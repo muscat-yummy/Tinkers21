@@ -1,3 +1,5 @@
+[English](README.md) | **日本語**
+
 # Tinkers' Construct for Minecraft 1.21.1
 
 **Tinkers' Construct** を **Minecraft 1.21.1 / NeoForge** に対応させる非公式移植プロジェクトです。
