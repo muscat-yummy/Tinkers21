@@ -2,6 +2,21 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
+## Current checkpoint (2026-09-26)
+
+- The repository started with documentation only. A NeoForge 1.21.1 / Java 21 Gradle scaffold and wrapper are now present.
+- Upstream source and resources have **not** been imported. The build deliberately fails before compilation until `src/main/java/slimeknights/tconstruct/TConstruct.java` is present. A successful empty JAR is not a valid port.
+- Pinned upstream source candidate: [SlimeKnights/TinkersConstruct 1.20.1 at 2785bc3](https://github.com/SlimeKnights/TinkersConstruct/commit/2785bc3b5e7777f9f1fd77a243887171ea2c3c68). Import the original `src` tree with its notices intact, then replace the Forge build configuration with the scaffold here. Keep a separate provenance commit.
+- Tinkers' Construct 1.20.1 depends on Mantle 1.20.1. Its official source repository currently has a 1.20 branch and no 1.21.1 branch. Resolve a compatible NeoForge Mantle port before trying to compile the full TiC source; never remove Mantle-backed features just to make the build green.
+- Build configuration and metadata are preparatory only. No gameplay, runtime load, or API compatibility has been verified.
+
+### Next coherent slice
+
+1. Import upstream source/assets/data from the pinned commit, keeping package names and attribution.
+2. Port Mantle (or identify a compatible, source-audited port) and wire it into the 1.21.1 build.
+3. Run one compile pass, classify the first failures as A/B/C, and migrate initialization and registries without stubbing subsystems.
+4. At the Phase 2 boundary, run one meaningful Minecraft load test.
+
 ## Principles
 
 - Preserve upstream Tinkers' Construct behavior and API structure wherever practical.
@@ -68,7 +83,8 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 
 ## Known issues
 
-None documented yet.
+- Source and resources are not imported; compilation is intentionally blocked.
+- Mantle compatibility for NeoForge 1.21.1 is unresolved.
 
 ## Upstream
 
