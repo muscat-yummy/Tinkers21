@@ -1,0 +1,67 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+group = mod_group_id
+version = mod_version
+base.archivesName = 'TinkersConstruct'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude('**/.cache/**')
+}
+
+neoForge {
+    version = neo_version
+    runs {
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        data {
+            data()
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources').absolutePath,
+                    '--existing', file('src/main/resources').absolutePath
+        }
+    }
+    mods {
+        tconstruct {
+            sourceSet(sourceSets.main)
+        }
+    }
+}
+
+tasks.register('generateModMetadata', ProcessResources) {
+    def properties = [
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            mod_license: mod_license,
+            neo_version: neo_version,
+            minecraft_version_range: minecraft_version_range,
+            loader_version_range: loader_version_range
+    ]
+    inputs.properties(properties)
+    expand(properties)
+    from('src/main/templates')
+    into(layout.buildDirectory.dir('generated/sources/modMetadata'))
+}
+sourceSets.main.resources.srcDir(tasks.named('generateModMetadata'))
+neoForge.ideSyncTask(tasks.named('generateModMetadata'))
+
+// The upstream implementation must be imported and ported before a distributable jar exists.
+// A build containing only metadata would incorrectly look like a working TiC port.
+tasks.register('verifyUpstreamSource') {
+    doLast {
+        if (!file('src/main/java/slimeknights/tconstruct/TConstruct.java').isFile()) {
+            throw new GradleException('Upstream Tinkers Construct source is missing. See PORTING.md; do not publish an empty mod jar.')
+        }
+    }
+}
+tasks.named('compileJava').configure { dependsOn(tasks.named('verifyUpstreamSource')) }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
