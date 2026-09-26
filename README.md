@@ -1,3 +1,5 @@
+**English** | [日本語](README_ja.md)
+
 # Tinkers' Construct for Minecraft 1.21.1
 
 An unofficial port of **Tinkers' Construct** to **Minecraft 1.21.1** using **NeoForge**.
