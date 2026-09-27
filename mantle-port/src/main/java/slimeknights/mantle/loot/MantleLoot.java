@@ -59,7 +59,7 @@ public class MantleLoot {
     ResourceKey<?> key = event.getRegistryKey();
 
     if (key == NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS) {
-      RegistryAdapter<Codec<? extends IGlobalLootModifier>> adapter = new RegistryAdapter<>(Objects.requireNonNull(event.getForgeRegistry()));
+      RegistryAdapter<Codec<? extends IGlobalLootModifier>> adapter = new RegistryAdapter<>(Objects.requireNonNull(event.getRegistry(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS)));
       adapter.register(AddEntryLootModifier.CODEC, "add_entry");
       adapter.register(ReplaceItemLootModifier.CODEC, "replace_item");
 
@@ -74,8 +74,8 @@ public class MantleLoot {
     } else if (key == Registries.LOOT_CONDITION_TYPE) {
       BLOCK_TAG_CONDITION = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("block_tag"), new LootItemConditionType(BlockTagLootCondition.SERIALIZER));
       HAS_CONTEXT_SET = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("has_context_set"), new LootItemConditionType(new HasLootContextSetCondition.Serializer()));
-      TAG_EMPTY = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, TagEmptyCondition.SERIALIZER.getID(), new LootItemConditionType(TagEmptyCondition.SERIALIZER));
-      TAG_FILLED = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, TagFilledCondition.SERIALIZER.getID(), new LootItemConditionType(TagFilledCondition.SERIALIZER));
+      TAG_EMPTY = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("tag_empty"), new LootItemConditionType(TagEmptyCondition.CODEC));
+      TAG_FILLED = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("tag_filled"), new LootItemConditionType(TagFilledCondition.CODEC));
 
     } else if (key == Registries.LOOT_POOL_ENTRY_TYPE) {
       TAG_PREFERENCE = Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, Mantle.getResource("tag_preference"), new LootPoolEntryType(new TagPreferenceLootEntry.Serializer()));

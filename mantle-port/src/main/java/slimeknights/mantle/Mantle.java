@@ -27,6 +27,7 @@ import net.neoforged.fml.config.ModConfig.Type;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.loading.FMLEnvironment;
 import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.block.entity.MantleHangingSignBlockEntity;
@@ -137,9 +138,6 @@ public class Mantle {
   private void register(RegisterEvent event) {
     ResourceKey<?> key = event.getRegistryKey();
     if (key == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(TagEmptyCondition.SERIALIZER);
-      CraftingHelper.register(TagFilledCondition.SERIALIZER);
-      CraftingHelper.register(TagCombinationCondition.SERIALIZER);
       CraftingHelper.register(FluidContainerIngredient.ID, FluidContainerIngredient.SERIALIZER);
       CraftingHelper.register(getResource("potion"), PotionIngredient.SERIALIZER);
       CraftingHelper.register(getResource("potion_display"), PotionDisplayIngredient.SERIALIZER);
@@ -208,6 +206,11 @@ public class Mantle {
         DamageSourcePredicate.LOADER.register(getResource("message"), SourceMessagePredicate.LOADER);
         DamageSourcePredicate.LOADER.register(getResource("attacker"), SourceAttackerPredicate.LOADER);
       }
+    }
+    else if (key == NeoForgeRegistries.Keys.CONDITION_CODECS) {
+      event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, getResource("tag_empty"), () -> TagEmptyCondition.CODEC);
+      event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, getResource("tag_filled"), () -> TagFilledCondition.CODEC);
+      event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, TagCombinationCondition.ID, () -> TagCombinationCondition.CODEC);
     }
     else if (key == Registries.BLOCK_ENTITY_TYPE) {
       BlockEntityTypeRegistryAdapter adapter = new BlockEntityTypeRegistryAdapter(Objects.requireNonNull(event.getRegistry(Registries.BLOCK_ENTITY_TYPE)));

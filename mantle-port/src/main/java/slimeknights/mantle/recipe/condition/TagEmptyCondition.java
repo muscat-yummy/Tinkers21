@@ -1,5 +1,6 @@
 package slimeknights.mantle.recipe.condition;
 
+import com.mojang.serialization.MapCodec;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -12,6 +13,7 @@ import slimeknights.mantle.loot.MantleLoot;
 
 /** Condition that checks when a tag is empty. Same as {@link net.minecraftforge.common.crafting.conditions.TagEmptyCondition} but for any registry */
 public class TagEmptyCondition<T> extends TagCondition<T> implements LootItemCondition {
+  public static final MapCodec<TagEmptyCondition<?>> CODEC = TagCondition.codec(TagEmptyCondition::new);
   public static final Serializer<TagEmptyCondition<?>> SERIALIZER = new Serializer<>(Mantle.getResource("tag_empty"), TagEmptyCondition::new);
 
   public TagEmptyCondition(TagKey<T> tag) {
@@ -22,9 +24,14 @@ public class TagEmptyCondition<T> extends TagCondition<T> implements LootItemCon
     this(TagKey.create(registry, name));
   }
 
-  @Override
   public ResourceLocation getID() {
     return SERIALIZER.getID();
+  }
+
+
+  @Override
+  public MapCodec<? extends net.neoforged.neoforge.common.conditions.ICondition> codec() {
+    return CODEC;
   }
 
   @Override

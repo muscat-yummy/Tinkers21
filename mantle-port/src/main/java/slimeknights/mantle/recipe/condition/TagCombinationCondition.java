@@ -1,6 +1,10 @@
 package slimeknights.mantle.recipe.condition;
 
 import com.google.gson.JsonArray;
+import com.mojang.datafixers.util.Either;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.google.gson.JsonObject;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
@@ -9,7 +13,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -19,6 +22,7 @@ import slimeknights.mantle.util.JsonHelper;
 import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.List;
+import java.util.Optional;
 
 /**
  * Condition checking for a combination of tags having any entries
@@ -29,6 +33,22 @@ import java.util.List;
 @SuppressWarnings("unused")
 public record TagCombinationCondition<T>(List<TagKey<T>> match, @Nullable TagKey<T> ignore) implements ICondition {
   public static final ResourceLocation ID = Mantle.getResource("tag_combination_filled");
+  private static final Codec<Either<ResourceLocation, List<ResourceLocation>>> MATCH_CODEC =
+      Codec.either(ResourceLocation.CODEC, ResourceLocation.CODEC.listOf());
+  public static final MapCodec<TagCombinationCondition<?>> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+      ResourceLocation.CODEC.optionalFieldOf("registry", Registries.ITEM.location()).forGetter(value -> value.match.get(0).registry().location()),
+      MATCH_CODEC.fieldOf("match").forGetter(value -> value.match.size() == 1
+          ? Either.left(value.match.get(0).location())
+          : Either.right(value.match.stream().map(TagKey::location).toList())),
+      ResourceLocation.CODEC.optionalFieldOf("ignore").forGetter(value -> Optional.ofNullable(value.ignore).map(TagKey::location))
+  ).apply(instance, (registryName, names, ignored) -> {
+    ResourceKey<Registry<Object>> registry = ResourceKey.createRegistryKey(registryName);
+    List<ResourceLocation> locations = names.map(List::of, ids -> ids);
+    List<TagKey<Object>> matches = locations.stream().map(id -> TagKey.create(registry, id)).toList();
+    TagKey<Object> ignoredTag = ignored.map(id -> TagKey.create(registry, id)).orElse(null);
+    return new TagCombinationCondition<>(matches, ignoredTag);
+  }));
+
 
   public TagCombinationCondition {
     if (match.isEmpty()) {
@@ -54,9 +74,13 @@ public record TagCombinationCondition<T>(List<TagKey<T>> match, @Nullable TagKey
   }
 
 
-  @Override
   public ResourceLocation getID() {
     return ID;
+  }
+
+  @Override
+  public MapCodec<? extends ICondition> codec() {
+    return CODEC;
   }
 
   @Override
@@ -94,15 +118,15 @@ public record TagCombinationCondition<T>(List<TagKey<T>> match, @Nullable TagKey
     return false;
   }
 
-  public static final IConditionSerializer<TagCombinationCondition<?>> SERIALIZER = new IConditionSerializer<>() {
+  public static final Serializer SERIALIZER = new Serializer();
+
+  public static final class Serializer {
     private static final Loadable<List<ResourceLocation>> MATCH = Loadables.RESOURCE_LOCATION.list(ArrayLoadable.COMPACT);
 
-    @Override
     public ResourceLocation getID() {
       return ID;
     }
 
-    @Override
     public void write(JsonObject json, TagCombinationCondition<?> value) {
       // save some space in JSON by not setting registry if item (most common)
       ResourceKey<?> registry = value.match.get(0).registry();
@@ -124,7 +148,6 @@ public record TagCombinationCondition<T>(List<TagKey<T>> match, @Nullable TagKey
       }
     }
 
-    @Override
     public TagCombinationCondition<?> read(JsonObject json) {
       // default to item registry if registry is unset
       ResourceKey<Registry<Object>> registry = ResourceKey.createRegistryKey(JsonHelper.getResourceLocation(json, "registry", Registries.ITEM.location()));

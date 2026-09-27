@@ -1,10 +1,10 @@
 package slimeknights.mantle.recipe.condition;
 
 import com.google.gson.JsonDeserializationContext;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.Registry;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
@@ -12,7 +12,6 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.util.JsonHelper;
 
@@ -21,10 +20,24 @@ import java.util.Optional;
 import java.util.function.Function;
 
 /** Common logic for {@link TagEmptyCondition} and {@link TagFilledCondition} */
-@RequiredArgsConstructor
 public abstract class TagCondition<T> implements ICondition {
-  @Getter
   protected final TagKey<T> tag;
+
+  protected TagCondition(TagKey<T> tag) {
+    this.tag = tag;
+  }
+
+  public TagKey<T> getTag() {
+    return tag;
+  }
+
+  /** Common codec for conditions serialized as a registry and tag pair. */
+  public static <C extends TagCondition<?>> MapCodec<C> codec(Function<TagKey<Object>, C> constructor) {
+    return RecordCodecBuilder.mapCodec(instance -> instance.group(
+        ResourceLocation.CODEC.optionalFieldOf("registry", Registries.ITEM.location()).forGetter(value -> value.tag.registry().location()),
+        ResourceLocation.CODEC.fieldOf("tag").forGetter(value -> value.tag.location())
+    ).apply(instance, (registry, name) -> constructor.apply(TagKey.create(ResourceKey.createRegistryKey(registry), name))));
+  }
   @Nullable
   private Optional<Registry<T>> registry;
 
@@ -47,8 +60,7 @@ public abstract class TagCondition<T> implements ICondition {
   }
 
   /** Serializer logic for tag keys */
-  public record Serializer<C extends TagCondition<?>>(ResourceLocation getID, Function<TagKey<?>,C> constructor) implements IConditionSerializer<C>, net.minecraft.world.level.storage.loot.Serializer<C> {
-    @Override
+  public record Serializer<C extends TagCondition<?>>(ResourceLocation getID, Function<TagKey<?>,C> constructor) {
     public void write(JsonObject json, C value) {
       TagKey<?> tag = value.getTag();
       // save some space in JSON by not setting registry if item (most common)
@@ -58,7 +70,6 @@ public abstract class TagCondition<T> implements ICondition {
       json.addProperty("tag", tag.location().toString());
     }
 
-    @Override
     public C read(JsonObject json) {
       return constructor.apply(TagKey.create(
         // default to item registry if registry is unset
@@ -66,12 +77,10 @@ public abstract class TagCondition<T> implements ICondition {
         JsonHelper.getResourceLocation(json, "tag")));
     }
 
-    @Override
     public void serialize(JsonObject json, C value, JsonSerializationContext context) {
       write(json, value);
     }
 
-    @Override
     public C deserialize(JsonObject json, JsonDeserializationContext context) {
       return read(json);
     }
