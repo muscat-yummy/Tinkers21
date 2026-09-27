@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.recipe.display;
 
 import net.minecraft.world.item.ItemStack;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 
 import java.util.List;
 

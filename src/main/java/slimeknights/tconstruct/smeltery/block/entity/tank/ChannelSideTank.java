@@ -2,7 +2,7 @@ package slimeknights.tconstruct.smeltery.block.entity.tank;
 
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.fluid.FillOnlyFluidHandler;
 import slimeknights.tconstruct.smeltery.block.entity.ChannelBlockEntity;
 

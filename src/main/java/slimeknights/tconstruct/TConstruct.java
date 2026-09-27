@@ -131,6 +131,7 @@ public class TConstruct {
     // init deferred registers
     TinkerModule.initRegisters();
     TinkerNetwork.setup();
+    bus.addListener(TinkerNetwork.getInstance()::registerPayloads);
     TinkerTags.init();
     // init client logic
     DistExecutor.unsafeRunWhenOn(Dist.CLIENT, () -> TinkerClient::onConstruct);

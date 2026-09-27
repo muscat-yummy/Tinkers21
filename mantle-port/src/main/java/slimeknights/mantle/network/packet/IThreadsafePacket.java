@@ -1,6 +1,6 @@
 package slimeknights.mantle.network.packet;
 
-import net.minecraftforge.network.NetworkEvent;
+import slimeknights.mantle.network.NetworkEvent;
 
 import java.util.function.Supplier;
 

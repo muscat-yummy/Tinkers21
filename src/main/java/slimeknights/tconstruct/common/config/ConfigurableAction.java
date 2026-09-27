@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.common.config;
 
-import net.minecraftforge.common.ForgeConfigSpec;
-import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
+import net.neoforged.neoforge.common.ModConfigSpec;
+import net.neoforged.neoforge.common.ModConfigSpec.BooleanValue;
 
 /** Config prop that runs a runnable assuming its true */
 public class ConfigurableAction implements Runnable {

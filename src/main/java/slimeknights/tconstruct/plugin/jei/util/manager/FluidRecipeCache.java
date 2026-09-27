@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.plugin.jei.util.manager;
 
 import mezz.jei.api.ingredients.IIngredientHelper;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.library.recipe.display.FilteredFluidRecipe;
 
 import java.util.ArrayList;
