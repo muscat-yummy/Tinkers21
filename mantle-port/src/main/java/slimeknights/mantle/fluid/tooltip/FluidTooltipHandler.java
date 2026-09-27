@@ -20,7 +20,7 @@ import net.minecraftforge.client.event.RegisterClientReloadListenersEvent;
 import net.neoforged.neoforge.common.NeoForge;
 import net.minecraftforge.event.TagsUpdatedEvent;
 import net.neoforged.bus.api.EventPriority;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.ModList;
 import slimeknights.mantle.Mantle;

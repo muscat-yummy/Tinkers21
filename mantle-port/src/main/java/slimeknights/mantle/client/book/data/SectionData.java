@@ -5,7 +5,7 @@ import com.google.gson.JsonElement;
 import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.TrueCondition;
 import slimeknights.mantle.client.book.BookLoader;
 import slimeknights.mantle.client.book.IHTML;

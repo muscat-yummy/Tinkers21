@@ -13,7 +13,7 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.storage.LevelResource;
 import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.FalseCondition;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.fml.ModList;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.util.JsonHelper;

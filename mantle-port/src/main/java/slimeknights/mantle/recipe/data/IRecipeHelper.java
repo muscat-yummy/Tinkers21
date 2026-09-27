@@ -10,7 +10,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.registries.RegistryObject;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;

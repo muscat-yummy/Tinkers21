@@ -21,7 +21,7 @@ import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
 import net.minecraftforge.event.AddReloadListenerEvent;
 import net.minecraftforge.event.OnDatapackSyncEvent;
 import net.neoforged.bus.api.EventPriority;
-import net.minecraftforge.fluids.FluidStack;
+import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.data.gson.GenericRegisteredSerializer;
 import slimeknights.mantle.network.MantleNetwork;
 import slimeknights.mantle.util.JsonHelper;
