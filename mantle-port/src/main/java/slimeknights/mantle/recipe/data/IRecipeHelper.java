@@ -35,7 +35,7 @@ public interface IRecipeHelper {
    * @return  Location for the mod
    */
   default ResourceLocation location(String name) {
-    return new ResourceLocation(getModId(), name);
+    return ResourceLocation.fromNamespaceAndPath(getModId(), name);
   }
 
   /**
