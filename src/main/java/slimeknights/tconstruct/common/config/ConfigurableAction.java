@@ -8,7 +8,7 @@ public class ConfigurableAction implements Runnable {
   private final BooleanValue prop;
   private final Runnable action;
 
-  public ConfigurableAction(ForgeConfigSpec.Builder builder, String name, boolean defaultValue, String comment, Runnable action) {
+  public ConfigurableAction(ModConfigSpec.Builder builder, String name, boolean defaultValue, String comment, Runnable action) {
     prop = builder.comment(comment).worldRestart().define(name, defaultValue);
     this.action = action;
   }

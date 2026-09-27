@@ -10,7 +10,7 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.mantle.client.model.TextureColorHelper;
 import slimeknights.mantle.data.loadable.common.ColorLoadable;

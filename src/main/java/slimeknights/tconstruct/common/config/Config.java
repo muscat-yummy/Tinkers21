@@ -62,7 +62,7 @@ public class Config {
     public final EnumValue<LogInvalidToolStack> logInvalidToolStack;
     public enum LogInvalidToolStack { STACKTRACE, WARNING, IGNORED }
 
-    Common(ForgeConfigSpec.Builder builder) {
+    Common(ModConfigSpec.Builder builder) {
       builder.comment("Everything to do with gameplay").push("gameplay");
 
       this.shouldSpawnWithTinkersBook = builder
@@ -225,14 +225,14 @@ public class Config {
    * Client specific configuration - only loaded clientside from tconstruct-client.toml
    */
   public static class Client {
-    //public final ForgeConfigSpec.BooleanValue temperatureInCelsius;
-    public final ForgeConfigSpec.BooleanValue tankFluidModel;
-    public final ForgeConfigSpec.BooleanValue logMissingMaterialTextures;
-    public final ForgeConfigSpec.BooleanValue logMissingModifierTextures;
-    public final ForgeConfigSpec.BooleanValue renderShieldSlotItem;
-    public final ForgeConfigSpec.BooleanValue renderSleevesItem;
-    public final ForgeConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
-    public final ForgeConfigSpec.IntValue maxSmelteryItemQuads;
+    //public final ModConfigSpec.BooleanValue temperatureInCelsius;
+    public final ModConfigSpec.BooleanValue tankFluidModel;
+    public final ModConfigSpec.BooleanValue logMissingMaterialTextures;
+    public final ModConfigSpec.BooleanValue logMissingModifierTextures;
+    public final ModConfigSpec.BooleanValue renderShieldSlotItem;
+    public final ModConfigSpec.BooleanValue renderSleevesItem;
+    public final ModConfigSpec.BooleanValue modifiersIDsInAdvancedTooltips;
+    public final ModConfigSpec.IntValue maxSmelteryItemQuads;
 
     // JEI
     public final BooleanValue showModifiersInJEI;
@@ -246,19 +246,19 @@ public class Config {
     public final BooleanValue showToolInModifiers;
 
     // framed modifier
-    public final ForgeConfigSpec.BooleanValue renderItemFrame;
-    public final ForgeConfigSpec.IntValue itemFrameXOffset;
-    public final ForgeConfigSpec.IntValue itemFrameYOffset;
-    public final ForgeConfigSpec.EnumValue<Orientation2D> itemFrameLocation;
-    public final ForgeConfigSpec.IntValue itemsPerRow;
+    public final ModConfigSpec.BooleanValue renderItemFrame;
+    public final ModConfigSpec.IntValue itemFrameXOffset;
+    public final ModConfigSpec.IntValue itemFrameYOffset;
+    public final ModConfigSpec.EnumValue<Orientation2D> itemFrameLocation;
+    public final ModConfigSpec.IntValue itemsPerRow;
 
     // map modifier
-    public final ForgeConfigSpec.IntValue mapXOffset;
-    public final ForgeConfigSpec.IntValue mapYOffset;
-    public final ForgeConfigSpec.DoubleValue mapScale;
-    public final ForgeConfigSpec.EnumValue<Orientation2D> mapLocation;
+    public final ModConfigSpec.IntValue mapXOffset;
+    public final ModConfigSpec.IntValue mapYOffset;
+    public final ModConfigSpec.DoubleValue mapScale;
+    public final ModConfigSpec.EnumValue<Orientation2D> mapLocation;
 
-    Client(ForgeConfigSpec.Builder builder) {
+    Client(ModConfigSpec.Builder builder) {
       // TODO 1.21: do we really need everything in a big "client" group? can simplify
       builder.comment("Client only settings").push("client");
 
@@ -399,20 +399,20 @@ public class Config {
     }
   }
 
-  public static final ForgeConfigSpec clientSpec;
+  public static final ModConfigSpec clientSpec;
   public static final Client CLIENT;
 
   static {
-    final Pair<Client, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Client::new);
+    final Pair<Client, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Client::new);
     clientSpec = specPair.getRight();
     CLIENT = specPair.getLeft();
   }
 
-  public static final ForgeConfigSpec commonSpec;
+  public static final ModConfigSpec commonSpec;
   public static final Common COMMON;
 
   static {
-    final Pair<Common, ForgeConfigSpec> specPair = new ForgeConfigSpec.Builder().configure(Common::new);
+    final Pair<Common, ModConfigSpec> specPair = new ModConfigSpec.Builder().configure(Common::new);
     commonSpec = specPair.getRight();
     COMMON = specPair.getLeft();
   }
@@ -435,7 +435,7 @@ public class Config {
     private final ConfigValue<Integer> nuggetsPerMetal;
     private final ConfigValue<Integer> shardsPerGem;
 
-    public OreRate(ForgeConfigSpec.Builder builder, int defaultNuggets, int defaultQuarters) {
+    public OreRate(ModConfigSpec.Builder builder, int defaultNuggets, int defaultQuarters) {
       nuggetsPerMetal = builder
         .comment("Number of nuggets produced per metal ore unit melted. 9 nuggets would give 1 ingot")
         .defineInRange("nuggetsPerMetal", defaultNuggets, 1, 45);

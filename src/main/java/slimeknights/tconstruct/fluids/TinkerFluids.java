@@ -37,7 +37,7 @@ import net.minecraftforge.common.brewing.BrewingRecipeRegistry;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.fluids.FluidType;
+import net.neoforged.neoforge.fluids.FluidType;
 import net.minecraftforge.fluids.ForgeFlowingFluid;
 import net.minecraftforge.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
