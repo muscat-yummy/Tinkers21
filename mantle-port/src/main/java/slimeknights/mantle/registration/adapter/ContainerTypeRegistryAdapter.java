@@ -4,17 +4,17 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
 import net.neoforged.neoforge.network.IContainerFactory;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraft.core.Registry;
 
 @SuppressWarnings("unused")
 public class ContainerTypeRegistryAdapter extends RegistryAdapter<MenuType<?>> {
   /** @inheritDoc */
-  public ContainerTypeRegistryAdapter(IForgeRegistry<MenuType<?>> registry, String modId) {
+  public ContainerTypeRegistryAdapter(Registry<MenuType<?>> registry, String modId) {
     super(registry, modId);
   }
 
   /** @inheritDoc */
-  public ContainerTypeRegistryAdapter(IForgeRegistry<MenuType<?>> registry) {
+  public ContainerTypeRegistryAdapter(Registry<MenuType<?>> registry) {
     super(registry);
   }
 
