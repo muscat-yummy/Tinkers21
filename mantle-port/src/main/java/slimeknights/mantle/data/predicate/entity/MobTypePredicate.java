@@ -1,7 +1,7 @@
 package slimeknights.mantle.data.predicate.entity;
 
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.MobType;
+
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.registry.NamedComponentRegistry;
 
@@ -17,7 +17,7 @@ public record MobTypePredicate(MobType type) implements LivingEntityPredicate {
 
   @Override
   public boolean matches(LivingEntity input) {
-    return input.getMobType() == type;
+    return type.matches(input);
   }
 
   @Override
