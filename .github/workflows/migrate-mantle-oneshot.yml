@@ -1,0 +1,25 @@
+name: Migrate Mantle bootstrap
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/migrate-mantle-oneshot.yml]
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Apply verified migrations
+        run: |
+          set -euo pipefail
+          python3 scripts/migrate_verified_imports.py --root mantle-port
+          python3 scripts/migrate_resource_locations.py --root mantle-port
+          python3 scripts/migrate_mantle_bootstrap.py
+          git add mantle-port/src/main/java
+          if git diff --cached --quiet; then
+            echo 'No source changes'
+            exit 0
+          fi
+          git -c user.name='Tinkers21 port automation' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'port: migrate Mantle bootstrap and verified APIs'
+          git push origin HEAD:port/1.21.1-neoforge
