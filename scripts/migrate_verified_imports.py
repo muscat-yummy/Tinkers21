@@ -41,6 +41,11 @@ IMPORTS = {
     "net.minecraftforge.common.data.BlockTagsProvider": "net.neoforged.neoforge.common.data.BlockTagsProvider",
     "net.minecraftforge.common.util.INBTSerializable": "net.neoforged.neoforge.common.util.INBTSerializable",
     "net.minecraftforge.common.ForgeConfigSpec": "net.neoforged.neoforge.common.ModConfigSpec",
+    "net.minecraftforge.network.NetworkDirection": "slimeknights.mantle.network.NetworkDirection",
+    "net.minecraftforge.network.NetworkEvent": "slimeknights.mantle.network.NetworkEvent",
+    "net.minecraftforge.network.NetworkEvent.Context": "slimeknights.mantle.network.NetworkEvent.Context",
+    "net.minecraftforge.network.PacketDistributor": "slimeknights.mantle.network.PacketDistributor",
+    "net.minecraftforge.common.util.FakePlayer": "net.neoforged.neoforge.common.util.FakePlayer",
     "net.minecraftforge.common.MinecraftForge": "net.neoforged.neoforge.common.NeoForge",
 }
 IMPORT_RE = re.compile(r"^(?P<prefix>\s*import\s+(?:static\s+)?)(?P<name>[\w.]+)(?P<suffix>\s*;)", re.MULTILINE)
@@ -53,6 +58,8 @@ def migrate(source: str, counts: Counter[str]) -> str:
     def replace_import(match: re.Match[str]) -> str:
         old = match.group("name")
         new = IMPORTS.get(old)
+        if new is None and old.startswith("net.minecraftforge.network.PacketDistributor."):
+            new = old.replace("net.minecraftforge.network.PacketDistributor.", "slimeknights.mantle.network.PacketDistributor.", 1)
         if new is None and old.startswith("net.minecraftforge.common.ForgeConfigSpec."):
             new = old.replace("net.minecraftforge.common.ForgeConfigSpec.", "net.neoforged.neoforge.common.ModConfigSpec.", 1)
         if new is None:
