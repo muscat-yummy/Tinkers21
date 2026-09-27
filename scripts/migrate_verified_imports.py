@@ -22,6 +22,9 @@ IMPORTS = {
     "net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent": "net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent",
     "net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent": "net.neoforged.fml.event.lifecycle.FMLClientSetupEvent",
     "net.minecraftforge.fml.event.lifecycle.FMLDedicatedServerSetupEvent": "net.neoforged.fml.event.lifecycle.FMLDedicatedServerSetupEvent",
+    "net.minecraftforge.registries.DeferredRegister": "net.neoforged.neoforge.registries.DeferredRegister",
+    "net.minecraftforge.common.data.DatapackBuiltinEntriesProvider": "net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider",
+    "net.minecraftforge.common.data.ExistingFileHelper": "net.neoforged.neoforge.common.data.ExistingFileHelper",
     "net.minecraftforge.common.MinecraftForge": "net.neoforged.neoforge.common.NeoForge",
 }
 IMPORT_RE = re.compile(r"^(?P<prefix>\s*import\s+(?:static\s+)?)(?P<name>[\w.]+)(?P<suffix>\s*;)", re.MULTILINE)
