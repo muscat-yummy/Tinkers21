@@ -3,8 +3,6 @@ package slimeknights.mantle.loot;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -73,11 +71,15 @@ public class ReplaceItemLootModifier extends LootModifier {
   }
 
   /** Logic to build this modifier for datagen */
-  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public static class Builder extends AbstractLootModifierBuilder<Builder> {
     private final Ingredient input;
     private final ItemOutput replacement;
     private final List<LootItemFunction> functions = new ArrayList<>();
+
+    private Builder(Ingredient input, ItemOutput replacement) {
+      this.input = input;
+      this.replacement = replacement;
+    }
 
     /**
      * Adds a loot function to the builder

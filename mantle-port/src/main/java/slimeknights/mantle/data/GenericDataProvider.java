@@ -7,7 +7,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.stream.JsonWriter;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.JsonOps;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.Util;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.data.DataGenerator;
@@ -32,10 +31,14 @@ import java.util.concurrent.CompletionException;
 import java.util.stream.Stream;
 
 /** Generic logic to convert any serializable object into JSON. */
-@RequiredArgsConstructor
 public abstract class GenericDataProvider implements DataProvider {
   protected final PackOutput.PathProvider pathProvider;
   private final Gson gson;
+
+  protected GenericDataProvider(PackOutput.PathProvider pathProvider, Gson gson) {
+    this.pathProvider = pathProvider;
+    this.gson = gson;
+  }
 
   public GenericDataProvider(PackOutput output, Target type, String folder, Gson gson) {
     this(output.createPathProvider(type, folder), gson);

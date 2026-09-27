@@ -5,6 +5,7 @@ import com.mojang.serialization.Codec;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.nbt.NbtOps;
+import net.minecraft.nbt.NbtAccounter;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.FriendlyByteBuf;
 import slimeknights.mantle.data.loadable.ErrorFactory;
@@ -29,7 +30,7 @@ public record CodecLoadable<T>(DynamicOps<Tag> ops, Codec<T> codec) implements L
 
   @Override
   public T decode(FriendlyByteBuf buffer, TypedMap context) {
-    return buffer.readWithCodec(ops, codec);
+    return buffer.readWithCodec(ops, codec, NbtAccounter.unlimitedHeap());
   }
 
   @Override

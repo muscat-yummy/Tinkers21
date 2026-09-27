@@ -3,8 +3,6 @@ package slimeknights.mantle.loot;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
-import lombok.AccessLevel;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
@@ -77,11 +75,14 @@ public class AddEntryLootModifier extends LootModifier {
   }
 
   /** Builder for a conditional loot entry */
-  @RequiredArgsConstructor(access = AccessLevel.PRIVATE)
   public static class Builder extends AbstractLootModifierBuilder<Builder> {
     private final List<ILootModifierCondition> modifierConditions = new ArrayList<>();
     private final LootPoolEntryContainer entry;
     private final List<LootItemFunction> functions = new ArrayList<>();
+
+    private Builder(LootPoolEntryContainer entry) {
+      this.entry = entry;
+    }
 
     /**
      * Adds a loot entry condition to the builder
