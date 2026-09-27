@@ -16,8 +16,8 @@ import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
-import net.minecraftforge.fluids.ForgeFlowingFluid.Properties;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid.Properties;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import slimeknights.mantle.block.fluid.BurningLiquidBlock;
@@ -206,8 +206,8 @@ public class FluidDeferredRegister extends DeferredRegisterWrapper<Fluid> {
     }
 
     /** Builds a flowing fluid with the default constructors */
-    public FlowingFluidObject<ForgeFlowingFluid> flowing() {
-      return flowing(ForgeFlowingFluid.Source::new, ForgeFlowingFluid.Flowing::new);
+    public FlowingFluidObject<BaseFlowingFluid> flowing() {
+      return flowing(BaseFlowingFluid.Source::new, BaseFlowingFluid.Flowing::new);
     }
 
     /** Builds a flowing fluid with the default constructors */

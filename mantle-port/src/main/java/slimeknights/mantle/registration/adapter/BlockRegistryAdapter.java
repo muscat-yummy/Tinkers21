@@ -24,7 +24,7 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.WoodType;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 import net.minecraft.core.Registry;
 import slimeknights.mantle.block.MantleCeilingHangingSignBlock;
 import slimeknights.mantle.block.MantleStandingSignBlock;
@@ -177,7 +177,7 @@ public class BlockRegistryAdapter extends EnumRegistryAdapter<Block> {
    * @param name        Fluid name, unfortunately no way to fetch from the fluid as it does not exist yet
    * @return  Fluid block instance
    */
-  public LiquidBlock registerFluidBlock(Supplier<? extends ForgeFlowingFluid> fluid, MapColor color, int lightLevel, String name) {
+  public LiquidBlock registerFluidBlock(Supplier<? extends BaseFlowingFluid> fluid, MapColor color, int lightLevel, String name) {
     return register(new LiquidBlock(fluid, FluidDeferredRegister.createProperties(color, lightLevel)), name + "_fluid");
   }
 }

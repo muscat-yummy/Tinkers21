@@ -19,12 +19,12 @@ import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.event.ForgeEventFactory;
-import net.minecraftforge.fluids.ForgeFlowingFluid;
+import net.neoforged.neoforge.fluids.BaseFlowingFluid;
 
 import java.util.Map;
 
 /** Fluid where up is down and down is up */
-public abstract class InvertedFluid extends ForgeFlowingFluid {
+public abstract class InvertedFluid extends BaseFlowingFluid {
   protected InvertedFluid(Properties properties) {
     super(properties);
   }
