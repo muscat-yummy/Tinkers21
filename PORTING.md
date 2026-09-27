@@ -13,11 +13,12 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - Official Mantle has no 1.21.1 branch at this checkpoint. Pinned Mantle 1.20.1 source (commit `2832b8e`) is imported in `mantle-port/` as a separate Gradle module with its license and provenance. It remains Forge code and needs its own 1.21.1 NeoForge API port before TiC can compile; do not stub or delete Mantle-backed systems.
 - Mantle entrypoint constructor injection, verified imports and simple ResourceLocation calls were migrated in 70 files ([migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291174813)). A [Mantle compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291218878) reached the Java compiler after one retry for an upstream Maven HTTP 502, and exposed old Forge APIs (networking, capabilities, fluids, config and data generation) plus 1.21 vanilla signature changes. The compiler's 100-error cap is not a total error count.
 - A further 42 Mantle Java files received verified import moves for config, fluid handlers, conditions and tag providers ([migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291507349)). Class signatures and behavior still require review; no redundant compile was run for import-only edits.
+- A shared NeoForge payload bridge now replaces Mantle's old SimpleChannel registration and delivery while retaining existing packet encoder/decoder contracts. Mantle and TiC register channels on their mod event buses; the associated import and initialization migration touched 321 Java files ([migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291871696)). This bridge requires a later compile and client/server exchange test; no networking behavior is verified yet.
 - No gameplay, runtime load, or addon compatibility has been verified. The imported source is still Forge 1.20.1 code; this branch is not a usable 1.21.1 mod.
 
 ### Next coherent slice
 
-1. Continue porting the in-repository Mantle source, starting with config, fluid and registry APIs, then adapt networking and capabilities with the 1.21.1 APIs.
+1. Continue porting the in-repository Mantle source, starting with capabilities, fluid and registry APIs; review and verify the new payload bridge once the coherent Mantle compile blockers are addressed.
 2. Classify and migrate Forge registration/event references (A), then the changed item data, resource, fluid, rendering, and networking APIs (B).
 3. After a coherent group of changes, run one compile pass; at the Phase 2 boundary, perform one meaningful Minecraft load test.
 
@@ -83,7 +84,7 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 | Area | Upstream 1.20.1 | 1.21.1 port | Compatibility notes |
 | --- | --- | --- | --- |
 | Item/tool data | TBD | TBD | TBD |
-| Networking | TBD | TBD | TBD |
+| Networking | SimpleChannel and NetworkEvent.Context | NeoForge payload bridge with Mantle packet adapter | API calls migrated; compiler and client/server behavior unverified |
 | Registries | TBD | TBD | TBD |
 | Rendering | TBD | TBD | TBD |
 | Fluids/capabilities | TBD | TBD | TBD |
