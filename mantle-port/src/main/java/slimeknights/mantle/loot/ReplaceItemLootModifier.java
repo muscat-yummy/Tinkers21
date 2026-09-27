@@ -1,6 +1,6 @@
 package slimeknights.mantle.loot;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.AccessLevel;
@@ -25,7 +25,7 @@ import java.util.function.BiFunction;
 
 /** Loot modifier to replace an item with another */
 public class ReplaceItemLootModifier extends LootModifier {
-  public static final Codec<ReplaceItemLootModifier> CODEC = RecordCodecBuilder.create(inst -> codecStart(inst).and(
+  public static final MapCodec<ReplaceItemLootModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(
     inst.group(
       MantleCodecs.INGREDIENT.fieldOf("original").forGetter(m -> m.original),
       ItemOutput.REQUIRED_STACK_CODEC.fieldOf("replacement").forGetter(m -> m.replacement),
@@ -69,7 +69,7 @@ public class ReplaceItemLootModifier extends LootModifier {
   }
 
   @Override
-  public Codec<? extends IGlobalLootModifier> codec() {
+  public MapCodec<? extends IGlobalLootModifier> codec() {
     return CODEC;
   }
 

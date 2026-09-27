@@ -1,7 +1,7 @@
 package slimeknights.mantle.loot;
 
 import com.google.gson.JsonDeserializer;
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.core.Registry;
@@ -59,7 +59,7 @@ public class MantleLoot {
     ResourceKey<?> key = event.getRegistryKey();
 
     if (key == NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS) {
-      RegistryAdapter<Codec<? extends IGlobalLootModifier>> adapter = new RegistryAdapter<>(Objects.requireNonNull(event.getRegistry(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS)));
+      RegistryAdapter<MapCodec<? extends IGlobalLootModifier>> adapter = new RegistryAdapter<>(Objects.requireNonNull(event.getRegistry(NeoForgeRegistries.Keys.GLOBAL_LOOT_MODIFIER_SERIALIZERS)));
       adapter.register(AddEntryLootModifier.CODEC, "add_entry");
       adapter.register(ReplaceItemLootModifier.CODEC, "replace_item");
 
