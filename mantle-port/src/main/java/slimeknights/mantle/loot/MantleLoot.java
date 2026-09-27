@@ -8,7 +8,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
@@ -68,8 +67,8 @@ public class MantleLoot {
       MODIFIER_CONDITIONS.registerDeserializer(EmptyModifierLootCondition.ID, EmptyModifierLootCondition.INSTANCE);
       MODIFIER_CONDITIONS.registerDeserializer(ContainsItemModifierLootCondition.ID, (JsonDeserializer<? extends ILootModifierCondition>)ContainsItemModifierLootCondition::deserialize);
     } else if (key == Registries.LOOT_FUNCTION_TYPE) {
-      RETEXTURED_FUNCTION = registerFunction("fill_retextured_block", RetexturedLootFunction.SERIALIZER);
-      SET_FLUID_FUNCTION = registerFunction("set_fluid", SetFluidLootFunction.SERIALIZER);
+      RETEXTURED_FUNCTION = registerFunction("fill_retextured_block", RetexturedLootFunction.CODEC);
+      SET_FLUID_FUNCTION = registerFunction("set_fluid", SetFluidLootFunction.CODEC);
 
     } else if (key == Registries.LOOT_CONDITION_TYPE) {
       BLOCK_TAG_CONDITION = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("block_tag"), new LootItemConditionType(BlockTagLootCondition.CODEC));
@@ -78,7 +77,7 @@ public class MantleLoot {
       TAG_FILLED = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("tag_filled"), new LootItemConditionType(TagFilledCondition.CODEC));
 
     } else if (key == Registries.LOOT_POOL_ENTRY_TYPE) {
-      TAG_PREFERENCE = Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, Mantle.getResource("tag_preference"), new LootPoolEntryType(new TagPreferenceLootEntry.Serializer()));
+      TAG_PREFERENCE = Registry.register(BuiltInRegistries.LOOT_POOL_ENTRY_TYPE, Mantle.getResource("tag_preference"), new LootPoolEntryType(TagPreferenceLootEntry.CODEC));
     }
   }
 
@@ -88,7 +87,7 @@ public class MantleLoot {
    * @param serializer  Loot function serializer
    * @return  Registered loot function
    */
-  private static LootItemFunctionType registerFunction(String name, Serializer<? extends LootItemFunction> serializer) {
+  private static LootItemFunctionType registerFunction(String name, MapCodec<? extends LootItemFunction> serializer) {
     return Registry.register(BuiltInRegistries.LOOT_FUNCTION_TYPE, Mantle.getResource(name), new LootItemFunctionType(serializer));
   }
 }
