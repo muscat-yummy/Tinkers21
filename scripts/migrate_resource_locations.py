@@ -4,11 +4,12 @@
 Only single-line constructor calls without nested parentheses are touched.
 Complex expressions are intentionally left for reviewed, manual migration.
 """
+import argparse
 from collections import Counter
 from pathlib import Path
 import re
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "main" / "java"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 CONSTRUCTOR = re.compile(r"\bnew\s+ResourceLocation\s*\(([^()\n]*)\)")
 
 
@@ -33,11 +34,15 @@ def argument_count(arguments: str) -> int:
 
 
 def main() -> None:
-    if not ROOT.is_dir():
-        raise SystemExit(f"missing source tree: {ROOT}")
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", choices=("tconstruct", "mantle-port"), default="tconstruct")
+    args = parser.parse_args()
+    root = PROJECT_ROOT / ("mantle-port/src/main/java" if args.root == "mantle-port" else "src/main/java")
+    if not root.is_dir():
+        raise SystemExit(f"missing source tree: {root}")
     counts: Counter[str] = Counter()
     files = 0
-    for path in sorted(ROOT.rglob("*.java")):
+    for path in sorted(root.rglob("*.java")):
         source = path.read_text(encoding="utf-8")
 
         def replace(match: re.Match[str]) -> str:

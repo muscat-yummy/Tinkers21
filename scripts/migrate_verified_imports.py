@@ -11,7 +11,7 @@ from collections import Counter
 from pathlib import Path
 import re
 
-ROOT = Path(__file__).resolve().parents[1] / "src" / "main" / "java"
+PROJECT_ROOT = Path(__file__).resolve().parents[1]
 IMPORTS = {
     "net.minecraftforge.api.distmarker.Dist": "net.neoforged.api.distmarker.Dist",
     "net.minecraftforge.eventbus.api.IEventBus": "net.neoforged.bus.api.IEventBus",
@@ -25,6 +25,12 @@ IMPORTS = {
     "net.minecraftforge.registries.DeferredRegister": "net.neoforged.neoforge.registries.DeferredRegister",
     "net.minecraftforge.common.data.DatapackBuiltinEntriesProvider": "net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider",
     "net.minecraftforge.common.data.ExistingFileHelper": "net.neoforged.neoforge.common.data.ExistingFileHelper",
+    "net.minecraftforge.common.capabilities.RegisterCapabilitiesEvent": "net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent",
+    "net.minecraftforge.common.crafting.CraftingHelper": "net.neoforged.neoforge.common.crafting.CraftingHelper",
+    "net.minecraftforge.data.event.GatherDataEvent": "net.neoforged.neoforge.data.event.GatherDataEvent",
+    "net.minecraftforge.registries.RegisterEvent": "net.neoforged.neoforge.registries.RegisterEvent",
+    "net.minecraftforge.event.entity.player.PlayerInteractEvent": "net.neoforged.neoforge.event.entity.player.PlayerInteractEvent",
+    "net.minecraftforge.fml.loading.FMLEnvironment": "net.neoforged.fml.loading.FMLEnvironment",
     "net.minecraftforge.common.MinecraftForge": "net.neoforged.neoforge.common.NeoForge",
 }
 IMPORT_RE = re.compile(r"^(?P<prefix>\s*import\s+(?:static\s+)?)(?P<name>[\w.]+)(?P<suffix>\s*;)", re.MULTILINE)
@@ -50,14 +56,16 @@ def migrate(source: str, counts: Counter[str]) -> str:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--root", choices=("tconstruct", "mantle-port"), default="tconstruct")
     parser.add_argument("--check", action="store_true", help="report pending changes without writing")
     args = parser.parse_args()
-    if not ROOT.is_dir():
-        parser.error(f"missing source tree: {ROOT}")
+    root = PROJECT_ROOT / ("mantle-port/src/main/java" if args.root == "mantle-port" else "src/main/java")
+    if not root.is_dir():
+        parser.error(f"missing source tree: {root}")
 
     counts: Counter[str] = Counter()
     changed = 0
-    for path in sorted(ROOT.rglob("*.java")):
+    for path in sorted(root.rglob("*.java")):
         original = path.read_text(encoding="utf-8")
         updated = migrate(original, counts)
         if updated != original:
