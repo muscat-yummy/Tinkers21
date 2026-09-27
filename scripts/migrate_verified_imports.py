@@ -35,6 +35,7 @@ IMPORTS = {
     "net.minecraftforge.fml.common.Mod.EventBusSubscriber": "net.neoforged.fml.common.EventBusSubscriber",
     "net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus": "net.neoforged.fml.common.EventBusSubscriber.Bus",
     "net.minecraftforge.fluids.FluidStack": "net.neoforged.neoforge.fluids.FluidStack",
+    "net.minecraftforge.fluids.FluidType": "net.neoforged.neoforge.fluids.FluidType",
     "net.minecraftforge.fluids.capability.IFluidHandler": "net.neoforged.neoforge.fluids.capability.IFluidHandler",
     "net.minecraftforge.fluids.capability.IFluidHandlerItem": "net.neoforged.neoforge.fluids.capability.IFluidHandlerItem",
     "net.minecraftforge.common.crafting.conditions.ICondition": "net.neoforged.neoforge.common.conditions.ICondition",
@@ -68,8 +69,8 @@ def migrate(source: str, counts: Counter[str]) -> str:
         return match.group("prefix") + new + match.group("suffix")
 
     result = IMPORT_RE.sub(replace_import, source)
-    if has_old_config_spec:
-        result, replacements = re.subn(r"\\bForgeConfigSpec\\b", "ModConfigSpec", result)
+    if has_old_config_spec or "import net.neoforged.neoforge.common.ModConfigSpec" in result:
+        result, replacements = re.subn(r"\bForgeConfigSpec\b", "ModConfigSpec", result)
         counts["ForgeConfigSpec usage"] += replacements
     if has_minecraft_forge:
         result, replacements = re.subn(r"\bMinecraftForge\.EVENT_BUS\b", "NeoForge.EVENT_BUS", result)
