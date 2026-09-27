@@ -12,11 +12,14 @@ evaluationDependsOn(':mantle-port')
 
 repositories {
     mavenCentral()
+    maven { url = uri('https://maven.blamejared.com/') }
 }
 
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.48'
     annotationProcessor 'org.projectlombok:lombok:1.18.48'
+    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.27.0.340'
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340'
     implementation project(':mantle-port')
 }
 
