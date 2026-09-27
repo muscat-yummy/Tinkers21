@@ -4,7 +4,7 @@ import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.minecraftforge.registries.RegistryObject;
+import slimeknights.mantle.registration.deferred.RegistryObject;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.recipe.cooking.BlastingResultRecipe;
 import slimeknights.mantle.recipe.cooking.CampfireResultRecipe;
