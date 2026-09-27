@@ -1,6 +1,6 @@
 package slimeknights.mantle.loot;
 
-import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import lombok.AccessLevel;
@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 
 /** Loot modifier to inject an additional loot entry into an existing table */
 public class AddEntryLootModifier extends LootModifier {
-  public static final Codec<AddEntryLootModifier> CODEC = RecordCodecBuilder.create(inst -> codecStart(inst).and(inst.group(
+  public static final MapCodec<AddEntryLootModifier> CODEC = RecordCodecBuilder.mapCodec(inst -> codecStart(inst).and(inst.group(
     ILootModifierCondition.CODEC.listOf().fieldOf("post_conditions").forGetter(m -> m.modifierConditions),
     MantleCodecs.LOOT_ENTRY.fieldOf("entry").forGetter(m -> m.entry),
     MantleCodecs.LOOT_FUNCTIONS.fieldOf("functions").forGetter(m -> m.functions))).apply(inst, AddEntryLootModifier::new));
@@ -72,7 +72,7 @@ public class AddEntryLootModifier extends LootModifier {
 	}
 
   @Override
-  public Codec<? extends IGlobalLootModifier> codec() {
+  public MapCodec<? extends IGlobalLootModifier> codec() {
     return CODEC;
   }
 
