@@ -62,6 +62,7 @@ import slimeknights.mantle.fluid.transfer.EmptyPotionTransfer;
 import slimeknights.mantle.fluid.transfer.FillFluidContainerTransfer;
 import slimeknights.mantle.fluid.transfer.FillFluidWithNBTTransfer;
 import slimeknights.mantle.fluid.transfer.FluidContainerTransferManager;
+import slimeknights.mantle.item.ContainerFoodItem;
 import slimeknights.mantle.item.LecternBookItem;
 import slimeknights.mantle.loot.LootTableInjector;
 import slimeknights.mantle.loot.MantleLoot;
@@ -124,6 +125,7 @@ public class Mantle {
 
   private void registerCapabilities(RegisterCapabilitiesEvent event) {
     OffhandCooldownTracker.register(event);
+    ContainerFoodItem.FluidContainerFoodItem.registerCapabilities(event);
   }
 
   private void commonSetup(final FMLCommonSetupEvent event) {

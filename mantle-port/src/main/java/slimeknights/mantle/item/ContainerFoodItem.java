@@ -1,7 +1,6 @@
 package slimeknights.mantle.item;
 
 import com.mojang.datafixers.util.Pair;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -14,8 +13,10 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.item.UseAnim;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.fluids.FluidStack;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.minecraft.core.registries.BuiltInRegistries;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -95,10 +96,15 @@ public class ContainerFoodItem extends Item {
       this.fluid = fluid;
     }
 
-    @Nullable
-    @Override
-    public ICapabilityProvider initCapabilities(ItemStack stack, @Nullable CompoundTag nbt) {
-      return new ConstantFluidContainerWrapper(fluid.get(), stack);
+    /** NeoForge queries item capabilities through registered providers. */
+    public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+      for (Item item : BuiltInRegistries.ITEM) {
+        if (item instanceof FluidContainerFoodItem) {
+          event.registerItem(Capabilities.FluidHandler.ITEM,
+            (stack, context) -> new ConstantFluidContainerWrapper(
+              ((FluidContainerFoodItem) stack.getItem()).fluid.get(), stack), item);
+        }
+      }
     }
   }
 }
