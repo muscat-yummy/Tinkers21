@@ -1,0 +1,26 @@
+name: Compile Mantle network checkpoint
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/compile-network-oneshot.yml]
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Compile Mantle with expanded diagnostics
+        run: |
+          cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
+          allprojects {
+              tasks.withType(JavaCompile).configureEach {
+                  options.compilerArgs.addAll(['-Xmaxerrs', '2000'])
+              }
+          }
+          GRADLE
+          ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
