@@ -22,7 +22,7 @@ import java.util.Set;
 public class BlockTagLootCondition implements LootItemCondition {
   public static final MapCodec<BlockTagLootCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
     ResourceLocation.CODEC.fieldOf("tag").forGetter((BlockTagLootCondition value) -> value.tag.location()),
-    StatePropertiesPredicate.CODEC.optionalFieldOf("properties", Optional.empty()).forGetter(value -> value.properties)
+    StatePropertiesPredicate.CODEC.optionalFieldOf("properties").forGetter(value -> value.properties)
   ).apply(instance, (id, properties) -> new BlockTagLootCondition(TagKey.create(Registries.BLOCK, id), properties)));
 
   private final TagKey<Block> tag;

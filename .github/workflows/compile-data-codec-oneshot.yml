@@ -1,8 +1,8 @@
-name: Compile Mantle condition API checkpoint
+name: Compile Mantle data codec checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-condition-api-oneshot.yml]
+    paths: [.github/workflows/compile-data-codec-oneshot.yml]
 permissions:
   contents: read
 jobs:
@@ -19,7 +19,7 @@ jobs:
           cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
           allprojects {
               tasks.withType(JavaCompile).configureEach {
-                  options.compilerArgs.addAll(['-Xmaxerrs', '2200'])
+                  options.compilerArgs.addAll(['-Xmaxerrs', '2200', '-XprintProcessorInfo'])
               }
           }
           GRADLE
