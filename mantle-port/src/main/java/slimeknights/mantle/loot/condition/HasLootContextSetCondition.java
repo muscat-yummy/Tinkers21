@@ -1,5 +1,6 @@
 package slimeknights.mantle.loot.condition;
 
+import com.mojang.serialization.MapCodec;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -18,6 +19,10 @@ import java.util.Objects;
 
 /** Loot condition that only runs if all required values in the given loot context set are present. Good heuristic for using that set. */
 public record HasLootContextSetCondition(LootContextParamSet set) implements LootItemCondition {
+  public static final MapCodec<HasLootContextSetCondition> CODEC = ResourceLocation.CODEC.fieldOf("set")
+    .xmap(key -> new HasLootContextSetCondition(Objects.requireNonNull(LootContextParamSets.get(key), "Unknown loot context set " + key)),
+          value -> Objects.requireNonNull(LootContextParamSets.getKey(value.set), "Unregistered loot context set"));
+
   /** Creates a new builder instance */
   public static Builder builder(LootContextParamSet set) {
     return new Builder(set);
@@ -47,13 +52,11 @@ public record HasLootContextSetCondition(LootContextParamSet set) implements Loo
   }
 
   /** Serializer logic */
-  public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<HasLootContextSetCondition> {
-    @Override
+  public static class Serializer {
     public void serialize(JsonObject json, HasLootContextSetCondition value, JsonSerializationContext context) {
       json.addProperty("set", Objects.requireNonNull(LootContextParamSets.getKey(value.set), "Unregistered loot LootContextParamSets").toString());
     }
 
-    @Override
     public HasLootContextSetCondition deserialize(JsonObject json, JsonDeserializationContext context) {
       ResourceLocation key = JsonHelper.getResourceLocation(json, "set");
       LootContextParamSet set = LootContextParamSets.get(key);

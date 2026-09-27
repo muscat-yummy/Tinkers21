@@ -72,8 +72,8 @@ public class MantleLoot {
       SET_FLUID_FUNCTION = registerFunction("set_fluid", SetFluidLootFunction.SERIALIZER);
 
     } else if (key == Registries.LOOT_CONDITION_TYPE) {
-      BLOCK_TAG_CONDITION = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("block_tag"), new LootItemConditionType(BlockTagLootCondition.SERIALIZER));
-      HAS_CONTEXT_SET = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("has_context_set"), new LootItemConditionType(new HasLootContextSetCondition.Serializer()));
+      BLOCK_TAG_CONDITION = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("block_tag"), new LootItemConditionType(BlockTagLootCondition.CODEC));
+      HAS_CONTEXT_SET = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("has_context_set"), new LootItemConditionType(HasLootContextSetCondition.CODEC));
       TAG_EMPTY = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("tag_empty"), new LootItemConditionType(TagEmptyCondition.CODEC));
       TAG_FILLED = Registry.register(BuiltInRegistries.LOOT_CONDITION_TYPE, Mantle.getResource("tag_filled"), new LootItemConditionType(TagFilledCondition.CODEC));
 

@@ -1,5 +1,8 @@
 package slimeknights.mantle.loot.condition;
 
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.resources.ResourceLocation;
 import com.google.gson.JsonDeserializationContext;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSerializationContext;
@@ -10,7 +13,6 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
@@ -23,6 +25,10 @@ import java.util.Set;
 /** Variant of {@link net.minecraft.world.level.storage.loot.predicates.LootItemBlockStatePropertyCondition} that allows using a tag for block type instead of a block */
 @RequiredArgsConstructor
 public class BlockTagLootCondition implements LootItemCondition {
+  public static final MapCodec<BlockTagLootCondition> CODEC = RecordCodecBuilder.mapCodec(instance -> instance.group(
+    ResourceLocation.CODEC.fieldOf("tag").forGetter(value -> value.tag.location()),
+    StatePropertiesPredicate.CODEC.optionalFieldOf("properties", StatePropertiesPredicate.ANY).forGetter(value -> value.properties)
+  ).apply(instance, (id, properties) -> new BlockTagLootCondition(TagKey.create(Registries.BLOCK, id), properties)));
   public static final SerializerImpl SERIALIZER = new SerializerImpl();
 
   private final TagKey<Block> tag;
@@ -52,8 +58,7 @@ public class BlockTagLootCondition implements LootItemCondition {
     return MantleLoot.BLOCK_TAG_CONDITION;
   }
 
-  private static class SerializerImpl implements Serializer<BlockTagLootCondition> {
-    @Override
+  public static class SerializerImpl {
     public void serialize(JsonObject json, BlockTagLootCondition loot, JsonSerializationContext context) {
       json.addProperty("tag", loot.tag.location().toString());
       if (loot.properties != StatePropertiesPredicate.ANY) {
@@ -61,7 +66,6 @@ public class BlockTagLootCondition implements LootItemCondition {
       }
     }
 
-    @Override
     public BlockTagLootCondition deserialize(JsonObject json, JsonDeserializationContext context) {
       TagKey<Block> tag = TagKey.create(Registries.BLOCK, JsonHelper.getResourceLocation(json, "tag"));
       StatePropertiesPredicate predicate = StatePropertiesPredicate.ANY;
