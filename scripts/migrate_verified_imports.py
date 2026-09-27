@@ -31,23 +31,39 @@ IMPORTS = {
     "net.minecraftforge.registries.RegisterEvent": "net.neoforged.neoforge.registries.RegisterEvent",
     "net.minecraftforge.event.entity.player.PlayerInteractEvent": "net.neoforged.neoforge.event.entity.player.PlayerInteractEvent",
     "net.minecraftforge.fml.loading.FMLEnvironment": "net.neoforged.fml.loading.FMLEnvironment",
+    "net.minecraftforge.fml.config.ModConfig.Type": "net.neoforged.fml.config.ModConfig.Type",
+    "net.minecraftforge.fml.common.Mod.EventBusSubscriber": "net.neoforged.fml.common.EventBusSubscriber",
+    "net.minecraftforge.fml.common.Mod.EventBusSubscriber.Bus": "net.neoforged.fml.common.EventBusSubscriber.Bus",
+    "net.minecraftforge.fluids.FluidStack": "net.neoforged.neoforge.fluids.FluidStack",
+    "net.minecraftforge.fluids.capability.IFluidHandler": "net.neoforged.neoforge.fluids.capability.IFluidHandler",
+    "net.minecraftforge.fluids.capability.IFluidHandlerItem": "net.neoforged.neoforge.fluids.capability.IFluidHandlerItem",
+    "net.minecraftforge.common.crafting.conditions.ICondition": "net.neoforged.neoforge.common.conditions.ICondition",
+    "net.minecraftforge.common.data.BlockTagsProvider": "net.neoforged.neoforge.common.data.BlockTagsProvider",
+    "net.minecraftforge.common.util.INBTSerializable": "net.neoforged.neoforge.common.util.INBTSerializable",
+    "net.minecraftforge.common.ForgeConfigSpec": "net.neoforged.neoforge.common.ModConfigSpec",
     "net.minecraftforge.common.MinecraftForge": "net.neoforged.neoforge.common.NeoForge",
 }
 IMPORT_RE = re.compile(r"^(?P<prefix>\s*import\s+(?:static\s+)?)(?P<name>[\w.]+)(?P<suffix>\s*;)", re.MULTILINE)
 
 
 def migrate(source: str, counts: Counter[str]) -> str:
+    has_old_config_spec = "import net.minecraftforge.common.ForgeConfigSpec" in source
     has_minecraft_forge = bool(re.search(r"^\s*import\s+net\.minecraftforge\.common\.MinecraftForge\s*;", source, re.MULTILINE))
 
     def replace_import(match: re.Match[str]) -> str:
         old = match.group("name")
         new = IMPORTS.get(old)
+        if new is None and old.startswith("net.minecraftforge.common.ForgeConfigSpec."):
+            new = old.replace("net.minecraftforge.common.ForgeConfigSpec.", "net.neoforged.neoforge.common.ModConfigSpec.", 1)
         if new is None:
             return match.group(0)
         counts[old] += 1
         return match.group("prefix") + new + match.group("suffix")
 
     result = IMPORT_RE.sub(replace_import, source)
+    if has_old_config_spec:
+        result, replacements = re.subn(r"\\bForgeConfigSpec\\b", "ModConfigSpec", result)
+        counts["ForgeConfigSpec usage"] += replacements
     if has_minecraft_forge:
         result, replacements = re.subn(r"\bMinecraftForge\.EVENT_BUS\b", "NeoForge.EVENT_BUS", result)
         counts["MinecraftForge.EVENT_BUS"] += replacements
