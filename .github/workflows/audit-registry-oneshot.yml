@@ -1,0 +1,29 @@
+name: Audit registry object use
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/audit-registry-oneshot.yml]
+permissions:
+  contents: read
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Count registry references
+        run: |
+          python3 - <<'PY'
+          from pathlib import Path
+          import re
+          root=Path('mantle-port/src/main/java')
+          files=[]
+          for p in root.rglob('*.java'):
+              s=p.read_text(encoding='utf8')
+              if 'RegistryObject' in s:
+                  files.append((str(p),s))
+          print('files:',len(files))
+          for p,s in files:
+              n=s.count('RegistryObject')
+              methods=sorted(set(re.findall(r'RegistryObject\.([A-Za-z0-9_]+)',s)))
+              print(n,p,'static=',','.join(methods))
+          PY
