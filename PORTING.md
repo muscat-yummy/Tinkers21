@@ -2,20 +2,22 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
-## Current checkpoint (2026-09-26)
+## Current checkpoint (2026-09-27)
 
-- The repository started with documentation only. A NeoForge 1.21.1 / Java 21 Gradle scaffold and wrapper are now present.
-- Upstream source and resources have **not** been imported. The build deliberately fails before compilation until `src/main/java/slimeknights/tconstruct/TConstruct.java` is present. A successful empty JAR is not a valid port.
-- Pinned upstream source candidate: [SlimeKnights/TinkersConstruct 1.20.1 at 2785bc3](https://github.com/SlimeKnights/TinkersConstruct/commit/2785bc3b5e7777f9f1fd77a243887171ea2c3c68). Import the original `src` tree with its notices intact, then replace the Forge build configuration with the scaffold here. Keep a separate provenance commit.
-- Tinkers' Construct 1.20.1 depends on Mantle 1.20.1. Its official source repository currently has a 1.20 branch and no 1.21.1 branch. Resolve a compatible NeoForge Mantle port before trying to compile the full TiC source; never remove Mantle-backed features just to make the build green.
-- Build configuration and metadata are preparatory only. No gameplay, runtime load, or API compatibility has been verified.
+- Imported the full upstream `src` tree, `lombok.config`, and `.editorconfig` from [SlimeKnights/TinkersConstruct 1.20.1 at 2785bc3](https://github.com/SlimeKnights/TinkersConstruct/commit/2785bc3b5e7777f9f1fd77a243887171ea2c3c68) in a separate provenance commit. The repository tree now contains 1,988 Java files and 10,734 paths under `src/main/resources` (including directories).
+- The NeoForge 1.21.1 / Java 21 Gradle scaffold successfully reached Java compilation. The [first compile run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36289026918) failed with the compiler's initial 100 reported errors: missing Forge namespaces, absent Mantle API, and absent Lombok. The first two are expected migration work; Lombok has now been added to the compile and annotation processing classpaths, pending verification at the next meaningful phase boundary.
+- The official Mantle source has no 1.21.1 branch at this checkpoint. A compatible NeoForge Mantle dependency or port is required before TiC can compile. Do not stub or delete Mantle-backed systems to hide this dependency.
+- No gameplay, runtime load, or addon compatibility has been verified. The imported source is still Forge 1.20.1 code; this branch is not a usable 1.21.1 mod.
 
 ### Next coherent slice
 
-1. Import upstream source/assets/data from the pinned commit, keeping package names and attribution.
-2. Port Mantle (or identify a compatible, source-audited port) and wire it into the 1.21.1 build.
-3. Run one compile pass, classify the first failures as A/B/C, and migrate initialization and registries without stubbing subsystems.
-4. At the Phase 2 boundary, run one meaningful Minecraft load test.
+1. Port or source-audit a 1.21.1 NeoForge Mantle dependency and wire it into Gradle.
+2. Classify and migrate Forge registration/event references (A), then the changed item data, resource, fluid, rendering, and networking APIs (B).
+3. After a coherent group of changes, run one compile pass; at the Phase 2 boundary, perform one meaningful Minecraft load test.
+
+### Distribution consideration
+
+The [SlimeKnights FAQ](https://slimeknights.github.io/faq/) states that it does not grant permission for independent Forge/NeoForge ports to future Java versions while the project is active, although it permits reuse of MIT-licensed code and assets. Before any public release, review the project name, presentation, and that stated policy with the maintainers. The repository's MIT license and attribution do not imply endorsement.
 
 ## Principles
 
@@ -83,7 +85,7 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 
 ## Known issues
 
-- Source and resources are not imported; compilation is intentionally blocked.
+- The imported 1.20.1 source still references Forge APIs and cannot compile against NeoForge 1.21.1.
 - Mantle compatibility for NeoForge 1.21.1 is unresolved.
 
 ## Upstream

@@ -9,9 +9,20 @@ base.archivesName = 'TinkersConstruct'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
+}
+
 sourceSets.main.resources {
     srcDir('src/generated/resources')
     exclude('**/.cache/**')
+    // The imported Forge metadata is superseded by generated NeoForge metadata.
+    exclude('META-INF/mods.toml')
 }
 
 neoForge {
