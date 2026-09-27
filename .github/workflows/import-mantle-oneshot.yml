@@ -1,0 +1,30 @@
+name: Import pinned Mantle source
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/import-mantle-oneshot.yml]
+permissions:
+  contents: write
+jobs:
+  import:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
+        with:
+          repository: SlimeKnights/Mantle
+          ref: 2832b8e43a2f7c1ff6f382faa769660741cc7326
+          path: upstream-mantle
+          persist-credentials: false
+      - name: Import source with provenance
+        run: |
+          set -euo pipefail
+          mkdir -p mantle-port
+          cp -a upstream-mantle/src mantle-port/
+          cp upstream-mantle/LICENSE mantle-port/LICENSE
+          cp upstream-mantle/lombok.config mantle-port/lombok.config
+          printf '%s\n' 'Source: https://github.com/SlimeKnights/Mantle' 'Commit: 2832b8e43a2f7c1ff6f382faa769660741cc7326' 'Original target: Minecraft 1.20.1 / Forge' 'Current state: imported, not yet ported to 1.21.1 / NeoForge' > mantle-port/UPSTREAM.md
+          rm -rf upstream-mantle
+          git add mantle-port
+          git -c user.name='Tinkers21 port automation' -c user.email='41898282+github-actions[bot]@users.noreply.github.com' commit -m 'port: import pinned Mantle source for dependency migration'
+          git push origin HEAD:port/1.21.1-neoforge
