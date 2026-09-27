@@ -22,3 +22,10 @@ type="required"
 versionRange="${minecraft_version_range}"
 ordering="NONE"
 side="BOTH"
+
+[[dependencies.tconstruct]]
+modId="mantle"
+type="required"
+versionRange="[1.11-port.0,)"
+ordering="AFTER"
+side="BOTH"

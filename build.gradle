@@ -8,6 +8,7 @@ version = mod_version
 base.archivesName = 'TinkersConstruct'
 
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+evaluationDependsOn(':mantle-port')
 
 repositories {
     mavenCentral()
@@ -16,6 +17,7 @@ repositories {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.48'
     annotationProcessor 'org.projectlombok:lombok:1.18.48'
+    implementation project(':mantle-port')
 }
 
 sourceSets.main.resources {
@@ -43,6 +45,9 @@ neoForge {
     mods {
         tconstruct {
             sourceSet(sourceSets.main)
+        }
+        mantle {
+            sourceSet(project(':mantle-port').sourceSets.main)
         }
     }
 }

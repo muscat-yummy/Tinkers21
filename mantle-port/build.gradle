@@ -1,0 +1,39 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+group = 'slimeknights.mantle'
+version = '1.11-port.0'
+base.archivesName = 'Mantle'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories { mavenCentral() }
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
+}
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude('**/.cache/**')
+    exclude('META-INF/mods.toml')
+}
+
+neoForge {
+    version = neo_version
+    mods {
+        mantle { sourceSet(sourceSets.main) }
+    }
+}
+
+tasks.register('generateModMetadata', ProcessResources) {
+    inputs.property('neo_version', neo_version)
+    from('src/main/templates')
+    into(layout.buildDirectory.dir('generated/sources/modMetadata'))
+    expand(neo_version: neo_version)
+}
+sourceSets.main.resources.srcDir(tasks.named('generateModMetadata'))
+neoForge.ideSyncTask(tasks.named('generateModMetadata'))
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }

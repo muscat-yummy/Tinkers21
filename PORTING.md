@@ -10,7 +10,7 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - Simple ResourceLocation constructors were migrated in 39 Java files (60 namespace/path and 40 parse calls; [migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36290266362)). More complex call sites still require source review.
 - Verified NeoForge registry and datagen imports were moved in another 40 Java files (41 imports; [migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36290404099)). This is a package migration only; registration behavior and provider signatures remain to audit.
 - The original MissingMappingsEvent flow and Mantle RegistrationHelper call in the entrypoint need a deliberate replacement; this event is absent in the NeoForge 1.21.1 source. Keep old mapping behavior in scope rather than deleting it.
-- The official Mantle source has no 1.21.1 branch at this checkpoint. A compatible NeoForge Mantle dependency or port is required before TiC can compile. Do not stub or delete Mantle-backed systems to hide this dependency.
+- Official Mantle has no 1.21.1 branch at this checkpoint. Pinned Mantle 1.20.1 source (commit `2832b8e`) is imported in `mantle-port/` as a separate Gradle module with its license and provenance. It remains Forge code and needs its own 1.21.1 NeoForge API port before TiC can compile; do not stub or delete Mantle-backed systems.
 - No gameplay, runtime load, or addon compatibility has been verified. The imported source is still Forge 1.20.1 code; this branch is not a usable 1.21.1 mod.
 
 ### Next coherent slice

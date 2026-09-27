@@ -9,3 +9,5 @@ plugins {
 }
 
 rootProject.name = 'Tinkers21'
+
+include('mantle-port')
