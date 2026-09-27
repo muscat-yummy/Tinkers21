@@ -14,18 +14,16 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
-      - name: Resolve module compile classpaths
-        run: |
-          ./gradlew :mantle-port:dependencies :dependencies --configuration compileClasspath --no-daemon --console=plain > /tmp/phase1-dependencies.log
-          grep -E 'jei-1.21.1-(common|neoforge)-api|project :mantle-port|net.neoforged:neoforge' /tmp/phase1-dependencies.log | head -25
-      - name: Confirm Java compiler checkpoint
+      - name: Verify Mantle compile classpath and compiler
         run: |
           set +e
           ./gradlew :mantle-port:compileJava --no-daemon --console=plain > /tmp/phase1-compile.log 2>&1
           code=$?
           set -e
-          grep -E '(^> Task :mantle-port:compileJava|[0-9,]+ errors$|BUILD FAILED|BUILD SUCCESSFUL)' /tmp/phase1-compile.log | tail -10
-          if [ "$code" -ne 0 ] && ! grep -q '^> Task :mantle-port:compileJava' /tmp/phase1-compile.log; then
-            tail -80 /tmp/phase1-compile.log
+          tail -60 /tmp/phase1-compile.log
+          if grep -Eq 'Could not resolve|Could not find mezz.jei|Could not get resource' /tmp/phase1-compile.log; then
+            exit 1
+          fi
+          if [ "$code" -ne 0 ] && ! grep -q ' error: ' /tmp/phase1-compile.log; then
             exit 1
           fi

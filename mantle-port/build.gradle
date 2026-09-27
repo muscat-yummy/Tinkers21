@@ -8,7 +8,10 @@ version = '1.11-port.0'
 base.archivesName = 'Mantle'
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 
-repositories { mavenCentral() }
+repositories {
+    mavenCentral()
+    maven { url = uri('https://maven.blamejared.com/') }
+}
 
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.48'
