@@ -2,7 +2,9 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
-## Current checkpoint (2026-09-27)
+## Current checkpoint (2026-09-28)
+
+**Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward.
 
 - Imported the full upstream `src` tree, `lombok.config`, and `.editorconfig` from [SlimeKnights/TinkersConstruct 1.20.1 at 2785bc3](https://github.com/SlimeKnights/TinkersConstruct/commit/2785bc3b5e7777f9f1fd77a243887171ea2c3c68) in a separate provenance commit. The repository tree now contains 1,988 Java files and 10,734 paths under `src/main/resources` (including directories).
 - The NeoForge 1.21.1 / Java 21 Gradle scaffold successfully reached Java compilation. The [first compile run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36289026918) failed with the compiler's initial 100 reported errors: missing Forge namespaces, absent Mantle API, and absent Lombok. The first two are expected migration work; Lombok has now been added to the compile and annotation processing classpaths, pending verification at the next meaningful phase boundary.
@@ -16,7 +18,7 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - A shared NeoForge payload bridge now replaces Mantle's old SimpleChannel registration and delivery while retaining existing packet encoder/decoder contracts. Mantle and TiC register channels on their mod event buses; the associated import and initialization migration touched 321 Java files ([migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291871696)). A [compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36291957510) reached javac and reported 1,984 Mantle compilation errors across legacy Forge and 1.21 API use; no diagnostics pointed directly at the newly added network bridge files. This is not a successful compile or proof of packet exchange; client/server behavior is still unverified.
 - Fixed the verified `ModConfigSpec` migration pattern and moved `FluidType` imports across 54 Mantle/TiC Java files (32 config type references, 51 fluid type imports; [migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36292329206)). This is a source migration checkpoint; no additional compile was run for these edits.
 - Compared compiler-failing Forge imports against the official NeoForge 1.21.1 source tree and moved 308 exact class imports in 184 Java files ([migration run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36292523002)). The next [Mantle compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36292595001) reported 1,564 errors, down from 1,984. This is still a failed build and includes substantial API adaptations.
-- Added the published JEI 1.21.1 common/NeoForge API jars as compile-only dependencies for both modules. Migrated Mantle's constant-fluid food item capability from Forge's per-stack provider hook to NeoForge's item registration event. These edits have not been compiled or tested yet.
+- Added the published JEI 1.21.1 common/NeoForge API jars as compile-only dependencies for both modules and the BlameJared repository to both Gradle projects. A [build environment checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36332272695) reached `:mantle-port:compileJava` and reported old Forge API source errors, with no dependency resolution error. Migrated Mantle's constant-fluid food item capability from Forge's per-stack provider hook to NeoForge's item registration event; this behavior remains untested.
 - An [external import audit](https://github.com/muscat-yummy/Tinkers21/actions/runs/36292910976) found additional TiC integration imports for JSON Things, Crafting Tweaks, Immersive Engineering, MmmMmmMmmMmm and Diet; their 1.21.1 API availability and compile dependency coordinates remain to be resolved.
 - No gameplay, runtime load, or addon compatibility has been verified. The imported source is still Forge 1.20.1 code; this branch is not a usable 1.21.1 mod.
 
@@ -49,11 +51,11 @@ When investigating breakage, classify changes as:
 
 ## Development phases
 
-### Phase 1 — Build environment
-Move Gradle/build configuration to Minecraft 1.21.1, NeoForge, and Java 21. Resolve dependencies and reach a useful compile state.
+### Phase 1 — Build environment (complete: 2026-09-28)
+Move Gradle/build configuration to Minecraft 1.21.1, NeoForge, and Java 21. Resolve dependencies and reach a useful compile state. The compiler now reports source-level port errors against the resolved core classpath. Compilation itself is not yet successful; optional integration APIs remain in the later-content audit.
 
-### Phase 2 — Bootstrap
-Port mod initialization, registries, configuration, resource/data loading, and enough infrastructure for Minecraft to load the mod.
+### Phase 2 — Bootstrap (in progress)
+Port mod initialization, registries, configuration, resource/data loading, and enough infrastructure for Minecraft to load the mod. The current build still fails in Mantle source before Minecraft can load.
 
 ### Phase 3 — Core tool system
 Port and preserve the core material/tool/modifier systems, including MaterialId and material managers, ToolDefinition/ToolModule/ToolStack, IModifiable, Modifier/ModifierId/ModifierManager, modifier hooks/modules, and related serialization.
