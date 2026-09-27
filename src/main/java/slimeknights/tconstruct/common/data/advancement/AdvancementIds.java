@@ -37,7 +37,7 @@ public class AdvancementIds {
 
   @SuppressWarnings("removal")
   private static ResourceLocation id(String key) {
-    return new ResourceLocation("minecraft", key);
+    return ResourceLocation.fromNamespaceAndPath("minecraft", key);
   }
 
   /** Creates a function ID from the given advancement */

@@ -21,7 +21,7 @@ import java.util.List;
 public class MeltingFuelLookup {
   /** Dummy fuel instance sine caches don't support caching null */
   @SuppressWarnings("removal")
-  private static final MeltingFuel EMPTY = new MeltingFuel(new ResourceLocation("missingno"), FluidIngredient.EMPTY, 0, 0, 0);
+  private static final MeltingFuel EMPTY = new MeltingFuel(ResourceLocation.parse("missingno"), FluidIngredient.EMPTY, 0, 0, 0);
   /** Temperature for solid fuels in the heater */
   private static MeltingFuel SOLID = EMPTY;
   /** List of all recipes */

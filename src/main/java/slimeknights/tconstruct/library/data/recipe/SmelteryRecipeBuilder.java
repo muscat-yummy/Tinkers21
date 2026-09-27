@@ -245,7 +245,7 @@ public class SmelteryRecipeBuilder {
   /** Adds a recipe for melting a list of items. Never optional */
   @SuppressWarnings({"removal", "deprecation"})
   private void minecraftArmorMelting(int cost, String prefix, String name) {
-    Item item = BuiltInRegistries.ITEM.get(new ResourceLocation(prefix + '_' + name));
+    Item item = BuiltInRegistries.ITEM.get(ResourceLocation.parse(prefix + '_' + name));
     if (item == Items.AIR) {
       throw new IllegalArgumentException("Unknown item name minecraft:" + name);
     }
@@ -433,7 +433,7 @@ public class SmelteryRecipeBuilder {
   /** Adds a recipe for melting a tool from the given mod */
   @SuppressWarnings("removal")
   public SmelteryRecipeBuilder itemMelting(float scale, String domain, String path, boolean damagable) {
-    itemMelting(scale, domain + '_' + path, (float)Math.sqrt(scale), new ResourceLocation(domain, path), damagable);
+    itemMelting(scale, domain + '_' + path, (float)Math.sqrt(scale), ResourceLocation.fromNamespaceAndPath(domain, path), damagable);
     return this;
   }
 

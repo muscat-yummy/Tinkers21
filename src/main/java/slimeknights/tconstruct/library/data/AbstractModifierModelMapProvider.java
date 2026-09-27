@@ -65,7 +65,7 @@ public abstract class AbstractModifierModelMapProvider extends GenericDataProvid
   /** Creates a new material for the given texture */
   @SuppressWarnings("removal")
   protected Material material(String texture) {
-    return ModifierModel.blockAtlas(new ResourceLocation(modId, texture));
+    return ModifierModel.blockAtlas(ResourceLocation.fromNamespaceAndPath(modId, texture));
   }
 
   /** Creates a tool texture path from the given path */
@@ -78,7 +78,7 @@ public abstract class AbstractModifierModelMapProvider extends GenericDataProvid
   @SuppressWarnings("removal")
   @Nullable
   protected ResourceLocation toolPath(String path) {
-    return new ResourceLocation(modId, "item/tool/" + path);
+    return ResourceLocation.fromNamespaceAndPath(modId, "item/tool/" + path);
   }
 
   /** Creates a tool material from the given path */
@@ -127,7 +127,7 @@ public abstract class AbstractModifierModelMapProvider extends GenericDataProvid
   /** Gets the builder for the given tool */
   @SuppressWarnings("removal")
   protected Builder tool(String tool) {
-    return tool(new ResourceLocation(modId, tool));
+    return tool(ResourceLocation.fromNamespaceAndPath(modId, tool));
   }
 
   /** Adds the given model to the tool variant */
