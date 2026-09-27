@@ -10,14 +10,16 @@ import net.neoforged.neoforge.registries.DeferredHolder;
  * The underlying holder still performs the actual registry resolution.
  */
 public final class RegistryObject<T> implements Supplier<T> {
-  private final DeferredHolder<?, ? extends T> holder;
+  private final ResourceLocation id;
+  private final Supplier<? extends T> holder;
 
-  RegistryObject(DeferredHolder<?, ? extends T> holder) {
+  RegistryObject(ResourceLocation id, Supplier<? extends T> holder) {
+    this.id = Objects.requireNonNull(id);
     this.holder = Objects.requireNonNull(holder);
   }
 
   public ResourceLocation getId() {
-    return holder.getId();
+    return id;
   }
 
   @Override

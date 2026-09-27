@@ -3,7 +3,7 @@ package slimeknights.mantle.recipe;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.bus.api.IEventBus;
-import net.neoforged.neoforge.registries.DeferredRegister;
+import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.recipe.cooking.BlastingResultRecipe;
@@ -16,7 +16,7 @@ import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
 
 /** Handles any custom recipes added by Mantle */
 public class MantleRecipes {
-  private static final DeferredRegister<RecipeSerializer<?>> RECIPES = DeferredRegister.create(Registries.RECIPE_SERIALIZER, Mantle.modId);
+  private static final SynchronizedDeferredRegister<RecipeSerializer<?>> RECIPES = SynchronizedDeferredRegister.create(Registries.RECIPE_SERIALIZER, Mantle.modId);
 
   private MantleRecipes() {}
 
