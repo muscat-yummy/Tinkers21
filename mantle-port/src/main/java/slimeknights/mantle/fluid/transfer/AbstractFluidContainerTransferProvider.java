@@ -10,7 +10,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.minecraftforge.common.crafting.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
 import slimeknights.mantle.recipe.helper.FluidOutput;
@@ -46,7 +46,7 @@ public abstract class AbstractFluidContainerTransferProvider extends GenericData
 
   /** Adds a transfer to be saved */
   protected void addTransfer(String name, IFluidContainerTransfer transfer, ICondition... conditions) {
-    addTransfer(new ResourceLocation(modId, name), transfer, conditions);
+    addTransfer(ResourceLocation.fromNamespaceAndPath(modId, name), transfer, conditions);
   }
 
   /** Adds generic fill and empty for a container */

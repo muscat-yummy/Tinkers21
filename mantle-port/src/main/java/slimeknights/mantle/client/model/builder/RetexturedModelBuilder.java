@@ -3,7 +3,7 @@ package slimeknights.mantle.client.model.builder;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraftforge.client.model.generators.ModelBuilder;
-import net.minecraftforge.common.data.ExistingFileHelper;
+import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import slimeknights.mantle.Mantle;
 
 public class RetexturedModelBuilder<T extends ModelBuilder<T>> extends ColoredModelBuilder<T> {
