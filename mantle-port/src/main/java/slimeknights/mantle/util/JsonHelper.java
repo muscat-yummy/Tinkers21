@@ -17,7 +17,7 @@ import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.OnDatapackSyncEvent;
+import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import slimeknights.mantle.network.PacketDistributor;
 import slimeknights.mantle.network.PacketDistributor.PacketTarget;
 import net.minecraftforge.registries.IForgeRegistry;

@@ -3,7 +3,7 @@ package slimeknights.mantle.registration.adapter;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.MenuType;
 import net.minecraftforge.common.extensions.IForgeMenuType;
-import net.minecraftforge.network.IContainerFactory;
+import net.neoforged.neoforge.network.IContainerFactory;
 import net.minecraftforge.registries.IForgeRegistry;
 
 @SuppressWarnings("unused")

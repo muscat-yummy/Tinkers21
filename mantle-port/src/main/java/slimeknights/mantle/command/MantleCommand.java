@@ -9,7 +9,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.world.level.GameRules;
 import net.minecraft.world.level.storage.loot.LootDataType;
 import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.event.RegisterCommandsEvent;
+import net.neoforged.neoforge.event.RegisterCommandsEvent;
 import slimeknights.mantle.command.argument.TagSourceArgument;
 import slimeknights.mantle.command.tags.ModifyTagCommand;
 

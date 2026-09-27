@@ -16,7 +16,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.world.level.levelgen.structure.StructureSet;
 import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.common.world.BiomeModifier;
+import net.neoforged.neoforge.common.world.BiomeModifier;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.util.JsonHelper;
 

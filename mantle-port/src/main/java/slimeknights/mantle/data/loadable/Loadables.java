@@ -25,7 +25,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryContainer;
 import net.minecraftforge.common.ToolAction;
-import net.minecraftforge.common.loot.LootModifierManager;
+import net.neoforged.neoforge.common.loot.LootModifierManager;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.mantle.client.model.util.ModelHelper;
