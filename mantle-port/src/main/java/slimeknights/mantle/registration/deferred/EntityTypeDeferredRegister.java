@@ -5,7 +5,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.ForgeSpawnEggItem;
+import net.neoforged.neoforge.common.DeferredSpawnEggItem;
 import net.neoforged.bus.api.IEventBus;
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import slimeknights.mantle.registration.object.EntityObject;
@@ -52,6 +52,6 @@ public class EntityTypeDeferredRegister extends DeferredRegisterWrapper<EntityTy
    */
   public <T extends Mob> EntityObject<T> registerWithEgg(String name, Supplier<EntityType.Builder<T>> sup, int primary, int secondary) {
     RegistryObject<EntityType<T>> object = register(name, sup);
-    return new EntityObject<>(object, itemRegistry.register(name + "_spawn_egg", () -> new ForgeSpawnEggItem(object, primary, secondary, new Item.Properties())));
+    return new EntityObject<>(object, itemRegistry.register(name + "_spawn_egg", () -> new DeferredSpawnEggItem(object, primary, secondary, new Item.Properties())));
   }
 }
