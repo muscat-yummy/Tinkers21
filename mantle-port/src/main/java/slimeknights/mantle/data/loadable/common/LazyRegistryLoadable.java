@@ -1,6 +1,5 @@
 package slimeknights.mantle.data.loadable.common;
 
-import lombok.RequiredArgsConstructor;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -14,11 +13,14 @@ import javax.annotation.Nullable;
  * Should not be used for world registries; those will need to be handled using the {@link slimeknights.mantle.util.typed.TypedMap} context.
  * @see RegistryLoadable
  */
-@RequiredArgsConstructor
 public class LazyRegistryLoadable<T> implements BaseRegistryLoadable<T> {
   private final ResourceKey<? extends Registry<T>> registryKey;
   @Nullable
   private Registry<T> registry;
+
+  public LazyRegistryLoadable(ResourceKey<? extends Registry<T>> registryKey) {
+    this.registryKey = registryKey;
+  }
 
   @Nullable
   @Override

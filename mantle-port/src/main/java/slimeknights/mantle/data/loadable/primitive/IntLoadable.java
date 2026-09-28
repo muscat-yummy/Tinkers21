@@ -3,7 +3,6 @@ package slimeknights.mantle.data.loadable.primitive;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonPrimitive;
 import com.google.gson.JsonSyntaxException;
-import lombok.RequiredArgsConstructor;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -18,7 +17,6 @@ import slimeknights.mantle.util.typed.TypedMap;
  * @see slimeknights.mantle.data.loadable.common.ColorLoadable
  */
 @SuppressWarnings("unused")  // API
-@RequiredArgsConstructor
 public class IntLoadable implements Loadable<Integer> {
   /** Loadable ranging from integer min to integer max */
   public static final IntLoadable ANY_FULL = range(Integer.MIN_VALUE, Integer.MAX_VALUE);
@@ -39,6 +37,12 @@ public class IntLoadable implements Loadable<Integer> {
   private final int max;
   /** Method of writing to the network */
   private final IntNetwork network;
+
+  public IntLoadable(int min, int max, IntNetwork network) {
+    this.min = min;
+    this.max = max;
+    this.network = network;
+  }
 
   /** Creates a loadable with defaulting networking */
   public static IntLoadable range(int min, int max) {
