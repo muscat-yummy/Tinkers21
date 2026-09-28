@@ -68,6 +68,8 @@ import slimeknights.mantle.loot.LootTableInjector;
 import slimeknights.mantle.loot.MantleLoot;
 import slimeknights.mantle.network.MantleNetwork;
 import slimeknights.mantle.recipe.MantleRecipes;
+import slimeknights.mantle.recipe.MantleRecipeSerializers;
+import slimeknights.mantle.registration.MantleRegistrations;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
 import slimeknights.mantle.recipe.condition.TagEmptyCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -129,6 +131,7 @@ public class Mantle {
   }
 
   private void commonSetup(final FMLCommonSetupEvent event) {
+    MantleRecipeSerializers.bind();
     MantleCommand.init();
     OffhandCooldownTracker.init();
     TagPreference.init();
@@ -216,11 +219,11 @@ public class Mantle {
       BlockEntityTypeRegistryAdapter adapter = new BlockEntityTypeRegistryAdapter(Objects.requireNonNull(event.getRegistry(Registries.BLOCK_ENTITY_TYPE)));
       Set<Block> signs = MantleSignBlockEntity.buildSignBlocks();
       if (!signs.isEmpty()) {
-        adapter.register(MantleSignBlockEntity::new, signs, "sign");
+        MantleRegistrations.SIGN = adapter.register(MantleSignBlockEntity::new, signs, "sign");
       }
       signs = MantleHangingSignBlockEntity.buildSignBlocks();
       if (!signs.isEmpty()) {
-        adapter.register(MantleHangingSignBlockEntity::new, signs, "hanging_sign");
+        MantleRegistrations.HANGING_SIGN = adapter.register(MantleHangingSignBlockEntity::new, signs, "hanging_sign");
       }
     }
     else if (key == Registries.COMMAND_ARGUMENT_TYPE) {
