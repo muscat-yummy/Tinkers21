@@ -6,14 +6,16 @@ import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.util.typed.TypedMap;
 
-/** Loadable for ingredients, handling Forge ingredients */
+/** Loadable for vanilla and NeoForge custom ingredients. */
 public enum IngredientLoadable implements Loadable<Ingredient> {
   ALLOW_EMPTY,
   DISALLOW_EMPTY;
 
+  private final CodecLoadable<Ingredient> codec = new CodecLoadable<>(this == ALLOW_EMPTY ? Ingredient.CODEC : Ingredient.CODEC_NONEMPTY);
+
   @Override
   public Ingredient convert(JsonElement element, String key, TypedMap context) {
-    return Ingredient.fromJson(element, this == ALLOW_EMPTY);
+    return codec.convert(element, key, context);
   }
 
   @Override
@@ -21,16 +23,16 @@ public enum IngredientLoadable implements Loadable<Ingredient> {
     if (object.isEmpty() && this == DISALLOW_EMPTY) {
       throw new IllegalArgumentException("Ingredient cannot be empty");
     }
-    return object.toJson();
+    return codec.serialize(object);
   }
 
   @Override
   public Ingredient decode(FriendlyByteBuf buffer, TypedMap context) {
-    return Ingredient.fromNetwork(buffer);
+    return codec.decode(buffer, context);
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer, Ingredient object) {
-    object.toNetwork(buffer);
+    codec.encode(buffer, object);
   }
 }
