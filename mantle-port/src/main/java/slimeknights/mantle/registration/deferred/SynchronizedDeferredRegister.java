@@ -25,6 +25,11 @@ public class SynchronizedDeferredRegister<T> {
     return new SynchronizedDeferredRegister<>(DeferredRegister.create(registry, modid));
   }
 
+  /** Wraps an existing deferred register while retaining synchronized registration. */
+  public static <T> SynchronizedDeferredRegister<T> create(DeferredRegister<T> register) {
+    return new SynchronizedDeferredRegister<>(register);
+  }
+
   /** Registers the given object, synchronized over the internal register */
   public <I extends T> RegistryObject<I> register(final String name, final Supplier<? extends I> sup) {
     synchronized (internal) {

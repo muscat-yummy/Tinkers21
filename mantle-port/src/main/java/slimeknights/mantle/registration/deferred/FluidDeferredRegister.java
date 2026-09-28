@@ -105,6 +105,11 @@ public class FluidDeferredRegister extends DeferredRegisterWrapper<Fluid> {
       return this.commonTag(name);
     }
 
+    public Builder commonTag(String tag) {
+      this.commonTag = tag;
+      return this;
+    }
+
     /* Fluid type */
 
     /** Registers the passed fluid type */
@@ -149,7 +154,7 @@ public class FluidDeferredRegister extends DeferredRegisterWrapper<Fluid> {
 
     /** Creates the default bucket */
     public Builder bucket() {
-      return bucket(itemRegister.register(name + "_bucket", () -> new BucketItem(stillDelayed, RegistrationHelper.BUCKET_PROPS)));
+      return bucket(itemRegister.register(name + "_bucket", () -> new BucketItem(stillDelayed.get(), RegistrationHelper.BUCKET_PROPS)));
     }
 
 
@@ -166,7 +171,7 @@ public class FluidDeferredRegister extends DeferredRegisterWrapper<Fluid> {
 
     /** Creates the default block from the given material and light level */
     public Builder block(MapColor color, int lightLevel) {
-      return block(sup -> new LiquidBlock(sup, createProperties(color, lightLevel)));
+      return block(sup -> new LiquidBlock(sup.get(), createProperties(color, lightLevel)));
     }
 
     /** Creates a block that lights entities on fire and damages them over time */

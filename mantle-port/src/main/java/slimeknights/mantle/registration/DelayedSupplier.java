@@ -15,6 +15,10 @@ public class DelayedSupplier<T> implements Supplier<T> {
   @Nullable
   private Supplier<? extends T> supplier;
 
+  public void setSupplier(Supplier<? extends T> supplier) {
+    this.supplier = supplier;
+  }
+
   @Override
   public T get() {
     if (supplier == null) {
