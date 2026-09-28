@@ -1,8 +1,8 @@
-name: Compile Mantle codec and registry checkpoint
+name: Compile Mantle fluid component and codec checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-codec-registry-oneshot.yml]
+    paths: [.github/workflows/compile-fluid-component-oneshot.yml]
 permissions:
   contents: read
 jobs:
