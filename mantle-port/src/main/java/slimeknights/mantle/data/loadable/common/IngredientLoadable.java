@@ -8,10 +8,14 @@ import slimeknights.mantle.util.typed.TypedMap;
 
 /** Loadable for vanilla and NeoForge custom ingredients. */
 public enum IngredientLoadable implements Loadable<Ingredient> {
-  ALLOW_EMPTY,
-  DISALLOW_EMPTY;
+  ALLOW_EMPTY(true),
+  DISALLOW_EMPTY(false);
 
-  private final CodecLoadable<Ingredient> codec = new CodecLoadable<>(this == ALLOW_EMPTY ? Ingredient.CODEC : Ingredient.CODEC_NONEMPTY);
+  private final CodecLoadable<Ingredient> codec;
+
+  IngredientLoadable(boolean allowEmpty) {
+    this.codec = new CodecLoadable<>(allowEmpty ? Ingredient.CODEC : Ingredient.CODEC_NONEMPTY);
+  }
 
   @Override
   public Ingredient convert(JsonElement element, String key, TypedMap context) {
