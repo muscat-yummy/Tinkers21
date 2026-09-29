@@ -1,8 +1,8 @@
-name: Compile Mantle JSON helper checkpoint
+name: Compile Mantle fallback recipe checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-json-helper-oneshot.yml]
+    paths: [.github/workflows/compile-fallback-recipe-oneshot.yml]
 permissions:
   contents: read
 jobs:
