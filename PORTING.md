@@ -2,7 +2,7 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
-## Current checkpoint (2026-09-28)
+## Current checkpoint (2026-09-29)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward.
 
@@ -26,6 +26,7 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - A [Mantle registration and codec checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36431893108) reported 1,081 errors, down from 1,131 at the last documented checkpoint (intermediate counts: 1,117, 1,100, 1,094, 1,088). Menu, spawn egg, log-stripping and direct registry holder APIs were migrated; soulbound marker data uses item data components. Registry wire IDs and recipe/loot codecs were adapted, with two loot codec names corrected in the next batch. Mantle still does not compile or load; fluid component and custom ingredient migrations remain substantial.
 - The [fluid component compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36432384867) reported 1,075 errors, down from 1,081. The corrected loot codecs and `FluidStack` custom-data migration no longer have direct compiler errors. The old ingredient loadable still uses removed JSON and network methods; the next source batch replaces those with 1.21 codecs. This is still a failed Mantle compile.
 - The [ingredient codec compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36432803464) reported 1,072 errors, down from 1,075. The new enum codec implementation exposed one Java enum initialization error, corrected in the next batch. The common fluid transfer helper still uses Forge `LazyOptional`; the next batch migrates it to nullable NeoForge block/item capabilities and preserves fluid components during split transfers.
+- The [fluid capability compile checkpoint](https://github.com/muscat-yummy/Tinkers21/actions/runs/36433318663) reported 1,050 errors, down from 1,072. The shared ingredient codec loadable and fluid transfer helper have no direct diagnostics. Runtime packet exchange, bucket entities, and tank transfers remain unverified. A subsequent review fixes refund copying before a drained stack can become empty; offhand cooldown state is migrated to transient player attachments with an entity capability.
 - An [external import audit](https://github.com/muscat-yummy/Tinkers21/actions/runs/36292910976) found additional TiC integration imports for JSON Things, Crafting Tweaks, Immersive Engineering, MmmMmmMmmMmm and Diet; their 1.21.1 API availability and compile dependency coordinates remain to be resolved.
 - No gameplay, runtime load, or addon compatibility has been verified. The imported source is still Forge 1.20.1 code; this branch is not a usable 1.21.1 mod.
 

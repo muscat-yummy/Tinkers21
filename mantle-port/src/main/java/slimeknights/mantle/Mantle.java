@@ -116,6 +116,7 @@ public class Mantle {
     bus.addListener(EventPriority.NORMAL, false, GatherDataEvent.class, this::gatherData);
     bus.addListener(EventPriority.NORMAL, false, RegisterEvent.class, this::register);
     MantleRecipes.init(bus);
+    OffhandCooldownTracker.init(bus);
     MantleNetwork.registerPackets();
     bus.addListener(MantleNetwork.INSTANCE::registerPayloads);
     NeoForge.EVENT_BUS.addListener(EventPriority.NORMAL, false, PlayerInteractEvent.RightClickBlock.class, LecternBookItem::interactWithBlock);
@@ -133,7 +134,6 @@ public class Mantle {
   private void commonSetup(final FMLCommonSetupEvent event) {
     MantleRecipeSerializers.bind();
     MantleCommand.init();
-    OffhandCooldownTracker.init();
     TagPreference.init();
     LootTableInjector.init();
   }

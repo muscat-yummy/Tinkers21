@@ -99,8 +99,9 @@ public class FluidTransferHelper {
           // failed to fill everything we drained, so try putting the extra back
           if (actualFill < drainedFluid.getAmount()) {
             int toReturn = drainedFluid.getAmount() - actualFill;
+            FluidStack refund = drainedFluid.copyWithAmount(toReturn);
             drainedFluid.setAmount(actualFill);
-            int returned = input.fill(drainedFluid.copyWithAmount(toReturn), FluidAction.EXECUTE);
+            int returned = input.fill(refund, FluidAction.EXECUTE);
             // failed to put the rest back, so all that's left to do is delete it
             if (returned < toReturn) {
               Mantle.logger.error("Lost {} fluid during transfer", toReturn - returned);
