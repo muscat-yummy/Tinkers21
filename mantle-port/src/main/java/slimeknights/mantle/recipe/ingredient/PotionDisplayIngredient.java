@@ -5,45 +5,36 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.alchemy.PotionUtils;
-import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.IIngredientSerializer;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.recipe.helper.LoadableIngredientSerializer;
 
 import javax.annotation.Nullable;
-import java.util.Arrays;
 import java.util.List;
+import java.util.stream.Stream;
 
-/** Ingredient that shows all potion variants on the displayed item list */
+/** Matches any potion on the selected items and displays every registered potion variant. */
 public class PotionDisplayIngredient extends ItemIngredient {
-  /** Ingredient serializer instance */
-  public static final LoadableIngredientSerializer<PotionDisplayIngredient> SERIALIZER = new LoadableIngredientSerializer<>(RecordLoadable.create(ItemsField.INSTANCE, TAG_FIELD, PotionDisplayIngredient::new));
-
-  /** last return of {@link Ingredient#getItems()} */
-  private ItemStack[] lastParentStacks = null;
-  /** cache for {@link #getItems()} */
-  private ItemStack[] displayStacks = null;
+  public static final LoadableIngredientSerializer<PotionDisplayIngredient> SERIALIZER = new LoadableIngredientSerializer<>(
+    RecordLoadable.create(ItemsField.INSTANCE, TAG_FIELD, PotionDisplayIngredient::new));
+  public static final IngredientType<PotionDisplayIngredient> TYPE = SERIALIZER.type("item", "tag");
 
   protected PotionDisplayIngredient(List<Item> items, @Nullable TagKey<Item> tag) {
     super(items, tag);
   }
 
-  /** Creates a ingredient matching a list of items */
-  public static PotionDisplayIngredient of(List<ItemLike> items) {
-    return new PotionDisplayIngredient(toItem(items), null);
+  public static Ingredient of(List<ItemLike> items) {
+    return new PotionDisplayIngredient(toItem(items), null).toVanilla();
   }
 
-  /** Creates a ingredient matching a list of items */
-  public static PotionDisplayIngredient of(ItemLike... items) {
+  public static Ingredient of(ItemLike... items) {
     return of(List.of(items));
   }
 
-  /** Creates a ingredient matching a tag */
-  public static PotionDisplayIngredient of(TagKey<Item> tag) {
-    return new PotionDisplayIngredient(List.of(), tag);
+  public static Ingredient of(TagKey<Item> tag) {
+    return new PotionDisplayIngredient(List.of(), tag).toVanilla();
   }
 
   @Override
@@ -52,25 +43,17 @@ public class PotionDisplayIngredient extends ItemIngredient {
   }
 
   @Override
-  public ItemStack[] getItems() {
-    // if empty, means we want wildcard, show all potions on the stack
-    ItemStack[] parentStacks = super.getItems();
-    if (lastParentStacks != parentStacks) {
-      lastParentStacks = parentStacks;
-      displayStacks = BuiltInRegistries.POTION.stream()
-        .filter(pot -> pot != Potions.EMPTY)
-        .flatMap(pot -> Arrays.stream(parentStacks).map(item -> PotionUtils.setPotion(item.copy(), pot)))
-        .toArray(ItemStack[]::new);
-    }
-    return displayStacks;
+  public Stream<ItemStack> getItems() {
+    List<ItemStack> parent = super.getItems().toList();
+    return BuiltInRegistries.POTION.stream().flatMap(potion ->
+      parent.stream().map(stack -> PotionIngredient.withPotion(stack.copy(), potion)));
   }
 
   @Override
-  public IIngredientSerializer<? extends Ingredient> getSerializer() {
-    return SERIALIZER;
+  public IngredientType<PotionDisplayIngredient> getType() {
+    return TYPE;
   }
 
-  @Override
   public JsonElement toJson() {
     return SERIALIZER.serialize(this);
   }

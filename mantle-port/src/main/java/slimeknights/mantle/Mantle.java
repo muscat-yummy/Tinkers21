@@ -15,7 +15,6 @@ import net.minecraft.world.level.block.Block;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
@@ -141,8 +140,6 @@ public class Mantle {
   private void register(RegisterEvent event) {
     ResourceKey<?> key = event.getRegistryKey();
     if (key == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(getResource("potion"), PotionIngredient.SERIALIZER);
-      CraftingHelper.register(getResource("potion_display"), PotionDisplayIngredient.SERIALIZER);
 
       // fluid container transfer
       FluidContainerTransferManager.TRANSFER_LOADERS.registerDeserializer(EmptyFluidContainerTransfer.ID, EmptyFluidContainerTransfer.DESERIALIZER);
@@ -211,6 +208,8 @@ public class Mantle {
     }
     else if (key == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, FluidContainerIngredient.ID, () -> FluidContainerIngredient.TYPE);
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, getResource("potion"), () -> PotionIngredient.TYPE);
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, getResource("potion_display"), () -> PotionDisplayIngredient.TYPE);
     }
     else if (key == NeoForgeRegistries.Keys.CONDITION_CODECS) {
       event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, getResource("tag_empty"), () -> TagEmptyCondition.CODEC);

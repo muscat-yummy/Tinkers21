@@ -6,7 +6,9 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.AbstractIngredient;
+import net.neoforged.neoforge.common.crafting.ICustomIngredient;
+import net.minecraft.world.item.crafting.Ingredient;
+import java.util.Objects;
 import slimeknights.mantle.data.loadable.Loadable;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.array.ArrayLoadable;
@@ -21,17 +23,18 @@ import java.util.List;
 import java.util.stream.Stream;
 
 /** Abstract ingredient that matches a list of items or a tag, mirroring the vanilla syntax */
-public abstract class ItemIngredient extends AbstractIngredient {
+public abstract class ItemIngredient implements ICustomIngredient {
   /** Field for the item tag */
   protected static final LoadableField<TagKey<Item>,ItemIngredient> TAG_FIELD = new UnsyncedField<>(Loadables.ITEM_TAG.nullableField("tag", i -> i.tag));
 
+  private final List<? extends Ingredient.Value> values;
   protected final List<Item> items;
   @Nullable
   protected final TagKey<Item> tag;
 
   /** Constructor letting you supply your own item stream */
-  protected ItemIngredient(List<Item> items, @Nullable TagKey<Item> tag, Stream<? extends Value> values) {
-    super(values);
+  protected ItemIngredient(List<Item> items, @Nullable TagKey<Item> tag, Stream<? extends Ingredient.Value> values) {
+    this.values = values.toList();
     this.items = items;
     this.tag = tag;
   }
@@ -39,9 +42,25 @@ public abstract class ItemIngredient extends AbstractIngredient {
   /** Constructor using default stream of items */
   protected ItemIngredient(List<Item> items, @Nullable TagKey<Item> tag) {
     this(items, tag, Stream.concat(
-      items.stream().map(item -> new ItemValue(new ItemStack(item))),
-      Stream.ofNullable(tag).map(TagValue::new))
+      items.stream().map(item -> new Ingredient.ItemValue(new ItemStack(item))),
+      Stream.ofNullable(tag).map(Ingredient.TagValue::new))
     );
+  }
+
+  @Override
+  public Stream<ItemStack> getItems() {
+    return values.stream().flatMap(value -> value.getItems().stream());
+  }
+
+  @Override
+  public boolean equals(Object object) {
+    return object == this || object != null && object.getClass() == getClass()
+      && object instanceof ItemIngredient other && items.equals(other.items) && Objects.equals(tag, other.tag);
+  }
+
+  @Override
+  public int hashCode() {
+    return Objects.hash(getClass(), items, tag);
   }
 
   /** Maps the list to a list of items */
@@ -82,7 +101,7 @@ public abstract class ItemIngredient extends AbstractIngredient {
     @Override
     public void encode(FriendlyByteBuf buffer, ItemIngredient parent) {
       // sync both tag and item values to client
-      ITEM_LIST.encode(buffer, Arrays.stream(parent.getItems()).map(ItemStack::getItem).toList());
+      ITEM_LIST.encode(buffer, parent.getItems().map(ItemStack::getItem).toList());
     }
   }
 }
