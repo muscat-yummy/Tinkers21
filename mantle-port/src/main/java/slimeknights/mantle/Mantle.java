@@ -141,7 +141,6 @@ public class Mantle {
   private void register(RegisterEvent event) {
     ResourceKey<?> key = event.getRegistryKey();
     if (key == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(FluidContainerIngredient.ID, FluidContainerIngredient.SERIALIZER);
       CraftingHelper.register(getResource("potion"), PotionIngredient.SERIALIZER);
       CraftingHelper.register(getResource("potion_display"), PotionDisplayIngredient.SERIALIZER);
 
@@ -209,6 +208,9 @@ public class Mantle {
         DamageSourcePredicate.LOADER.register(getResource("message"), SourceMessagePredicate.LOADER);
         DamageSourcePredicate.LOADER.register(getResource("attacker"), SourceAttackerPredicate.LOADER);
       }
+    }
+    else if (key == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, FluidContainerIngredient.ID, () -> FluidContainerIngredient.TYPE);
     }
     else if (key == NeoForgeRegistries.Keys.CONDITION_CODECS) {
       event.register(NeoForgeRegistries.Keys.CONDITION_CODECS, getResource("tag_empty"), () -> TagEmptyCondition.CODEC);
