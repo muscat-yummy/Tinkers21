@@ -20,7 +20,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
 import slimeknights.mantle.network.PacketDistributor;
 import slimeknights.mantle.network.PacketDistributor.PacketTarget;
-import net.minecraftforge.registries.IForgeRegistry;
+import net.minecraft.core.Registry;
 import org.jetbrains.annotations.Contract;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -221,15 +221,15 @@ public class JsonHelper {
    * @deprecated use {@link slimeknights.mantle.data.loadable.Loadables}
    */
   @Deprecated(forRemoval = true)
-  public static <T> T convertToEntry(IForgeRegistry<T> registry, JsonElement element, String key) {
+  public static <T> T convertToEntry(Registry<T> registry, JsonElement element, String key) {
     ResourceLocation name = JsonHelper.convertToResourceLocation(element, key);
     if (registry.containsKey(name)) {
-      T value = registry.getValue(name);
+      T value = registry.get(name);
       if (value != null) {
         return value;
       }
     }
-    throw new JsonSyntaxException("Unknown " + registry.getRegistryName() + " " + name);
+    throw new JsonSyntaxException("Unknown " + registry.key().location() + " " + name);
   }
 
   /**
@@ -243,7 +243,7 @@ public class JsonHelper {
    * @deprecated use {@link slimeknights.mantle.data.loadable.Loadables}
    */
   @Deprecated(forRemoval = true)
-  public static <T> T getAsEntry(IForgeRegistry<T> registry, JsonObject parent, String key) {
+  public static <T> T getAsEntry(Registry<T> registry, JsonObject parent, String key) {
     return convertToEntry(registry, JsonHelper.getElement(parent, key), key);
   }
 
@@ -312,7 +312,7 @@ public class JsonHelper {
 
     // on a dedicated server, the client is running a separate game instance, this is where we send packets, plus fully loaded should already be true
     // this event is not fired when connecting to a server
-    if (!player.connection.connection.isMemoryConnection()) {
+    if (!player.connection.getConnection().isMemoryConnection()) {
       PacketTarget target = PacketDistributor.PLAYER.with(() -> player);
       for (ISimplePacket packet : packets) {
         network.send(target, packet);
@@ -372,12 +372,18 @@ public class JsonHelper {
   /** Parses the given JSON element using the passed codec */
   public static <T> T parse(Codec<T> codec, JsonElement json) throws JsonParseException {
     return codec.parse(new Dynamic<>(JsonOps.INSTANCE, json))
-      .getOrThrow(false, Mantle.logger::error);
+      .getOrThrow(message -> {
+        Mantle.logger.error(message);
+        return new JsonParseException(message);
+      });
   }
 
   /** Serializes the given object using the passed codec */
   public static <T> JsonElement serialize(Codec<T> codec, T object) {
-    return codec.encodeStart(JsonOps.INSTANCE, object).getOrThrow(false, Mantle.logger::error);
+    return codec.encodeStart(JsonOps.INSTANCE, object).getOrThrow(message -> {
+        Mantle.logger.error(message);
+        return new JsonParseException(message);
+      });
   }
 
 
