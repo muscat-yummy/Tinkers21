@@ -1,8 +1,8 @@
-name: Compile Mantle registry alias checkpoint
+name: Compile Mantle combat effects checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-registry-alias-oneshot.yml]
+    paths: [.github/workflows/compile-combat-effects-oneshot.yml]
 permissions:
   contents: read
 jobs:
