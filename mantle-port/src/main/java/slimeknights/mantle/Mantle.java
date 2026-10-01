@@ -116,6 +116,7 @@ public class Mantle {
     bus.addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, this::registerCapabilities);
     bus.addListener(EventPriority.NORMAL, false, GatherDataEvent.class, this::gatherData);
     bus.addListener(EventPriority.NORMAL, false, RegisterEvent.class, this::register);
+    bus.addListener(EventPriority.LOWEST, false, RegisterEvent.class, this::registerConditionAliases);
     MantleRecipes.init(bus);
     OffhandCooldownTracker.init(bus);
     MantleNetwork.registerPackets();
@@ -238,6 +239,19 @@ public class Mantle {
     }
     else {
       MantleLoot.registerGlobalLootModifiers(event);
+    }
+  }
+
+  /** Keeps old built-in Forge condition type IDs readable through the matching NeoForge codec. */
+  private void registerConditionAliases(RegisterEvent event) {
+    if (event.getRegistryKey() == NeoForgeRegistries.Keys.CONDITION_CODECS) {
+      var registry = Objects.requireNonNull(event.getRegistry(NeoForgeRegistries.Keys.CONDITION_CODECS));
+      for (ResourceLocation id : java.util.List.copyOf(registry.keySet())) {
+        if (id.getNamespace().equals("neoforge")) {
+          ResourceLocation legacy = ResourceLocation.fromNamespaceAndPath("forge", id.getPath());
+          if (!registry.containsKey(legacy)) { registry.addAlias(legacy, id); }
+        }
+      }
     }
   }
 

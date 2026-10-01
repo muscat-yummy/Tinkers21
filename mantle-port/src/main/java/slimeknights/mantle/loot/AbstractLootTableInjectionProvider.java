@@ -5,7 +5,8 @@ import net.minecraft.data.CachedOutput;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import com.mojang.serialization.JsonOps;
+import java.util.Arrays;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import slimeknights.mantle.data.GenericDataProvider;
 
@@ -33,7 +34,7 @@ public abstract class AbstractLootTableInjectionProvider extends GenericDataProv
     return allOf(builders.stream().map(builder -> {
       JsonObject json = LootTableInjection.LOADABLE.serialize(builder.build()).getAsJsonObject();
       if (builder.conditions.length > 0) {
-        json.add("conditions", CraftingHelper.serialize(builder.conditions));
+        json.add("conditions", ICondition.LIST_CODEC.encodeStart(JsonOps.INSTANCE, Arrays.asList(builder.conditions)).getOrThrow());
       }
       return saveJson(output, ResourceLocation.fromNamespaceAndPath(domain, builder.path), json);
     }));

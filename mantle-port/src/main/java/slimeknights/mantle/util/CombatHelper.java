@@ -238,7 +238,7 @@ public class CombatHelper {
         damage += enchantmentDamage;
 
         // check if we can do a sweep attack
-        boolean canSweep = fullyCharged && !(critical && hitResult.disableSweep()) && !sprinting && player.onGround() && (player.walkDist - player.walkDistO) < player.getSpeed() && stack.canPerformAbility(ItemAbilities.SWORD_SWEEP);
+        boolean canSweep = fullyCharged && !(critical && hitResult.disableSweep()) && !sprinting && player.onGround() && (player.walkDist - player.walkDistO) < player.getSpeed() && stack.canPerformAction(ItemAbilities.SWORD_SWEEP);
         canSweep = CommonHooks.fireSweepAttack(player, target, canSweep).isSweeping();
 
         // Fire aspect and other entity enchantment effects now run through POST_ATTACK.
@@ -249,7 +249,7 @@ public class CombatHelper {
         boolean hit;
 
         // cancel knockback if requested
-        if (stack.canPerformAbility(NO_BASE_KNOCKBACK) && targetLiving != null) {
+        if (stack.canPerformAction(NO_BASE_KNOCKBACK) && targetLiving != null) {
           AttributeInstance knockbackAttribute = targetLiving.getAttribute(Attributes.KNOCKBACK_RESISTANCE);
           if (knockbackAttribute != null && !knockbackAttribute.hasModifier(ANTI_KNOCKBACK_MODIFIER.id())) {
             knockbackAttribute.addTransientModifier(ANTI_KNOCKBACK_MODIFIER);

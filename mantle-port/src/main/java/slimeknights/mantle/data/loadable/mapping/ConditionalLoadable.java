@@ -1,6 +1,8 @@
 package slimeknights.mantle.data.loadable.mapping;
 
 import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import java.util.Arrays;
 import net.minecraft.network.FriendlyByteBuf;
 import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -26,8 +28,8 @@ public record ConditionalLoadable<T extends IHaveLoader>(GenericLoaderRegistry<T
     // if missing, assume tags are invalid
     IContext conditionContext = context.getOrDefault(ContextKey.CONDITION_CONTEXT, IContext.TAGS_INVALID);
     // if the condition matches, use the true value
-    if (CraftingHelper.processConditions(json, "conditions", conditionContext)) {
-      return registry.getIfPresent(json, "if_true");
+    if ((!json.has("conditions") || ICondition.LIST_CODEC.parse(JsonOps.INSTANCE, json.get("conditions")).getOrThrow().stream().allMatch(condition -> condition.test(conditionContext)))) {
+      return registry.getIfPresent(json, "if_true", context);
     }
     // loader can define a default instance for false if they have one. Otherwise false is required.
     if (defaultIfFalse != null) {
@@ -40,7 +42,7 @@ public record ConditionalLoadable<T extends IHaveLoader>(GenericLoaderRegistry<T
   @Override
   public void serialize(T object, JsonObject json) {
     ConditionalObject<T> conditional = (ConditionalObject<T>) object;
-    json.add("conditions", CraftingHelper.serialize(conditional.conditions()));
+    json.add("conditions", ICondition.LIST_CODEC.encodeStart(JsonOps.INSTANCE, Arrays.asList(conditional.conditions())).getOrThrow());
     json.add("if_true", registry.serialize(conditional.ifTrue()));
     T ifFalse = conditional.ifFalse();
     if (ifFalse != defaultIfFalse) {
