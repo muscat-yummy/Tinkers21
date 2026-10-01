@@ -24,6 +24,7 @@ renamed = {
     'net.minecraftforge.registries.RegistryObject': 'net.neoforged.neoforge.registries.DeferredHolder',
 }
 prefixes = [
+    ('net.minecraftforge.common.crafting.conditions.', 'net.neoforged.neoforge.common.conditions.'),
     ('net.minecraftforge.eventbus.api.', 'net.neoforged.bus.api.'),
     ('net.minecraftforge.fml.', 'net.neoforged.fml.'),
     ('net.minecraftforge.', 'net.neoforged.neoforge.'),
@@ -54,6 +55,12 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         text = re.sub(r'\b' + re.escape(source) + r'\b', target, text)
     if 'RegistryObject' in simple_renames:
         text = re.sub(r'\bDeferredHolder\s*<', 'DeferredHolder<?, ', text)
+    legacy_bus = 'FMLJavaModLoadingContext.get().getModEventBus()'
+    if legacy_bus in text:
+        text = text.replace(legacy_bus, 'TConstruct.getModEventBus()')
+        text = re.sub(r'import net\\.minecraftforge\\.fml\\.javafmlmod\\.FMLJavaModLoadingContext;\\n', '', text)
+        if 'import slimeknights.tconstruct.TConstruct;' not in text and 'package slimeknights.tconstruct;' not in text:
+            text = text.replace('\\n\\nimport ', '\\n\\nimport slimeknights.tconstruct.TConstruct;\\nimport ', 1)
     if text != old:
         path.write_text(text)
         changed.append(str(path))

@@ -105,11 +105,18 @@ public class TConstruct {
   /* Instance of this mod, used for grabbing prototype fields */
   public static TConstruct instance;
 
+  private final IEventBus modEventBus;
+
+  /** The TiC mod bus injected by NeoForge; shared by internal initialization helpers. */
+  public static IEventBus getModEventBus() {
+    return Objects.requireNonNull(instance, "TConstruct has not been constructed").modEventBus;
+  }
+
   public TConstruct(IEventBus bus, ModContainer container) {
+    modEventBus = bus;
     instance = this;
 
     Config.init(container);
-    TinkerItemDisplays.init();
     MaterialRegistry.init();
 
     // initialize modules, done this way rather than with annotations to give us control over the order
