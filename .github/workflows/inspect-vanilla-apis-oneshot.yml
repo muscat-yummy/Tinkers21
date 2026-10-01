@@ -1,0 +1,50 @@
+name: Inspect vanilla 1.21.1 API signatures
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/inspect-vanilla-apis-oneshot.yml]
+permissions:
+  contents: read
+jobs:
+  inspect:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Resolve mapped Minecraft artifacts
+        run: ./gradlew :mantle-port:createMinecraftArtifacts --no-daemon --console=plain
+      - name: Inspect selected vanilla API signatures
+        shell: python
+        run: |
+          import os, pathlib, subprocess, zipfile
+          targets = {
+            'net.minecraft.world.item.enchantment.EnchantmentHelper': ('modifyDamage(', 'modifyKnockback(', 'doPostAttack', 'FireAspect', 'Sweeping', 'getEnchantmentsForCrafting', 'runIteration'),
+            'net.minecraft.world.item.enchantment.Enchantment': ('modifyDamage(', 'modifyKnockback(', 'doPostAttack', 'getEffects('),
+            'net.minecraft.world.entity.LivingEntity': ('getAttribute(', 'getAttributeValue(', 'getAttributeBaseValue(', 'getLastHandItem('),
+            'net.minecraft.world.item.ItemStack': ('Attribute', 'forEachModifier', 'hurtEnemy(', 'postHurtEnemy(', 'Tooltip'),
+          }
+          pending = dict(targets)
+          roots = [pathlib.Path(os.environ['HOME']) / '.gradle' / 'caches', pathlib.Path('mantle-port/build')]
+          for root in roots:
+            for jar in root.rglob('*.jar'):
+              if not pending:
+                break
+              try:
+                with zipfile.ZipFile(jar) as archive:
+                  names = set(archive.namelist())
+              except (OSError, zipfile.BadZipFile):
+                continue
+              for cls, wanted in list(pending.items()):
+                if cls.replace('.', '/') + '.class' not in names:
+                  continue
+                result = subprocess.run(['javap', '-classpath', str(jar), '-public', cls], capture_output=True, text=True, check=True)
+                print('Vanilla API:', cls)
+                for line in result.stdout.splitlines():
+                  if any(token in line for token in wanted):
+                    print(line)
+                del pending[cls]
+          if pending:
+            raise RuntimeError('Mapped vanilla classes not found: ' + ', '.join(pending))
