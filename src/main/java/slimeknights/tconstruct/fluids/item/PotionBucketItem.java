@@ -21,7 +21,7 @@ import net.minecraft.world.level.material.Fluid;
 import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
-import net.minecraftforge.fluids.capability.wrappers.FluidBucketWrapper;
+import net.neoforged.neoforge.fluids.capability.wrappers.FluidBucketWrapper;
 import slimeknights.tconstruct.library.utils.Util;
 
 import javax.annotation.Nonnull;

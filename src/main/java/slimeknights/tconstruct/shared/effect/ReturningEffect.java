@@ -8,7 +8,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.entity.LivingEntity;
 import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.event.entity.living.MobEffectEvent;
+import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.library.events.teleport.ReturningTeleportEvent;

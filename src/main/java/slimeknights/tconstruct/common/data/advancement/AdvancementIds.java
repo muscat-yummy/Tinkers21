@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.common.data.advancement;
 
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.common.ToolActions;
+import net.neoforged.neoforge.common.ItemAbilities;
 import slimeknights.tconstruct.TConstruct;
 
 /** IDs used in {@link slimeknights.tconstruct.common.data.AdvancementsProvider} and {@link FunctionProvider} */
@@ -32,7 +32,7 @@ public class AdvancementIds {
   public static final ResourceLocation IRON_ARMOR = TConstruct.getResource("iron_armor");
   /** Apply to anything with plating to grant it diamond armor achievements. */
   public static final ResourceLocation DIAMOND_ARMOR = TConstruct.getResource("diamond_armor");
-  /** Apply to anything with plating to grant it netherite armor achievements, and to anything with {@link ToolActions#HOE_TILL} to grant netherite hoe. */
+  /** Apply to anything with plating to grant it netherite armor achievements, and to anything with {@link ItemAbilities#HOE_TILL} to grant netherite hoe. */
   public static final ResourceLocation NETHERITE = TConstruct.getResource("netherite");
 
   @SuppressWarnings("removal")

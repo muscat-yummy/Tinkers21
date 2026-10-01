@@ -6,9 +6,9 @@ import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraftforge.common.ForgeMod;
-import net.minecraftforge.event.entity.living.LivingEvent.LivingJumpEvent;
-import net.minecraftforge.event.entity.living.LivingFallEvent;
+import net.neoforged.neoforge.common.NeoForgeMod;
+import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
+import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
 import net.neoforged.fml.common.EventBusSubscriber.Bus;
@@ -29,7 +29,7 @@ public class DoubleJumpHandler {
   @SubscribeEvent
   static void onJump(LivingJumpEvent event) {
     LivingEntity living = event.getEntity();
-    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(ForgeMod.ENTITY_GRAVITY.get()) < 0)) {
+    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(NeoForgeMod.ENTITY_GRAVITY.get()) < 0)) {
       living.getCapability(PersistentDataCapability.CAPABILITY).ifPresent(data -> data.remove(JUMPS));
     }
   }

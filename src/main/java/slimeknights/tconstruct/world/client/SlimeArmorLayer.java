@@ -35,7 +35,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.SkullBlock.Type;
-import net.minecraftforge.client.ForgeHooksClient;
+import net.neoforged.neoforge.client.ClientHooks;
 
 import java.util.Map;
 
@@ -75,7 +75,7 @@ public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A 
         armorModel.head.visible = true;
         armorModel.hat.visible = true;
         //noinspection UnstableApiUsage  I am reimplementing vanilla stuff, I will call vanilla hooks
-        Model model = ForgeHooksClient.getArmorModel(entity, helmet, EquipmentSlot.HEAD, armorModel);
+        Model model = ClientHooks.getArmorModel(entity, helmet, EquipmentSlot.HEAD, armorModel);
         boolean enchanted = helmet.hasFoil();
         if (armor instanceof DyeableLeatherItem dyeable) {
           int color = dyeable.getColor(helmet);
@@ -137,7 +137,7 @@ public class SlimeArmorLayer<T extends Slime, M extends HierarchicalModel<T>, A 
       texture = texture.substring(idx + 1);
     }
     String path = String.format(java.util.Locale.ROOT, "%s:textures/models/armor/%s_layer_1%s.png", domain, texture, type);
-    path = ForgeHooksClient.getArmorTexture(entity, stack, path, EquipmentSlot.HEAD, type);
+    path = ClientHooks.getArmorTexture(entity, stack, path, EquipmentSlot.HEAD, type);
     ResourceLocation location = HumanoidArmorLayer.ARMOR_LOCATION_CACHE.get(path);
     if (location == null) {
       location = ResourceLocation.parse(path);

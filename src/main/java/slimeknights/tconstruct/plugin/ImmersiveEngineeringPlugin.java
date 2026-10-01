@@ -20,7 +20,7 @@ import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import slimeknights.tconstruct.common.TinkerTags.Fluids;
 import slimeknights.tconstruct.common.config.Config;

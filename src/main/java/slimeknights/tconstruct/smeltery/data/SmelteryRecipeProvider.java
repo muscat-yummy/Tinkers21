@@ -25,11 +25,11 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.ForgeMod;
+import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.Tags;
-import net.minecraftforge.common.crafting.CompoundIngredient;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import net.minecraftforge.common.crafting.ConditionalRecipe;
-import net.minecraftforge.common.crafting.DifferenceIngredient;
+import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import net.minecraftforge.common.crafting.conditions.AndCondition;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.minecraftforge.common.crafting.conditions.ItemExistsCondition;
@@ -2159,9 +2159,9 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
                               .save(consumer, location(folder + "strength"));
 
     // melt skeletons to get the milk out
-    EntityMeltingRecipeBuilder.melting(EntityIngredient.of(TinkerTags.EntityTypes.MELTABLE_SKELETON), new FluidStack(ForgeMod.MILK.get(), FluidType.BUCKET_VOLUME / 10))
+    EntityMeltingRecipeBuilder.melting(EntityIngredient.of(TinkerTags.EntityTypes.MELTABLE_SKELETON), new FluidStack(NeoForgeMod.MILK.get(), FluidType.BUCKET_VOLUME / 10))
                               .save(consumer, location(folder + "skeletons"));
-    MeltingRecipeBuilder.melting(Ingredient.of(Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, TinkerWorld.heads.get(TinkerHeadType.STRAY)), ForgeMod.MILK.get(), FluidType.BUCKET_VOLUME / 4)
+    MeltingRecipeBuilder.melting(Ingredient.of(Items.SKELETON_SKULL, Items.WITHER_SKELETON_SKULL, TinkerWorld.heads.get(TinkerHeadType.STRAY)), NeoForgeMod.MILK.get(), FluidType.BUCKET_VOLUME / 4)
                         .save(consumer, location(headFolder + "skeleton"));
 
     // slimes melt into slime, shocker

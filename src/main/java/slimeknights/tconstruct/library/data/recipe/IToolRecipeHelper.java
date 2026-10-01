@@ -5,7 +5,7 @@ import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import net.minecraftforge.common.crafting.CompoundIngredient;
+import net.neoforged.neoforge.common.crafting.CompoundIngredient;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.common.registration.CastItemObject;

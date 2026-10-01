@@ -27,9 +27,9 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.items.IItemHandler;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
 import slimeknights.mantle.inventory.EmptyItemHandler;
@@ -182,7 +182,7 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
     super.tick();
     HitResult hitResult = ProjectileUtil.getHitResultOnMoveVector(this, this::canHitEntity);
     HitResult.Type hitType = hitResult.getType();
-    if (hitType != HitResult.Type.MISS && !ForgeEventFactory.onProjectileImpact(this, hitResult)) {
+    if (hitType != HitResult.Type.MISS && !EventHooks.onProjectileImpact(this, hitResult)) {
       this.onHit(hitResult);
     }
     if (!this.isRemoved()) {

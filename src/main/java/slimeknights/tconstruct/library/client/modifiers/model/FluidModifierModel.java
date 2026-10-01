@@ -11,7 +11,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.client.extensions.common.IClientFluidTypeExtensions;
 import net.neoforged.neoforge.client.model.QuadTransformers;
-import net.minecraftforge.client.model.SimpleModelState;
+import net.neoforged.neoforge.client.model.SimpleModelState;
 import net.neoforged.neoforge.client.model.geometry.UnbakedGeometryHelper;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.joml.Vector3f;

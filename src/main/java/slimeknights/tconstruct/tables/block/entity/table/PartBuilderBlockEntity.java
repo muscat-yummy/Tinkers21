@@ -10,7 +10,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.ForgeEventFactory;
+import net.neoforged.neoforge.event.EventHooks;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -290,7 +290,7 @@ public class PartBuilderBlockEntity extends RetexturedTableBlockEntity implement
 
     // we are definitely crafting at this point
     result.onCraftedBy(this.level, player, amount);
-    ForgeEventFactory.firePlayerCraftingEvent(player, result, this.inventoryWrapper);
+    EventHooks.firePlayerCraftingEvent(player, result, this.inventoryWrapper);
     this.playCraftSound(player);
 
     // give the player any leftovers

@@ -11,8 +11,8 @@ import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
-import net.minecraftforge.common.ForgeHooks;
-import net.minecraftforge.common.util.Lazy;
+import net.neoforged.neoforge.common.CommonHooks;
+import net.neoforged.neoforge.common.util.Lazy;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -88,7 +88,7 @@ public class MeltingFuelHandler {
     RecipeType<?> fuel = TinkerRecipeTypes.FUEL.get();
     for (ItemStack stack : allStacks) {
       try {
-        int burnTime = ForgeHooks.getBurnTime(stack, fuel);
+        int burnTime = CommonHooks.getBurnTime(stack, fuel);
         if (burnTime > 0) {
           fuels.add(stack);
           newFuels.put(itemHelper.getUid(stack, UidContext.Ingredient), burnTime);

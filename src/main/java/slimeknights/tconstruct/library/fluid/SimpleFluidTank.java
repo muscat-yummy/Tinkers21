@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.library.fluid;
 
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.fluids.IFluidTank;
+import net.neoforged.neoforge.fluids.IFluidTank;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
 import javax.annotation.Nonnull;
@@ -9,7 +9,7 @@ import javax.annotation.Nonnull;
 /**
  * Simple implementation of {@link IFluidTank} and {@link IFluidHandler} for a single tank.
  *
- * Similar to {@link net.minecraftforge.fluids.capability.templates.FluidTank} except with more control over the fluid storage.
+ * Similar to {@link net.neoforged.neoforge.fluids.capability.templates.FluidTank} except with more control over the fluid storage.
  */
 public interface SimpleFluidTank extends IFluidTank, IFluidHandler {
   @Override

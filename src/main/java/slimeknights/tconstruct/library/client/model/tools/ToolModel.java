@@ -38,7 +38,7 @@ import net.minecraft.world.item.ItemDisplayContext;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec2;
 import net.neoforged.neoforge.client.model.BakedModelWrapper;
-import net.minecraftforge.client.model.IModelBuilder;
+import net.neoforged.neoforge.client.model.IModelBuilder;
 import net.neoforged.neoforge.client.model.IQuadTransformer;
 import net.neoforged.neoforge.client.model.QuadTransformers;
 import net.neoforged.neoforge.client.model.data.ModelData;

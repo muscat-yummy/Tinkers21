@@ -18,11 +18,11 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
-import net.minecraftforge.common.ForgeHooks;
+import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
-import net.minecraftforge.eventbus.api.Event.Result;
+import net.neoforged.bus.api.Event.Result;
 import net.neoforged.neoforge.fluids.FluidStack;
-import net.minecraftforge.fluids.capability.IFluidHandler.FluidAction;
+import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
@@ -103,7 +103,7 @@ public enum BlockInteractFluidEffect implements FluidEffect<FluidEffectContext.B
       Result useItem = Result.DEFAULT;
       Result useBlock = Result.DEFAULT;
       if (player != null) {
-        PlayerInteractEvent.RightClickBlock event = ForgeHooks.onRightClickBlock(player, hand, pos, hitResult);
+        PlayerInteractEvent.RightClickBlock event = CommonHooks.onRightClickBlock(player, hand, pos, hitResult);
         if (event.isCanceled()) {
           // if successful, swing hand
           if (event.getCancellationResult().consumesAction()) {

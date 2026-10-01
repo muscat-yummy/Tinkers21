@@ -3,7 +3,7 @@ package slimeknights.tconstruct.fluids;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
-import net.minecraftforge.event.furnace.FurnaceFuelBurnTimeEvent;
+import net.neoforged.neoforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
