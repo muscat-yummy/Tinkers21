@@ -27,6 +27,7 @@ import net.minecraft.world.level.gameevent.GameEvent.Context;
 import net.minecraft.world.level.levelgen.structure.templatesystem.StructureTemplate.StructureBlockInfo;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.saveddata.maps.MapId;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.ticks.BlackholeTickAccess;
@@ -45,9 +46,12 @@ import java.util.function.Predicate;
  */
 public class TemplateLevel extends Level {
 
-  private final Map<String, MapItemSavedData> maps = new HashMap<>();
+  private final Map<MapId, MapItemSavedData> maps = new HashMap<>();
   private final Scoreboard scoreboard = new Scoreboard();
-  private final RecipeManager recipeManager = new RecipeManager();
+  private final RecipeManager recipeManager;
+  private int nextMapId;
+  private float dayTimeFraction;
+  private float dayTimePerTick = -1.0F;
   private final TemplateChunkSource chunkSource;
 
   public TemplateLevel(List<StructureBlockInfo> blocks, Predicate<BlockPos> shouldShow) {
@@ -57,6 +61,7 @@ public class TemplateLevel extends Level {
       () -> InactiveProfiler.INSTANCE, true, false, 0, 0
     );
 
+    this.recipeManager = new RecipeManager(registryAccess());
     this.chunkSource = new TemplateChunkSource(blocks, this, shouldShow);
   }
 
@@ -82,18 +87,21 @@ public class TemplateLevel extends Level {
 
   @Nullable
   @Override
-  public MapItemSavedData getMapData(@Nonnull String mapName) {
+  public MapItemSavedData getMapData(@Nonnull MapId mapName) {
     return this.maps.get(mapName);
   }
 
   @Override
-  public void setMapData(String mapId, MapItemSavedData mapDataIn) {
+  public void setMapData(MapId mapId, MapItemSavedData mapDataIn) {
     this.maps.put(mapId, mapDataIn);
   }
 
   @Override
-  public int getFreeMapId() {
-    return this.maps.size();
+  public MapId getFreeMapId() {
+    while (maps.containsKey(new MapId(nextMapId))) {
+      nextMapId++;
+    }
+    return new MapId(nextMapId++);
   }
 
   @Override
@@ -138,11 +146,31 @@ public class TemplateLevel extends Level {
   public void levelEvent(@Nullable Player player, int type, @Nonnull BlockPos pos, int data) {}
 
   @Override
-  public void gameEvent(GameEvent pEvent, Vec3 pPosition, Context pContext) {}
+  public void gameEvent(Holder<GameEvent> pEvent, Vec3 pPosition, Context pContext) {}
 
   @Override
   public FeatureFlagSet enabledFeatures() {
     return FeatureFlagSet.of();
+  }
+
+  @Override
+  public void setDayTimeFraction(float fraction) {
+    this.dayTimeFraction = fraction;
+  }
+
+  @Override
+  public float getDayTimeFraction() {
+    return this.dayTimeFraction;
+  }
+
+  @Override
+  public float getDayTimePerTick() {
+    return this.dayTimePerTick;
+  }
+
+  @Override
+  public void setDayTimePerTick(float step) {
+    this.dayTimePerTick = step;
   }
 
   @Override

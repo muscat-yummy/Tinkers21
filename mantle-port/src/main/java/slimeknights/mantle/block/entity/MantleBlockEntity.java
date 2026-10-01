@@ -1,6 +1,7 @@
 package slimeknights.mantle.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockEntityDataPacket;
 import net.minecraft.world.level.block.Block;
@@ -47,26 +48,31 @@ public class MantleBlockEntity extends BlockEntity {
   @Override
   @Nullable
   public ClientboundBlockEntityDataPacket getUpdatePacket() {
-    // number is just used for vanilla, -1 ensures it skips all instanceof checks as its not a vanilla TE
     return shouldSyncOnUpdate() ? ClientboundBlockEntityDataPacket.create(this) : null;
   }
 
   /**
-   * Write to NBT that is synced to the client in {@link #getUpdateTag()} and in {@link #saveAdditional(CompoundTag)}
+   * Write to NBT that is synced to the client in {@link #getUpdateTag(HolderLookup.Provider)} and in {@link #saveAdditional(CompoundTag, HolderLookup.Provider)}
+   * Compatibility hook for data that does not need registry access.
    * @param nbt  NBT
    */
+  @Deprecated
   protected void saveSynced(CompoundTag nbt) {}
 
-  @Override
-  public CompoundTag getUpdateTag() {
-    CompoundTag nbt = new CompoundTag();
+  protected void saveSynced(CompoundTag nbt, HolderLookup.Provider registries) {
     saveSynced(nbt);
+  }
+
+  @Override
+  public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
+    CompoundTag nbt = new CompoundTag();
+    saveSynced(nbt, registries);
     return nbt;
   }
 
   @Override
-  public void saveAdditional(CompoundTag nbt) {
-    super.saveAdditional(nbt);
-    saveSynced(nbt);
+  public void saveAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+    super.saveAdditional(nbt, registries);
+    saveSynced(nbt, registries);
   }
 }

@@ -1,8 +1,8 @@
-name: Compile Mantle model quad checkpoint
+name: Compile Mantle preview and persistence checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-model-quad-oneshot.yml]
+    paths: [.github/workflows/compile-preview-persistence-oneshot.yml]
 permissions:
   contents: read
 jobs:

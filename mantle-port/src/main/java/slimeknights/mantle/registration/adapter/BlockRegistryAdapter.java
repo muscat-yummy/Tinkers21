@@ -9,7 +9,6 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.FenceGateBlock;
 import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.PressurePlateBlock;
-import net.minecraft.world.level.block.PressurePlateBlock.Sensitivity;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.StairBlock;
@@ -151,8 +150,8 @@ public class BlockRegistryAdapter extends EnumRegistryAdapter<Block> {
     FenceGateBlock fenceGate = register(new FenceGateBlock(Properties.copy(fence), woodType), name + "_fence_gate");
     // redstone
     BlockBehaviour.Properties redstoneProps = behaviorCreator.apply(WoodVariant.PLANKS).forceSolidOn().instrument(NoteBlockInstrument.BASS).noCollission().pushReaction(PushReaction.DESTROY).strength(0.5F);
-    PressurePlateBlock pressurePlate = register(new PressurePlateBlock(Sensitivity.EVERYTHING, redstoneProps, setType), name + "_pressure_plate");
-    ButtonBlock button = register(new ButtonBlock(redstoneProps, setType, 30, true), name + "_button");
+    PressurePlateBlock pressurePlate = register(new PressurePlateBlock(setType, redstoneProps), name + "_pressure_plate");
+    ButtonBlock button = register(new ButtonBlock(setType, 30, redstoneProps), name + "_button");
     // signs
     StandingSignBlock standingSign = register(new MantleStandingSignBlock(behaviorCreator.apply(WoodVariant.PLANKS).forceSolidOn().instrument(NoteBlockInstrument.BASS).noCollission().strength(1.0F), woodType), name + "_sign");
     WallSignBlock wallSign = register(new MantleWallSignBlock(behaviorCreator.apply(WoodVariant.PLANKS).forceSolidOn().instrument(NoteBlockInstrument.BASS).noCollission().strength(1.0F).dropsLike(standingSign), woodType), name + "_wall_sign");
