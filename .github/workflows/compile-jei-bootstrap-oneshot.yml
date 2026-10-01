@@ -1,8 +1,8 @@
-name: Compile Mantle data and fluid checkpoint
+name: Compile Mantle JEI bootstrap checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-data-fluid-oneshot.yml]
+    paths: [.github/workflows/compile-jei-bootstrap-oneshot.yml]
 permissions:
   contents: read
 jobs:
@@ -24,3 +24,5 @@ jobs:
           }
           GRADLE
           ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile Tinkers after Mantle succeeds
+        run: ./gradlew :compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

@@ -1,6 +1,7 @@
 package slimeknights.mantle.recipe;
 
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeInput;
 import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Recipe;
@@ -23,6 +24,15 @@ public interface IMultiRecipe<T> {
    * @param access  Registry access instance
    */
   List<T> getRecipes(RegistryAccess access);
+
+  /**
+   * Identity for a virtual JEI child, not a server recipe registration.
+   * Override for stable domain keys when the child list may change its order.
+   */
+  default ResourceLocation getDisplayRecipeId(ResourceLocation parentId, T child, int index) {
+    return ResourceLocation.fromNamespaceAndPath(parentId.getNamespace(),
+      "mantle_display/" + parentId.getPath() + "/" + index);
+  }
 
 
   /**

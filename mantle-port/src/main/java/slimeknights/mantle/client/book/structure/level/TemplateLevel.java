@@ -194,4 +194,9 @@ public class TemplateLevel extends Level {
     return Objects.requireNonNull(Minecraft.getInstance().level).potionBrewing();
   }
 
+  @Override
+  public net.minecraft.world.TickRateManager tickRateManager() {
+    return Objects.requireNonNull(Minecraft.getInstance().level).tickRateManager();
+  }
+
 }
