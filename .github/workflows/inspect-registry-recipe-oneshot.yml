@@ -1,8 +1,8 @@
-name: Inspect vanilla 1.21.1 recipe output APIs
+name: Inspect vanilla 1.21.1 registry and recipe APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/inspect-recipe-output-oneshot.yml]
+    paths: [.github/workflows/inspect-registry-recipe-oneshot.yml]
 permissions:
   contents: read
 jobs:
@@ -21,14 +21,13 @@ jobs:
         run: |
           import os, pathlib, subprocess, zipfile
           targets = {
-            'net.minecraft.data.recipes.RecipeProvider': ('RecipeProvider(', 'run(', 'buildRecipes(', 'createRootAdvancement(', 'has('),
-            'net.minecraft.data.recipes.RecipeOutput': ('accept(', 'advancement('),
-            'net.minecraft.advancements.Advancement': ('CODEC',),
-            'net.minecraft.advancements.Advancement$Builder': ('getCriteria(', 'addCriterion(', 'requirements(', 'build(', 'criteria'),
-            'net.minecraft.world.item.crafting.ShapedRecipePattern': ('of(', 'data(', 'Data(', 'ingredients(',),
-            'net.minecraft.world.item.crafting.Ingredient': ('of(', 'fromValues(', 'Ingredient(', 'Value', 'CODEC'),
-            'net.minecraft.world.item.TieredItem': ('getTier(',),
-            'net.minecraft.util.datafix.DataFixers': ('getDataFixer(',),
+            'net.minecraft.resources.RegistryOps': ('withParent(', 'RegistryOps(', 'lookup(', 'retrieveGetter('),
+            'net.minecraft.world.item.ItemStack': ('CODEC', 'applyComponents', 'getComponents', 'parse(', 'save(', 'STREAM_CODEC', 'getAttribute'),
+            'net.minecraft.world.item.crafting.ShapedRecipe': ('ShapedRecipe(', 'pattern', 'getResultItem(', 'assemble(',),
+            'net.minecraft.world.item.crafting.ShapedRecipe$Serializer': ('codec(', 'streamCodec(',),
+            'net.minecraft.world.item.crafting.AbstractCookingRecipe': ('AbstractCookingRecipe(', 'assemble(', 'getResultItem(',),
+            'net.minecraft.world.item.crafting.SmeltingRecipe': ('SmeltingRecipe(',),
+            'net.minecraft.data.recipes.RecipeProvider': ('inventoryTrigger(',),
           }
           pending = dict(targets)
           roots = [pathlib.Path(os.environ['HOME']) / '.gradle' / 'caches', pathlib.Path('mantle-port/build')]
