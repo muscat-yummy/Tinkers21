@@ -812,8 +812,8 @@ public class BookScreen extends Screen {
     }
 
     @Override
-    public void onUpdateAdvancementProgress(AdvancementHolder advancement, AdvancementProgress advancementProgress) {
-      this.progress.put(advancement.value(), advancementProgress);
+    public void onUpdateAdvancementProgress(AdvancementNode advancement, AdvancementProgress advancementProgress) {
+      this.progress.put(advancement.holder().value(), advancementProgress);
     }
 
     @Override

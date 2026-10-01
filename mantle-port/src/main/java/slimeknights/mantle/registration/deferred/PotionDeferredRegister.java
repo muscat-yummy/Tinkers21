@@ -3,6 +3,7 @@ package slimeknights.mantle.registration.deferred;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.item.alchemy.Potion;
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import slimeknights.mantle.registration.object.EnumObject;
@@ -65,7 +66,7 @@ public class PotionDeferredRegister extends DeferredRegisterWrapper<Potion> {
     private Builder with(PotionType type, int duration, int amplifier) {
       // TODO 1.21: normal should have no prefix, not just an underscore. Move the underscore addition to line below
       String prefix = type == PotionType.NORMAL ? "" : type.toString().toLowerCase(Locale.ROOT);
-      builder.put(type, register(prefix + '_' + name, () -> new Potion(modID + "." + name, new MobEffectInstance(effect.get(), duration, amplifier))));
+      builder.put(type, register(prefix + '_' + name, () -> new Potion(modID + "." + name, new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect.get()), duration, amplifier))));
       return this;
     }
 

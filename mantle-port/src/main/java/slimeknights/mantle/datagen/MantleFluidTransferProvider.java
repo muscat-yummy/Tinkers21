@@ -91,7 +91,7 @@ public class MantleFluidTransferProvider extends AbstractFluidContainerTransferP
     // we can always fill water bottles, not always fill splash and lingering
     addTransfer(prefix + "fill_water", new FillFluidContainerTransfer(
       container,
-      ItemOutput.fromStack(PotionContents.createItemStack(filled, Potions.WATER)),
+      ItemOutput.fromStack(PotionContents.createItemStack(filled.asItem(), Potions.WATER)),
       FluidIngredient.of(MantleTags.Fluids.WATER, MantleValues.BOTTLE * 2)),
       waterConditions);
   }

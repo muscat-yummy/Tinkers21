@@ -143,8 +143,8 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
     ItemObject<Block> blockObj = register(name, block, item);
     return new BuildingBlockObject(
         blockObj,
-        this.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.copy(blockObj.get())), item),
-        this.register(name + "_stairs", () -> new StairBlock(() -> blockObj.get().defaultBlockState(), BlockBehaviour.Properties.copy(blockObj.get())), item));
+        this.register(name + "_slab", () -> new SlabBlock(BlockBehaviour.Properties.ofFullCopy(blockObj.get())), item),
+        this.register(name + "_stairs", () -> new StairBlock(blockObj.get().defaultBlockState(), BlockBehaviour.Properties.ofFullCopy(blockObj.get())), item));
   }
 
   /**
@@ -158,7 +158,7 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
     ItemObject<Block> blockObj = register(name, props, item);
     return new BuildingBlockObject(blockObj,
       register(name + "_slab", () -> new SlabBlock(props), item),
-      register(name + "_stairs", () -> new StairBlock(() -> blockObj.get().defaultBlockState(), props), item)
+      register(name + "_stairs", () -> new StairBlock(blockObj.get().defaultBlockState(), props), item)
     );
   }
 
@@ -171,7 +171,7 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
    */
   public WallBuildingBlockObject registerWallBuilding(String name, Supplier<? extends Block> block, Function<? super Block, ? extends BlockItem> item) {
     BuildingBlockObject obj = this.registerBuilding(name, block, item);
-    return new WallBuildingBlockObject(obj, this.register(name + "_wall", () -> new WallBlock(BlockBehaviour.Properties.copy(obj.get())), item));
+    return new WallBuildingBlockObject(obj, this.register(name + "_wall", () -> new WallBlock(BlockBehaviour.Properties.ofFullCopy(obj.get())), item));
   }
 
   /**
@@ -197,7 +197,7 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
    */
   public FenceBuildingBlockObject registerFenceBuilding(String name, Supplier<? extends Block> block, Function<? super Block, ? extends BlockItem> item) {
     BuildingBlockObject obj = this.registerBuilding(name, block, item);
-    return new FenceBuildingBlockObject(obj, this.register(name + "_fence", () -> new FenceBlock(BlockBehaviour.Properties.copy(obj.get())), item));
+    return new FenceBuildingBlockObject(obj, this.register(name + "_fence", () -> new FenceBlock(BlockBehaviour.Properties.ofFullCopy(obj.get())), item));
   }
 
   /**
@@ -251,7 +251,7 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
     Function<? super Block, ? extends BlockItem> burnable300 = burnableItem.apply(300);
     BlockBehaviour.Properties planksProps = behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(2.0f, 3.0f);
     BuildingBlockObject planks = registerBuilding(name + "_planks", planksProps, block -> burnableItem.apply(block instanceof SlabBlock ? 150 : 300).apply(block));
-    ItemObject<FenceBlock> fence = register(name + "_fence", () -> new FenceBlock(Properties.copy(planks.get()).forceSolidOn()), burnable300);
+    ItemObject<FenceBlock> fence = register(name + "_fence", () -> new FenceBlock(Properties.ofFullCopy(planks.get()).forceSolidOn()), burnable300);
     // logs and wood
     Supplier<? extends RotatedPillarBlock> stripped = () -> new RotatedPillarBlock(behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(2.0f));
     ItemObject<RotatedPillarBlock> strippedLog = register("stripped_" + name + "_log", stripped, burnable300);
@@ -260,9 +260,9 @@ public class BlockDeferredRegister extends DeferredRegisterWrapper<Block> {
     ItemObject<RotatedPillarBlock> wood = register(name + "_wood", () -> new StrippableLogBlock(strippedWood, behaviorCreator.apply(WoodBlockObject.WoodVariant.WOOD).instrument(NoteBlockInstrument.BASS).strength(2.0f)), burnable300);
 
     // doors
-    ItemObject<DoorBlock> door = register(name + "_door", () -> new DoorBlock(behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(3.0F).noOcclusion().pushReaction(PushReaction.DESTROY), setType), burnableTallItem);
-    ItemObject<TrapDoorBlock> trapdoor = register(name + "_trapdoor", () -> new TrapDoorBlock(behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never), setType), burnable300);
-    ItemObject<FenceGateBlock> fenceGate = register(name + "_fence_gate", () -> new FenceGateBlock(BlockBehaviour.Properties.copy(fence.get()), woodType), burnable300);
+    ItemObject<DoorBlock> door = register(name + "_door", () -> new DoorBlock(setType, behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(3.0F).noOcclusion().pushReaction(PushReaction.DESTROY)), burnableTallItem);
+    ItemObject<TrapDoorBlock> trapdoor = register(name + "_trapdoor", () -> new TrapDoorBlock(setType, behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).instrument(NoteBlockInstrument.BASS).strength(3.0F).noOcclusion().isValidSpawn(Blocks::never)), burnable300);
+    ItemObject<FenceGateBlock> fenceGate = register(name + "_fence_gate", () -> new FenceGateBlock(woodType, BlockBehaviour.Properties.ofFullCopy(fence.get())), burnable300);
     // redstone
     BlockBehaviour.Properties redstoneProps = behaviorCreator.apply(WoodBlockObject.WoodVariant.PLANKS).forceSolidOn().instrument(NoteBlockInstrument.BASS).noCollission().pushReaction(PushReaction.DESTROY).strength(0.5F);
     ItemObject<PressurePlateBlock> pressurePlate = register(name + "_pressure_plate", () -> new PressurePlateBlock(setType, redstoneProps), burnable300);

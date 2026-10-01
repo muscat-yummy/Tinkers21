@@ -3,9 +3,9 @@ package slimeknights.mantle.inventory;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.IItemHandlerModifiable;
-import net.neoforged.neoforge.items.ItemHandlerHelper;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 
 import javax.annotation.Nonnull;
@@ -89,11 +89,11 @@ public abstract class SingleItemHandler<T extends MantleBlockEntity> implements 
           // insert up to the stack limit
           int size = Math.min(stack.getCount(), getSlotLimit(0));
           if (!simulate) {
-            this.setStack(ItemHandlerHelper.copyStackWithSize(stack, size));
+            this.setStack(stack.copyWithCount(size));
           }
-          return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - size);
+          return stack.copyWithCount(stack.getCount() - size);
         }
-      } else if (ItemHandlerHelper.canItemStacksStack(current, stack)) {
+      } else if (ItemStack.isSameItemSameComponents(current, stack)) {
         // increase up to the stack limit
         int added = Math.min(stack.getCount(), getSlotLimit(0) - current.getCount());
         if (added > 0) {
@@ -101,7 +101,7 @@ public abstract class SingleItemHandler<T extends MantleBlockEntity> implements 
             current.grow(added);
             setStack(current);
           }
-          return ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - added);
+          return stack.copyWithCount(stack.getCount() - added);
         }
       }
     }
@@ -120,9 +120,9 @@ public abstract class SingleItemHandler<T extends MantleBlockEntity> implements 
 
     // if amount is less than our size, need to do some shrinking
     if (amount < stack.getCount()) {
-      ItemStack result = ItemHandlerHelper.copyStackWithSize(stack, amount);
+      ItemStack result = stack.copyWithCount(amount);
       if (!simulate) {
-        setStack(ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - amount));
+        setStack(stack.copyWithCount(stack.getCount() - amount));
       }
       return result;
     }
@@ -140,10 +140,10 @@ public abstract class SingleItemHandler<T extends MantleBlockEntity> implements 
    * Writes this module to NBT
    * @return  Module in NBT
    */
-  public CompoundTag writeToNBT() {
+  public CompoundTag writeToNBT(HolderLookup.Provider lookup) {
     CompoundTag nbt = new CompoundTag();
     if (!stack.isEmpty()) {
-      stack.save(nbt);
+      stack.save(lookup, nbt);
     }
     return nbt;
   }
@@ -152,7 +152,19 @@ public abstract class SingleItemHandler<T extends MantleBlockEntity> implements 
    * Reads this module from NBT
    * @param nbt  NBT
    */
-  public void readFromNBT(CompoundTag nbt) {
-    stack = ItemStack.of(nbt);
+  public void readFromNBT(CompoundTag nbt, HolderLookup.Provider lookup) {
+    stack = ItemStack.parseOptional(lookup, nbt);
   }
+  /** Legacy callers must have an attached level; block-entity load/save should pass their lookup explicitly. */
+  @Deprecated
+  public CompoundTag writeToNBT() {
+    return writeToNBT(java.util.Objects.requireNonNull(parent.getLevel(), "Pass registry lookup before the block entity is attached").registryAccess());
+  }
+
+  /** Legacy callers must have an attached level; block-entity load/save should pass their lookup explicitly. */
+  @Deprecated
+  public void readFromNBT(CompoundTag nbt) {
+    readFromNBT(nbt, java.util.Objects.requireNonNull(parent.getLevel(), "Pass registry lookup before the block entity is attached").registryAccess());
+  }
+
 }
