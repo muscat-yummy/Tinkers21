@@ -4,6 +4,7 @@ import lombok.AllArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
 import slimeknights.mantle.network.NetworkEvent.Context;
 import slimeknights.mantle.item.ILecternBookItem;
 
@@ -17,13 +18,13 @@ public class OpenLecternBookPacket implements IThreadsafePacket {
 
   public OpenLecternBookPacket(FriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.book = buffer.readItem();
+    this.book = ItemStack.OPTIONAL_STREAM_CODEC.decode(ItemStackLoadable.registryBuffer(buffer));
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeItem(book);
+    ItemStack.OPTIONAL_STREAM_CODEC.encode(ItemStackLoadable.registryBuffer(buffer), book);
   }
 
   @Override

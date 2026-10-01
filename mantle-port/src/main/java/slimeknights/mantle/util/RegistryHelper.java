@@ -58,7 +58,7 @@ public class RegistryHelper {
     if (index == Registry.DEFAULT) {
       return false;
     }
-    return registry.getHolder(index).filter(holder -> holder.containsTag(tag)).isPresent();
+    return registry.getHolder(index).filter(holder -> holder.is(tag)).isPresent();
   }
 
   /** Checks if the given tag contains the given registry object */
@@ -102,7 +102,7 @@ public class RegistryHelper {
    * @return  Supplier for the given registry
    */
   public static <T> Supplier<T> getHolder(DefaultedRegistry<T> registry, T entry) {
-    return registry.getHolder(registry.getId(entry)).orElseThrow();
+    return registry.getHolder(registry.getId(entry)).orElseThrow()::value;
   }
 
   /**

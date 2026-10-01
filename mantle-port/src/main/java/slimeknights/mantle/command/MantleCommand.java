@@ -47,9 +47,9 @@ public class MantleCommand {
     TagSourceArgument.registerSuggestions();
 
     // register interesting sources
-    SourcesCommand.register(LootDataType.TABLE.directory(), (context, builder)
+    SourcesCommand.register(net.minecraft.core.registries.Registries.elementsDirPath(net.minecraft.core.registries.Registries.LOOT_TABLE), (context, builder)
       -> SharedSuggestionProvider.suggestResource(context.getSource().getServer().getLootData().getKeys(LootDataType.TABLE), builder));
-    SourcesCommand.register("recipes", (context, builder)
+    SourcesCommand.register("recipe", (context, builder)
       -> SharedSuggestionProvider.suggestResource(context.getSource().getRecipeNames(), builder));
 
     // add command listener

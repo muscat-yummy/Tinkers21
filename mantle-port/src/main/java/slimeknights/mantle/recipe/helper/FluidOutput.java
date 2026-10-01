@@ -4,6 +4,11 @@ import com.google.gson.JsonObject;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import slimeknights.mantle.data.loadable.LoadableOps;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.level.material.Fluid;
@@ -104,7 +109,7 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
    * @return Output
    */
   public static FluidOutput fromTag(TagKey<Fluid> tag, int amount, @Nullable CompoundTag nbt) {
-    return new OfTagPreference(tag, amount, nbt);
+    return new OfTagPreference(tag, amount, nbt == null ? null : nbt.copy(), DataComponentPatch.EMPTY);
   }
 
   /**
@@ -122,7 +127,7 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
    * @param buffer  Packet buffer instance
    */
   public void write(FriendlyByteBuf buffer) {
-    buffer.writeFluidStack(get());
+    FluidStack.OPTIONAL_STREAM_CODEC.encode(ItemStackLoadable.registryBuffer(buffer), get());
   }
 
   /**
@@ -131,7 +136,7 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
    * @return  Item output
    */
   public static FluidOutput read(FriendlyByteBuf buffer) {
-    return fromStack(buffer.readFluidStack());
+    return fromStack(FluidStack.OPTIONAL_STREAM_CODEC.decode(ItemStackLoadable.registryBuffer(buffer)));
   }
 
   /** Class for an output that is just an item, simplifies NBT for serializing as vanilla forces NBT to be set for tools and forge goes through extra steps when NBT is set */
@@ -189,6 +194,7 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
     private final int amount;
     @Nullable
     private final CompoundTag nbt;
+    private final DataComponentPatch components;
     private FluidStack cachedResult = null;
 
     @Override
@@ -203,7 +209,12 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
         if (preference.isEmpty()) {
           return FluidStack.EMPTY;
         }
-        cachedResult = new FluidStack(preference.orElseThrow(), amount, nbt);
+        FluidStack resolved = new FluidStack(preference.orElseThrow(), amount);
+        if (nbt != null && !nbt.isEmpty()) {
+          resolved.set(DataComponents.CUSTOM_DATA, CustomData.of(nbt.copy()));
+        }
+        resolved.applyComponents(components);
+        cachedResult = resolved;
       }
       return cachedResult;
     }
@@ -214,6 +225,9 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
         json.addProperty("tag", tag.location().toString());
       }
       json.addProperty("amount", amount);
+      if (amount > 0 && !components.isEmpty()) {
+        json.add("components", DataComponentPatch.CODEC.encodeStart(LoadableOps.current(), components).getOrThrow());
+      }
       if (amount > 0 && nbt != null) {
         json.add("nbt", NBTLoadable.ALLOW_STRING.serialize(nbt));
       }
@@ -243,10 +257,15 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
     @Override
     public FluidOutput deserialize(JsonObject json, TypedMap context) {
       if (json.has("tag")) {
-        return fromTag(
+        CompoundTag nbt = NBTLoadable.ALLOW_STRING.getOrDefault(json, "nbt", null, context);
+        if (nbt != null && json.has("components")) {
+          throw new com.google.gson.JsonSyntaxException("Specify either legacy nbt or components, not both");
+        }
+        return new OfTagPreference(
           Loadables.FLUID_TAG.getIfPresent(json, "tag", context),
           IntLoadable.FROM_ONE.getIfPresent(json, "amount", context),
-          NBTLoadable.ALLOW_STRING.getOrDefault(json, "nbt", null));
+          nbt == null ? null : nbt.copy(),
+          json.has("components") ? DataComponentPatch.CODEC.parse(LoadableOps.current(), json.get("components")).getOrThrow() : DataComponentPatch.EMPTY);
       }
       return fromStack(stack.deserialize(json, context));
     }

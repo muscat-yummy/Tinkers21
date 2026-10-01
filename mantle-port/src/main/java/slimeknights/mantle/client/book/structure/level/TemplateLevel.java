@@ -189,4 +189,9 @@ public class TemplateLevel extends Level {
   public Holder<Biome> getUncachedNoiseBiome(int x, int y, int z) {
     return registryAccess().registryOrThrow(Registries.BIOME).getHolderOrThrow(Biomes.PLAINS);
   }
+  @Override
+  public net.minecraft.world.item.alchemy.PotionBrewing potionBrewing() {
+    return Objects.requireNonNull(Minecraft.getInstance().level).potionBrewing();
+  }
+
 }
