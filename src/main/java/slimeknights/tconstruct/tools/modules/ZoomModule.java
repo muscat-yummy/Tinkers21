@@ -90,7 +90,7 @@ public enum ZoomModule implements ModifierModule, GeneralInteractionModifierHook
 
   /** Starts spyglass style zooming */
   private static void setZoom(ModifierEntry modifier, LivingEntity living, float amount) {
-    living.getCapability(TinkerDataCapability.CAPABILITY).ifPresent(data -> data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).set(modifier.getId(), amount));
+    TinkerDataCapability.getOptionalData(living).ifPresent(data -> data.computeIfAbsent(TinkerDataKeys.FOV_MODIFIER).set(modifier.getId(), amount));
   }
 
   /** Stops zooming */
@@ -100,7 +100,7 @@ public enum ZoomModule implements ModifierModule, GeneralInteractionModifierHook
 
   /** Stops zooming */
   private static void stopZoom(ModifierEntry modifier, LivingEntity entity) {
-    stopZoom(modifier, entity.getCapability(TinkerDataCapability.CAPABILITY));
+    stopZoom(modifier, TinkerDataCapability.getOptionalData(entity));
   }
 
 

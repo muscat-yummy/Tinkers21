@@ -51,7 +51,7 @@ public interface ProtectionModifierHook {
 
   /** Gets the maximum protection amount on the given entity */
   static double getProtectionCap(LivingEntity living) {
-    return getProtectionCap(living, living.getCapability(TinkerDataCapability.CAPABILITY));
+    return getProtectionCap(living, TinkerDataCapability.getOptionalData(living));
   }
 
   /** Merger that combines all values */
