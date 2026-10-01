@@ -6,54 +6,36 @@ import javax.annotation.Nullable;
 import java.util.function.BiFunction;
 
 /**
- * Helper for use with our extensions of resource location for some type safety in IDs.
- * Note we left {@link ResourceLocation#withPath(String)} and alike as returning {@link ResourceLocation} as there is not much use extending an ID.
- * @see IdParser
+ * Typed resource IDs retained through a narrowly scoped access transformer.
+ * All public construction and nullable factories validate with vanilla 1.21 factories.
  */
 public abstract class ResourceId extends ResourceLocation {
-  protected ResourceId(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
+  /** Called only after the namespace and path have been validated. */
+  protected ResourceId(String namespace, String path, @Nullable Void validated) {
+    super(namespace, path);
   }
 
   public ResourceId(ResourceLocation location) {
     this(location.getNamespace(), location.getPath(), null);
   }
 
-  @SuppressWarnings("removal")
   public ResourceId(String namespace, String path) {
-    super(namespace, path);
+    this(ResourceLocation.fromNamespaceAndPath(namespace, path));
   }
 
-  @SuppressWarnings("removal")
   public ResourceId(String location) {
-    super(location);
+    this(ResourceLocation.parse(location));
   }
 
-
-  /* Helpers for static constructors */
-
-  /**
-   * Creates a new ID from the given string
-   * @param string  String
-   * @return  ID, or null if invalid
-   */
   @Nullable
   protected static <T extends ResourceLocation> T tryParse(String string, BiFunction<String,String,T> constructor) {
-    String[] parts = decompose(string, ':');
-    return tryBuild(parts[0], parts[1], constructor);
+    ResourceLocation parsed = ResourceLocation.tryParse(string);
+    return parsed == null ? null : constructor.apply(parsed.getNamespace(), parsed.getPath());
   }
 
-  /**
-   * Creates a new ID from the given namespace and path
-   * @param namespace  Namespace
-   * @param path       Path
-   * @return  ID, or null if invalid
-   */
   @Nullable
   protected static <T extends ResourceLocation> T tryBuild(String namespace, String path, BiFunction<String,String,T> constructor) {
-    if (isValidNamespace(namespace) && isValidPath(path)) {
-      return constructor.apply(namespace, path);
-    }
-    return null;
+    ResourceLocation parsed = ResourceLocation.tryBuild(namespace, path);
+    return parsed == null ? null : constructor.apply(parsed.getNamespace(), parsed.getPath());
   }
 }

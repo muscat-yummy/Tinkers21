@@ -149,3 +149,13 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - TiC `:compileJava` reached the 2,200 diagnostic limit. This is a new full-source baseline, not comparable to previous Mantle error counts. Phase 2 remains incomplete; neither TiC compilation nor game loading has passed.
 - TiC entry point now receives the NeoForge ModContainer and mod event bus explicitly. Config registration and shared deferred-register initialization use those injected values. Global loot modifiers use MapCodec.
 - A one-shot migration resolves the actual compile classpath and changes legacy qualified references only when the destination class exists. It preserves unresolved APIs for explicit implementation and commits the resulting source changes to the port branch before compiling.
+
+
+### TiC foundation migration checkpoints
+
+- Run 36922448390 migrated 250 TiC Java files by checking destination class presence on the resolved 1.21.1 compile classpath. Mantle compiled successfully again. TiC compilation reached the expanded 4,000 error limit; this is not an error-count improvement measurement against the earlier 2,200 capped run.
+- Run 36923052433 migrated another 35 files, including NeoForge condition package references and use of the injected TiC mod bus. Mantle compilation succeeded; TiC still reached the 4,000 diagnostic limit.
+- Six custom ItemDisplayContext values are now supplied by NeoForge's enumextensions.json, with the existing serialized names and NONE/FIXED fallback semantics. Runtime loading remains pending.
+- ResourceLocation is final in 1.21.1. Two narrowly scoped access-transformer entries retain TiC's existing typed ID API rather than changing all material/modifier/stat ID call sites at once. ResourceId delegates validation to vanilla factories; the removed vanilla Dummy constructor marker is replaced by a private/protected Void marker. A standalone behavioral smoke test checks invalid input, equality symmetry, hashing, sorting and default namespaces independently of TiC's remaining compile failures.
+- Effect tick implementations return true to retain prior effect lifetime semantics under the new boolean API. Full effect functionality remains part of runtime testing.
+- Verified built-in registry fields are migrated to BuiltInRegistries/Registries; NeoForge-only keys remain in NeoForgeRegistries. Dynamic enchantment registries are deliberately left for lookup-aware changes.

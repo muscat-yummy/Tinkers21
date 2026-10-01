@@ -41,7 +41,7 @@ public class ReturningEffect extends TinkerEffect {
   }
 
   @Override
-  public void applyEffectTick(LivingEntity living, int amplifier) {
+  public boolean applyEffectTick(LivingEntity living, int amplifier) {
     ModDataNBT data = PersistentDataCapability.getOrWarn(living);
     if (data.contains(KEY, Tag.TAG_COMPOUND)) {
       CompoundTag tag = data.getCompound(KEY);
@@ -53,5 +53,6 @@ public class ReturningEffect extends TinkerEffect {
         TeleportHelper.tryTeleport(new ReturningTeleportEvent(living, pos.getX(), pos.getY(), pos.getZ()));
       }
     }
+    return true;
   }
 }

@@ -23,8 +23,9 @@ public class MagneticEffect extends TinkerEffect {
   }
 
   @Override
-  public void applyEffectTick(LivingEntity entity, int amplifier) {
+  public boolean applyEffectTick(LivingEntity entity, int amplifier) {
     applyMagnet(entity, amplifier);
+    return true;
   }
 
   /** Performs the magnetic effect. */

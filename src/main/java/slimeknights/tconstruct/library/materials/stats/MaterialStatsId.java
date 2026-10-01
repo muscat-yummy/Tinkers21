@@ -27,8 +27,8 @@ public class MaterialStatsId extends ResourceId implements IMaterialUser {
     super(location);
   }
 
-  private MaterialStatsId(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
+  private MaterialStatsId(String namespace, String path, @Nullable Void validated) {
+    super(namespace, path, validated);
   }
 
   /** Checks if the given material can be used */

@@ -33,8 +33,8 @@ public class ModifierId extends ResourceId {
     super(location);
   }
 
-  private ModifierId(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
+  private ModifierId(String namespace, String path, @Nullable Void validated) {
+    super(namespace, path, validated);
   }
 
   /** {@return Modifier ID, or null if invalid} */

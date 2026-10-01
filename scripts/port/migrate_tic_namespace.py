@@ -9,6 +9,13 @@ for entry in pathlib.Path('/tmp/tinkers-port-classpath.txt').read_text().splitli
         classes.update(name[:-6].replace('/', '.').replace('$', '.') for name in archive.namelist() if name.endswith('.class'))
 
 renamed = {
+    'net.minecraftforge.common.MinecraftForge': 'net.neoforged.neoforge.common.NeoForge',
+    'net.minecraftforge.common.extensions.IForgeItem': 'net.neoforged.neoforge.common.extensions.IItemExtension',
+    'net.minecraftforge.common.loot.CanToolPerformAction': 'net.neoforged.neoforge.common.loot.CanItemPerformAbility',
+    'net.minecraftforge.entity.IEntityAdditionalSpawnData': 'net.neoforged.neoforge.entity.IEntityWithComplexSpawn',
+    'net.minecraftforge.event.entity.SpawnPlacementRegisterEvent': 'net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent',
+    'net.minecraftforge.items.wrapper.EmptyHandler': 'net.neoforged.neoforge.items.wrapper.EmptyItemHandler',
+    'net.minecraftforge.registries.IForgeRegistry': 'net.minecraft.core.Registry',
     'net.minecraftforge.common.ForgeHooks': 'net.neoforged.neoforge.common.CommonHooks',
     'net.minecraftforge.common.ForgeMod': 'net.neoforged.neoforge.common.NeoForgeMod',
     'net.minecraftforge.common.ForgeI18n': 'net.neoforged.neoforge.common.NeoForgeI18n',
@@ -55,12 +62,48 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         text = re.sub(r'\b' + re.escape(source) + r'\b', target, text)
     if 'RegistryObject' in simple_renames:
         text = re.sub(r'\bDeferredHolder\s*<', 'DeferredHolder<?, ', text)
+    registry_fields = {
+        'BLOCKS': 'BLOCK', 'ITEMS': 'ITEM', 'FLUIDS': 'FLUID',
+        'ENTITY_TYPES': 'ENTITY_TYPE', 'MOB_EFFECTS': 'MOB_EFFECT',
+        'POTIONS': 'POTION', 'SOUND_EVENTS': 'SOUND_EVENT',
+        'BLOCK_ENTITY_TYPES': 'BLOCK_ENTITY_TYPE', 'MENU_TYPES': 'MENU',
+        'PARTICLE_TYPES': 'PARTICLE_TYPE', 'RECIPE_TYPES': 'RECIPE_TYPE',
+        'RECIPE_SERIALIZERS': 'RECIPE_SERIALIZER', 'STAT_TYPES': 'STAT_TYPE',
+        'ATTRIBUTES': 'ATTRIBUTE', 'FEATURES': 'FEATURE',
+        'TREE_DECORATOR_TYPES': 'TREE_DECORATOR_TYPE',
+        'STRUCTURE_TYPES': 'STRUCTURE_TYPE',
+        'STRUCTURE_PIECE_TYPES': 'STRUCTURE_PIECE',
+        'BIOME_SOURCE_SERIALIZERS': 'BIOME_SOURCE',
+        'CHUNK_GENERATOR_SERIALIZERS': 'CHUNK_GENERATOR',
+    }
+    for source, target in registry_fields.items():
+        text = text.replace('ForgeRegistries.Keys.' + source, 'Registries.' + target)
+        text = re.sub(r'\bForgeRegistries\.' + source + r'\b', 'BuiltInRegistries.' + target, text)
+    for source in ('ENTITY_DATA_SERIALIZERS', 'GLOBAL_LOOT_MODIFIER_SERIALIZERS', 'BIOME_MODIFIER_SERIALIZERS'):
+        text = text.replace('ForgeRegistries.Keys.' + source, 'NeoForgeRegistries.Keys.' + source)
+    for cls, qualified in (
+        ('BuiltInRegistries', 'net.minecraft.core.registries.BuiltInRegistries'),
+        ('Registries', 'net.minecraft.core.registries.Registries'),
+        ('NeoForgeRegistries', 'net.neoforged.neoforge.registries.NeoForgeRegistries'),
+    ):
+        if re.search(r'\b' + cls + r'\.', text) and 'import ' + qualified + ';' not in text:
+            text = text.replace('\n\nimport ', '\n\nimport ' + qualified + ';\nimport ', 1)
+    if 'ForgeRegistries' not in re.sub(r'import [^;]+;', '', text):
+        text = re.sub(r'import net\.minecraftforge\.registries\.ForgeRegistries;\n', '', text)
     legacy_bus = 'FMLJavaModLoadingContext.get().getModEventBus()'
     if legacy_bus in text:
         text = text.replace(legacy_bus, 'TConstruct.getModEventBus()')
-        text = re.sub(r'import net\\.minecraftforge\\.fml\\.javafmlmod\\.FMLJavaModLoadingContext;\\n', '', text)
+        text = re.sub(r'import net\.minecraftforge\.fml\.javafmlmod\.FMLJavaModLoadingContext;\n', '', text)
         if 'import slimeknights.tconstruct.TConstruct;' not in text and 'package slimeknights.tconstruct;' not in text:
-            text = text.replace('\\n\\nimport ', '\\n\\nimport slimeknights.tconstruct.TConstruct;\\nimport ', 1)
+            text = text.replace('\n\nimport ', '\n\nimport slimeknights.tconstruct.TConstruct;\nimport ', 1)
+    if 'FMLJavaModLoadingContext' not in re.sub(r'import [^;]+;', '', text):
+        text = re.sub(r'import net\.minecraftforge\.fml\.javafmlmod\.FMLJavaModLoadingContext;\n', '', text)
+    if 'TConstruct.getModEventBus()' in text and 'import slimeknights.tconstruct.TConstruct;' not in text and 'package slimeknights.tconstruct;' not in text:
+        text = text.replace('\n\nimport ', '\n\nimport slimeknights.tconstruct.TConstruct;\nimport ', 1)
+    if 'Mod.EventBusSubscriber' in text:
+        text = text.replace('Mod.EventBusSubscriber', 'EventBusSubscriber')
+        if 'import net.neoforged.fml.common.EventBusSubscriber;' not in text:
+            text = text.replace('\n\nimport ', '\n\nimport net.neoforged.fml.common.EventBusSubscriber;\nimport ', 1)
     if text != old:
         path.write_text(text)
         changed.append(str(path))

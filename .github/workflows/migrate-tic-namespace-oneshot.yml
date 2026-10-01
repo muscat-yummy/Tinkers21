@@ -1,4 +1,4 @@
-name: Migrate TiC bootstrap bus and enum extensions
+name: Validate typed TiC IDs and bootstrap migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -25,6 +25,16 @@ jobs:
               }
           }
           gradle.projectsEvaluated {
+              rootProject.tasks.register('compileResourceIdSmoke', JavaCompile) {
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/utils/ResourceId.java', 'src/portTest/java/slimeknights/tconstruct/port/ResourceIdSmoke.java')
+                  classpath = rootProject.configurations.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/resource-id'))
+              }
+              rootProject.tasks.register('runResourceIdSmoke', JavaExec) {
+                  dependsOn 'compileResourceIdSmoke'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/resource-id')) + rootProject.configurations.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
+              }
               rootProject.tasks.register('portClasspath') {
                   doLast {
                       new File('/tmp/tinkers-port-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
@@ -39,6 +49,7 @@ jobs:
           import pathlib, subprocess, zipfile
           targets = {
               'net.minecraft.world.item.alchemy.PotionBrewing$Builder': ('addMix(', 'addRecipe('),
+              'net.minecraft.resources.ResourceLocation': ('class ', 'ResourceLocation(java.lang.String, java.lang.String)',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
               'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ('EnchantmentDefinition(', 'slots(',),
               'net.minecraft.core.registries.BuiltInRegistries': ('Registry<',),
@@ -74,5 +85,7 @@ jobs:
           fi
       - name: Compile Mantle
         run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify typed resource ID behavior independently of the remaining TiC port
+        run: ./gradlew :runResourceIdSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile Tinkers
         run: ./gradlew :compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

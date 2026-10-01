@@ -54,7 +54,7 @@ public class AntigravityEffect extends TinkerEffect {
 
   /** Handles movement while under anti-gravity */
   @Override
-  public void applyEffectTick(LivingEntity living, int amplifier) {
+  public boolean applyEffectTick(LivingEntity living, int amplifier) {
     // ensure we are actually under the effects of antigrav, might have a double negative
     if (living.getAttributeValue(NeoForgeMod.ENTITY_GRAVITY.get()) < 0) {
       Level level = living.level();
@@ -109,6 +109,7 @@ public class AntigravityEffect extends TinkerEffect {
       // update speed based on ladders and friction
       living.setDeltaMovement(velocity.x * friction, y, velocity.z * friction);
     }
+    return true;
   }
 
   @Override
