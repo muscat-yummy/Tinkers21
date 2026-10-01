@@ -7,7 +7,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.neoforged.neoforge.event.entity.EntityAttributeModificationEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.deferred.AttributeDeferredRegister;
 import slimeknights.tconstruct.TConstruct;

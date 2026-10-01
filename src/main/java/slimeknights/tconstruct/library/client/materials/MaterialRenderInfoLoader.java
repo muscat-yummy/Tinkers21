@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.client.materials;
 
+import slimeknights.tconstruct.TConstruct;
 import com.google.common.collect.ImmutableMap;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
@@ -13,7 +14,6 @@ import net.minecraft.util.GsonHelper;
 import net.neoforged.neoforge.client.event.ModelEvent;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.fml.ModLoader;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import slimeknights.mantle.data.datamap.RegistryDataMapLoader;
 import slimeknights.mantle.data.listener.IEarlySafeManagerReloadListener;
 import slimeknights.mantle.data.loadable.field.ContextKey;

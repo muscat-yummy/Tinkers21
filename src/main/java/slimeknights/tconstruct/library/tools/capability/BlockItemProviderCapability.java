@@ -15,7 +15,6 @@ import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.minecraftforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.neoforged.bus.api.EventPriority;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.jetbrains.annotations.ApiStatus;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.LogicHelper;

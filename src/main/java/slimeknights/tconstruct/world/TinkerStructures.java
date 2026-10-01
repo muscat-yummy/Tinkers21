@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.world;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
@@ -16,9 +17,7 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import net.neoforged.neoforge.registries.DeferredRegister;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import org.apache.logging.log4j.Logger;
 import slimeknights.tconstruct.TConstruct;
@@ -40,7 +39,7 @@ import slimeknights.tconstruct.world.worldgen.trees.feature.SlimeTreeFeature;
 @SuppressWarnings("unused")
 public final class TinkerStructures extends TinkerModule {
   static final Logger log = Util.getLogger("tinker_structures");
-  private static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(ForgeRegistries.FEATURES, TConstruct.MOD_ID);
+  private static final DeferredRegister<Feature<?>> FEATURES = DeferredRegister.create(BuiltInRegistries.FEATURE, TConstruct.MOD_ID);
   private static final DeferredRegister<StructureType<?>> STRUCTURE_TYPE = DeferredRegister.create(Registries.STRUCTURE_TYPE, TConstruct.MOD_ID);
   private static final DeferredRegister<StructurePieceType> STRUCTURE_PIECE = DeferredRegister.create(Registries.STRUCTURE_PIECE, TConstruct.MOD_ID);
   private static final DeferredRegister<TreeDecoratorType<?>> TREE_DECORATORS = DeferredRegister.create(Registries.TREE_DECORATOR_TYPE, TConstruct.MOD_ID);

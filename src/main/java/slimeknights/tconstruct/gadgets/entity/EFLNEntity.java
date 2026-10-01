@@ -10,7 +10,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.HitResult;
-import net.minecraftforge.entity.IEntityAdditionalSpawnData;
+import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
 import net.minecraftforge.network.NetworkHooks;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 
@@ -18,7 +18,7 @@ import javax.annotation.Nonnull;
 
 /** @deprecated use {@link slimeknights.tconstruct.tools.entity.ThrownShuriken} */
 @Deprecated
-public class EFLNEntity extends ThrowableItemProjectile implements IEntityAdditionalSpawnData {
+public class EFLNEntity extends ThrowableItemProjectile implements IEntityWithComplexSpawn {
   public EFLNEntity(EntityType<? extends EFLNEntity> type, Level level) {
     super(type, level);
   }

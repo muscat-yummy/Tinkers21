@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.client;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator;
 import com.mojang.blaze3d.vertex.VertexConsumer;
@@ -42,7 +43,7 @@ import slimeknights.tconstruct.library.utils.BlockSideHitListener;
 
 import java.util.Iterator;
 
-@Mod.EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = EventBusSubscriber.Bus.FORGE)
 public class ToolRenderEvents {
   /** Maximum number of blocks from the iterator to render */
   private static final int MAX_BLOCKS = 60;

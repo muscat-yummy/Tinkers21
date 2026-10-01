@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.common.data.loot;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.MinMaxBounds;
 import net.minecraft.advancements.critereon.NbtPredicate;
@@ -23,7 +24,6 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemEntityPropertyCondition;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
-import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.shared.TinkerCommons;
@@ -43,7 +43,7 @@ public class EntityLootTableProvider extends EntityLootSubProvider {
 
   @Override
   protected Stream<EntityType<?>> getKnownEntityTypes() {
-    return ForgeRegistries.ENTITY_TYPES.getEntries().stream()
+    return BuiltInRegistries.ENTITY_TYPE.getEntries().stream()
                                    // remove earth slime entity, we redirect to the vanilla loot table
                                    .filter(entry -> TConstruct.MOD_ID.equals(entry.getKey().location().getNamespace()))
                                    .map(Entry::getValue);

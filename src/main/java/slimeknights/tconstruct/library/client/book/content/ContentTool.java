@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.library.client.book.content;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.gson.annotations.SerializedName;
@@ -19,7 +20,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.ItemLike;
 import net.minecraftforge.common.ForgeI18n;
 import net.minecraftforge.common.crafting.IShapedRecipe;
-import net.minecraftforge.registries.ForgeRegistries;
 import slimeknights.mantle.client.book.HTMLUtils;
 import slimeknights.mantle.client.book.data.BookData;
 import slimeknights.mantle.client.book.data.content.PageContent;
@@ -131,7 +131,7 @@ public class ContentTool extends PageContent {
       if (this.toolName == null) {
         this.toolName = this.parent.name;
       }
-      Item item = ForgeRegistries.ITEMS.getValue(ResourceLocation.parse(this.toolName));
+      Item item = BuiltInRegistries.ITEM.getValue(ResourceLocation.parse(this.toolName));
       if (item instanceof IModifiableDisplay tool) {
         this.tool = tool;
       } else {

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.world;
 
+import net.neoforged.fml.common.EventBusSubscriber;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -22,7 +23,7 @@ import slimeknights.tconstruct.world.logic.AncientToolItemListing;
 import java.util.Collections;
 
 @SuppressWarnings("unused")
-@Mod.EventBusSubscriber(modid = TConstruct.MOD_ID, bus = Mod.EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = EventBusSubscriber.Bus.FORGE)
 public class WorldEvents {
   /* Heads */
 

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.advancements.critereon.ItemPredicate;
 import net.minecraft.core.particles.SimpleParticleType;
 import net.minecraft.core.registries.Registries;
@@ -23,7 +24,6 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.object.EnumObject;
@@ -231,7 +231,7 @@ public final class TinkerTools extends TinkerModule {
     if (ModList.get().isLoaded("twilightforest")) {
       minotaurAxe = ITEMS.register("minotaur_axe", () -> new ModifiableItem(UNSTACKABLE_PROPS, ToolDefinitions.MINOTAUR_AXE));
     } else {
-      minotaurAxe = new ItemObject<>(DeferredHolder.create(getResource("minotaur_axe"), ForgeRegistries.ITEMS));
+      minotaurAxe = new ItemObject<>(DeferredHolder.create(getResource("minotaur_axe"), BuiltInRegistries.ITEM));
     }
   }
 

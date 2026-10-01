@@ -31,7 +31,7 @@ import net.minecraft.world.level.storage.loot.providers.nbt.ContextNbtProvider;
 import net.minecraft.world.level.storage.loot.providers.number.ConstantValue;
 import net.minecraft.world.level.storage.loot.providers.number.UniformGenerator;
 import net.neoforged.neoforge.common.ItemAbilities;
-import net.minecraftforge.common.loot.CanToolPerformAction;
+import net.neoforged.neoforge.common.loot.CanItemPerformAbility;
 import slimeknights.mantle.loot.function.RetexturedLootFunction;
 import slimeknights.mantle.registration.object.BuildingBlockObject;
 import slimeknights.mantle.registration.object.FenceBuildingBlockObject;
@@ -327,7 +327,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
    */
 
   private static final LootItemCondition.Builder SILK_TOUCH = MatchTool.toolMatches(ItemPredicate.Builder.item().hasEnchantment(new EnchantmentPredicate(Enchantments.SILK_TOUCH, MinMaxBounds.Ints.atLeast(1))));
-  private static final LootItemCondition.Builder SHEARS = CanToolPerformAction.canToolPerformAction(ItemAbilities.SHEARS_DIG);
+  private static final LootItemCondition.Builder SHEARS = CanItemPerformAbility.canToolPerformAction(ItemAbilities.SHEARS_DIG);
   private static final LootItemCondition.Builder SILK_TOUCH_OR_SHEARS = SHEARS.or(SILK_TOUCH);
 
   protected static LootTable.Builder onlyShears(ItemLike item) {

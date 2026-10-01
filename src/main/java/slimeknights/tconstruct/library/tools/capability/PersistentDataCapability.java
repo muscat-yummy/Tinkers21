@@ -17,7 +17,6 @@ import net.neoforged.neoforge.common.util.LazyOptional;
 import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import net.neoforged.bus.api.EventPriority;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.network.SyncPersistentDataPacket;
 import slimeknights.tconstruct.common.network.TinkerNetwork;

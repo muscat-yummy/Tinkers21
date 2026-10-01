@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.shared;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffects;
@@ -15,8 +16,6 @@ import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.deferred.PotionDeferredRegister;
 import slimeknights.mantle.registration.deferred.PotionDeferredRegister.PotionType;
@@ -86,7 +85,7 @@ public class TinkerEffects extends TinkerModule {
   /** Registers recipes for brewing, longer and stronger potions for the given object */
   private static void brewing(EnumObject<PotionType,Potion> potion, Potion base, Ingredient ingredient) {
     Potion normal = potion.get(PotionType.NORMAL);
-    PotionBrewing.POTION_MIXES.add(new PotionBrewing.Mix<>(ForgeRegistries.POTIONS, base, ingredient, normal));
+    PotionBrewing.POTION_MIXES.add(new PotionBrewing.Mix<>(BuiltInRegistries.POTION, base, ingredient, normal));
     Potion longer = potion.getOrNull(PotionType.LONG);
     if (longer != null) {
       PotionBrewing.addMix(normal, Items.REDSTONE, longer);

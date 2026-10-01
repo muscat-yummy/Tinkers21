@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.shared;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
@@ -30,7 +31,6 @@ import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.registries.ForgeRegistries;
 import net.neoforged.neoforge.registries.RegisterEvent;
 import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.data.predicate.block.BlockPredicate;
@@ -113,7 +113,7 @@ public final class TinkerCommons extends TinkerModule {
    * @deprecated Use {@link #glowBlock}
    */
   @Deprecated(forRemoval = true)
-  public static final DeferredHolder<?, GlowBlock> glow = DeferredHolder.create(glowBlock.getId(), ForgeRegistries.BLOCKS);
+  public static final DeferredHolder<?, GlowBlock> glow = DeferredHolder.create(glowBlock.getId(), BuiltInRegistries.BLOCK);
   // glass
   public static final ItemObject<GlassBlock> clearGlass = BLOCKS.register("clear_glass", () -> new GlassBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
   public static final ItemObject<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
