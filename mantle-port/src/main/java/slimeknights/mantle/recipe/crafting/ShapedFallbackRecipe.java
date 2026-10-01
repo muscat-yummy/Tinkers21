@@ -42,7 +42,7 @@ public class ShapedFallbackRecipe extends ShapedRecipe {
   }
 
   /** Retains the JSON pattern data when constructing a recipe through the legacy API. */
-  private static ShapedRecipePattern pattern(int width, int height, NonNullList<Ingredient> ingredients) {
+  static ShapedRecipePattern pattern(int width, int height, NonNullList<Ingredient> ingredients) {
     if (width <= 0 || height <= 0 || ingredients.size() != width * height) {
       throw new IllegalArgumentException("Invalid shaped recipe dimensions");
     }

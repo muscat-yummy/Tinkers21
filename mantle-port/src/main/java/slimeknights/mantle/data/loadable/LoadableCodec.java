@@ -8,11 +8,11 @@ import slimeknights.mantle.data.JsonCodec;
 public record LoadableCodec<T>(Loadable<T> loadable) implements JsonCodec<T> {
   @Override
   public T deserialize(JsonElement element, DynamicOps<?> ops) {
-    return loadable.convert(element, "codec");
+    return LoadableOps.with(ops, () -> loadable.convert(element, "codec"));
   }
 
   @Override
   public JsonElement serialize(T object, DynamicOps<?> ops) {
-    return loadable.serialize(object);
+    return LoadableOps.with(ops, () -> loadable.serialize(object));
   }
 }

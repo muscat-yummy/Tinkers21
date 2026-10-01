@@ -1,8 +1,8 @@
-name: Compile Mantle item and condition checkpoint
+name: Compile Mantle recipe codec checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-item-conditions-oneshot.yml]
+    paths: [.github/workflows/compile-recipe-codecs-oneshot.yml]
 permissions:
   contents: read
 jobs:

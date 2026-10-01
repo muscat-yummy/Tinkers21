@@ -2,57 +2,35 @@ package slimeknights.mantle.recipe.helper;
 
 import io.netty.handler.codec.DecoderException;
 import io.netty.handler.codec.EncoderException;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.resources.ResourceLocation;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import net.minecraft.network.codec.StreamCodec;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.Mantle;
 
-import javax.annotation.Nullable;
-
-/**
- * Recipe serializer that logs network exceptions before throwing them as otherwise the exceptions may be invisible
- * @param <T>  Recipe class
- */
+/** Logs recipe packet failures before forwarding them to the connection. */
 public interface LoggingRecipeSerializer<T extends Recipe<?>> extends RecipeSerializer<T> {
-  /**
-   * Read the recipe from the packet
-   * @param id      Recipe ID
-   * @param buffer  Buffer instance
-   * @return  Parsed recipe
-   * @throws RuntimeException  If any errors happen, the exception will be logged automatically
-   */
-  @Nullable
-  T fromNetworkSafe(ResourceLocation id, FriendlyByteBuf buffer);
-
-  /**
-   * Write the method to the buffer
-   * @param buffer  Buffer instance
-   * @param recipe  Recipe instance
-   * @throws RuntimeException  If any errors happen, the exception will be logged automatically
-   */
-  void toNetworkSafe(FriendlyByteBuf buffer, T recipe);
-
-  @Nullable
-  @Override
-  default T fromNetwork(ResourceLocation id, FriendlyByteBuf buffer) {
-    try {
-      return fromNetworkSafe(id, buffer);
-    } catch (RuntimeException e) {
-      String error = this.getClass().getSimpleName() + ": Error reading recipe " + id + " from packet";
-      Mantle.logger.error("{}", error, e);
-      throw new DecoderException(error + " - " + e.getMessage(), e);
-    }
-  }
+  T fromNetworkSafe(RegistryFriendlyByteBuf buffer);
+  void toNetworkSafe(RegistryFriendlyByteBuf buffer, T recipe);
 
   @Override
-  default void toNetwork(FriendlyByteBuf buffer, T recipe) {
-    try {
-      toNetworkSafe(buffer, recipe);
-    } catch (RuntimeException e) {
-      String error = this.getClass().getSimpleName() + ": Error writing recipe " + recipe.getId() + " of class " + recipe.getClass().getSimpleName() + " to packet";
-      Mantle.logger.error("{}", error, e);
-      throw new EncoderException(error + " - " + e.getMessage(), e);
-    }
+  default StreamCodec<RegistryFriendlyByteBuf,T> streamCodec() {
+    return StreamCodec.of((buffer, recipe) -> {
+      try {
+        toNetworkSafe(buffer, recipe);
+      } catch (RuntimeException e) {
+        String error = getClass().getSimpleName() + ": Error writing recipe of class " + recipe.getClass().getSimpleName();
+        Mantle.logger.error("{}", error, e);
+        throw new EncoderException(error, e);
+      }
+    }, buffer -> {
+      try {
+        return fromNetworkSafe(buffer);
+      } catch (RuntimeException e) {
+        String error = getClass().getSimpleName() + ": Error reading recipe";
+        Mantle.logger.error("{}", error, e);
+        throw new DecoderException(error, e);
+      }
+    });
   }
 }
