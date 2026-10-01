@@ -1,0 +1,48 @@
+name: Compile Mantle component and holder checkpoint
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/compile-component-holders-oneshot.yml]
+permissions:
+  contents: read
+jobs:
+  compile:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Verify registry scope independently of unfinished Mantle classes
+        run: |
+          cat > /tmp/tinkers-ops-smoke.init.gradle <<'GRADLE'
+          allprojects {
+              if (path != ':mantle-port') return
+              afterEvaluate {
+                  def smokeCompile = tasks.register('portOpsSmokeCompile', JavaCompile) {
+                      source = files('src/main/java/slimeknights/mantle/data/loadable/LoadableOps.java',
+                                     'src/portTest/java/slimeknights/mantle/data/loadable/LoadableOpsSmoke.java')
+                      classpath = sourceSets.main.compileClasspath
+                      destinationDirectory = layout.buildDirectory.dir('port-ops-smoke')
+                  }
+                  tasks.register('portOpsSmoke', JavaExec) {
+                      dependsOn smokeCompile
+                      classpath = files(smokeCompile.map { it.destinationDirectory }) + sourceSets.main.compileClasspath
+                      mainClass = 'slimeknights.mantle.data.loadable.LoadableOpsSmoke'
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :mantle-port:portOpsSmoke --no-daemon --console=plain -I /tmp/tinkers-ops-smoke.init.gradle
+      - name: Compile Mantle
+        if: always()
+        run: |
+          cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
+          allprojects {
+              tasks.withType(JavaCompile).configureEach {
+                  options.compilerArgs.addAll(['-Xmaxerrs', '2200'])
+              }
+          }
+          GRADLE
+          ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

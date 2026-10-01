@@ -2,7 +2,9 @@ package slimeknights.mantle.data.loadable.common;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import io.netty.handler.codec.EncoderException;
+import net.minecraft.core.component.DataComponentPatch;
+import net.minecraft.network.RegistryFriendlyByteBuf;
+import slimeknights.mantle.data.loadable.LoadableOps;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.Item;
@@ -41,8 +43,6 @@ public class ItemStackLoadable {
   private static final LoadableField<Item,ItemStack> ITEM = Loadables.ITEM.defaultField("item", Items.AIR, false, ITEM_GETTER);
   /** Field for item stack count that allows empty */
   private static final LoadableField<Integer,ItemStack> COUNT = IntLoadable.FROM_ZERO.defaultField("count", 1, true, ItemStack::getCount);
-  /** Field for item stack count that allows empty */
-  private static final LoadableField<CompoundTag,ItemStack> NBT = NBTLoadable.ALLOW_STRING.nullableField("nbt", ItemStack::getTag);
 
 
   /* Optional */
@@ -69,6 +69,14 @@ public class ItemStackLoadable {
 
   /* Helpers */
 
+  /** Component networking requires the registry lookup carried by the payload bridge. */
+  public static RegistryFriendlyByteBuf registryBuffer(FriendlyByteBuf buffer) {
+    if (buffer instanceof RegistryFriendlyByteBuf registryBuffer) {
+      return registryBuffer;
+    }
+    throw new IllegalArgumentException("Item stack components require RegistryFriendlyByteBuf");
+  }
+
   /** Makes an item stack from the given parameters */
   private static ItemStack makeStack(Item item, int count, @Nullable CompoundTag nbt) {
     if (item == Items.AIR || count == 0) {
@@ -76,7 +84,7 @@ public class ItemStackLoadable {
     }
     ItemStack stack = new ItemStack(item, count);
     if (nbt != null) {
-      stack.setTag(nbt);
+      stack.applyComponents(LegacyItemData.convert(item, nbt, LoadableOps.current()));
     }
     return stack;
   }
@@ -91,7 +99,7 @@ public class ItemStackLoadable {
     return loadable.validate(NOT_EMPTY);
   }
 
-  /** Loadable for an item stack with NBT, requires special logic due to forges share tags */
+  /** Accepts legacy NBT or component patches; networking sends the complete component stack */
   private enum NBTStack implements RecordLoadable<ItemStack> {
     /** Reads count from JSON */
     READ_COUNT,
@@ -107,7 +115,15 @@ public class ItemStackLoadable {
       if (this == READ_COUNT) {
         count = COUNT.get(json, context);
       }
-      return makeStack(ITEM.get(json, context), count, NBT.get(json, context));
+      CompoundTag nbt = NBTLoadable.ALLOW_STRING.getOrDefault(json, "nbt", null, context);
+      if (json.has("components") && nbt != null) {
+        throw new com.google.gson.JsonSyntaxException("Specify either legacy nbt or components, not both");
+      }
+      ItemStack stack = makeStack(ITEM.get(json, context), count, nbt);
+      if (!stack.isEmpty() && json.has("components")) {
+        stack.applyComponents(DataComponentPatch.CODEC.parse(LoadableOps.current(), json.get("components")).getOrThrow());
+      }
+      return stack;
     }
 
     @Override
@@ -116,7 +132,9 @@ public class ItemStackLoadable {
       if (this == READ_COUNT) {
         COUNT.serialize(stack, json);
       }
-      NBT.serialize(stack, json);
+      if (!stack.getComponentsPatch().isEmpty()) {
+        json.add("components", DataComponentPatch.CODEC.encodeStart(LoadableOps.current(), stack.getComponentsPatch()).getOrThrow());
+      }
     }
 
 
@@ -132,7 +150,7 @@ public class ItemStackLoadable {
 
     @Override
     public JsonElement serialize(ItemStack stack) {
-      if ((this == FIXED_COUNT || stack.getCount() == 1) && !stack.hasTag()) {
+      if ((this == FIXED_COUNT || stack.getCount() == 1) && stack.getComponentsPatch().isEmpty()) {
         return OPTIONAL_ITEM.serialize(stack);
       }
       return RecordLoadable.super.serialize(stack);
@@ -143,29 +161,14 @@ public class ItemStackLoadable {
 
     @Override
     public ItemStack decode(FriendlyByteBuf buffer, TypedMap context) {
-      // not using makeItemStack as we need to set the share tag NBT here
-      Item item = ITEM.decode(buffer, context);
-      int count = 1;
-      if (this == READ_COUNT) {
-        count = COUNT.decode(buffer, context);
-      }
-      CompoundTag nbt = buffer.readNbt();
-      // not using make stack because we want to set share tag
-      if (item == Items.AIR || count <= 0) {
-        return ItemStack.EMPTY;
-      }
-      ItemStack stack = new ItemStack(item, count);
-      stack.readShareTag(nbt);
-      return stack;
+      ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(registryBuffer(buffer));
+      return this == FIXED_COUNT && !stack.isEmpty() ? stack.copyWithCount(1) : stack;
     }
 
     @Override
-    public void encode(FriendlyByteBuf buffer, ItemStack stack) throws EncoderException {
-      ITEM.encode(buffer, stack);
-      if (this == READ_COUNT) {
-        COUNT.encode(buffer, stack);
-      }
-      buffer.writeNbt(stack.getShareTag());
+    public void encode(FriendlyByteBuf buffer, ItemStack stack) {
+      ItemStack.OPTIONAL_STREAM_CODEC.encode(registryBuffer(buffer),
+        this == FIXED_COUNT && !stack.isEmpty() ? stack.copyWithCount(1) : stack);
     }
   }
 }

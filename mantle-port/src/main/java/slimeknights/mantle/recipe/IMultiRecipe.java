@@ -1,7 +1,8 @@
 package slimeknights.mantle.recipe;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.world.Container;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -30,8 +31,8 @@ public interface IMultiRecipe<T> {
    * @see RecipeHelper#getJEIRecipes(RegistryAccess, RecipeManager, RecipeType, Class)
    */
   @SuppressWarnings("SameParameterValue") // might want it later for other recipe types
-  static <I extends Container, T extends Recipe<I>, C> Stream<C> getMultiRecipes(RegistryAccess access, RecipeManager manager, RecipeType<T> type, Class<C> clazz) {
-    return manager.byType(type).values().stream().filter(Recipe::isSpecial)
+  static <I extends RecipeInput, T extends Recipe<I>, C> Stream<C> getMultiRecipes(RegistryAccess access, RecipeManager manager, RecipeType<T> type, Class<C> clazz) {
+    return manager.getAllRecipesFor(type).stream().map(RecipeHolder::value).filter(Recipe::isSpecial)
       .flatMap(recipe -> recipe instanceof IMultiRecipe<?> r ? r.getRecipes(access).stream() : Stream.empty())
       .filter(clazz::isInstance).map(clazz::cast);
   }

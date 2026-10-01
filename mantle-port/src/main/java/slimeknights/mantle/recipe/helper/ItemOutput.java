@@ -3,6 +3,10 @@ package slimeknights.mantle.recipe.helper;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.core.component.DataComponentPatch;
+import slimeknights.mantle.data.loadable.LoadableOps;
+import slimeknights.mantle.data.loadable.common.LegacyItemData;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.nbt.CompoundTag;
@@ -114,7 +118,7 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
    * @return Output
    */
   public static ItemOutput fromTag(TagKey<Item> tag, int count, @Nullable CompoundTag nbt) {
-    return new OfTagPreference(tag, count, nbt);
+    return new OfTagPreference(tag, count, nbt == null ? null : nbt.copy(), DataComponentPatch.EMPTY, LoadableOps.current());
   }
 
   /**
@@ -141,7 +145,7 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
    * @param buffer  Packet buffer instance
    */
   public void write(FriendlyByteBuf buffer) {
-    buffer.writeItem(get());
+    ItemStack.OPTIONAL_STREAM_CODEC.encode(ItemStackLoadable.registryBuffer(buffer), get());
   }
 
   /**
@@ -150,7 +154,7 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
    * @return  Item output
    */
   public static ItemOutput read(FriendlyByteBuf buffer) {
-    return fromStack(buffer.readItem());
+    return fromStack(ItemStack.OPTIONAL_STREAM_CODEC.decode(ItemStackLoadable.registryBuffer(buffer)));
   }
 
   /** Class for an output that is just an item, simplifies NBT for serializing as vanilla forces NBT to be set for tools and forge goes through extra steps when NBT is set */
@@ -216,6 +220,8 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
     private final int count;
     @Nullable
     private final CompoundTag nbt;
+    private final DataComponentPatch components;
+    private final DynamicOps<JsonElement> ops;
     private ItemStack cachedResult = null;
 
     @Override
@@ -232,8 +238,9 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
         }
         cachedResult = new ItemStack(preference.orElseThrow(), count);
         if (nbt != null) {
-          cachedResult.setTag(nbt.copy());
+          cachedResult.applyComponents(LegacyItemData.convert(preference.orElseThrow(), nbt, ops));
         }
+        cachedResult.applyComponents(components);
       }
       return cachedResult;
     }
@@ -246,6 +253,9 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
       }
       if (writeCount) {
         json.addProperty("count", count);
+      }
+      if (count > 0 && !components.isEmpty()) {
+        json.add("components", DataComponentPatch.CODEC.encodeStart(ops, components).getOrThrow());
       }
       if (count > 0 && nbt != null) {
         json.add("nbt", NBTLoadable.ALLOW_STRING.serialize(nbt));
@@ -289,7 +299,15 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
         if (readCount) {
           count = IntLoadable.FROM_ONE.getOrDefault(json, "count", 1, context);
         }
-        return fromTag(tag, count, NBTLoadable.ALLOW_STRING.getOrDefault(json, "nbt", null));
+        CompoundTag nbt = NBTLoadable.ALLOW_STRING.getOrDefault(json, "nbt", null);
+        if (json.has("components") && nbt != null) {
+          throw new com.google.gson.JsonSyntaxException("Specify either legacy nbt or components, not both");
+        }
+        if (json.has("components")) {
+          return new OfTagPreference(tag, count, null,
+            DataComponentPatch.CODEC.parse(LoadableOps.current(), json.get("components")).getOrThrow(), LoadableOps.current());
+        }
+        return fromTag(tag, count, nbt);
       }
       return fromStack(stack.deserialize(json, context));
     }

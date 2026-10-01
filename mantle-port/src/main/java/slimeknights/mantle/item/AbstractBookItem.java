@@ -54,7 +54,8 @@ public abstract class AbstractBookItem extends LecternBookItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level world, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    Level world = context.level();
     // if the stack is in the player inventory, show the right click to open tooltip
     if (world != null && world.isClientSide) {
       Player player = SafeClientAccess.getPlayer();
@@ -65,7 +66,7 @@ public abstract class AbstractBookItem extends LecternBookItem {
         }
       }
     }
-    super.appendHoverText(stack, world, tooltip, flag);
+    super.appendHoverText(stack, context, tooltip, flag);
   }
 
   /** Called on the client to open the screen when used on right click in the hand */
