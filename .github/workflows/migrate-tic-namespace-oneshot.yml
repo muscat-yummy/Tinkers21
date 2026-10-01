@@ -1,0 +1,50 @@
+name: Migrate resolved TiC NeoForge APIs and compile
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/migrate-tic-namespace-oneshot.yml]
+permissions:
+  contents: write
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: port/1.21.1-neoforge
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Resolve the exact compile classpath
+        run: |
+          cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
+          allprojects {
+              tasks.withType(JavaCompile).configureEach {
+                  options.compilerArgs.addAll(['-Xmaxerrs', '4000'])
+              }
+          }
+          gradle.projectsEvaluated {
+              rootProject.tasks.register('portClasspath') {
+                  doLast {
+                      new File('/tmp/tinkers-port-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :createMinecraftArtifacts :portClasspath --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Migrate references to classes present in NeoForge
+        run: python3 scripts/port/migrate_tic_namespace.py
+      - name: Persist the migration on the authorized port branch
+        run: |
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add src/main/java
+          if ! git diff --cached --quiet; then
+            git commit -m "Port TiC references to resolved NeoForge 1.21.1 classes"
+            git push origin HEAD:port/1.21.1-neoforge
+          fi
+      - name: Compile Mantle
+        run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile Tinkers
+        run: ./gradlew :compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
