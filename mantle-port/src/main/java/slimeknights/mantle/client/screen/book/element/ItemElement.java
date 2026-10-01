@@ -12,7 +12,7 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions;
-import net.minecraftforge.client.extensions.common.IClientItemExtensions.FontContext;
+import net.neoforged.neoforge.client.extensions.common.IClientItemExtensions.FontContext;
 import slimeknights.mantle.client.book.action.StringActionProcessor;
 
 import javax.annotation.Nullable;
