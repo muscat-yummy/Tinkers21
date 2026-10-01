@@ -10,6 +10,8 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
 import net.minecraft.core.Registry;
 import slimeknights.mantle.registration.object.EnumObject;
+import slimeknights.mantle.registration.MantleBlockEntityCapabilities;
+import net.minecraft.resources.ResourceLocation;
 
 import javax.annotation.Nullable;
 import java.util.Collection;
@@ -29,6 +31,13 @@ public class BlockEntityTypeRegistryAdapter extends RegistryAdapter<BlockEntityT
   /** @inheritDoc */
   public BlockEntityTypeRegistryAdapter(Registry<BlockEntityType<?>> registry) {
     super(registry);
+  }
+
+  @Override
+  public <I extends BlockEntityType<?>> I register(I entry, ResourceLocation location) {
+    I registered = super.register(entry, location);
+    MantleBlockEntityCapabilities.track(() -> registered);
+    return registered;
   }
 
   /**

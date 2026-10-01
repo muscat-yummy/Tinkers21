@@ -69,6 +69,7 @@ import slimeknights.mantle.network.MantleNetwork;
 import slimeknights.mantle.recipe.MantleRecipes;
 import slimeknights.mantle.recipe.MantleRecipeSerializers;
 import slimeknights.mantle.registration.MantleRegistrations;
+import slimeknights.mantle.registration.MantleBlockEntityCapabilities;
 import slimeknights.mantle.recipe.condition.TagCombinationCondition;
 import slimeknights.mantle.recipe.condition.TagEmptyCondition;
 import slimeknights.mantle.recipe.condition.TagFilledCondition;
@@ -127,6 +128,7 @@ public class Mantle {
 
   private void registerCapabilities(RegisterCapabilitiesEvent event) {
     OffhandCooldownTracker.register(event);
+    MantleBlockEntityCapabilities.register(event);
     ContainerFoodItem.FluidContainerFoodItem.registerCapabilities(event);
   }
 
