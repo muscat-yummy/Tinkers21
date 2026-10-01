@@ -361,7 +361,7 @@ public final class TinkerModifiers extends TinkerModule {
     ModifierManager.INSTANCE.init();
     DynamicModifier.init();
     FluidEffectManager.INSTANCE.init();
-    MODIFIERS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    MODIFIERS.register(TConstruct.getModEventBus());
     TinkerDataKeys.init();
   }
 

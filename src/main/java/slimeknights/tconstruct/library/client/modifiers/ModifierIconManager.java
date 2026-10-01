@@ -51,7 +51,7 @@ public class ModifierIconManager implements IEarlySafeManagerReloadListener {
    * Initializes this manager, registering it relevant event busses
    */
   public static void init() {
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    IEventBus bus = TConstruct.getModEventBus();
     bus.addListener(ModifierIconManager::onResourceManagerRegister);
   }
 

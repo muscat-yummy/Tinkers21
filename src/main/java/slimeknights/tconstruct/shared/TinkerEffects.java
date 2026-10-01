@@ -70,7 +70,7 @@ public class TinkerEffects extends TinkerModule {
 
   @SuppressWarnings("removal")
   public TinkerEffects() {
-    POTIONS.register(FMLJavaModLoadingContext.get().getModEventBus());
+    POTIONS.register(TConstruct.getModEventBus());
   }
 
   @SubscribeEvent

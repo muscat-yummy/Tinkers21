@@ -80,7 +80,7 @@ public class EntityModifierCapability {
 
   /** Registers this capability with relevant busses*/
   public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, event -> event.register(ModifierNBT.class));
+    TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, event -> event.register(ModifierNBT.class));
     NeoForge.EVENT_BUS.addGenericListener(Entity.class, EntityModifierCapability::attachCapability);
   }
 

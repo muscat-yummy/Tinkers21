@@ -48,7 +48,7 @@ public final class TinkerStructures extends TinkerModule {
 
 
   public TinkerStructures() {
-    IEventBus bus = FMLJavaModLoadingContext.get().getModEventBus();
+    IEventBus bus = TConstruct.getModEventBus();
     FEATURES.register(bus);
     STRUCTURE_TYPE.register(bus);
     STRUCTURE_PIECE.register(bus);

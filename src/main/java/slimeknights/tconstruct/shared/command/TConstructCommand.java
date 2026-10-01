@@ -40,7 +40,7 @@ public class TConstructCommand {
 
   /** Registers all TConstruct command related content */
   public static void init() {
-    ARGUMENT_TYPE.register(FMLJavaModLoadingContext.get().getModEventBus());
+    ARGUMENT_TYPE.register(TConstruct.getModEventBus());
     ARGUMENT_TYPE.registerSingleton("slot_type", SlotTypeArgument.class, SlotTypeArgument::slotType);
     ARGUMENT_TYPE.registerSingleton("tool_stat", ToolStatArgument.class, ToolStatArgument::stat);
     ARGUMENT_TYPE.registerSingleton("modifier", ModifierArgument.class, ModifierArgument::modifier);

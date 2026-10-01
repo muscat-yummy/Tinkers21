@@ -37,7 +37,7 @@ public interface BlockItemProviderCapability {
   /** Registers this capability */
   @ApiStatus.Internal
   static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, BlockItemProviderCapability::register);
+    TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, BlockItemProviderCapability::register);
     // receive the attach event on low priority, so that our default implementations do not override other mods.
     NeoForge.EVENT_BUS.addGenericListener(ItemStack.class, EventPriority.LOW, BlockItemProviderCapability::attachCapability);
   }

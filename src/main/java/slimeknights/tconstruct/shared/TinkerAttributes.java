@@ -17,7 +17,7 @@ public class TinkerAttributes {
   private static final AttributeDeferredRegister ATTRIBUTES = new AttributeDeferredRegister(TConstruct.MOD_ID);
 
   public TinkerAttributes() {
-    ATTRIBUTES.register(FMLJavaModLoadingContext.get().getModEventBus());
+    ATTRIBUTES.register(TConstruct.getModEventBus());
   }
 
   // booleans

@@ -12,7 +12,7 @@ import slimeknights.tconstruct.library.client.model.tools.ToolModel;
 public class PluginClient {
   public static void init() {
     ItemColorHandler.register(TConstruct.resourceString("tool"), block -> ToolModel.COLOR_HANDLER);
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(PluginClient::clientSetup);
+    TConstruct.getModEventBus().addListener(PluginClient::clientSetup);
   }
 
   private static void clientSetup(FMLClientSetupEvent event) {

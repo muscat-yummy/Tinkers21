@@ -49,7 +49,7 @@ public class EquipmentChangeWatcher {
 
   /** Registers this capability */
   public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, event -> event.register(PlayerLastEquipment.class));
+    TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, event -> event.register(PlayerLastEquipment.class));
 
     // equipment change is used on both sides
     NeoForge.EVENT_BUS.addListener(EquipmentChangeWatcher::onEquipmentChange);

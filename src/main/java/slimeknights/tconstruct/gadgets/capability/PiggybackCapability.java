@@ -22,7 +22,7 @@ public class PiggybackCapability {
 
   /** Registers this capability */
   public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, PiggybackCapability::register);
+    TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, PiggybackCapability::register);
     NeoForge.EVENT_BUS.addGenericListener(Entity.class, PiggybackCapability::attachCapability);
   }
 

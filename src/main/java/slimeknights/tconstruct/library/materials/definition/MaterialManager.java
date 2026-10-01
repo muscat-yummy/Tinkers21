@@ -17,7 +17,7 @@ import net.minecraft.tags.TagLoader;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.Rarity;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.ICondition.IContext;
+import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import slimeknights.mantle.data.gson.ConditionSerializer;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.exception.TinkerJSONException;

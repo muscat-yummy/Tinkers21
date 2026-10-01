@@ -40,7 +40,7 @@ public class TinkerDataCapability {
 
   /** Registers this capability */
   public static void register() {
-    FMLJavaModLoadingContext.get().getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, TinkerDataCapability::register);
+    TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, TinkerDataCapability::register);
     NeoForge.EVENT_BUS.addGenericListener(Entity.class, TinkerDataCapability::attachCapability);
   }
 
