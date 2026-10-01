@@ -11,7 +11,7 @@ import slimeknights.mantle.Mantle;
 import slimeknights.mantle.recipe.helper.FluidOutput;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 
-/** Fluid transfer info that empties a fluid from an item, copying the fluid's NBT to the stack */
+/** Fluid transfer info that empties a fluid from an item, copying the item's component patch to the fluid */
 public class EmptyFluidWithNBTTransfer extends EmptyFluidContainerTransfer {
   public static final ResourceLocation ID = Mantle.getResource("empty_nbt");
   public EmptyFluidWithNBTTransfer(Ingredient input, ItemOutput filled, FluidOutput fluid) {
@@ -26,8 +26,10 @@ public class EmptyFluidWithNBTTransfer extends EmptyFluidContainerTransfer {
 
   @Override
   protected FluidStack getFluid(ItemStack stack) {
-    // TODO: merge NBT?
-    return new FluidStack(fluid.get().getFluid(), fluid.getAmount(), stack.getTag());
+    // Copy explicit per-stack metadata; item defaults do not belong on the fluid.
+    FluidStack transferred = new FluidStack(fluid.get().getFluid(), fluid.getAmount());
+    transferred.applyComponents(stack.getComponentsPatch());
+    return transferred;
   }
 
   @Override

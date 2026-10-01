@@ -8,8 +8,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.crafting.IShapedRecipe;
+import net.minecraft.world.item.crafting.ShapedRecipe;
 import org.apache.commons.lang3.StringUtils;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.client.book.data.BookData;
@@ -112,12 +113,12 @@ public class ContentCrafting extends PageContent {
   public void load() {
     super.load();
 
-    if (!StringUtils.isEmpty(recipe) && ResourceLocation.isValidResourceLocation(recipe)) {
+    if (!StringUtils.isEmpty(recipe) && ResourceLocation.tryParse(this.recipe) != null) {
       int w = 0, h = 0;
 
       Level level = Minecraft.getInstance().level;
       assert level != null;
-      Recipe<?> recipe = level.getRecipeManager().byKey(ResourceLocation.parse(this.recipe)).orElse(null);
+      Recipe<?> recipe = level.getRecipeManager().byKey(ResourceLocation.parse(this.recipe)).map(RecipeHolder::value).orElse(null);
       if (recipe instanceof CraftingRecipe) {
         if(grid_size.equalsIgnoreCase("auto")) {
           if(recipe.canCraftInDimensions(2, 2)) {
@@ -140,8 +141,8 @@ public class ContentCrafting extends PageContent {
 
         NonNullList<Ingredient> ingredients = recipe.getIngredients();
 
-        if (recipe instanceof IShapedRecipe<?> shaped) {
-          grid = new IngredientData[shaped.getRecipeHeight()][shaped.getRecipeWidth()];
+        if (recipe instanceof ShapedRecipe shaped) {
+          grid = new IngredientData[shaped.getHeight()][shaped.getWidth()];
 
           for (int y = 0; y < grid.length; y++) {
             for (int x = 0; x < grid[y].length; x++) {
@@ -154,7 +155,7 @@ public class ContentCrafting extends PageContent {
 
         grid = new IngredientData[h][w];
         for (int i = 0; i < ingredients.size(); i++) {
-          grid[i / h][i % w] = IngredientData.getItemStackData(NonNullList.of(ItemStack.EMPTY, ingredients.get(i).getItems()));
+          grid[i / w][i % w] = IngredientData.getItemStackData(NonNullList.of(ItemStack.EMPTY, ingredients.get(i).getItems()));
         }
       }
     }

@@ -11,7 +11,7 @@ import slimeknights.mantle.Mantle;
 import slimeknights.mantle.recipe.helper.ItemOutput;
 import slimeknights.mantle.recipe.ingredient.FluidIngredient;
 
-/** Fluid transfer info that fills a fluid into an item, copying its NBT */
+/** Fluid transfer info that fills a fluid into an item, copying its component patch */
 public class FillFluidWithNBTTransfer extends FillFluidContainerTransfer {
   public static final ResourceLocation ID = Mantle.getResource("fill_nbt");
   public FillFluidWithNBTTransfer(Ingredient input, ItemOutput filled, FluidIngredient fluid) {
@@ -21,9 +21,7 @@ public class FillFluidWithNBTTransfer extends FillFluidContainerTransfer {
   @Override
   protected ItemStack getFilled(FluidStack drained) {
     ItemStack filled = super.getFilled(drained);
-    if (drained.hasTag()) {
-      filled.setTag(drained.getTag().copy());
-    }
+    filled.applyComponents(drained.getComponentsPatch());
     return filled;
   }
 
