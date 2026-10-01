@@ -236,9 +236,9 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
         if (preference.isEmpty()) {
           return ItemStack.EMPTY;
         }
-        cachedResult = new ItemStack(preference.orElseThrow(), count);
+        ItemStack resolved = new ItemStack(preference.orElseThrow(), count);
         if (nbt != null) {
-          cachedResult.applyComponents(LegacyItemData.convert(preference.orElseThrow(), nbt, ops));
+          resolved.applyComponents(LegacyItemData.convert(preference.orElseThrow(), nbt, ops));
         }
         cachedResult.applyComponents(components);
       }

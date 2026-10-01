@@ -69,6 +69,11 @@ public class RetexturedModel implements IUnbakedGeometry<RetexturedModel> {
   }
 
   @Override
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides) {
+    return bake(owner, baker, spriteGetter, transform, overrides, slimeknights.mantle.Mantle.getResource("dynamic_model_baking"));
+  }
+
+  /** Compatibility overload retaining the optional model location. */
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
     // bake the model and return
     BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides, location);
@@ -205,7 +210,7 @@ public class RetexturedModel implements IUnbakedGeometry<RetexturedModel> {
       @Nullable
       @Override
       public BakedModel resolve(BakedModel originalModel, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int pSeed) {
-        if (stack.isEmpty() || !stack.hasTag()) {
+        if (stack.isEmpty() || RetexturedHelper.getTextureName(stack).isEmpty()) {
           return originalModel;
         }
 

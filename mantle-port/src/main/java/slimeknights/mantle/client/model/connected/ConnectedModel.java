@@ -127,6 +127,11 @@ public class ConnectedModel implements IUnbakedGeometry<ConnectedModel> {
   }
 
   @Override
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides) {
+    return bake(owner, baker, spriteGetter, transform, overrides, slimeknights.mantle.Mantle.getResource("dynamic_model_baking"));
+  }
+
+  /** Compatibility overload retaining the optional model location. */
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState transform, ItemOverrides overrides, ResourceLocation location) {
     BakedModel baked = model.bake(owner, baker, spriteGetter, transform, overrides, location);
     return new Baked(this, new ExtraTextureContext(owner, extraTextures), transform, baked);
@@ -306,14 +311,14 @@ public class ConnectedModel implements IUnbakedGeometry<ConnectedModel> {
 
           // follow the texture name back to the original name
           // if it never reaches a connected texture, skip
-          String connectedTexture = getConnectedName(original.texture);
+          String connectedTexture = getConnectedName(original.texture());
           if (!connectedTexture.isEmpty()) {
             // if empty string, we can keep the old face
-            String suffix = getTextureSuffix(connectedTexture, connections, getTransform(dir, original.uv));
+            String suffix = getTextureSuffix(connectedTexture, connections, getTransform(dir, original.uv()));
             if (!suffix.isEmpty()) {
               // suffix the texture
               String fullTexture = connectedTexture + suffix;
-              face = new BlockElementFace(original.cullForDirection, original.tintIndex, "#" + fullTexture, original.uv);
+              face = new BlockElementFace(original.cullForDirection(), original.tintIndex(), "#" + fullTexture, original.uv());
             }
           }
           // add the updated face

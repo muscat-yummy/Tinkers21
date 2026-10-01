@@ -137,7 +137,7 @@ public class FluidRenderer {
 
     // if rotating by 90 or 270, swap U and V
     float minU, maxU, minV, maxV;
-    double size = flowing ? 8 : 16;
+    float size = flowing ? 0.5f : 1.0f;
     if ((rotation % 180) == 90) {
       minU = sprite.getU(v1 * size);
       maxU = sprite.getU(v2 * size);
@@ -178,48 +178,46 @@ public class FluidRenderer {
       }
     }
     // add quads
-    int light1 = brightness & 0xFFFF;
-    int light2 = brightness >> 0x10 & 0xFFFF;
     int a = color >> 24 & 0xFF;
     int r = color >> 16 & 0xFF;
     int g = color >> 8 & 0xFF;
     int b = color & 0xFF;
     switch (face) {
       case DOWN -> {
-        renderer.vertex(matrix, x1, y1, z2).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y1, z1).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y1, z1).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y1, z2).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x1, y1, z2).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x2, y1, z1).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x2, y1, z2).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
       case UP -> {
-        renderer.vertex(matrix, x1, y2, z1).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y2, z2).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z2).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z1).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x1, y2, z1).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x1, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z1).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
       case NORTH -> {
-        renderer.vertex(matrix, x1, y1, z1).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y2, z1).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z1).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y1, z1).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x1, y2, z1).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z1).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x2, y1, z1).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
       case SOUTH -> {
-        renderer.vertex(matrix, x2, y1, z2).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z2).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y2, z2).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y1, z2).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x2, y1, z2).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x1, y2, z2).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x1, y1, z2).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
       case WEST -> {
-        renderer.vertex(matrix, x1, y1, z2).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y2, z2).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y2, z1).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x1, y1, z1).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x1, y1, z2).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x1, y2, z2).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x1, y2, z1).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x1, y1, z1).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
       case EAST -> {
-        renderer.vertex(matrix, x2, y1, z1).color(r, g, b, a).uv(u1, v1).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z1).color(r, g, b, a).uv(u2, v2).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y2, z2).color(r, g, b, a).uv(u3, v3).uv2(light1, light2).endVertex();
-        renderer.vertex(matrix, x2, y1, z2).color(r, g, b, a).uv(u4, v4).uv2(light1, light2).endVertex();
+        renderer.addVertex(matrix, x2, y1, z1).setColor(r, g, b, a).setUv(u1, v1).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z1).setColor(r, g, b, a).setUv(u2, v2).setLight(brightness);
+        renderer.addVertex(matrix, x2, y2, z2).setColor(r, g, b, a).setUv(u3, v3).setLight(brightness);
+        renderer.addVertex(matrix, x2, y1, z2).setColor(r, g, b, a).setUv(u4, v4).setLight(brightness);
       }
     }
   }
@@ -351,7 +349,7 @@ public class FluidRenderer {
     assert minecraft.player != null;
     RenderSystem.setShader(GameRenderer::getPositionTexShader);
     RenderSystem.setShaderTexture(0, texture);
-    BufferBuilder buffer = Tesselator.getInstance().getBuilder();
+    BufferBuilder buffer = Tesselator.getInstance().begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
     BlockPos pos = BlockPos.containing(minecraft.player.getX(), minecraft.player.getEyeY(), minecraft.player.getZ());
     Level level = minecraft.player.level();
     float brightness = LightTexture.getBrightness(level.dimensionType(), level.getMaxLocalRawBrightness(pos));
@@ -369,12 +367,11 @@ public class FluidRenderer {
     float yRot = -minecraft.player.getYRot() / 64;
     float xRot = minecraft.player.getXRot() / 64;
     Matrix4f matrix = poseStack.last().pose();
-    buffer.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
-    buffer.vertex(matrix, -1, -1, -0.5f).uv(4 + yRot, 4 + xRot).endVertex();
-    buffer.vertex(matrix,  1, -1, -0.5f).uv(0 + yRot, 4 + xRot).endVertex();
-    buffer.vertex(matrix,  1,  1, -0.5f).uv(0 + yRot, 0 + xRot).endVertex();
-    buffer.vertex(matrix, -1,  1, -0.5f).uv(4 + yRot, 0 + xRot).endVertex();
-    BufferUploader.drawWithShader(buffer.end());
+    buffer.addVertex(matrix, -1, -1, -0.5f).setUv(4 + yRot, 4 + xRot);
+    buffer.addVertex(matrix,  1, -1, -0.5f).setUv(0 + yRot, 4 + xRot);
+    buffer.addVertex(matrix,  1,  1, -0.5f).setUv(0 + yRot, 0 + xRot);
+    buffer.addVertex(matrix, -1,  1, -0.5f).setUv(4 + yRot, 0 + xRot);
+    BufferUploader.drawWithShader(buffer.buildOrThrow());
     RenderSystem.setShaderColor(1, 1, 1, 1);
     RenderSystem.disableBlend();
   }

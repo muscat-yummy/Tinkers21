@@ -4,6 +4,8 @@ import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -61,7 +63,7 @@ public final class RetexturedHelper {
    * @return  Texture, or empty string if none
    */
   public static String getTextureName(ItemStack stack) {
-    return getTextureName(stack.getTag());
+    return getTextureName(stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag());
   }
 
   /**
@@ -127,10 +129,12 @@ public final class RetexturedHelper {
    * @return The item stack with the proper NBT
    */
   public static ItemStack setTexture(ItemStack stack, String name) {
-    if (!name.isEmpty()) {
-      setTexture(stack.getOrCreateTag(), name);
-    } else if (stack.hasTag()) {
-      setTexture(stack.getTag(), name);
+    CompoundTag data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+    setTexture(data, name);
+    if (data.isEmpty()) {
+      stack.remove(DataComponents.CUSTOM_DATA);
+    } else {
+      stack.set(DataComponents.CUSTOM_DATA, CustomData.of(data));
     }
     return stack;
   }

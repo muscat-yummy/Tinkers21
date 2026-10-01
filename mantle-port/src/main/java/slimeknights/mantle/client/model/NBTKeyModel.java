@@ -17,6 +17,8 @@ import net.minecraft.client.resources.model.ModelBaker;
 import net.minecraft.client.resources.model.ModelState;
 import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.entity.LivingEntity;
@@ -104,6 +106,11 @@ public class NBTKeyModel implements IUnbakedGeometry<NBTKeyModel> {
   }
 
   @Override
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
+    return bake(owner, baker, spriteGetter, modelTransform, overrides, slimeknights.mantle.Mantle.getResource("dynamic_model_baking"));
+  }
+
+  /** Compatibility overload retaining the optional model location. */
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
     // setup transforms
     Transformation transform = MantleItemLayerModel.applyTransform(modelTransform, owner.getRootTransform()).getRotation();
@@ -127,7 +134,7 @@ public class NBTKeyModel implements IUnbakedGeometry<NBTKeyModel> {
 
     @Override
     public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity livingEntity, int pSeed) {
-      CompoundTag nbt = stack.getTag();
+      CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
       if (nbt != null && nbt.contains(nbtKey)) {
         return variants.getOrDefault(nbt.getString(nbtKey), model);
       }

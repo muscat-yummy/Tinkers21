@@ -11,9 +11,10 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.StringTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.network.chat.Component;
+import net.minecraft.ChatFormatting;
+import net.minecraft.world.item.component.ItemLore;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.StringUtil;
@@ -23,6 +24,7 @@ import slimeknights.mantle.recipe.ingredient.SizedIngredient;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+import java.util.List;
 
 public class IngredientData implements IDataElement {
   public SizedIngredient[] ingredients = new SizedIngredient[0];
@@ -82,14 +84,13 @@ public class IngredientData implements IDataElement {
   private ItemStack getMissingItem(String error) {
     ItemStack missingItem = new ItemStack(Items.BARRIER);
 
-    CompoundTag display = missingItem.getOrCreateTagElement("display");
-    display.putString("Name", "\u00A7rError Loading Item");
-    ListTag lore = new ListTag();
-    if(!StringUtil.isNullOrEmpty(error)) {
-      lore.add(StringTag.valueOf("\u00A7r\u00A7eError:"));
-      lore.add(StringTag.valueOf("\u00A7r\u00A7e" + error));
+    missingItem.set(DataComponents.CUSTOM_NAME, Component.literal("Error Loading Item").withStyle(ChatFormatting.RESET));
+    List<Component> lore = new java.util.ArrayList<>();
+    if (!StringUtil.isNullOrEmpty(error)) {
+      lore.add(Component.literal("Error:").withStyle(ChatFormatting.YELLOW));
+      lore.add(Component.literal(error).withStyle(ChatFormatting.YELLOW));
     }
-    display.put("Lore", lore);
+    missingItem.set(DataComponents.LORE, new ItemLore(lore));
 
     return missingItem;
   }
