@@ -18,7 +18,7 @@ import net.minecraft.client.resources.model.UnbakedModel;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Direction.Axis;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.client.ForgeRenderTypes;
+import net.neoforged.neoforge.client.NeoForgeRenderTypes;
 import net.neoforged.neoforge.client.RenderTypeGroup;
 import net.neoforged.neoforge.client.model.CompositeModel;
 import net.neoforged.neoforge.client.model.ItemLayerModel;
@@ -86,7 +86,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
     if (renderTypeHint != null) {
       return context.getRenderType(renderTypeHint);
     } else {
-      return new RenderTypeGroup(RenderType.translucent(), ForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get());
+      return new RenderTypeGroup(RenderType.translucent(), NeoForgeRenderTypes.ITEM_UNSORTED_TRANSLUCENT.get());
     }
   }
 
@@ -102,6 +102,11 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
   }
 
   @Override
+  public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides) {
+    return bake(owner, baker, spriteGetter, modelTransform, overrides, ResourceLocation.fromNamespaceAndPath("mantle", "item_layer"));
+  }
+
+  /** Compatibility overload; NeoForge no longer passes the bake location. */
   public BakedModel bake(IGeometryBakingContext owner, ModelBaker baker, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelTransform, ItemOverrides overrides, ResourceLocation modelLocation) {
     if (textures.isEmpty()) {
       throw new IllegalStateException("Empty textures list");
@@ -211,7 +216,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
     }
 
     // setup quad builder
-    QuadBakingVertexConsumer quadBuilder = new QuadBakingVertexConsumer(builder::add);
+    QuadBakingVertexConsumer quadBuilder = new QuadBakingVertexConsumer();
     // common settings
     quadBuilder.setSprite(sprite);
     quadBuilder.setTintIndex(tint);
@@ -247,6 +252,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
             if (!canDraw || translucent) {
               int off = facing == Direction.DOWN ? 1 : 0;
               buildSideQuad(quadBuilder, quadConsumer, facing, color, sprite, uStart, v + off, uEnd - uStart, emissivity);
+              builder.add(quadBuilder.bakeQuad());
               building = false;
             }
           }
@@ -255,6 +261,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
           // make quad [uStart, uEnd]
           int off = facing == Direction.DOWN ? 1 : 0;
           buildSideQuad(quadBuilder, quadConsumer, facing, color, sprite, uStart, v+off, uEnd-uStart, emissivity);
+          builder.add(quadBuilder.bakeQuad());
         }
       }
     }
@@ -282,6 +289,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
             if (!canDraw || translucent) {
               int off = facing == Direction.EAST ? 1 : 0;
               buildSideQuad(quadBuilder, quadConsumer, facing, color, sprite, u + off, vStart, vEnd - vStart, emissivity);
+              builder.add(quadBuilder.bakeQuad());
               building = false;
             }
           }
@@ -290,6 +298,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
           // make quad [vStart, vEnd]
           int off = facing == Direction.EAST ? 1 : 0;
           buildSideQuad(quadBuilder, quadConsumer, facing, color, sprite, u+off, vStart, vEnd-vStart, emissivity);
+          builder.add(quadBuilder.bakeQuad());
         }
       }
     }
@@ -300,12 +309,14 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
               0, 1, 7.5f / 16f, sprite.getU0(), sprite.getV0(),
               1, 1, 7.5f / 16f, sprite.getU1(), sprite.getV0(),
               1, 0, 7.5f / 16f, sprite.getU1(), sprite.getV1());
+    builder.add(quadBuilder.bakeQuad());
     // front
     buildQuad(quadBuilder, quadConsumer, Direction.SOUTH, color, emissivity,
               0, 0, 8.5f / 16f, sprite.getU0(), sprite.getV1(),
               1, 0, 8.5f / 16f, sprite.getU1(), sprite.getV1(),
               1, 1, 8.5f / 16f, sprite.getU1(), sprite.getV0(),
               0, 1, 8.5f / 16f, sprite.getU0(), sprite.getV0());
+    builder.add(quadBuilder.bakeQuad());
 
     // fill in the pixel map with new pixels from the sprite
     if (pixels != null) {
@@ -344,7 +355,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
   @SuppressWarnings("unused")  // API
   public static BakedQuad getQuadForGui(int color, int tint, TextureAtlasSprite sprite, Transformation transform, int emissivity) {
     // setup quad builder
-    QuadBakingVertexConsumer.Buffered quadBuilder = new QuadBakingVertexConsumer.Buffered();
+    QuadBakingVertexConsumer quadBuilder = new QuadBakingVertexConsumer();
     // common settings
     quadBuilder.setSprite(sprite);
     quadBuilder.setTintIndex(tint);
@@ -362,7 +373,7 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
               1, 0, 8.5f / 16f, sprite.getU1(), sprite.getV1(),
               1, 1, 8.5f / 16f, sprite.getU1(), sprite.getV0(),
               0, 1, 8.5f / 16f, sprite.getU0(), sprite.getV0());
-    return quadBuilder.getQuad();
+    return quadBuilder.bakeQuad();
   }
 
   /**
@@ -414,10 +425,10 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
     float v1 = 16f * (1f - y1 - dy);
     buildQuad(builder, consumer, (side.getAxis() == Axis.Y ? side.getOpposite() : side),
       color, luminosity,
-      x0, y0, z0, sprite.getU(u0), sprite.getV(v0),
-      x1, y1, z0, sprite.getU(u1), sprite.getV(v1),
-      x1, y1, z1, sprite.getU(u1), sprite.getV(v1),
-      x0, y0, z1, sprite.getU(u0), sprite.getV(v0));
+      x0, y0, z0, sprite.getU(u0 / 16f), sprite.getV(v0 / 16f),
+      x1, y1, z0, sprite.getU(u1 / 16f), sprite.getV(v1 / 16f),
+      x1, y1, z1, sprite.getU(u1 / 16f), sprite.getV(v1 / 16f),
+      x0, y0, z1, sprite.getU(u0 / 16f), sprite.getV(v0 / 16f));
   }
 
   /**
@@ -454,13 +465,12 @@ public class MantleItemLayerModel implements IUnbakedGeometry<MantleItemLayerMod
    */
   private static void putVertex(VertexConsumer consumer, Direction side, float x, float y, float z, float u, float v, int color, int luminosity) {
     // format is always DefaultVertexFormat#BLOCK, though order does not matter too much
-    consumer.vertex(x, y, z);
-    consumer.color(color);
-    consumer.normal(side.getStepX(), side.getStepY(), side.getStepZ());
-    consumer.uv(u, v);
+    consumer.addVertex(x, y, z);
+    consumer.setColor(color);
+    consumer.setNormal(side.getStepX(), side.getStepY(), side.getStepZ());
+    consumer.setUv(u, v);
     int light = (luminosity << 4);
-    consumer.uv2(light, light);
-    consumer.endVertex();
+    consumer.setUv2(light, light);
   }
 
   /** Cloned from {@link ItemLayerModel}'s FaceData subclass */

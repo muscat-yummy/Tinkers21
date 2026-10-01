@@ -108,14 +108,14 @@ public class ClientEvents {
   @SubscribeEvent
   static void registerModelLoaders(RegisterGeometryLoaders event) {
     // standard models - useful in resource packs for any model
-    event.register("connected", ConnectedModel.LOADER);
-    event.register("item_layer", MantleItemLayerModel.LOADER);
-    event.register("colored_block", ColoredBlockModel.LOADER);
-    event.register("fallback", FallbackModelLoader.INSTANCE);
+    event.register(Mantle.getResource("connected"), ConnectedModel.LOADER);
+    event.register(Mantle.getResource("item_layer"), MantleItemLayerModel.LOADER);
+    event.register(Mantle.getResource("colored_block"), ColoredBlockModel.LOADER);
+    event.register(Mantle.getResource("fallback"), FallbackModelLoader.INSTANCE);
 
     // NBT dynamic models - require specific data defined in the block/item to use
-    event.register("nbt_key", NBTKeyModel.LOADER);
-    event.register("retextured", RetexturedModel.LOADER);
+    event.register(Mantle.getResource("nbt_key"), NBTKeyModel.LOADER);
+    event.register(Mantle.getResource("retextured"), RetexturedModel.LOADER);
   }
 
   @SubscribeEvent
