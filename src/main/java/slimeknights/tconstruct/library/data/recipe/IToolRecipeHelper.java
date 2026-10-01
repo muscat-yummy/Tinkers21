@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.data.recipe;
 
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
@@ -34,7 +35,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param tool     Tool
    * @param folder   Folder for recipe
    */
-  default void toolBuilding(Consumer<FinishedRecipe> consumer, IModifiable tool, String folder) {
+  default void toolBuilding(RecipeConsumer consumer, IModifiable tool, String folder) {
     ToolBuildingRecipeBuilder.toolBuildingRecipe(tool)
                              .save(consumer, prefix(id(tool), folder));
   }
@@ -46,7 +47,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param folder     Folder for recipe
    * @param layoutSlot StationLayoutSlot id
    */
-  default void toolBuilding(Consumer<FinishedRecipe> consumer, IModifiable tool, String folder, ResourceLocation layoutSlot) {
+  default void toolBuilding(RecipeConsumer consumer, IModifiable tool, String folder, ResourceLocation layoutSlot) {
     ToolBuildingRecipeBuilder.toolBuildingRecipe(tool)
       .layoutSlot(layoutSlot)
       .save(consumer, prefix(id(tool), folder));
@@ -58,7 +59,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param tool     Tool supplier
    * @param folder   Folder for recipe
    */
-  default void toolBuilding(Consumer<FinishedRecipe> consumer, Supplier<? extends IModifiable> tool, String folder) {
+  default void toolBuilding(RecipeConsumer consumer, Supplier<? extends IModifiable> tool, String folder) {
     toolBuilding(consumer, tool.get(), folder);
   }
 
@@ -70,7 +71,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param cost     Part cost
    * @param partFolder   Folder for recipes
    */
-  default void partCasting(Consumer<FinishedRecipe> consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder) {
+  default void partCasting(RecipeConsumer consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder) {
     String name = id(part).getPath();
     String castingFolder = partFolder + "casting/";
     MaterialCastingRecipeBuilder.tableRecipe(part)
@@ -94,7 +95,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param partFolder   Folder for recipes
    * @param castFolder   Folder for cast creation recipes
    */
-  default void partCasting(Consumer<FinishedRecipe> consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder, String castFolder) {
+  default void partCasting(RecipeConsumer consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder, String castFolder) {
     // Material Casting
     partCasting(consumer, part, cast, cost, partFolder);
     // Cast Casting
@@ -109,7 +110,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param castingStatConflict  If nonnull, disallows casting if a material matching this fluid and stat type can be casted. Prevents conflicts with tool casting
    * @param partFolder   Folder for recipes
    */
-  default void uncastablePart(Consumer<FinishedRecipe> consumer, IMaterialItem part, int cost, @Nullable MaterialStatsId castingStatConflict, String partFolder) {
+  default void uncastablePart(RecipeConsumer consumer, IMaterialItem part, int cost, @Nullable MaterialStatsId castingStatConflict, String partFolder) {
     ResourceLocation id = id(part);
     PartRecipeBuilder.partRecipe(part)
                      .setPattern(id)
@@ -131,7 +132,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param partFolder   Folder for recipes
    * @param castFolder   Folder for cast creation recipes
    */
-  default void partWithDummy(Consumer<FinishedRecipe> consumer, IMaterialItem part, ItemLike dummyPart, CastItemObject cast, int cost, String partFolder, String castFolder) {
+  default void partWithDummy(RecipeConsumer consumer, IMaterialItem part, ItemLike dummyPart, CastItemObject cast, int cost, String partFolder, String castFolder) {
     // Material Casting
     partCasting(consumer, part, cast, cost, partFolder);
     // Cast Casting
@@ -151,7 +152,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param cost     Part cost
    * @param partFolder   Folder for recipes
    */
-  default void partRecipes(Consumer<FinishedRecipe> consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder, String castFolder) {
+  default void partRecipes(RecipeConsumer consumer, IMaterialItem part, CastItemObject cast, int cost, String partFolder, String castFolder) {
     ResourceLocation id = id(part);
     // Part Builder
     PartRecipeBuilder.partRecipe(part)
@@ -171,7 +172,7 @@ public interface IToolRecipeHelper extends ICastCreationHelper {
    * @param cost     Part cost
    * @param partFolder   Folder for recipes
    */
-  default void partRecipes(Consumer<FinishedRecipe> consumer, Supplier<? extends IMaterialItem> part, CastItemObject cast, int cost, String partFolder, String castFolder) {
+  default void partRecipes(RecipeConsumer consumer, Supplier<? extends IMaterialItem> part, CastItemObject cast, int cost, String partFolder, String castFolder) {
     partRecipes(consumer, part.get(), cast, cost, partFolder, castFolder);
   }
 }

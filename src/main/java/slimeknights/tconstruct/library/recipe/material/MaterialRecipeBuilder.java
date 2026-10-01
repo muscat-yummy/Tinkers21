@@ -3,7 +3,8 @@ package slimeknights.tconstruct.library.recipe.material;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -59,12 +60,12 @@ public class MaterialRecipeBuilder extends AbstractRecipeBuilder<MaterialRecipeB
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn) {
+  public void save(RecipeConsumer consumerIn) {
     this.save(consumerIn, material.getId());
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id) {
+  public void save(RecipeConsumer consumerIn, ResourceLocation id) {
     if (this.material == null) {
       throw new IllegalStateException("recipe " + id + " has no material associated with it");
     }

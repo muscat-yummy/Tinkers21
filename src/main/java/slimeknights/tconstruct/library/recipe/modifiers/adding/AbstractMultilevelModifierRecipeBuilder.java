@@ -3,7 +3,8 @@ package slimeknights.tconstruct.library.recipe.modifiers.adding;
 import com.google.gson.JsonSyntaxException;
 import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Item;
@@ -149,7 +150,7 @@ public abstract class AbstractMultilevelModifierRecipeBuilder<T extends Abstract
   /* Saving */
 
   /** Saves all salvage recipes for this recipe */
-  public T saveSalvage(Consumer<FinishedRecipe> consumer, ResourceLocation id) {
+  public T saveSalvage(RecipeConsumer consumer, ResourceLocation id) {
     if (levels.isEmpty()) {
       throw new IllegalStateException("Must have at least 1 level");
     }
@@ -164,7 +165,7 @@ public abstract class AbstractMultilevelModifierRecipeBuilder<T extends Abstract
   }
 
   @Override
-  public void save(Consumer<FinishedRecipe> consumer) {
+  public void save(RecipeConsumer consumer) {
     save(consumer, result);
   }
 }

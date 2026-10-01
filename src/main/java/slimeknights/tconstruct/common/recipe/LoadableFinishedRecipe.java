@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.common.recipe;
 
 import com.google.gson.JsonObject;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -43,7 +44,7 @@ public record LoadableFinishedRecipe<T extends Recipe<?>>(RecordLoadable<T> load
   }
 
   /** One-liner to accept a new recipe */
-  public static <T extends Recipe<?>> void save(Consumer<FinishedRecipe> consumer, RecordLoadable<T> loader, T recipe) {
+  public static <T extends Recipe<?>> void save(RecipeConsumer consumer, RecordLoadable<T> loader, T recipe) {
     consumer.accept(new LoadableFinishedRecipe<>(loader, recipe));
   }
 }

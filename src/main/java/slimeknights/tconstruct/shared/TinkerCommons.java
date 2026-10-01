@@ -246,7 +246,7 @@ public final class TinkerCommons extends TinkerModule {
     generator.addProvider(client, new TinkerBlockStateProvider(output, existingFileHelper));
     generator.addProvider(client, new RenderFluidProvider(output));
     generator.addProvider(client, new RenderItemProvider(output));
-    generator.addProvider(event.includeServer(), new CommonRecipeProvider(output));
+    generator.addProvider(event.includeServer(), new CommonRecipeProvider(output, event.getLookupProvider()));
   }
 
   /** Adds all relevant items to the creative tab */

@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.library.data.recipe;
 
 import com.google.gson.JsonObject;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
@@ -43,7 +44,7 @@ public record CraftingNBTWrapper(FinishedRecipe recipe, CompoundTag nbt) impleme
   }
 
   /** Creates a wrapped consumer, adding the given NBT */
-  public static Consumer<FinishedRecipe> wrap(Consumer<FinishedRecipe> base, CompoundTag nbt) {
+  public static RecipeConsumer wrap(RecipeConsumer base, CompoundTag nbt) {
     return recipe -> base.accept(new CraftingNBTWrapper(recipe, nbt));
   }
 }

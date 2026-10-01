@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.shared.data;
 
 import net.minecraft.data.PackOutput;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
 import net.minecraft.data.recipes.RecipeCategory;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.data.recipes.ShapelessRecipeBuilder;
@@ -34,8 +35,8 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonRecipeHelper {
-  public CommonRecipeProvider(PackOutput output) {
-    super(output);
+  public CommonRecipeProvider(PackOutput output, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup.Provider> registries) {
+    super(output, registries);
   }
 
   @Override
@@ -44,12 +45,12 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
   }
 
   @Override
-  protected void buildRecipes(Consumer<FinishedRecipe> consumer) {
+  protected void buildRecipes(RecipeConsumer consumer) {
     this.addCommonRecipes(consumer);
     this.addMaterialRecipes(consumer);
   }
 
-  private void addCommonRecipes(Consumer<FinishedRecipe> consumer) {
+  private void addCommonRecipes(RecipeConsumer consumer) {
     // firewood and lavawood
     String folder = "common/firewood/";
     slabStairsCrafting(consumer, TinkerMaterials.blazewood, folder, false);
@@ -188,7 +189,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
     }
     // fix vanilla recipes not using tinkers glass
     String glassVanillaFolder = folder + "vanilla/";
-    Consumer<FinishedRecipe> vanillaGlassConsumer = withCondition(consumer, ConfigEnabledCondition.GLASS_RECIPE_FIX);
+    RecipeConsumer vanillaGlassConsumer = withCondition(consumer, ConfigEnabledCondition.GLASS_RECIPE_FIX);
     ShapedRecipeBuilder.shaped(RecipeCategory.MISC, Blocks.BEACON)
                        .define('S', Items.NETHER_STAR)
                        .define('G', Tags.Items.GLASS_COLORLESS)
@@ -259,7 +260,7 @@ public class CommonRecipeProvider extends BaseRecipeProvider implements ICommonR
                           .save(consumer, location("common/cheese_ingot_from_block"));
   }
 
-  private void addMaterialRecipes(Consumer<FinishedRecipe> consumer) {
+  private void addMaterialRecipes(RecipeConsumer consumer) {
     String folder = "common/materials/";
 
     // ores
