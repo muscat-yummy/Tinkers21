@@ -10,15 +10,13 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.state.properties.WoodType;
-import net.minecraftforge.registries.MissingMappingsEvent;
-import net.minecraftforge.registries.MissingMappingsEvent.Mapping;
 import slimeknights.mantle.util.RegistryHelper;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
-import java.util.function.Function;
+import java.util.Map;
 import java.util.function.Supplier;
 
 @NoArgsConstructor(access = AccessLevel.PRIVATE)
@@ -54,22 +52,18 @@ public class RegistrationHelper {
   }
 
   /**
-   * Handles missing mappings for the given registry
-   * @param event    Mappings event
-   * @param handler  Mapping handler
-   * @param <T>      Event type
+   * Registers known legacy names after the target entries have been registered.
+   * Existing entries keep precedence, matching NeoForge alias lookup behavior.
    */
-  public static <T> void handleMissingMappings(MissingMappingsEvent event, String modID, ResourceKey<? extends Registry<T>> registry, Function<String, T> handler) {
-    // event is kinda nice, automatically filters mappings to the registry type via the key
-    for (Mapping<T> mapping : event.getAllMappings(registry)) {
-      ResourceLocation id = mapping.getKey();
-      if (modID.equals(id.getNamespace())) {
-        @Nullable T value = handler.apply(id.getPath());
-        if (value != null) {
-          mapping.remap(value);
-        }
+  public static <T> void registerAliases(Registry<T> registry, String modID, Map<String, ? extends T> aliases) {
+    aliases.forEach((name, target) -> {
+      ResourceLocation from = ResourceLocation.fromNamespaceAndPath(modID, name);
+      if (!registry.containsKey(from)) {
+        ResourceLocation to = registry.getResourceKey(target)
+          .orElseThrow(() -> new IllegalArgumentException("Alias target is not registered: " + target)).location();
+        registry.addAlias(from, to);
       }
-    }
+    });
   }
 
   /** Registers a wood type to be injected into the atlas, should be called before client setup */

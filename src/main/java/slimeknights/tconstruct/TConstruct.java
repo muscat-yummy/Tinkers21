@@ -22,7 +22,8 @@ import net.minecraftforge.fml.ModList;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
-import net.minecraftforge.registries.MissingMappingsEvent;
+import net.neoforged.neoforge.registries.RegisterEvent;
+import net.neoforged.bus.api.EventPriority;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import slimeknights.mantle.registration.RegistrationHelper;
@@ -79,6 +80,8 @@ import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.data.WorldgenProvider;
 
 import java.util.Locale;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
@@ -109,7 +112,7 @@ public class TConstruct {
     MaterialRegistry.init();
 
     // initialize modules, done this way rather than with annotations to give us control over the order
-    NeoForge.EVENT_BUS.addListener(TConstruct::missingMappings);
+    bus.addListener(EventPriority.LOWEST, false, RegisterEvent.class, TConstruct::registerAliases);
     // base
     bus.register(new TinkerCommons());
     bus.register(new TinkerMaterials());
@@ -202,30 +205,23 @@ public class TConstruct {
   }
 
   /** Handles missing mappings of all types */
-  private static void missingMappings(MissingMappingsEvent event) {
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.BLOCK, name -> switch (name) {
-      // silky jewel removal
-      case "silky_jewel_block" -> Blocks.EMERALD_BLOCK;
-      // piglin heads are vanilla
-      case "piglin_head" -> Blocks.PIGLIN_HEAD;
-      case "piglin_wall_head" -> Blocks.PIGLIN_WALL_HEAD;
-      default -> null;
-    });
-    RegistrationHelper.handleMissingMappings(event, MOD_ID, Registries.ITEM, name -> switch (name) {
-      // silky jewel removal
-      case "silky_jewel" -> Items.EMERALD;
-      case "silky_jewel_block" -> Items.EMERALD_BLOCK;
-      // piglin heads are vanilla
-      case "piglin_head" -> Items.PIGLIN_HEAD;
-      // round plate rename
-      case "round_plate" -> TinkerToolParts.adzeHead.get();
-      case "round_plate_cast" -> TinkerSmeltery.adzeHeadCast.get();
-      case "round_plate_sand_cast" -> TinkerSmeltery.adzeHeadCast.getSand();
-      case "round_plate_red_sand_cast" -> TinkerSmeltery.adzeHeadCast.getRedSand();
-      // slimesuit rework
-      case "slime_chestplate" -> TinkerTools.slimeWings.get();
-      default -> null;
-    });
+  private static void registerAliases(RegisterEvent event) {
+    if (event.getRegistryKey() == Registries.BLOCK) {
+      RegistrationHelper.registerAliases(Objects.requireNonNull(event.getRegistry(Registries.BLOCK)), MOD_ID, Map.of(
+        "silky_jewel_block", Blocks.EMERALD_BLOCK,
+        "piglin_head", Blocks.PIGLIN_HEAD,
+        "piglin_wall_head", Blocks.PIGLIN_WALL_HEAD));
+    } else if (event.getRegistryKey() == Registries.ITEM) {
+      RegistrationHelper.registerAliases(Objects.requireNonNull(event.getRegistry(Registries.ITEM)), MOD_ID, Map.of(
+        "silky_jewel", Items.EMERALD,
+        "silky_jewel_block", Items.EMERALD_BLOCK,
+        "piglin_head", Items.PIGLIN_HEAD,
+        "round_plate", TinkerToolParts.adzeHead.get(),
+        "round_plate_cast", TinkerSmeltery.adzeHeadCast.get(),
+        "round_plate_sand_cast", TinkerSmeltery.adzeHeadCast.getSand(),
+        "round_plate_red_sand_cast", TinkerSmeltery.adzeHeadCast.getRedSand(),
+        "slime_chestplate", TinkerTools.slimeWings.get()));
+    }
   }
 
   /* Utils */
