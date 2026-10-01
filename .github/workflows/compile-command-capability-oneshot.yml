@@ -1,8 +1,8 @@
-name: Compile Mantle preview and persistence checkpoint
+name: Compile Mantle command and capability checkpoint
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/compile-preview-persistence-oneshot.yml]
+    paths: [.github/workflows/compile-command-capability-oneshot.yml]
 permissions:
   contents: read
 jobs:

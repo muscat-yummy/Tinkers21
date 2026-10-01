@@ -22,10 +22,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.shapes.CollisionContext;
 import net.minecraft.world.phys.shapes.VoxelShape;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
-import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import slimeknights.mantle.Mantle;
 import slimeknights.mantle.util.TranslationHelper;
 
@@ -68,14 +67,14 @@ public class GaugeBlock extends Block {
   @SuppressWarnings("deprecation")
   @Deprecated
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+  public InteractionResult useWithoutItem(BlockState state, Level world, BlockPos pos, Player player, BlockHitResult hit) {
     // display adjacent tank contents
     if (!world.isClientSide()) {
       Direction side = state.getValue(FACING);
       BlockEntity te = world.getBlockEntity(pos.relative(side.getOpposite()));
       if (te != null) {
-        IFluidHandler handler = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side).orElse(EmptyFluidHandler.INSTANCE);
-        if (handler.getTanks() > 0) {
+        IFluidHandler handler = world.getCapability(Capabilities.FluidHandler.BLOCK, te.getBlockPos(), te.getBlockState(), te, side);
+        if (handler != null && handler.getTanks() > 0) {
           FluidStack fluid = handler.getFluidInTank(0);
           if (fluid.isEmpty()) {
             // show simple empty message if gauge amount is hidden
@@ -107,7 +106,11 @@ public class GaugeBlock extends Block {
   public boolean canSurvive(BlockState state, LevelReader world, BlockPos pos) {
     Direction direction = state.getValue(FACING);
     BlockEntity te = world.getBlockEntity(pos.relative(direction.getOpposite()));
-    return te != null && te.getCapability(ForgeCapabilities.FLUID_HANDLER, direction).isPresent();
+    if (te == null) {
+      return false;
+    }
+    Level level = world instanceof Level liveLevel ? liveLevel : te.getLevel();
+    return level != null && level.getCapability(Capabilities.FluidHandler.BLOCK, te.getBlockPos(), te.getBlockState(), te, direction) != null;
   }
 
   @Override
