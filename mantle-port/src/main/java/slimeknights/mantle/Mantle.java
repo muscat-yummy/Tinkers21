@@ -67,6 +67,7 @@ import slimeknights.mantle.loot.LootTableInjector;
 import slimeknights.mantle.loot.MantleLoot;
 import slimeknights.mantle.network.MantleNetwork;
 import slimeknights.mantle.recipe.MantleRecipes;
+import slimeknights.mantle.recipe.data.DatagenIngredient;
 import slimeknights.mantle.recipe.MantleRecipeSerializers;
 import slimeknights.mantle.registration.MantleRegistrations;
 import slimeknights.mantle.registration.MantleBlockEntityCapabilities;
@@ -209,6 +210,7 @@ public class Mantle {
       }
     }
     else if (key == NeoForgeRegistries.Keys.INGREDIENT_TYPES) {
+      event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, DatagenIngredient.ID, () -> DatagenIngredient.TYPE);
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, FluidContainerIngredient.ID, () -> FluidContainerIngredient.TYPE);
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, getResource("potion"), () -> PotionIngredient.TYPE);
       event.register(NeoForgeRegistries.Keys.INGREDIENT_TYPES, getResource("potion_display"), () -> PotionDisplayIngredient.TYPE);

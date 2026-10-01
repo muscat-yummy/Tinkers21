@@ -1,0 +1,55 @@
+package slimeknights.mantle.recipe.data;
+
+import com.google.gson.JsonObject;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.data.recipes.RecipeOutput;
+import net.minecraft.resources.RegistryOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.neoforged.neoforge.common.conditions.ICondition;
+import javax.annotation.Nullable;
+import java.util.function.Consumer;
+
+/** Bridges Mantle raw recipe builders and native recipe outputs. */
+public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
+  HolderLookup.Provider registryLookup();
+
+  @Override
+  default Advancement.Builder advancement() {
+    return Advancement.Builder.recipeAdvancement().parent(ResourceLocation.parse("recipes/root"));
+  }
+
+  @Override
+  default void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
+    HolderLookup.Provider registries = registryLookup();
+    JsonObject json = Recipe.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), recipe).getOrThrow().getAsJsonObject();
+    ICondition.writeConditions(registries, json, conditions);
+    JsonObject advancementJson = advancement == null ? null
+      : Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();
+    if (advancementJson != null) { ICondition.writeConditions(registries, advancementJson, conditions); }
+    accept(new FinishedRecipe() {
+      @Override public ResourceLocation getId() { return id; }
+      @Override public RecipeSerializer<?> getType() { return recipe.getSerializer(); }
+      @Override public ResourceLocation getAdvancementId() { return advancement == null ? null : advancement.id(); }
+      @Override public void serializeRecipeData(JsonObject output) {
+        json.entrySet().stream().filter(entry -> !entry.getKey().equals("type"))
+            .forEach(entry -> output.add(entry.getKey(), entry.getValue().deepCopy()));
+      }
+      @Override public JsonObject serializeAdvancement(HolderLookup.Provider lookup) {
+        return advancementJson == null ? null : advancementJson.deepCopy();
+      }
+    });
+  }
+
+  /** Wraps raw output while retaining the registry context of the original consumer. */
+  static RecipeConsumer wrap(RecipeConsumer original, Consumer<FinishedRecipe> consumer) {
+    return new RecipeConsumer() {
+      @Override public HolderLookup.Provider registryLookup() { return original.registryLookup(); }
+      @Override public void accept(FinishedRecipe recipe) { consumer.accept(recipe); }
+    };
+  }
+}

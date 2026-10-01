@@ -4,6 +4,7 @@ import com.google.gson.JsonElement;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.world.item.crafting.Ingredient;
 import slimeknights.mantle.data.loadable.Loadable;
+import slimeknights.mantle.recipe.data.DatagenIngredient;
 import slimeknights.mantle.util.typed.TypedMap;
 
 /** Loadable for vanilla and NeoForge custom ingredients. */
@@ -27,7 +28,7 @@ public enum IngredientLoadable implements Loadable<Ingredient> {
     if (object.isEmpty() && this == DISALLOW_EMPTY) {
       throw new IllegalArgumentException("Ingredient cannot be empty");
     }
-    return codec.serialize(object);
+    return DatagenIngredient.normalize(codec.serialize(object));
   }
 
   @Override

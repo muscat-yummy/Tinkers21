@@ -2,7 +2,10 @@ package slimeknights.mantle.recipe.crafting;
 
 import com.google.gson.JsonObject;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.data.recipes.FinishedRecipe;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
+import net.minecraft.core.HolderLookup;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
 import net.minecraft.data.recipes.ShapedRecipeBuilder;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -64,9 +67,9 @@ public class ShapedRetexturedRecipeBuilder {
    * Builds the recipe with the default name using the given consumer
    * @param consumer Recipe consumer
    */
-  public void build(Consumer<FinishedRecipe> consumer) {
+  public void build(RecipeConsumer consumer) {
     this.validate();
-    parent.save(base -> consumer.accept(new Result(base)));
+    parent.save(RecipeConsumer.wrap(consumer, base -> consumer.accept(new Result(base))));
   }
 
   /**
@@ -74,9 +77,9 @@ public class ShapedRetexturedRecipeBuilder {
    * @param consumer Recipe consumer
    * @param location Recipe location
    */
-  public void build(Consumer<FinishedRecipe> consumer, ResourceLocation location) {
+  public void build(RecipeConsumer consumer, ResourceLocation location) {
     this.validate();
-    parent.save(base -> consumer.accept(new Result(base)), location);
+    parent.save(RecipeConsumer.wrap(consumer, base -> consumer.accept(new Result(base))), location);
   }
 
   /**
@@ -112,7 +115,7 @@ public class ShapedRetexturedRecipeBuilder {
       if (textureKey != '\0') {
         json.addProperty("texture", textureKey);
       } else if (texture != null) {
-        json.add("texture", texture.toJson());
+        json.add("texture", IngredientLoadable.DISALLOW_EMPTY.serialize(texture));
         Mantle.logger.warn("Using deprecated ingredient format on texture for shaped retextured recipe {}. Use key instead.", getId());
       }
       json.addProperty("match_all", matchAll);
@@ -120,8 +123,8 @@ public class ShapedRetexturedRecipeBuilder {
 
     @Nullable
     @Override
-    public JsonObject serializeAdvancement() {
-      return base.serializeAdvancement();
+    public JsonObject serializeAdvancement(HolderLookup.Provider registries) {
+      return base.serializeAdvancement(registries);
     }
 
     @Nullable

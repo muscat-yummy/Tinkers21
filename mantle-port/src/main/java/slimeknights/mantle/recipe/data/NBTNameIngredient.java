@@ -2,63 +2,36 @@ package slimeknights.mantle.recipe.data;
 
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.world.item.ItemStack;
+import com.mojang.serialization.Dynamic;
+import com.mojang.serialization.JsonOps;
+import net.minecraft.SharedConstants;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.ResourceLocation;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
-import net.minecraftforge.common.crafting.StrictNBTIngredient;
-
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.util.datafix.fixes.References;
+import net.minecraft.world.item.crafting.Ingredient;
 import javax.annotation.Nullable;
-import java.util.Objects;
 
-import net.minecraftforge.common.crafting.StrictNBTIngredient.Serializer;
-
-/**
- * Ingredient for a NBT sensitive item from another mod, should never be used outside datagen
- */
-public class NBTNameIngredient extends StrictNBTIngredient {
-  private final ResourceLocation name;
-  @Nullable
-  private final CompoundTag nbt;
-
-  protected NBTNameIngredient(ResourceLocation name, @Nullable CompoundTag nbt) {
-    super(ItemStack.EMPTY);
-    this.name = name;
-    this.nbt = nbt;
+/** Converts 1.20.1 strict stack metadata into component ingredient data during datagen. */
+public final class NBTNameIngredient {
+  private static final int SOURCE_DATA_VERSION = 3465;
+  private NBTNameIngredient() {}
+  public static Ingredient from(ResourceLocation name, @Nullable CompoundTag nbt) {
+    CompoundTag oldStack = new CompoundTag();
+    oldStack.putString("id", name.toString());
+    oldStack.putByte("Count", (byte)1);
+    if (nbt != null) { oldStack.put("tag", nbt.copy()); }
+    JsonElement fixed = DataFixers.getDataFixer().update(References.ITEM_STACK,
+      new Dynamic<>(NbtOps.INSTANCE, oldStack), SOURCE_DATA_VERSION,
+      SharedConstants.getCurrentVersion().getDataVersion().getVersion()).convert(JsonOps.INSTANCE).getValue();
+    JsonObject ingredient = new JsonObject();
+    ingredient.addProperty("type", "neoforge:components");
+    ingredient.addProperty("items", name.toString());
+    JsonObject stack = fixed.getAsJsonObject();
+    ingredient.add("components", stack.has("components") ? stack.get("components").deepCopy() : new JsonObject());
+    ingredient.addProperty("strict", true);
+    return new DatagenIngredient(ingredient).toVanilla();
   }
-
-  /**
-   * Creates an ingredient for the given name and NBT
-   * @param name  Item name
-   * @param nbt   NBT
-   * @return  Ingredient
-   */
-  public static NBTNameIngredient from(ResourceLocation name, CompoundTag nbt) {
-    return new NBTNameIngredient(name, nbt);
-  }
-
-  /**
-   * Creates an ingredient for an item that must have no NBT
-   * @param name  Item name
-   * @return  Ingredient
-   */
-  public static NBTNameIngredient from(ResourceLocation name) {
-    return new NBTNameIngredient(name, null);
-  }
-
-  @Override
-  public boolean test(@Nullable ItemStack stack) {
-    throw new UnsupportedOperationException();
-  }
-
-  @Override
-  public JsonElement toJson() {
-    JsonObject json = new JsonObject();
-    json.addProperty("type", Objects.requireNonNull(CraftingHelper.getID(Serializer.INSTANCE)).toString());
-    json.addProperty("item", name.toString());
-    if (nbt != null) {
-      json.addProperty("nbt", nbt.toString());
-    }
-    return json;
-  }
+  public static Ingredient from(ResourceLocation name) { return from(name, null); }
 }

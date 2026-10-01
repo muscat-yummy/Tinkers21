@@ -6,10 +6,15 @@ import lombok.RequiredArgsConstructor;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.RequirementsStrategy;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.JsonOps;
+import java.util.LinkedHashMap;
+import java.util.Map;
+import net.minecraft.advancements.AdvancementHolder;
+import net.minecraft.advancements.AdvancementRequirements;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
-import net.minecraft.data.recipes.FinishedRecipe;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -26,7 +31,8 @@ import java.util.function.Consumer;
 @SuppressWarnings({"WeakerAccess", "unused"})
 public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> {
   /** Advancement builder for this class */
-  protected final Advancement.Builder advancementBuilder = Advancement.Builder.advancement();
+  protected Advancement.Builder advancementBuilder = Advancement.Builder.recipeAdvancement();
+  private final Map<String,Criterion<?>> criteria = new LinkedHashMap<>();
   /** Group for this recipe */
   @Nonnull
   protected String group = "";
@@ -38,8 +44,8 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
    * @return  Builder
    */
   @SuppressWarnings("unchecked")
-  public T unlockedBy(String name, CriterionTriggerInstance criteria) {
-    this.advancementBuilder.addCriterion(name, criteria);
+  public T unlockedBy(String name, Criterion<?> criterion) {
+    this.criteria.put(name, criterion);
     return (T)this;
   }
 
@@ -71,14 +77,14 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
    * Builds the recipe with a default recipe ID, typically based on the output
    * @param consumerIn  Recipe consumer
    */
-  public abstract void save(Consumer<FinishedRecipe> consumerIn);
+  public abstract void save(RecipeConsumer consumerIn);
 
   /**
    * Builds the recipe
    * @param consumerIn  Recipe consumer
    * @param id          Recipe ID
    */
-  public abstract void save(Consumer<FinishedRecipe> consumerIn, ResourceLocation id);
+  public abstract void save(RecipeConsumer consumerIn, ResourceLocation id);
 
   /**
    * Base logic for advancement building
@@ -87,13 +93,15 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
    * @return Advancement ID
    */
   private ResourceLocation buildAdvancementInternal(ResourceLocation id, String folder) {
+    this.advancementBuilder = Advancement.Builder.recipeAdvancement();
+    criteria.forEach(this.advancementBuilder::addCriterion);
     this.advancementBuilder
         .parent(ResourceLocation.parse("recipes/root"))
         .rewards(AdvancementRewards.Builder.recipe(id))
-        .requirements(RequirementsStrategy.OR);
-    // we directly add the critera through the map as we want to replace it if already added instead of erroring
-    // the rest of these setters all replace our previous recipe data
-    this.advancementBuilder.criteria.put("has_the_recipe", new Criterion(RecipeUnlockedTrigger.unlocked(id)));
+        .requirements(AdvancementRequirements.Strategy.OR);
+    if (!criteria.containsKey("has_the_recipe")) {
+      this.advancementBuilder.addCriterion("has_the_recipe", RecipeUnlockedTrigger.unlocked(id));
+    }
     return ResourceLocation.fromNamespaceAndPath(id.getNamespace(), "recipes/" + folder + "/" + id.getPath());
   }
 
@@ -104,7 +112,7 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
    * @return Advancement ID
    */
   protected ResourceLocation buildAdvancement(ResourceLocation id, String folder) {
-    if (this.advancementBuilder.getCriteria().isEmpty()) {
+    if (this.criteria.isEmpty()) {
       throw new IllegalStateException("No way of obtaining recipe " + id);
     }
     return buildAdvancementInternal(id, folder);
@@ -119,7 +127,7 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
   @SuppressWarnings("SameParameterValue")  // API
   @Nullable
   protected ResourceLocation buildOptionalAdvancement(ResourceLocation id, String folder) {
-    if (this.advancementBuilder.getCriteria().isEmpty()) {
+    if (this.criteria.isEmpty()) {
       return null;
     }
     return buildAdvancementInternal(id, folder);
@@ -127,19 +135,26 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
 
   /** Class to implement basic finished recipe methods */
   @Getter
-  @RequiredArgsConstructor
   protected abstract class AbstractFinishedRecipe implements FinishedRecipe {
     private final ResourceLocation id;
     @Nullable
     private final ResourceLocation advancementId;
+    @Nullable
+    private final AdvancementHolder advancement;
+
+    protected AbstractFinishedRecipe(ResourceLocation id, @Nullable ResourceLocation advancementId) {
+      this.id = id;
+      this.advancementId = advancementId;
+      this.advancement = advancementId == null ? null : advancementBuilder.build(advancementId);
+    }
 
     @Nullable
     @Override
-    public JsonObject serializeAdvancement() {
+    public JsonObject serializeAdvancement(HolderLookup.Provider registries) {
       if (advancementId == null) {
         return null;
       }
-      return advancementBuilder.serializeToJson();
+      return Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();
     }
   }
 
@@ -147,8 +162,8 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
   protected class LoadableFinishedRecipe<R extends Recipe<?>> extends AbstractFinishedRecipe {
     private final R recipe;
     private final RecordLoadable<R> loadable;
-    public LoadableFinishedRecipe(R recipe, RecordLoadable<R> loadable, @Nullable ResourceLocation advancementId) {
-      super(recipe.getId(), advancementId);
+    public LoadableFinishedRecipe(ResourceLocation id, R recipe, RecordLoadable<R> loadable, @Nullable ResourceLocation advancementId) {
+      super(id, advancementId);
       this.recipe = recipe;
       this.loadable = loadable;
     }
