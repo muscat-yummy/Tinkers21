@@ -4,7 +4,7 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 
 ## Current checkpoint (2026-10-01)
 
-**Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward.
+**Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.
 
 - Imported the full upstream `src` tree, `lombok.config`, and `.editorconfig` from [SlimeKnights/TinkersConstruct 1.20.1 at 2785bc3](https://github.com/SlimeKnights/TinkersConstruct/commit/2785bc3b5e7777f9f1fd77a243887171ea2c3c68) in a separate provenance commit. The repository tree now contains 1,988 Java files and 10,734 paths under `src/main/resources` (including directories).
 - The NeoForge 1.21.1 / Java 21 Gradle scaffold successfully reached Java compilation. The [first compile run](https://github.com/muscat-yummy/Tinkers21/actions/runs/36289026918) failed with the compiler's initial 100 reported errors: missing Forge namespaces, absent Mantle API, and absent Lombok. The first two are expected migration work; Lombok has now been added to the compile and annotation processing classpaths, pending verification at the next meaningful phase boundary.
@@ -159,3 +159,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - ResourceLocation is final in 1.21.1. Two narrowly scoped access-transformer entries retain TiC's existing typed ID API rather than changing all material/modifier/stat ID call sites at once. ResourceId delegates validation to vanilla factories; the removed vanilla Dummy constructor marker is replaced by a private/protected Void marker. A standalone behavioral smoke test checks invalid input, equality symmetry, hashing, sorting and default namespaces independently of TiC's remaining compile failures.
 - Effect tick implementations return true to retain prior effect lifetime semantics under the new boolean API. Full effect functionality remains part of runtime testing.
 - Verified built-in registry fields are migrated to BuiltInRegistries/Registries; NeoForge-only keys remain in NeoForgeRegistries. Dynamic enchantment registries are deliberately left for lookup-aware changes.
+
+
+### Typed-ID validation and entity-state migration
+
+- Run 36923710392: Mantle compilation succeeded; the ResourceId behavioral smoke test printed PASS. Destination-checked API and built-in registry migration changed 42 more Java files. TiC still hit the 4,000 diagnostic cap. No full-build or load success is claimed.
+- TinkerDataCapability uses a transient AttachmentType and a NeoForge EntityCapability sharing the same holder for every living entity. It remains nonserialized, matching equipment-derived state. EquipmentContext caches a standard Optional and sizes slot arrays from EquipmentSlot.values() to include the new BODY slot.
+- PersistentDataCapability uses a serialized attachment with copyOnDeath, retaining modifier NBT and the existing login/respawn/dimension sync packet flow. Serialization and copying use defensive CompoundTag copies. Legacy Forge capability/world-data import still requires validation before old-world compatibility can be claimed.
+- Calls to the two migrated capability types use explicit Optional lookup helpers; remaining capabilities require their own migration. Entity attachment lifecycle, respawn and packet exchange are not yet tested in a running game.

@@ -90,6 +90,14 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
             text = text.replace('\n\nimport ', '\n\nimport ' + qualified + ';\nimport ', 1)
     if 'ForgeRegistries' not in re.sub(r'import [^;]+;', '', text):
         text = re.sub(r'import net\.minecraftforge\.registries\.ForgeRegistries;\n', '', text)
+    capability_receiver = r'\b([A-Za-z_]\w*(?:\.[A-Za-z_]\w*(?:\(\))?)*)\.getCapability\((TinkerDataCapability|PersistentDataCapability)\.CAPABILITY\)'
+    text = re.sub(capability_receiver, lambda match: match[2] + '.getOptionalData(' + match[1] + ')', text)
+    text = re.sub(r'\b(TinkerDataCapability|PersistentDataCapability)\.getOptionalData\(([^;\n]+?)\)\.resolve\(\)', r'\1.getOptionalData(\2)', text)
+    text = re.sub(r'LazyOptional<(TinkerDataCapability\.Holder|ModDataNBT)>(\s+\w+\s*=\s*(?:TinkerDataCapability|PersistentDataCapability)\.getOptionalData\()', r'Optional<\1>\2', text)
+    if re.search(r'\bOptional\s*<', text) and 'import java.util.Optional;' not in text and 'import java.util.*;' not in text:
+        text = text.replace('\n\nimport ', '\n\nimport java.util.Optional;\nimport ', 1)
+    if 'LazyOptional' not in re.sub(r'import [^;]+;', '', text):
+        text = re.sub(r'import net\.(?:minecraftforge|neoforged\.neoforge)\.common\.util\.LazyOptional;\n', '', text)
     legacy_bus = 'FMLJavaModLoadingContext.get().getModEventBus()'
     if legacy_bus in text:
         text = text.replace(legacy_bus, 'TConstruct.getModEventBus()')

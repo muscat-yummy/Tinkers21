@@ -1,4 +1,4 @@
-name: Validate typed TiC IDs and bootstrap migration
+name: Compile TiC entity attachment migration
 on:
   push:
     branches: [port/1.21.1-neoforge]

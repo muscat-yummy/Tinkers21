@@ -2,23 +2,21 @@ package slimeknights.tconstruct.library.tools.capability;
 
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.CapabilityManager;
-import net.minecraftforge.common.capabilities.CapabilityToken;
-import net.minecraftforge.common.capabilities.ICapabilityProvider;
 import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.neoforged.bus.api.EventPriority;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.entity.Entity;
+import java.util.Optional;
+import net.neoforged.neoforge.attachment.AttachmentType;
+import net.neoforged.neoforge.capabilities.EntityCapability;
+import net.neoforged.neoforge.registries.DeferredHolder;
+import net.neoforged.neoforge.registries.DeferredRegister;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.registration.object.IdAwareObject;
 import slimeknights.tconstruct.TConstruct;
 
-import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.IdentityHashMap;
 import java.util.Map;
@@ -34,60 +32,40 @@ public class TinkerDataCapability {
 
   /** Capability ID */
   private static final ResourceLocation ID = TConstruct.getResource("modifier_data");
-  /** Capability type */
-  public static final Capability<Holder> CAPABILITY = CapabilityManager.get(new CapabilityToken<>() {});
+  /** The public lookup and transient storage point at the same holder. */
+  public static final EntityCapability<Holder,Void> CAPABILITY = EntityCapability.createVoid(ID, Holder.class);
+  private static final DeferredRegister<AttachmentType<?>> ATTACHMENTS =
+    DeferredRegister.create(NeoForgeRegistries.Keys.ATTACHMENT_TYPES, TConstruct.MOD_ID);
+  private static final DeferredHolder<AttachmentType<?>,AttachmentType<Holder>> DATA =
+    ATTACHMENTS.register("modifier_data", () -> AttachmentType.builder(owner -> {
+      if (!(owner instanceof LivingEntity)) {
+        throw new IllegalArgumentException("Modifier data attachment requires a living entity");
+      }
+      return new Holder();
+    }).build());
 
-  /** Registers this capability */
+  /** Registers nonpersistent modifier state and its NeoForge entity lookup. */
   public static void register() {
+    ATTACHMENTS.register(TConstruct.getModEventBus());
     TConstruct.getModEventBus().addListener(EventPriority.NORMAL, false, RegisterCapabilitiesEvent.class, TinkerDataCapability::register);
-    NeoForge.EVENT_BUS.addGenericListener(Entity.class, TinkerDataCapability::attachCapability);
   }
 
-  /** Registers the capability with the event bus */
   private static void register(RegisterCapabilitiesEvent event) {
-    event.register(Holder.class);
-  }
-
-  /** Event listener to attach the capability */
-  private static void attachCapability(AttachCapabilitiesEvent<Entity> event) {
-    if (event.getObject() instanceof LivingEntity) {
-      Provider provider = new Provider();
-      event.addCapability(ID, provider);
-      event.addListener(provider);
+    for (var type : BuiltInRegistries.ENTITY_TYPE) {
+      event.registerEntity(CAPABILITY, type, (entity, context) ->
+        entity instanceof LivingEntity ? entity.getData(DATA) : null);
     }
   }
 
-  /** Gets the data capability from an entity, or null if missing */
-  @SuppressWarnings("DataFlowIssue")
+  /** Optional form for callers migrating from Forge LazyOptional. */
+  public static Optional<Holder> getOptionalData(Entity entity) {
+    return Optional.ofNullable(entity.getCapability(CAPABILITY));
+  }
+
+  /** Returns the living entity's transient state. It is never serialized to NBT. */
   @Nullable
-  public static TinkerDataCapability.Holder getData(LivingEntity entity) {
-    return entity.getCapability(CAPABILITY).orElse(null);
-  }
-
-
-  /* Required methods */
-
-  /** Capability provider instance */
-  private static class Provider implements ICapabilityProvider, Runnable {
-    private LazyOptional<Holder> data;
-    private Provider() {
-      this.data = LazyOptional.of(Holder::new);
-    }
-
-    @Nonnull
-    @Override
-    public <T> LazyOptional<T> getCapability(Capability<T> cap, @Nullable Direction side) {
-      return CAPABILITY.orEmpty(cap, data);
-    }
-
-    @Override
-    public void run() {
-      // called when capabilities invalidate, just invalidate but preserve the old data
-      // (as if they revive the equipment change event does not fire again, see dimension change)
-      Holder oldData = data.orElse(new Holder());
-      data.invalidate();
-      data = LazyOptional.of(() -> oldData);
-    }
+  public static Holder getData(LivingEntity entity) {
+    return entity.getCapability(CAPABILITY);
   }
 
   /** Class for generic keys */
