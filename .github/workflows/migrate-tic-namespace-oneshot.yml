@@ -1,4 +1,4 @@
-name: Port native bonus formulas and armor modifier state
+name: Verify native formula constructors and armor registry APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -106,6 +106,9 @@ jobs:
               'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
               'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
+              'net.minecraft.world.item.ArmorMaterial$Layer': ('Layer(',),
+              'net.minecraft.world.item.ArmorItem': ('ArmorItem(', 'getMaterial(',),
+              'net.neoforged.neoforge.registries.DeferredRegister': ('create(', 'register(',),
               'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ('EnchantmentDefinition(', 'slots(',),
               'net.minecraft.core.registries.BuiltInRegistries': ('Registry<',),
               'net.neoforged.neoforge.registries.NeoForgeRegistries': ('Registry<',),
