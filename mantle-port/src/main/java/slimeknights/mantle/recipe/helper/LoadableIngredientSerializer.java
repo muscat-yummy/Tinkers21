@@ -14,6 +14,7 @@ import net.neoforged.neoforge.common.crafting.ICustomIngredient;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
+import slimeknights.mantle.data.loadable.LoadableOps;
 
 import java.util.Arrays;
 import java.util.Objects;
@@ -44,7 +45,7 @@ public record LoadableIngredientSerializer<T extends ICustomIngredient>(RecordLo
           input.entries().forEach(entry -> json.add(
             ops.getStringValue(entry.getFirst()).getOrThrow(),
             ops.convertTo(JsonOps.INSTANCE, entry.getSecond())));
-          return DataResult.success(loadable.deserialize(json));
+          return DataResult.success(LoadableOps.with(ops, () -> loadable.deserialize(json)));
         } catch (RuntimeException exception) {
           return DataResult.error(() -> "Invalid ingredient: " + exception.getMessage());
         }
@@ -53,7 +54,7 @@ public record LoadableIngredientSerializer<T extends ICustomIngredient>(RecordLo
       @Override
       public <O> RecordBuilder<O> encode(T ingredient, DynamicOps<O> ops, RecordBuilder<O> prefix) {
         try {
-          loadable.serialize(ingredient).getAsJsonObject().entrySet().forEach(entry ->
+          LoadableOps.with(ops, () -> loadable.serialize(ingredient)).getAsJsonObject().entrySet().forEach(entry ->
             prefix.add(entry.getKey(), JsonOps.INSTANCE.convertTo(ops, entry.getValue())));
           return prefix;
         } catch (RuntimeException exception) {
