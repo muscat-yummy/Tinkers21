@@ -441,7 +441,7 @@ public class SmelteryRecipeBuilder {
   /** Adds a recipe for melting an metal item with the metal prefix in the name */
   @SuppressWarnings("removal")
   public SmelteryRecipeBuilder metalMelting(float scale, String domain, String path, boolean damagable) {
-    itemMelting(scale, domain + '_' + path, (float)Math.sqrt(scale), new ResourceLocation(domain, name.getPath() + '_' + path), damagable);
+    itemMelting(scale, domain + '_' + path, (float)Math.sqrt(scale), ResourceLocation.fromNamespaceAndPath(domain, name.getPath() + '_' + path), damagable);
     return this;
   }
 
@@ -595,7 +595,7 @@ public class SmelteryRecipeBuilder {
   @SuppressWarnings("removal")
   public SmelteryRecipeBuilder oreberry() {
     assert baseUnit == FluidValues.INGOT;
-    itemMelting(1/9f, "oreberry", 1 / 3f, new ResourceLocation("oreberriesreplanted", name.getPath() + "_oreberry"), false);
+    itemMelting(1/9f, "oreberry", 1 / 3f, ResourceLocation.fromNamespaceAndPath("oreberriesreplanted", name.getPath() + "_oreberry"), false);
     return this;
   }
 
