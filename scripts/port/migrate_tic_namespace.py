@@ -90,6 +90,17 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
             text = text.replace('\n\nimport ', '\n\nimport ' + qualified + ';\nimport ', 1)
     if 'ForgeRegistries' not in re.sub(r'import [^;]+;', '', text):
         text = re.sub(r'import net\.minecraftforge\.registries\.ForgeRegistries;\n', '', text)
+    # Mantle's register wrappers retain a single-type RegistryObject view.
+    # Correct only declarations made by the earlier RegistryObject -> DeferredHolder pass.
+    if re.search(r'\bDeferredHolder\s*<\?\s*,', text):
+        text = re.sub(r'\bDeferredHolder\s*<\?\s*,\s*', 'RegistryObject<', text)
+        if 'import slimeknights.mantle.registration.deferred.RegistryObject;' not in text:
+            text = text.replace('\n\nimport ', '\n\nimport slimeknights.mantle.registration.deferred.RegistryObject;\nimport ', 1)
+        if 'DeferredHolder' not in re.sub(r'import [^;]+;', '', text):
+            text = text.replace('import net.neoforged.neoforge.registries.DeferredHolder;\n', '')
+        if 'import net.neoforged.neoforge.registries.DeferredRegister;' in text and not any(token in text for token in ('makeRegistry(', 'getEntries(', 'DeferredRegister.Items', 'DeferredRegister.Blocks')):
+            text = re.sub(r'\bDeferredRegister\b', 'SynchronizedDeferredRegister', text)
+            text = text.replace('import net.neoforged.neoforge.registries.SynchronizedDeferredRegister;', 'import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;')
     capability_receiver = r'\b([A-Za-z_]\w*(?:\.[A-Za-z_]\w*(?:\(\))?)*)\.getCapability\((TinkerDataCapability|PersistentDataCapability)\.CAPABILITY\)'
     text = re.sub(capability_receiver, lambda match: match[2] + '.getOptionalData(' + match[1] + ')', text)
     text = re.sub(r'\b(TinkerDataCapability|PersistentDataCapability)\.getOptionalData\(([^;\n]+?)\)\.resolve\(\)', r'\1.getOptionalData(\2)', text)

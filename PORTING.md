@@ -167,3 +167,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - TinkerDataCapability uses a transient AttachmentType and a NeoForge EntityCapability sharing the same holder for every living entity. It remains nonserialized, matching equipment-derived state. EquipmentContext caches a standard Optional and sizes slot arrays from EquipmentSlot.values() to include the new BODY slot.
 - PersistentDataCapability uses a serialized attachment with copyOnDeath, retaining modifier NBT and the existing login/respawn/dimension sync packet flow. Serialization and copying use defensive CompoundTag copies. Legacy Forge capability/world-data import still requires validation before old-world compatibility can be claimed.
 - Calls to the two migrated capability types use explicit Optional lookup helpers; remaining capabilities require their own migration. Entity attachment lifecycle, respawn and packet exchange are not yet tested in a running game.
+
+
+### Registry wrapper correction (2026-10-02)
+
+- Run 36924425142: Mantle compilation and typed-ID behavior passed again. The entity attachment migration changed 13 further Java files. TiC compilation still hit its 4,000 diagnostic limit.
+- The first TiC namespace pass incorrectly represented Mantle registrations as native DeferredHolder declarations. Mantle's existing SynchronizedDeferredRegister and EnumDeferredRegister intentionally return its single-type RegistryObject adapter. Correct those TiC declarations to the actual adapter; direct generic registers without custom registry hooks use the same synchronized wrapper.
+- New native attachment DeferredHolder declarations with explicit registry types are preserved. Registers with makeRegistry/getEntries require individual review and are excluded from automatic wrapper replacement.
+- The next TiC compiler limit is 12,000 to capture a more complete baseline; counts from differently capped runs must not be compared as progress metrics. Phase 2 remains incomplete until TiC builds and loads.

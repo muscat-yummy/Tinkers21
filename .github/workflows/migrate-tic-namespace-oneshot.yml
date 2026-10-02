@@ -1,4 +1,4 @@
-name: Compile TiC entity attachment migration
+name: Compile corrected TiC registry adapter migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -21,7 +21,7 @@ jobs:
           cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
           allprojects {
               tasks.withType(JavaCompile).configureEach {
-                  options.compilerArgs.addAll(['-Xmaxerrs', '4000'])
+                  options.compilerArgs.addAll(['-Xmaxerrs', '12000'])
               }
           }
           gradle.projectsEvaluated {
