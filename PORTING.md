@@ -423,3 +423,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Dropper rails use native sided ENTITY_AUTOMATION inventory access, preserving their downward eligibility/upward transfer queries. Fluid cannon projectiles query native block inventory access, use the native synced-data builder and dimensions accessors, and save/load fluids with the entity's registry lookup. Legacy/native cannon positions use TagUtil.
 - Station menus open through the native player extension. Item-slot and fluid-update payloads use native optional stream codecs and the real registry-aware play buffer provided by Mantle; absent lookup is rejected. Item-slot updates guard invalid indices and pass the actual client level/states to the renderer.
 - Add independent native packet round trips for empty and component-bearing item/fluid contents, amounts, slots, positions and buffer consumption. Await CI. Container/cannon gameplay, recipes and Phase 2 completion remain pending.
+
+
+### Native recipe input compatibility for retained read-only inventories
+
+- Mantle IRecipeContainer extends the real native RecipeInput alongside Container. Its native size delegates to the existing slot-count contract, and native emptiness uses RecipeInput's normal slot scan. Existing single-stack and empty inventories retain their specialized methods and unsupported mutations.
+- This allows existing casting/melting/material/station inventory views to satisfy native recipe type bounds without fake inventory adapters or deleting their read-only behavior. Native RecipeHolder lookup, provider-aware recipe methods and serializer/datagen migration still remain.
+- Add independent checks for ordered multi-slot views, backing-inventory changes, empty and single-item inputs, unsupported mutations and component-preserving casting snapshots. Await CI; this is not a completed recipe or Phase 2 gate.
