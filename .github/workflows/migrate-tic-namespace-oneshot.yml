@@ -1,4 +1,4 @@
-name: Verify TiC loot entry and codec validation
+name: Port TiC player and projectile modifier attachments
 on:
   push:
     branches: [port/1.21.1-neoforge]

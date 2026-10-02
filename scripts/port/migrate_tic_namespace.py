@@ -128,10 +128,10 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
     if '@Cancelable' in text and re.search(r'\bextends\s+(EntityTeleportEvent|ModifierTeleportEvent)\b', text):
         text = re.sub(r'^\s*@Cancelable\s*\n', '', text, flags=re.MULTILINE)
         text = text.replace('import net.minecraftforge.eventbus.api.Cancelable;\n', '')
-    capability_receiver = r'\b([A-Za-z_]\w*(?:\.[A-Za-z_]\w*(?:\(\))?)*)\.getCapability\((TinkerDataCapability|PersistentDataCapability)\.CAPABILITY\)'
+    capability_receiver = r'\b([A-Za-z_]\w*(?:\.[A-Za-z_]\w*(?:\(\))?)*)\.getCapability\((TinkerDataCapability|PersistentDataCapability|EntityModifierCapability)\.CAPABILITY\)'
     text = re.sub(capability_receiver, lambda match: match[2] + '.getOptionalData(' + match[1] + ')', text)
-    text = re.sub(r'\b(TinkerDataCapability|PersistentDataCapability)\.getOptionalData\(([^;\n]+?)\)\.resolve\(\)', r'\1.getOptionalData(\2)', text)
-    text = re.sub(r'LazyOptional<(TinkerDataCapability\.Holder|ModDataNBT)>(\s+\w+\s*=\s*(?:TinkerDataCapability|PersistentDataCapability)\.getOptionalData\()', r'Optional<\1>\2', text)
+    text = re.sub(r'\b(TinkerDataCapability|PersistentDataCapability|EntityModifierCapability)\.getOptionalData\(([^;\n]+?)\)\.resolve\(\)', r'\1.getOptionalData(\2)', text)
+    text = re.sub(r'LazyOptional<(TinkerDataCapability\.Holder|ModDataNBT|EntityModifierCapability\.EntityModifiers|EntityModifiers)>(\s+\w+\s*=\s*(?:TinkerDataCapability|PersistentDataCapability|EntityModifierCapability)\.getOptionalData\()', r'Optional<\1>\2', text)
     if re.search(r'\bOptional\s*<', text) and 'import java.util.Optional;' not in text and 'import java.util.*;' not in text:
         text = text.replace('\n\nimport ', '\n\nimport java.util.Optional;\nimport ', 1)
     if 'LazyOptional' not in re.sub(r'import [^;]+;', '', text):
@@ -150,6 +150,9 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         text = text.replace('Mod.EventBusSubscriber', 'EventBusSubscriber')
         if 'import net.neoforged.fml.common.EventBusSubscriber;' not in text:
             text = text.replace('\n\nimport ', '\n\nimport net.neoforged.fml.common.EventBusSubscriber;\nimport ', 1)
+    if 'import net.neoforged.fml.common.EventBusSubscriber;' in text:
+        text = re.sub(r'\bbus\s*=\s*(EventBusSubscriber\.)?Bus\.FORGE\b',
+                      lambda match: 'bus = ' + (match[1] or '') + 'Bus.GAME', text)
     if text != old:
         path.write_text(text)
         changed.append(str(path))
