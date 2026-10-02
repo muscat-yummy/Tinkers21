@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.gadgets;
 
+import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -18,7 +19,6 @@ import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
 import slimeknights.tconstruct.common.TinkerModule;
@@ -102,7 +102,7 @@ public final class TinkerGadgets extends TinkerModule {
   /*
    * Entities
    */
-  public static final DeferredHolder<?, EntityType<FancyItemFrameEntity>> itemFrameEntity = ENTITIES.register("fancy_item_frame", () ->
+  public static final RegistryObject<EntityType<FancyItemFrameEntity>> itemFrameEntity = ENTITIES.register("fancy_item_frame", () ->
     EntityType.Builder.<FancyItemFrameEntity>of(
       FancyItemFrameEntity::new, MobCategory.MISC)
       .sized(0.5F, 0.5F)
@@ -111,11 +111,11 @@ public final class TinkerGadgets extends TinkerModule {
       .setCustomClientFactory((spawnEntity, world) -> new FancyItemFrameEntity(TinkerGadgets.itemFrameEntity.get(), world))
       .setShouldReceiveVelocityUpdates(false)
   );
-  public static final DeferredHolder<?, EntityType<FancyArmorStandEntity>> armorStandEntity = ENTITIES.register("armor_stand", () ->
+  public static final RegistryObject<EntityType<FancyArmorStandEntity>> armorStandEntity = ENTITIES.register("armor_stand", () ->
     EntityType.Builder.of(FancyArmorStandEntity::new, MobCategory.MISC).sized(0.5F, 1.975F).clientTrackingRange(10));
 
   @Deprecated
-  public static final DeferredHolder<?, EntityType<GlowballEntity>> glowBallEntity = ENTITIES.register("glow_ball", () ->
+  public static final RegistryObject<EntityType<GlowballEntity>> glowBallEntity = ENTITIES.register("glow_ball", () ->
     EntityType.Builder.<GlowballEntity>of(GlowballEntity::new, MobCategory.MISC)
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
@@ -124,7 +124,7 @@ public final class TinkerGadgets extends TinkerModule {
       .setShouldReceiveVelocityUpdates(true)
   );
   @Deprecated
-  public static final DeferredHolder<?, EntityType<EFLNEntity>> eflnEntity = ENTITIES.register("efln_ball", () ->
+  public static final RegistryObject<EntityType<EFLNEntity>> eflnEntity = ENTITIES.register("efln_ball", () ->
     EntityType.Builder.<EFLNEntity>of(EFLNEntity::new, MobCategory.MISC)
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
@@ -132,7 +132,7 @@ public final class TinkerGadgets extends TinkerModule {
       .setCustomClientFactory((spawnEntity, world) -> new EFLNEntity(TinkerGadgets.eflnEntity.get(), world))
       .setShouldReceiveVelocityUpdates(true));
   @Deprecated
-  public static final DeferredHolder<?, EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.register("quartz_shuriken", () ->
+  public static final RegistryObject<EntityType<QuartzShurikenEntity>> quartzShurikenEntity = ENTITIES.register("quartz_shuriken", () ->
     EntityType.Builder.<QuartzShurikenEntity>of(QuartzShurikenEntity::new, MobCategory.MISC)
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
@@ -141,7 +141,7 @@ public final class TinkerGadgets extends TinkerModule {
       .setShouldReceiveVelocityUpdates(true)
   );
   @Deprecated
-  public static final DeferredHolder<?, EntityType<FlintShurikenEntity>> flintShurikenEntity = ENTITIES.register("flint_shuriken", () ->
+  public static final RegistryObject<EntityType<FlintShurikenEntity>> flintShurikenEntity = ENTITIES.register("flint_shuriken", () ->
     EntityType.Builder.<FlintShurikenEntity>of(FlintShurikenEntity::new, MobCategory.MISC)
       .sized(0.25F, 0.25F)
       .setTrackingRange(4)
@@ -153,7 +153,7 @@ public final class TinkerGadgets extends TinkerModule {
   /*
    * Potions
    */
-  public static final DeferredHolder<?, CarryPotionEffect> carryEffect = MOB_EFFECTS.register("carry", CarryPotionEffect::new);
+  public static final RegistryObject<CarryPotionEffect> carryEffect = MOB_EFFECTS.register("carry", CarryPotionEffect::new);
 
   /*
    * Events

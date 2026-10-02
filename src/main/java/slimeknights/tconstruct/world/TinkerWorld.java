@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.world;
 
+import slimeknights.mantle.registration.deferred.RegistryObject;
 import com.google.common.collect.ImmutableSet;
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.Direction;
@@ -54,7 +55,6 @@ import net.neoforged.neoforge.event.entity.RegisterSpawnPlacementsEvent.Operatio
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.registries.ForgeRegistries;
-import net.neoforged.neoforge.registries.DeferredHolder;
 import slimeknights.mantle.registration.object.EntityObject;
 import slimeknights.mantle.registration.object.EnumObject;
 import slimeknights.mantle.registration.object.ItemObject;
@@ -118,7 +118,7 @@ public final class TinkerWorld extends TinkerModule {
   public static final PlantType SLIME_PLANT_TYPE = PlantType.get("slime");
 
   /** Creative tab for anything that is naturally found in the world */
-  public static final DeferredHolder<?, CreativeModeTab> tabWorld = CREATIVE_TABS.register(
+  public static final RegistryObject<CreativeModeTab> tabWorld = CREATIVE_TABS.register(
     "world", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "world"))
       .icon(() -> new ItemStack(TinkerWorld.cobaltOre))
       .displayItems(TinkerWorld::addTabItems)
@@ -306,9 +306,9 @@ public final class TinkerWorld extends TinkerModule {
   /*
    * Particles
    */
-  public static final DeferredHolder<?, SimpleParticleType> skySlimeParticle = PARTICLE_TYPES.register("sky_slime", () -> new SimpleParticleType(false));
-  public static final DeferredHolder<?, SimpleParticleType> enderSlimeParticle = PARTICLE_TYPES.register("ender_slime", () -> new SimpleParticleType(false));
-  public static final DeferredHolder<?, SimpleParticleType> terracubeParticle = PARTICLE_TYPES.register("terracube", () -> new SimpleParticleType(false));
+  public static final RegistryObject<SimpleParticleType> skySlimeParticle = PARTICLE_TYPES.register("sky_slime", () -> new SimpleParticleType(false));
+  public static final RegistryObject<SimpleParticleType> enderSlimeParticle = PARTICLE_TYPES.register("ender_slime", () -> new SimpleParticleType(false));
+  public static final RegistryObject<SimpleParticleType> terracubeParticle = PARTICLE_TYPES.register("terracube", () -> new SimpleParticleType(false));
 
   /*
    * Features
