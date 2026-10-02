@@ -17,6 +17,8 @@ import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
@@ -81,6 +83,20 @@ import java.util.function.Predicate;
  */
 @SuppressWarnings("unused")
 public final class TinkerTables extends TinkerModule {
+  public TinkerTables() {
+    TConstruct.getModEventBus().addListener(TinkerTables::registerCapabilities);
+  }
+
+  private static void registerCapabilities(RegisterCapabilitiesEvent event) {
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, craftingStationTile.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, tinkerStationTile.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, partBuilderTile.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, modifierWorktableTile.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, tinkersChestTile.get(), (blockEntity, side) -> blockEntity.isRemoved() ? null : blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, partChestTile.get(), (blockEntity, side) -> blockEntity.isRemoved() ? null : blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, castChestTile.get(), (blockEntity, side) -> blockEntity.isRemoved() ? null : blockEntity.getItemHandler());
+  }
+
   /** Creative tab for general items, or those that lack another tab */
   public static final RegistryObject<CreativeModeTab> tabTables = CREATIVE_TABS.register(
     "tables", () -> CreativeModeTab.builder().title(TConstruct.makeTranslation("itemGroup", "tables"))
