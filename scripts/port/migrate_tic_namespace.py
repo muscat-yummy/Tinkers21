@@ -119,6 +119,10 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         if 'import net.neoforged.neoforge.registries.DeferredRegister;' in text and not any(token in text for token in ('makeRegistry(', 'getEntries(', 'DeferredRegister.Items', 'DeferredRegister.Blocks')):
             text = re.sub(r'\bDeferredRegister\b', 'SynchronizedDeferredRegister', text)
             text = text.replace('import net.neoforged.neoforge.registries.SynchronizedDeferredRegister;', 'import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;')
+    # NeoForge EntityTeleportEvent itself implements ICancellableEvent.
+    if '@Cancelable' in text and re.search(r'\bextends\s+(EntityTeleportEvent|ModifierTeleportEvent)\b', text):
+        text = re.sub(r'^\s*@Cancelable\s*\n', '', text, flags=re.MULTILINE)
+        text = text.replace('import net.minecraftforge.eventbus.api.Cancelable;\n', '')
     capability_receiver = r'\b([A-Za-z_]\w*(?:\.[A-Za-z_]\w*(?:\(\))?)*)\.getCapability\((TinkerDataCapability|PersistentDataCapability)\.CAPABILITY\)'
     text = re.sub(capability_receiver, lambda match: match[2] + '.getOptionalData(' + match[1] + ')', text)
     text = re.sub(r'\b(TinkerDataCapability|PersistentDataCapability)\.getOptionalData\(([^;\n]+?)\)\.resolve\(\)', r'\1.getOptionalData(\2)', text)

@@ -184,3 +184,12 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - The mapped 1.21.1 ParticleType MapCodec/StreamCodec API and TransparentBlock constructor were inspected from the resolved Minecraft artifact. Fluid particles now use the complete native fluid codec/component payload. Glass and pane beacon colors use opaque ARGB while retaining the existing custom RGB values.
 - Spectator menu opening uses NeoForge's public player openMenu provider/BlockPos overload, retaining the block-position payload and syncOnOpen flow.
 - Legacy AT members are renamed only when the resolved mapped class contains the comment-named member with the original descriptor. Unmatched/removed members remain for deliberate source/API review. Minecraft artifacts are rebuilt after these AT changes.
+
+
+### Mapped access / particle checkpoint
+
+- Run 36979136764: 37 Java files migrated and 71 AT member names verified against mapped descriptors and corrected. Seventy-three legacy AT entries still require manual review.
+- Mantle compilation and ResourceId smoke test passed. TiC declaration diagnostics decreased from 643 to 561, while the normal compile decreased from 6,767 to 6,446 using the same compiler settings. Neither check constitutes a full build or game-load success.
+- BlockContainerOpenedTrigger now implements the 1.21 criterion Codec/SimpleInstance contract, preserving optional player predicates and the block-entity type JSON key. Its singleton is registered on the mod bus through the native trigger registry instead of modifying the vanilla registry during common setup. Datagen produces a Criterion wrapper referencing the same registered singleton.
+- Teleport events inherit cancellation from NeoForge EntityTeleportEvent; obsolete Forge @Cancelable annotations are removed only from those subclasses.
+- Particle and criterion implementation sources receive an independent normal JavaCompile check, in addition to declaration and full-source diagnostics. This check does not alter production source sets or remove any TiC systems.

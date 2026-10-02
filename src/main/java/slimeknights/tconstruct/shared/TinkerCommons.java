@@ -2,7 +2,8 @@ package slimeknights.tconstruct.shared;
 
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.core.registries.BuiltInRegistries;
-import net.minecraft.advancements.CriteriaTriggers;
+import net.minecraft.advancements.CriterionTrigger;
+import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
 import net.minecraft.core.particles.ParticleType;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.DataGenerator;
@@ -19,7 +20,7 @@ import net.minecraft.world.level.block.TransparentBlock;
 import net.minecraft.world.level.block.HalfTransparentBlock;
 import net.minecraft.world.level.block.IronBarsBlock;
 import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.TintedGlassBlock;
+import net.minecraft.world.level.block.TintedTransparentBlock;
 import net.minecraft.world.level.block.WeatheringCopper.WeatherState;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.material.MapColor;
@@ -117,7 +118,7 @@ public final class TinkerCommons extends TinkerModule {
   public static final RegistryObject<GlowBlock> glow = DeferredHolder.create(glowBlock.getId(), BuiltInRegistries.BLOCK);
   // glass
   public static final ItemObject<TransparentBlock> clearGlass = BLOCKS.register("clear_glass", () -> new TransparentBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
-  public static final ItemObject<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
+  public static final ItemObject<TintedTransparentBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedTransparentBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn(Blocks::never).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
   public static final ItemObject<ClearGlassPaneBlock> clearGlassPane = BLOCKS.register("clear_glass_pane", () -> new ClearGlassPaneBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassBlock> clearStainedGlass = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass", (color) -> new ClearStainedGlassBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassPaneBlock> clearStainedGlassPane = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass_pane", (color) -> new ClearStainedGlassPaneBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);
@@ -180,9 +181,15 @@ public final class TinkerCommons extends TinkerModule {
     .putAll(ITEMS.registerEnum(SlimeType.TINKER, "slime_ball", type -> new Item(ITEM_PROPS)))
     .build();
 
-  public static final BlockContainerOpenedTrigger CONTAINER_OPENED_TRIGGER = new BlockContainerOpenedTrigger();
+  private static final SynchronizedDeferredRegister<CriterionTrigger<?>> CRITERION_TRIGGERS =
+    SynchronizedDeferredRegister.create(Registries.TRIGGER_TYPE, TConstruct.MOD_ID);
+  public static final BlockContainerOpenedTrigger CONTAINER_OPENED_TRIGGER = BlockContainerOpenedTrigger.INSTANCE;
+  static {
+    CRITERION_TRIGGERS.register("block_container_opened", () -> CONTAINER_OPENED_TRIGGER);
+  }
 
   public TinkerCommons() {
+    CRITERION_TRIGGERS.register(TConstruct.getModEventBus());
     TConstructCommand.init();
     NeoForge.EVENT_BUS.addListener(RecipeCacheInvalidator::onReloadListenerReload);
   }
@@ -200,7 +207,6 @@ public final class TinkerCommons extends TinkerModule {
       CraftingHelper.register(BlockTagIngredient.Serializer.ID, BlockTagIngredient.Serializer.INSTANCE);
       CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
       CraftingHelper.register(ConfigEnabledCondition.SERIALIZER);
-      CriteriaTriggers.register(CONTAINER_OPENED_TRIGGER);
 
       //noinspection removal
       CraftingHelper.register(TagIntersectionPresentCondition.SERIALIZER);

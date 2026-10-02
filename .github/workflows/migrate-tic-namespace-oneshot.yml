@@ -1,4 +1,4 @@
-name: Compile TiC particle glass and mapped access migration
+name: Verify TiC particle and container criterion port
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -34,6 +34,12 @@ jobs:
                   dependsOn 'compileResourceIdSmoke'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/resource-id')) + rootProject.configurations.compileClasspath
                   mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
+              }
+              rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java')
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
               }
               rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -101,6 +107,9 @@ jobs:
         run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Verify typed resource ID behavior independently of the remaining TiC port
         run: ./gradlew :runResourceIdSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile particle and criterion implementations independently
+        continue-on-error: true
+        run: ./gradlew :compileLeafPortChecks --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
