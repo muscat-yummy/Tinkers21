@@ -1,4 +1,4 @@
-name: Port native entity pairing and registry aware complex spawn data
+name: Verify native port and inspect published optional integration APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -6,6 +6,29 @@ on:
 permissions:
   contents: write
 jobs:
+  inspect_optional_dependencies:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Inspect public publisher metadata for native optional integrations
+        shell: python
+        run: |
+          import json, urllib.request, urllib.parse
+          for slug in ('crafting-tweaks', 'immersiveengineering', 'json-things', 'mmmmmmmmmmmm', 'diet'):
+              try:
+                  headers = {'User-Agent': 'Tinkers21-private-port-api-inspection'}
+                  project_url = 'https://api.modrinth.com/v2/project/' + slug
+                  with urllib.request.urlopen(urllib.request.Request(project_url, headers=headers), timeout=30) as response:
+                      project = json.load(response)
+                  print('Published project:', slug, project.get('id'), 'source:', project.get('source_url'))
+                  query = urllib.parse.urlencode({'game_versions': json.dumps(['1.21.1']), 'loaders': json.dumps(['neoforge'])})
+                  url = project_url + '/version?' + query
+                  with urllib.request.urlopen(urllib.request.Request(url, headers=headers), timeout=30) as response:
+                      versions = json.load(response)
+                  print('Native versions:', json.dumps([{'id': version['id'], 'version': version['version_number'], 'files': [file['filename'] for file in version['files']]} for version in versions[:3]]))
+              except Exception as exception:
+                  print('Public metadata unavailable:', slug, type(exception).__name__, str(exception))
   migrate:
     runs-on: ubuntu-latest
     steps:
