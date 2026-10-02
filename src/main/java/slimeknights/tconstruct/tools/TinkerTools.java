@@ -174,6 +174,7 @@ public final class TinkerTools extends TinkerModule {
   }
 
   public TinkerTools() {
+    TConstruct.getModEventBus().addListener(ToolCapabilityProvider::registerCapabilities);
     INGREDIENT_TYPES.register(TConstruct.getModEventBus());
     SlotType.init();
     BlockSideHitListener.init();

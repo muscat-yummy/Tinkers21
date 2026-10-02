@@ -284,3 +284,14 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Run 36988393676: all established independent implementation and behavioral checks passed. Declaration diagnostics decreased from 452 to 446 and normal compilation from 6,129 to 6,111. ToolHookIngredient still depends on core Lombok-generated accessors while unresolved declaration errors prevent complete annotation processing; it is not independently verified.
 - BlockItemProviderCapability uses native ItemCapability and RegisterCapabilitiesEvent. The stateless fallback is registered at LOW priority, after normal custom providers across mod containers. NeoForge CapabilityHooks and FancyModLoader priority dispatch were inspected to verify this ordering. Native lookup returns nullable providers; original stack identity, placement data and consume behavior are preserved.
 - Pattern retains typed ResourceId inheritance and validated nullable factories, replacing the removed ResourceLocation.Dummy marker with the existing validated Void constructor. Full TiC compilation and game loading remain pending; phase 2 is incomplete.
+
+
+### Native tool capabilities and menu synchronization
+
+- Replace the legacy ICapabilityProvider/LazyOptional dispatcher with registered native ItemCapability callbacks for modifiable tools. Built-in fluid, inventory, energy and block providers retain their selection predicates and first-successful-provider ordering. Tool views refresh before selection and retained handler operations.
+- Native lookups construct providers per query. Constructor callbacks must keep persistent state in the tool data, not in provider identity. Addons with custom capabilities register them explicitly through registerCapability during RegisterCapabilitiesEvent; the provider-constructor extension point is retained.
+- Register capabilities on the mod bus and replace six obsolete item initCapabilities overrides with that registration. These tools' gameplay methods and handlers remain present. No stack/provider cache retains discarded item stacks.
+- Inventory blacklisting, fallback handlers and destruction drops use native nullable item capability lookup. Tool inventory menus use ServerPlayer.openMenu with registry-aware extra data and ItemStack.STREAM_CODEC on both sender and receiver, retaining FULL_STACK, MINIMAL and no-stack sync modes. CUSTOM_DATA replaces the legacy client NBT-presence guard.
+- These changes are awaiting the full declaration/body compiler checkpoint. Runtime fluid transfer, inventory opening/synchronization and addon providers still need game tests. Phase 2 remains incomplete.
+
+- Previous block-provider/pattern checkpoint run 36989960608: all established independent compilation and behavior checks passed; no diagnostics targeted the two migrated implementations. TiC declarations decreased from 446 to 433 and full compilation from 6,111 to 6,092. The implementations are not isolated runtime-tested.
