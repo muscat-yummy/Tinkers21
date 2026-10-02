@@ -29,7 +29,9 @@ public class DuctTankWrapper implements IFluidHandler {
     if (tankMapping == null) {
       FluidStack filter = itemHandler.getFluid();
       int count = parent.getTanks();
-      if (filter.isEmpty()) {
+      if (count == 0) {
+        tankMapping = new int[0];
+      } else if (filter.isEmpty()) {
         FluidStack last = parent.getFluidInTank(count - 1);
         if (last.isEmpty()) {
           tankMapping = new int[] { count - 1 };
@@ -40,7 +42,7 @@ public class DuctTankWrapper implements IFluidHandler {
         IntList list = new IntArrayList(count);
         for (int i = 0; i < count; i++) {
           FluidStack contained = parent.getFluidInTank(i);
-          if (contained.isEmpty() || filter.isFluidEqual(contained)) {
+          if (contained.isEmpty() || FluidStack.isSameFluidSameComponents(filter, contained)) {
             list.add(i);
           }
         }
@@ -84,7 +86,7 @@ public class DuctTankWrapper implements IFluidHandler {
 
   @Override
   public boolean isFluidValid(int tank, FluidStack stack) {
-    return itemHandler.getFluid().isFluidEqual(stack);
+    return FluidStack.isSameFluidSameComponents(itemHandler.getFluid(), stack);
   }
 
 
@@ -92,7 +94,7 @@ public class DuctTankWrapper implements IFluidHandler {
 
   @Override
   public int fill(FluidStack resource, FluidAction action) {
-    if (resource.isEmpty() || !itemHandler.getFluid().isFluidEqual(resource)) {
+    if (resource.isEmpty() || !FluidStack.isSameFluidSameComponents(itemHandler.getFluid(), resource)) {
       return 0;
     }
     return parent.fill(resource, action);
@@ -109,7 +111,7 @@ public class DuctTankWrapper implements IFluidHandler {
 
   @Override
   public FluidStack drain(FluidStack resource, FluidAction action) {
-    if (resource.isEmpty() || !itemHandler.getFluid().isFluidEqual(resource)) {
+    if (resource.isEmpty() || !FluidStack.isSameFluidSameComponents(itemHandler.getFluid(), resource)) {
       return FluidStack.EMPTY;
     }
     return parent.drain(resource, action);

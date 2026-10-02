@@ -170,6 +170,12 @@ public final class TinkerSmeltery extends TinkerModule {
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, melter.get(), (blockEntity, side) -> blockEntity.getItemHandler());
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, alloyer.get(), (blockEntity, side) -> blockEntity.getTank());
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, heater.get(), (blockEntity, side) -> blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, smeltery.get(), (blockEntity, side) -> blockEntity.getMeltingInventory());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, foundry.get(), (blockEntity, side) -> blockEntity.getMeltingInventory());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, drain.get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, duct.get(), (blockEntity, side) -> blockEntity.getFluidHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, duct.get(), (blockEntity, side) -> blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, chute.get(), (blockEntity, side) -> blockEntity.getItemHandler());
   }
 
   /** Predicate for something that never happens */

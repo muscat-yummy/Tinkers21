@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.smeltery.block.entity.tank;
 
-import net.minecraftforge.common.util.LazyOptional;
+import javax.annotation.Nullable;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 
@@ -23,7 +23,8 @@ public interface ISmelteryTankHandler {
    * Gets the fluid capability for this smeltery. Provided here as the smeltery itself does not expose this
    * @return  Fluid capability
    */
-  LazyOptional<IFluidHandler> getFluidCapability();
+  @Nullable
+  IFluidHandler getFluidCapability();
 
   /**
    * Called when the tank adds or removes a fluid to notify listeners
