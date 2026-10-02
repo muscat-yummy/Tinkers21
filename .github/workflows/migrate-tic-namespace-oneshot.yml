@@ -1,4 +1,4 @@
-name: Port native faucet and channel capability caches
+name: Port native instrument ingredient and verify fluid contents
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,7 +37,7 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java')
                   options.annotationProcessorPath = rootProject.configurations.annotationProcessor
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
@@ -56,6 +56,11 @@ jobs:
                   dependsOn 'compileLeafPortChecks'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath
                   mainClass.set('slimeknights.tconstruct.port.FluidContentsSmoke')
+              }
+              rootProject.tasks.register('runInstrumentIngredientSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.InstrumentIngredientSmoke')
               }
               rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -153,6 +158,9 @@ jobs:
       - name: Verify fluid components and scaled container behavior
         continue-on-error: true
         run: ./gradlew :runFluidContentsSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify instrument component matching and native codecs
+        continue-on-error: true
+        run: ./gradlew :runInstrumentIngredientSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

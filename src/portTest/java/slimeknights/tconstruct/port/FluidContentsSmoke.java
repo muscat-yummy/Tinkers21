@@ -30,6 +30,8 @@ public final class FluidContentsSmoke {
   }
 
   public static void main(String[] args) {
+    // Initialize the real loader's empty mod-file list before vanilla feature flags.
+    net.neoforged.fml.loading.LoadingModList.of(java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
     var registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);

@@ -28,7 +28,6 @@ import net.minecraft.world.level.material.PushReaction;
 import net.minecraft.world.level.storage.loot.entries.LootPoolEntryType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.crafting.IngredientType;
 import com.mojang.serialization.MapCodec;
@@ -172,6 +171,7 @@ public final class TinkerCommons extends TinkerModule {
   static {
     INGREDIENT_TYPES.register(BlockTagIngredient.ID.getPath(), () -> BlockTagIngredient.TYPE);
     INGREDIENT_TYPES.register(NoContainerIngredient.ID.getPath(), () -> NoContainerIngredient.TYPE);
+    INGREDIENT_TYPES.register(InstrumentIngredient.ID.getPath(), () -> InstrumentIngredient.TYPE);
   }
 
   private static final SynchronizedDeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS =
@@ -225,7 +225,6 @@ public final class TinkerCommons extends TinkerModule {
   @SubscribeEvent
   void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
 
       //noinspection removal
       //noinspection removal
