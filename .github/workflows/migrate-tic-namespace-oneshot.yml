@@ -1,4 +1,4 @@
-name: Compile corrected TiC registry adapter migration
+name: Inspect TiC declarations and current particle APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,6 +35,14 @@ jobs:
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/resource-id')) + rootProject.configurations.compileClasspath
                   mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
               }
+              rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.sourceSets.main.allJava
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  options.annotationProcessorPath = rootProject.configurations.annotationProcessor
+                  options.compilerArgs.add('-proc:only')
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/declarations'))
+              }
               rootProject.tasks.register('portClasspath') {
                   doLast {
                       new File('/tmp/tinkers-port-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
@@ -50,6 +58,8 @@ jobs:
           targets = {
               'net.minecraft.world.item.alchemy.PotionBrewing$Builder': ('addMix(', 'addRecipe('),
               'net.minecraft.resources.ResourceLocation': ('class ', 'ResourceLocation(java.lang.String, java.lang.String)',),
+              'net.minecraft.core.particles.ParticleType': ('ParticleType(', 'codec(', 'streamCodec(',),
+              'net.minecraft.world.level.block.TransparentBlock': ('class ', 'TransparentBlock(',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
               'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ('EnchantmentDefinition(', 'slots(',),
               'net.minecraft.core.registries.BuiltInRegistries': ('Registry<',),
@@ -87,5 +97,8 @@ jobs:
         run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Verify typed resource ID behavior independently of the remaining TiC port
         run: ./gradlew :runResourceIdSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Diagnose TiC declarations independently of method bodies
+        continue-on-error: true
+        run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile Tinkers
         run: ./gradlew :compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
