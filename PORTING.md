@@ -295,3 +295,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - These changes are awaiting the full declaration/body compiler checkpoint. Runtime fluid transfer, inventory opening/synchronization and addon providers still need game tests. Phase 2 remains incomplete.
 
 - Previous block-provider/pattern checkpoint run 36989960608: all established independent compilation and behavior checks passed; no diagnostics targeted the two migrated implementations. TiC declarations decreased from 446 to 433 and full compilation from 6,111 to 6,092. The implementations are not isolated runtime-tested.
+
+
+### Tool-capability checkpoint / piggyback attachment and inventory helper corrections
+
+- Run 36990705230: native tool capability declarations compiled without new dispatcher/provider API diagnostics. All established independent checks passed. TiC declarations decreased from 433 to 390 and full compilation from 6,092 to 6,024. Core Lombok-dependent tool handlers still cannot be independently compiled until the remaining declaration errors are resolved; runtime behavior is unverified.
+- Piggyback passenger tracking uses a transient player AttachmentType and native EntityCapability with the existing ID. Its passenger-change tracking, vanilla packet synchronization and no-save/no-death-copy behavior are retained. The carrying effect uses an Optional adapter around native nullable lookup.
+- Address genuine native inventory helper differences found by the full compiler: use ItemStack.copyWithCount instead of the removed helper, provide an Iterable of dropped stacks, and supply the optional cached recipe argument when updating the crafting grid. These changes preserve existing inventory/drop/crafting work.

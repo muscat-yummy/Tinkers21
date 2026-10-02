@@ -184,7 +184,7 @@ public class PiggyBackPackItem extends TooltipItem {
       } else {
         TinkerGadgets.piggyBackpack.get().matchCarriedEntitiesToCount(livingEntityIn, chestArmor.getCount());
         if (!livingEntityIn.getCommandSenderWorld().isClientSide) {
-          livingEntityIn.getCapability(PiggybackCapability.PIGGYBACK, null).ifPresent(PiggybackHandler::updatePassengers);
+          PiggybackCapability.getOptionalData(livingEntityIn).ifPresent(PiggybackHandler::updatePassengers);
         }
       }
     }

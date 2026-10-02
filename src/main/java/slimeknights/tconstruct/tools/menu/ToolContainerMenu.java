@@ -274,7 +274,7 @@ public class ToolContainerMenu extends AbstractContainerMenu {
   public void slotsChanged(Container pContainer) {
     super.slotsChanged(pContainer);
     if (craftingContainer != null && resultContainer != null) {
-      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer);
+      CraftingMenu.slotChangedCraftingGrid(this, player.level(), player, craftingContainer, resultContainer, null);
     }
   }
 

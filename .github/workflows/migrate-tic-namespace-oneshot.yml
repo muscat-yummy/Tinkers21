@@ -1,4 +1,4 @@
-name: Port native tool capabilities and inventory menu synchronization
+name: Port transient piggyback tracking and native inventory helpers
 on:
   push:
     branches: [port/1.21.1-neoforge]
