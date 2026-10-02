@@ -4,7 +4,7 @@ import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.item.Item;
-import net.minecraftforge.common.util.LazyOptional;
+import java.util.Optional;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.primitive.BooleanLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -114,7 +114,7 @@ public record ArmorLevelModule(TinkerDataKey<Integer> key, boolean allowBroken, 
    * @param key    Key to get
    * @return  Level from the key
    */
-  public static int getLevel(LazyOptional<TinkerDataCapability.Holder> cap, TinkerDataKey<Integer> key) {
+  public static int getLevel(Optional<TinkerDataCapability.Holder> cap, TinkerDataKey<Integer> key) {
     TinkerDataCapability.Holder data = LogicHelper.orElseNull(cap);
     return data != null ? data.get(key, 0) : 0;
   }
