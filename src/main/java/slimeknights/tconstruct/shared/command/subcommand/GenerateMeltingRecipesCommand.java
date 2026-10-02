@@ -31,7 +31,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
@@ -438,8 +438,8 @@ public class GenerateMeltingRecipesCommand {
       }
       // fluid capability check
       try {
-        IFluidHandlerItem capability = LogicHelper.orElseNull(stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM));
-        if (capability != null) {
+        IFluidHandlerItem capability = stack.getCapability(Capabilities.FluidHandler.ITEM);
+        if (capability != null && capability.getTanks() > 0) {
           FluidStack contained = capability.getFluidInTank(0);
           if (!contained.isEmpty()) {
             return MeltingResult.from(contained);

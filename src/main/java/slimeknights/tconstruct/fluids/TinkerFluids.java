@@ -103,6 +103,14 @@ public final class TinkerFluids extends TinkerModule {
       (stack, context) -> new ConstantFluidContainerWrapper(
         new FluidStack(powderedSnow.get(), FluidType.BUCKET_VOLUME), stack, Items.BUCKET.getDefaultInstance()),
       Items.POWDER_SNOW_BUCKET);
+    event.registerItem(Capabilities.FluidHandler.ITEM,
+      (stack, context) -> ((MagmaBottleItem) stack.getItem()).createFluidHandler(stack), magmaBottle.get());
+    for (Item item : BuiltInRegistries.ITEM) {
+      if (item instanceof FluidContainerFoodItem) {
+        event.registerItem(Capabilities.FluidHandler.ITEM,
+          (stack, context) -> ((FluidContainerFoodItem) stack.getItem()).createFluidHandler(stack), item);
+      }
+    }
   }
 
   public TinkerFluids() {

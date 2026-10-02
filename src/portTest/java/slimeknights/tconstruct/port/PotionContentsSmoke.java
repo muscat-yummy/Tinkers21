@@ -35,6 +35,7 @@ public final class PotionContentsSmoke {
     net.neoforged.fml.loading.LoadingModList.of(List.of(), List.of(), List.of(), List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
+    net.neoforged.neoforge.registries.VanillaRegistryPortTestBootstrap.modifyRegistries();
     var registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     var effect = new MobEffectInstance(MobEffects.POISON, 321, 2, true, false, true);
     var contents = new PotionContents(Optional.of(Potions.HEALING), Optional.of(0x123456), List.of(effect));
