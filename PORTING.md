@@ -223,3 +223,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - HasLootContextSetCondition now delegates to the public LootContextParamSets.CODEC, verified in the NeoForge 1.21.1 LootTable patch, retaining the set field and vanilla validation. The test compares decoded identity against actual EMPTY/CHEST/BLOCK/ENTITY constants.
 - Legacy tag intersection, difference, nonempty and config conditions implement ICondition.codec and register their MapCodecs on the injected mod bus at NeoForgeRegistries.Keys.CONDITION_CODECS. Loot conditions reuse their identical registered type objects. Legacy JSON registry/tags/base/subtracted/tag/prop fields and existing logical evaluation are preserved.
 - Tag collections are defensively copied and reject mixed registries, which cannot be represented by the legacy single-registry JSON schema. A standalone production-codec behavioral check covers shared/disjoint/covered/empty tags, JSON round trips, empty combination rejection and mixed registry rejection. Results remain pending.
+
+
+### Verified tag condition behavior / loot encoder validation
+
+- Run 36982814261: migration idempotence, Mantle compilation, ResourceId behavior, expanded leaf implementation compilation and TagConditionSmoke all passed. Tag tests verified intersection/difference/nonempty logic, legacy JSON round trips and invalid combinations. TiC declarations were 506 and normal compilation 6,295. Phase 2 remains incomplete.
+- LootConditionSmoke reached invalid-set encoding after its registered-set JSON/identity checks, where vanilla LootContextParamSets.CODEC threw NullPointerException for an unregistered set. Wrap only encoding to convert that invalid-data exception to DataResult.error; decoding and successful encoding still delegate to the native codec. Rerun the production-codec behavior check.
+- The retained tconstruct:tag_preference loot entry now uses MapCodec plus the native list-based singleton loot fields, preserves its tag preference selection and deprecated-ID warning, and returns its registered type identity. It is included in the independent implementation compile check.
