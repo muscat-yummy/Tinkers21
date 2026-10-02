@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.tools.item.armor;
 
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.item.ArmorItem;
@@ -27,14 +28,21 @@ public class MultilayerArmorItem extends ModifiableArmorItem {
     this.name = name;
   }
 
-  @SuppressWarnings("removal")
-  public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
-    this(material, slot, properties, toolDefinition, ResourceLocation.parse(material.getName()));
+  public MultilayerArmorItem(Holder<ArmorMaterial> material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
+    this(material, slot, properties, toolDefinition, material.unwrapKey().orElseThrow(() -> new IllegalArgumentException("Armor material needs a registry key or an explicit texture name")).location());
   }
 
-  public MultilayerArmorItem(ArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
+  public MultilayerArmorItem(Holder<ArmorMaterial> material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
     super(material, slot, properties, toolDefinition);
     this.name = name;
+  }
+
+  public MultilayerArmorItem(DummyArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition) {
+    this(material.getHolder(), slot, properties, toolDefinition, material.getId());
+  }
+
+  public MultilayerArmorItem(DummyArmorMaterial material, ArmorItem.Type slot, Properties properties, ToolDefinition toolDefinition, ResourceLocation name) {
+    this(material.getHolder(), slot, properties, toolDefinition, name);
   }
 
   @Nullable

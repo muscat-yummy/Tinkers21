@@ -10,6 +10,9 @@ import javax.annotation.Nullable;
 
 /** Armor material that doubles as a container for tool definitions for each armor slot */
 public class ModifiableArmorMaterial extends DummyArmorMaterial {
+  /** Player armor types; BODY is opt-in and has no default tool definition. */
+  public static final ArmorItem.Type[] ARMOR_TYPES = {ArmorItem.Type.BOOTS, ArmorItem.Type.LEGGINGS, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.HELMET};
+
   /** Array of all four armor slot types */
   public static final EquipmentSlot[] ARMOR_SLOTS = {EquipmentSlot.FEET, EquipmentSlot.LEGS, EquipmentSlot.CHEST, EquipmentSlot.HEAD};
 
@@ -35,7 +38,7 @@ public class ModifiableArmorMaterial extends DummyArmorMaterial {
 
   /** Creates a modifiable armor material, creates tool definition for all four armor slots */
   public static ModifiableArmorMaterial create(ResourceLocation id, SoundEvent equipSound) {
-    return create(id, equipSound, ArmorItem.Type.BOOTS, ArmorItem.Type.LEGGINGS, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.HELMET);
+    return create(id, equipSound, ARMOR_TYPES);
   }
 
   /**

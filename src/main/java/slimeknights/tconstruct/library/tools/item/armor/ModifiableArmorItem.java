@@ -4,6 +4,7 @@ import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.Holder;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
@@ -76,13 +77,17 @@ public class ModifiableArmorItem extends ArmorItem implements IModifiableDisplay
   private final ToolDefinition toolDefinition;
   /** Cache of the tool built for rendering */
   private ItemStack toolForRendering = null;
-  public ModifiableArmorItem(ArmorMaterial materialIn, ArmorItem.Type type, Properties builderIn, ToolDefinition toolDefinition) {
+  public ModifiableArmorItem(Holder<ArmorMaterial> materialIn, ArmorItem.Type type, Properties builderIn, ToolDefinition toolDefinition) {
     super(materialIn, type, builderIn);
     this.toolDefinition = toolDefinition;
   }
 
+  public ModifiableArmorItem(DummyArmorMaterial material, ArmorItem.Type type, Properties properties, ToolDefinition toolDefinition) {
+    this(material.getHolder(), type, properties, toolDefinition);
+  }
+
   public ModifiableArmorItem(ModifiableArmorMaterial material, ArmorItem.Type type, Properties properties) {
-    this(material, type, properties, Objects.requireNonNull(material.getArmorDefinition(type), "Missing tool definition for " + type.getName()));
+    this(material.getHolder(), type, properties, Objects.requireNonNull(material.getArmorDefinition(type), "Missing tool definition for " + type.getName()));
   }
 
   /* Basic properties */

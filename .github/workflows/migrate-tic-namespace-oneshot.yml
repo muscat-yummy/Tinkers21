@@ -1,4 +1,4 @@
-name: Verify native formula constructors and armor registry APIs
+name: Port registered armor materials and native armor holders
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -71,6 +71,18 @@ jobs:
                   dependsOn 'compileLeafPortChecks'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
                   mainClass.set('slimeknights.tconstruct.port.BonusFormulaSmoke')
+              }
+              rootProject.tasks.register('compileArmorRegistryCheck', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/item/armor/DummyArmorMaterial.java', 'src/portTest/java/net/neoforged/neoforge/registries/ArmorMaterialRegistrationSmoke.java')
+                  options.annotationProcessorPath = rootProject.configurations.annotationProcessor
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/armor-registry'))
+              }
+              rootProject.tasks.register('runArmorRegistryCheck', JavaExec) {
+                  dependsOn 'compileArmorRegistryCheck'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/armor-registry')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('net.neoforged.neoforge.registries.ArmorMaterialRegistrationSmoke')
               }
               rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -186,6 +198,9 @@ jobs:
       - name: Verify native bonus formula JSON and deterministic drop counts
         continue-on-error: true
         run: ./gradlew :runBonusFormulaSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify native armor registration and deferred equip sound
+        continue-on-error: true
+        run: ./gradlew :runArmorRegistryCheck --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
