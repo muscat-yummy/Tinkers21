@@ -17,9 +17,12 @@ public final class LootConditionSmoke {
     if (BlockOrEntityCondition.INSTANCE.getType() != BlockOrEntityCondition.TYPE) {
       throw new AssertionError("Condition type identity changed");
     }
-    for (String name : new String[] {"empty", "chest", "block", "entity"}) {
+    String[] names = {"empty", "chest", "block", "entity"};
+    LootContextParamSet[] sets = {LootContextParamSets.EMPTY, LootContextParamSets.CHEST, LootContextParamSets.BLOCK, LootContextParamSets.ENTITY};
+    for (int index = 0; index < names.length; index++) {
+      String name = names[index];
       ResourceLocation id = ResourceLocation.withDefaultNamespace(name);
-      LootContextParamSet set = LootContextParamSets.get(id);
+      LootContextParamSet set = sets[index];
       if (set == null) {
         throw new AssertionError("Missing vanilla parameter set " + id);
       }

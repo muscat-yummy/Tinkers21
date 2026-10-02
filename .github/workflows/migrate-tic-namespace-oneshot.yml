@@ -1,4 +1,4 @@
-name: Verify TiC native loot condition codecs
+name: Port TiC native recipe and loot condition codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,7 +37,7 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java')
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
               }
@@ -45,6 +45,11 @@ jobs:
                   dependsOn 'compileLeafPortChecks'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath
                   mainClass.set('slimeknights.tconstruct.port.LootConditionSmoke')
+              }
+              rootProject.tasks.register('runTagConditionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.TagConditionSmoke')
               }
               rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -132,6 +137,9 @@ jobs:
       - name: Verify loot condition JSON and invalid-set behavior
         continue-on-error: true
         run: ./gradlew :runLootConditionSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify tag condition behavior and legacy JSON fields
+        continue-on-error: true
+        run: ./gradlew :runTagConditionSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

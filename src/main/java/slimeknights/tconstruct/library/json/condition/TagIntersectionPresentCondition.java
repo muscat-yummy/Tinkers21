@@ -1,16 +1,15 @@
 package slimeknights.tconstruct.library.json.condition;
 
-import com.google.gson.JsonArray;
-import com.google.gson.JsonObject;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Holder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.conditions.ICondition;
-import net.minecraftforge.common.crafting.conditions.IConditionSerializer;
-import slimeknights.mantle.util.JsonHelper;
-import slimeknights.tconstruct.TConstruct;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,8 +18,9 @@ import java.util.List;
 /** @deprecated use {@link slimeknights.mantle.recipe.condition.TagCombinationCondition#intersection(TagKey[])} */
 @Deprecated(forRemoval = true)
 public class TagIntersectionPresentCondition<T> implements ICondition {
-  private static final ResourceLocation NAME = TConstruct.getResource("tag_intersection_present");
-  public static final Serializer SERIALIZER = new Serializer();
+  public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("tconstruct", "tag_intersection_present");
+  private static final Codec<List<ResourceLocation>> NONEMPTY_NAMES = ResourceLocation.CODEC.listOf().validate(
+    names -> names.isEmpty() ? DataResult.error(() -> "At least one tag is required") : DataResult.success(names));
 
   private final List<TagKey<T>> names;
 
@@ -28,7 +28,11 @@ public class TagIntersectionPresentCondition<T> implements ICondition {
     if (names.isEmpty()) {
       throw new IllegalArgumentException("Cannot create a condition with no names");
     }
-    this.names = names;
+    ResourceKey<? extends Registry<T>> registry = names.getFirst().registry();
+    if (names.stream().anyMatch(tag -> !tag.registry().equals(registry))) {
+      throw new IllegalArgumentException("Intersection tags must use the same registry");
+    }
+    this.names = List.copyOf(names);
   }
 
   /** Creates a condition from a set of keys */
@@ -42,9 +46,13 @@ public class TagIntersectionPresentCondition<T> implements ICondition {
     return new TagIntersectionPresentCondition<>(Arrays.stream(names).map(name -> TagKey.create(registry, name)).toList());
   }
 
-  @Override
   public ResourceLocation getID() {
-    return NAME;
+    return ID;
+  }
+
+  @Override
+  public MapCodec<? extends ICondition> codec() {
+    return CODEC;
   }
 
   @Override
@@ -78,31 +86,13 @@ public class TagIntersectionPresentCondition<T> implements ICondition {
     return false;
   }
 
-  private static class Serializer implements IConditionSerializer<TagIntersectionPresentCondition<?>> {
-    @Override
-    public void write(JsonObject json, TagIntersectionPresentCondition<?> value) {
-      JsonArray names = new JsonArray();
-      json.addProperty("registry", value.names.get(0).registry().location().toString());
-      for (TagKey<?> name : value.names) {
-        names.add(name.location().toString());
-      }
-      json.add("tags", names);
-    }
+  public static final MapCodec<TagIntersectionPresentCondition<?>> CODEC = RecordCodecBuilder.<TagIntersectionPresentCondition<?>>mapCodec(instance -> instance.group(
+    ResourceLocation.CODEC.fieldOf("registry").forGetter(value -> value.names.getFirst().registry().location()),
+    NONEMPTY_NAMES.fieldOf("tags").forGetter(value -> value.names.stream().map(TagKey::location).toList())
+  ).apply(instance, TagIntersectionPresentCondition::fromNames));
 
-    /** Reads with generics happy */
-    private static <T> TagIntersectionPresentCondition<T> readGeneric(JsonObject json) {
-      ResourceKey<Registry<T>> registry = ResourceKey.createRegistryKey(JsonHelper.getResourceLocation(json, "registry"));
-      return new TagIntersectionPresentCondition<>(JsonHelper.parseList(json, "tags", (element, s) -> TagKey.create(registry, JsonHelper.convertToResourceLocation(element, s))));
-    }
-
-    @Override
-    public TagIntersectionPresentCondition<?> read(JsonObject json) {
-      return readGeneric(json);
-    }
-
-    @Override
-    public ResourceLocation getID() {
-      return NAME;
-    }
+  private static TagIntersectionPresentCondition<?> fromNames(ResourceLocation registry, List<ResourceLocation> names) {
+    ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(registry);
+    return new TagIntersectionPresentCondition<>(names.stream().map(name -> TagKey.create(key, name)).toList());
   }
 }
