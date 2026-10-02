@@ -193,3 +193,9 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - BlockContainerOpenedTrigger now implements the 1.21 criterion Codec/SimpleInstance contract, preserving optional player predicates and the block-entity type JSON key. Its singleton is registered on the mod bus through the native trigger registry instead of modifying the vanilla registry during common setup. Datagen produces a Criterion wrapper referencing the same registered singleton.
 - Teleport events inherit cancellation from NeoForge EntityTeleportEvent; obsolete Forge @Cancelable annotations are removed only from those subclasses.
 - Particle and criterion implementation sources receive an independent normal JavaCompile check, in addition to declaration and full-source diagnostics. This check does not alter production source sets or remove any TiC systems.
+
+
+### Criterion / particle implementation verification
+
+- Run 36979892903: Mantle compile, ResourceId behavior and the independent normal JavaCompile of FluidParticleData plus BlockContainerOpenedTrigger all passed. TiC declarations decreased from 561 to 539; normal compilation decreased from 6,446 to 6,413 with unchanged settings. Phase 2 remains incomplete and no game loading is claimed.
+- Move remaining ResourceLocation constructors to the native validated parse/fromNamespaceAndPath factories with a token-aware migration that preserves nested calls, quoted commas, comments and Java text blocks. Parser fixtures are checked before source mutation. Unhandled constructor forms are counted for manual review.

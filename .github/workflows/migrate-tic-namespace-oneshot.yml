@@ -1,4 +1,4 @@
-name: Verify TiC particle and container criterion port
+name: Migrate TiC validated resource factories
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -91,6 +91,7 @@ jobs:
       - name: Migrate references to classes present in NeoForge
         run: |
           python3 scripts/port/migrate_tic_namespace.py
+          python3 scripts/port/migrate_tic_resource_locations.py
           python3 scripts/port/migrate_tic_access_transformer.py
       - name: Persist the migration on the authorized port branch
         run: |

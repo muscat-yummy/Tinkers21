@@ -80,6 +80,9 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
             old_name, new_name = source.split('.')[-1], target.split('.')[-1]
             if old_name != new_name:
                 text = re.sub(r'\b' + old_name + r'\b', new_name, text)
+    # Repair an earlier suffix-based glass rename only against actual vanilla classes.
+    if 'net.minecraft.world.level.block.TintedGlassBlock' in classes:
+        text = re.sub(r'\bTintedTransparentBlock\b', 'TintedGlassBlock', text)
     registry_fields = {
         'BLOCKS': 'BLOCK', 'ITEMS': 'ITEM', 'FLUIDS': 'FLUID',
         'ENTITY_TYPES': 'ENTITY_TYPE', 'MOB_EFFECTS': 'MOB_EFFECT',
