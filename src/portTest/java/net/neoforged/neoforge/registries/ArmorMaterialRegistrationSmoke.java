@@ -9,7 +9,7 @@ import net.minecraft.server.Bootstrap;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.Item;
-import net.neoforged.bus.BusBuilder;
+import net.neoforged.bus.api.BusBuilder;
 import slimeknights.tconstruct.library.tools.item.armor.DummyArmorMaterial;
 
 import java.util.List;

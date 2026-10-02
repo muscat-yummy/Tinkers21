@@ -9,17 +9,14 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.inventory.ContainerData;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuel;
 import slimeknights.tconstruct.library.recipe.fuel.MeltingFuelLookup;
-import slimeknights.tconstruct.library.utils.Util;
+import slimeknights.tconstruct.library.utils.BlockCapabilitySource;
 
 import javax.annotation.Nullable;
 import java.util.Objects;
@@ -29,9 +26,6 @@ import java.util.Objects;
  */
 @RequiredArgsConstructor
 public abstract class FuelModule implements ContainerData {
-  /** Listener to attach to stored capability */
-  protected final NonNullConsumer<LazyOptional<IFluidHandler>> fluidListener = new WeakConsumerWrapper<>(this, FuelModule::resetHandler);
-
   /** Parent TE */
   protected final MantleBlockEntity parent;
 
@@ -40,7 +34,7 @@ public abstract class FuelModule implements ContainerData {
   private MeltingFuel lastRecipe;
   /** Last fluid handler where fluid was extracted */
   @Nullable
-  protected LazyOptional<IFluidHandler> fluidHandler;
+  protected BlockCapabilitySource<IFluidHandler> fluidHandler;
 
   /** Current amount of fluid in the TE */
   @Getter
@@ -60,16 +54,9 @@ public abstract class FuelModule implements ContainerData {
    * Helpers
    */
 
-  /** Called when the capability invalidates to reset any listeners */
-  protected void resetHandler(@Nullable LazyOptional<?> source) {
-    if (source == null || source == fluidHandler) {
-      // for efficiency on Forge, clear listener. Neo lacks this so we protect against redundant calls
-      // note that this will break if the source is the listener, below check does both null check and not source check
-      if (source != fluidHandler && Util.isForge()) {
-        fluidHandler.removeListener(fluidListener);
-      }
-      fluidHandler = null;
-    }
+  /** Forget the selected fuel source; native capability caches handle block changes. */
+  protected void resetHandler() {
+    fluidHandler = null;
   }
 
   /** Gets a nonnull world instance from the parent */
@@ -225,21 +212,19 @@ public abstract class FuelModule implements ContainerData {
    * @return  Fuel info
    */
   public FuelInfo getFuelInfo() {
-    if (fluidHandler == null) {
+    IFluidHandler handler = fluidHandler != null ? fluidHandler.get() : null;
+    if (handler == null || handler.getTanks() == 0) {
       return FuelInfo.EMPTY;
     }
-    return fluidHandler.map(handler -> {
-      FluidStack fluid = handler.getFluidInTank(0);
-      int temperature = 0;
-      if (!fluid.isEmpty()) {
-        MeltingFuel fuel = findRecipe(fluid.getFluid());
-        if (fuel != null) {
-          temperature = fuel.getTemperature();
-        }
+    FluidStack fluid = handler.getFluidInTank(0);
+    int temperature = 0;
+    if (!fluid.isEmpty()) {
+      MeltingFuel recipe = findRecipe(fluid.getFluid());
+      if (recipe != null) {
+        temperature = recipe.getTemperature();
       }
-      return FuelInfo.of(fluid, handler.getTankCapacity(0), temperature);
-      // if no liquid, fallback to either item or empty
-    }).orElse(FuelInfo.EMPTY);
+    }
+    return FuelInfo.of(fluid, handler.getTankCapacity(0), temperature);
   }
 
   /** Data class to hold information about the current fuel */
