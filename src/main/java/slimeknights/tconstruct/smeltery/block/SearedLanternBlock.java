@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.smeltery.block;
 
+import slimeknights.tconstruct.smeltery.item.TankItem;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -60,9 +61,8 @@ public class SearedLanternBlock extends LanternBlock implements ITankBlock, Enti
 
   @Override
   public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    if (nbt != null && world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
-      tank.updateTank(nbt.getCompound(NBTTags.TANK));
+    if (world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
+      tank.updateTank(TankItem.getTank(stack, 1).getFluid());
     }
   }
 

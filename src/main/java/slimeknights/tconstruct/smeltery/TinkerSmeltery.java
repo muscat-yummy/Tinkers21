@@ -2,6 +2,12 @@ package slimeknights.tconstruct.smeltery;
 
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import slimeknights.tconstruct.library.fluid.FluidItemData;
+import slimeknights.tconstruct.smeltery.item.TankItemFluidHandler;
+import slimeknights.tconstruct.smeltery.item.CopperCanFluidHandler;
 import net.minecraft.data.DataGenerator;
 import net.minecraft.data.PackOutput;
 import net.minecraft.tags.ItemTags;
@@ -144,6 +150,23 @@ import static slimeknights.mantle.Mantle.commonResource;
  */
 @SuppressWarnings("unused")
 public final class TinkerSmeltery extends TinkerModule {
+  public TinkerSmeltery() {
+    FluidItemData.register(TConstruct.getModEventBus());
+    TConstruct.getModEventBus().addListener(TinkerSmeltery::registerCapabilities);
+  }
+
+  private static void registerCapabilities(RegisterCapabilitiesEvent event) {
+    for (Item item : BuiltInRegistries.ITEM) {
+      if (item instanceof TankItem tankItem) {
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new TankItemFluidHandler(tankItem, stack), item);
+      } else if (item instanceof CopperCanItem) {
+        event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new CopperCanFluidHandler(stack), item);
+      }
+    }
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, lantern.get(), (blockEntity, side) -> blockEntity.getTank());
+  }
+
   /** Predicate for something that never happens */
   private static final StatePredicate NEVER = Blocks::never;
   /** Creative tab for smeltery, all contents related to the multiblocks */

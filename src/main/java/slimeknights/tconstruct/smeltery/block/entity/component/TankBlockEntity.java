@@ -3,6 +3,10 @@ package slimeknights.tconstruct.smeltery.block.entity.component;
 import lombok.Getter;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import slimeknights.tconstruct.library.fluid.FluidItemData;
+import slimeknights.tconstruct.library.fluid.StoredFluid;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.BlockItem;
@@ -13,9 +17,6 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
-import net.minecraftforge.common.capabilities.Capability;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.IFluidTank;
@@ -63,8 +64,6 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   /** Internal fluid tank instance */
   @Getter
   protected final FluidTankAnimated tank;
-  /** Capability holder for the tank */
-  private final LazyOptional<IFluidHandler> holder;
   /** Last comparator strength to reduce block updates */
   @Getter @Setter
   private int lastStrength = -1;
@@ -85,28 +84,12 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   protected TankBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state, ITankBlock block) {
     super(type, pos, state);
     tank = new FluidTankAnimated(block.getCapacity(), this);
-    holder = LazyOptional.of(() -> tank);
   }
 
 
   /*
    * Tank methods
    */
-
-  @Override
-  @Nonnull
-  public <T> LazyOptional<T> getCapability(Capability<T> capability, @Nullable Direction facing) {
-    if (capability == ForgeCapabilities.FLUID_HANDLER) {
-      return holder.cast();
-    }
-    return super.getCapability(capability, facing);
-  }
-
-  @Override
-  public void invalidateCaps() {
-    super.invalidateCaps();
-    holder.invalidate();
-  }
 
   @Nonnull
   @Override
@@ -158,12 +141,15 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
    * @param nbt  tank NBT
    */
   public void updateTank(CompoundTag nbt) {
-    if (nbt.isEmpty()) {
-      tank.setFluid(FluidStack.EMPTY);
-    } else {
-      tank.readFromNBT(nbt);
-      updateLight(this, tank);
+    if (level == null) {
+      throw new IllegalStateException("NBT tank updates require the owning level's registry access");
     }
+    updateTank(StoredFluid.readTank(nbt, level.registryAccess()));
+  }
+
+  public void updateTank(FluidStack fluid) {
+    tank.setFluid(fluid.copy());
+    updateLight(this, tank);
   }
 
   @Override
@@ -172,19 +158,42 @@ public class TankBlockEntity extends SmelteryComponentBlockEntity implements ITa
   }
 
   @Override
-  public void load(CompoundTag tag) {
+  protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
-    updateTank(tag.getCompound(NBTTags.TANK));
-    super.load(tag);
+    updateTank(StoredFluid.readTank(tag.getCompound(NBTTags.TANK), registries));
+    super.loadAdditional(tag, registries);
   }
 
   @Override
-  public void saveSynced(CompoundTag tag) {
-    super.saveSynced(tag);
+  public void saveSynced(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveSynced(tag, registries);
     // want tank on the client on world load
     if (!tank.isEmpty()) {
-      tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
+      tag.put(NBTTags.TANK, tank.writeToNBT(registries, new CompoundTag()));
     }
+  }
+
+  @Override
+  protected void applyImplicitComponents(DataComponentInput input) {
+    super.applyImplicitComponents(input);
+    StoredFluid contents = input.get(FluidItemData.CONTENTS.get());
+    if (contents != null) {
+      updateTank(contents.toStack());
+    }
+  }
+
+  @Override
+  protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+    super.collectImplicitComponents(builder);
+    if (!tank.isEmpty()) {
+      builder.set(FluidItemData.CONTENTS.get(), StoredFluid.of(tank.getFluid()));
+    }
+  }
+
+  @Override
+  public void removeComponentsFromTag(CompoundTag tag) {
+    super.removeComponentsFromTag(tag);
+    tag.remove(NBTTags.TANK);
   }
 
   /** Interface for blocks to return their capacity */

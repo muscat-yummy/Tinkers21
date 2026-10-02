@@ -3,6 +3,7 @@ package slimeknights.tconstruct.common.multiblock;
 import net.minecraft.core.registries.BuiltInRegistries;
 import lombok.Getter;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
@@ -116,7 +117,7 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
     if (masterPos != null && tags.contains(TAG_MASTER_BLOCK, Tag.TAG_STRING)) {
       ResourceLocation masterBlockName = ResourceLocation.tryParse(tags.getString(TAG_MASTER_BLOCK));
       if (masterBlockName != null && BuiltInRegistries.BLOCK.containsKey(masterBlockName)) {
-        masterBlock = BuiltInRegistries.BLOCK.getValue(masterBlockName);
+        masterBlock = BuiltInRegistries.BLOCK.get(masterBlockName);
       }
     }
     // if both valid, set
@@ -127,8 +128,8 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
   }
 
   @Override
-  public void load(CompoundTag tags) {
-    super.load(tags);
+  protected void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
+    super.loadAdditional(tags, registries);
     readMaster(tags);
   }
 
@@ -146,8 +147,8 @@ public class ServantTileEntity extends MantleBlockEntity implements IServantLogi
   }
 
   @Override
-  public void saveAdditional(CompoundTag tags) {
-    super.saveAdditional(tags);
+  public void saveAdditional(CompoundTag tags, HolderLookup.Provider registries) {
+    super.saveAdditional(tags, registries);
     writeMaster(tags);
   }
 }

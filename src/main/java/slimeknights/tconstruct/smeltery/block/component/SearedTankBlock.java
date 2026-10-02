@@ -7,6 +7,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.util.StringRepresentable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -78,11 +79,11 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
 
   @Deprecated
   @Override
-  public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+  public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
     if (FluidTransferHelper.interactWithTank(world, pos, player, hand, hit)) {
-      return InteractionResult.SUCCESS;
+      return ItemInteractionResult.SUCCESS;
     }
-    return super.use(state, world, pos, player, hand, hit);
+    return super.useItemOn(stack, state, world, pos, player, hand, hit);
   }
 
   /** Helper for setting the light level on placement */
@@ -103,9 +104,8 @@ public class SearedTankBlock extends SearedBlock implements ITankBlock, EntityBl
 
   @Override
   public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
-    if (nbt != null && world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
-      tank.updateTank(nbt.getCompound(NBTTags.TANK));
+    if (world.getBlockEntity(pos) instanceof TankBlockEntity tank) {
+      tank.updateTank(TankItem.getTank(stack, 1).getFluid());
     }
     super.setPlacedBy(world, pos, state, placer, stack);
   }
