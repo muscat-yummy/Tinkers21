@@ -23,7 +23,7 @@ import slimeknights.tconstruct.world.logic.AncientToolItemListing;
 import java.util.Collections;
 
 @SuppressWarnings("unused")
-@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = EventBusSubscriber.Bus.FORGE)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = EventBusSubscriber.Bus.GAME)
 public class WorldEvents {
   /* Heads */
 

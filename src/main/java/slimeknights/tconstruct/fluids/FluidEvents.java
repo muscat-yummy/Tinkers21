@@ -17,7 +17,7 @@ import slimeknights.tconstruct.fluids.util.ConstantFluidContainerWrapper;
  * Note the way the subscribers are set up, technically works on anything that has the tic_modifiers tag
  */
 @SuppressWarnings("unused")
-@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = Bus.FORGE)
+@EventBusSubscriber(modid = TConstruct.MOD_ID, bus = Bus.GAME)
 public class FluidEvents {
   @SubscribeEvent
   static void onFurnaceFuel(FurnaceFuelBurnTimeEvent event) {
