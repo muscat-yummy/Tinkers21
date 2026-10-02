@@ -270,3 +270,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Run 36986709814: native BlockTagIngredient compiled in the independent leaf task. One direct recipe construction call was wrapped; its second pass made zero changes. All established independent behavior checks passed. TiC declarations were 456 and normal compilation 6,159. Phase 2 remains incomplete.
 - NoContainerIngredient uses ICustomIngredient/IngredientType with native registry-aware wire codecs. Decode retains flat item/tag fields and nested match JSON, while serialization emits the canonical nested representation. Nonempty decoding follows the prior getIngredient(..., false) contract. Factories return native Ingredient wrappers.
 - Matching still delegates to the nested ingredient and rejects stacks with crafting remainders. The native item-stack extension method was checked in NeoForge 1.21.1 source. Equality/hash include the nested ingredient. Independent implementation compilation is expanded; actual container crafting and recipe synchronization remain unverified.
+
+
+### No-container implementation verified / tool-hook native ingredient
+
+- Run 36987548119: NoContainerIngredient joined the successfully compiled leaf implementations, and every established independent behavior check passed. TiC declarations were 452 and normal compilation 6,129. Container crafting and full pack/client-server behavior still have not been tested; phase 2 remains incomplete.
+- ToolHookIngredient implements ICustomIngredient with Mantle's already ported RecordLoadable ingredient codec/stream bridge and native IngredientType registration in TinkerTools. Existing tag/hook JSON fields, default modifiable tag, matching by current tool definition hook, simple item matching and empty-tag barrier display are retained.
+- Factories produce native Ingredient wrappers. Equality/hash use tag and hook ID. The barrier label uses CUSTOM_NAME. Remaining recipe/stats/predicate registration in TinkerTools is retained; only the obsolete Forge ingredient serializer registration is replaced by mod-bus deferred type registration.

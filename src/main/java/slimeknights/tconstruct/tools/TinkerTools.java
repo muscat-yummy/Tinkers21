@@ -19,7 +19,9 @@ import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.neoforged.neoforge.common.crafting.IngredientType;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import slimeknights.mantle.registration.deferred.SynchronizedDeferredRegister;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -165,7 +167,14 @@ import static slimeknights.tconstruct.TConstruct.getResource;
  * Contains all complete tool items
  */
 public final class TinkerTools extends TinkerModule {
+  private static final SynchronizedDeferredRegister<IngredientType<?>> INGREDIENT_TYPES =
+    SynchronizedDeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, TConstruct.MOD_ID);
+  static {
+    INGREDIENT_TYPES.register(ToolHookIngredient.ID.getPath(), () -> ToolHookIngredient.TYPE);
+  }
+
   public TinkerTools() {
+    INGREDIENT_TYPES.register(TConstruct.getModEventBus());
     SlotType.init();
     BlockSideHitListener.init();
     ModifierLootingHandler.init();
@@ -315,7 +324,6 @@ public final class TinkerTools extends TinkerModule {
   void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
       ItemPredicate.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
-      CraftingHelper.register(ToolHookIngredient.Serializer.ID, ToolHookIngredient.Serializer.INSTANCE);
 
       // register tool stats that are not defined directly in the class; safer than static init registration
       ToolStats.register(OverslimeModule.OVERSLIME_STAT);

@@ -1,4 +1,4 @@
-name: Port TiC no-container ingredient codec and wrapper
+name: Port TiC tool-hook ingredient matching and native type registration
 on:
   push:
     branches: [port/1.21.1-neoforge]
