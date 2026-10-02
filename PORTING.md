@@ -452,3 +452,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 
 - Run 37037816204: Mantle and the new native RecipeInput/casting snapshot checks passed; declaration diagnostics remained 142 and full diagnostics decreased from 5,376 to 5,349. The later run 37038144680 passed every independent check, including scaling chest final-slot bounds, Items-only registry-aware persistence, component/count preservation, simulation, extraction shrink and empty reload. Declaration/full diagnostics remained 142 / 5,349. Phase 2 still requires full compilation and game loading.
 - Inspect public publisher metadata for available pinned native optional integrations in an independent CI job. This reads public version identifiers and filenames only; it does not install integrations into the runtime, publish artifacts, or replace missing APIs with source exclusions.
+
+
+### Published native optional integration APIs
+
+- Public publisher metadata in run 37039511274 identified the official native artifacts and source repositories. Pin compile-only Crafting Tweaks 21.1.11 (Modrinth DMu0oBKf / IhkQpEve), Immersive Engineering 12.4.2-194 (tIm2nV03 / uNRARSH2), and Dummy 1.21-2.1.2 (Adega8YN / DldwQTMc). They are not added to the runtime or bundled into TiC. Verify actual resolution/API compilation in CI.
+- Official Crafting Tweaks provider methods and Dummy class/disableShield methods retain the existing integration contracts. IE native chemthrower callbacks add the actual projectile Entity parameter; pass it into the existing fluid-effect context while retaining fluid consumption, tag routing and shield disabling.
+- The public Diet project currently reports no NeoForge 1.21.1 version. Its integration remains in scope; do not compile against a falsely labeled native jar or silently remove its behavior. The Json Things slug probe is corrected to jsonthings; its actual native artifact must still be resolved and ported.

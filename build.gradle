@@ -12,6 +12,10 @@ evaluationDependsOn(':mantle-port')
 
 repositories {
     mavenCentral()
+    maven {
+        url = uri('https://api.modrinth.com/maven')
+        content { includeGroup 'maven.modrinth' }
+    }
     maven { url = uri('https://maven.blamejared.com/') }
 }
 
@@ -20,6 +24,10 @@ dependencies {
     annotationProcessor 'org.projectlombok:lombok:1.18.48'
     compileOnly 'mezz.jei:jei-1.21.1-common-api:19.27.0.340'
     compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340'
+    // Published native jars provide optional API types without requiring these mods at runtime.
+    compileOnly('maven.modrinth:DMu0oBKf:IhkQpEve') { transitive = false } // Crafting Tweaks 21.1.11
+    compileOnly('maven.modrinth:tIm2nV03:uNRARSH2') { transitive = false } // IE 12.4.2-194
+    compileOnly('maven.modrinth:Adega8YN:DldwQTMc') { transitive = false } // Dummy 1.21-2.1.2
     implementation project(':mantle-port')
 }
 

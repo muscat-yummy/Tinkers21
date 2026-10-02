@@ -1,4 +1,4 @@
-name: Verify native port and inspect published optional integration APIs
+name: Resolve published native integration APIs and port chemthrower context
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -15,7 +15,7 @@ jobs:
         shell: python
         run: |
           import json, urllib.request, urllib.parse
-          for slug in ('crafting-tweaks', 'immersiveengineering', 'json-things', 'mmmmmmmmmmmm', 'diet'):
+          for slug in ('crafting-tweaks', 'immersiveengineering', 'jsonthings', 'mmmmmmmmmmmm', 'diet'):
               try:
                   headers = {'User-Agent': 'Tinkers21-private-port-api-inspection'}
                   project_url = 'https://api.modrinth.com/v2/project/' + slug
@@ -163,6 +163,9 @@ jobs:
               'net.minecraft.world.entity.Entity': ('getAddEntityPacket(',),
               'net.minecraft.world.entity.projectile.ThrowableItemProjectile': ('getItem(', 'defineSynchedData(',),
               'net.neoforged.neoforge.entity.IEntityWithComplexSpawn': ('SpawnData(',),
+              'net.blay09.mods.craftingtweaks.api.CraftingGridProvider': ('interface ', 'buildCraftingGrids(',),
+              'blusunrize.immersiveengineering.api.tool.ChemthrowerHandler$ChemthrowerEffect': ('applyToEntity(', 'applyToBlock(',),
+              'net.mehvahdjukaar.dummmmmmy.common.TargetDummyEntity': ('class ', 'disableShield(',),
               'net.minecraft.locale.Language': ('getInstance(', 'getOrDefault(',),
               'net.minecraft.world.item.crafting.ShapedRecipe': ('getWidth(', 'getHeight(', 'canCraftInDimensions(',),
               'mezz.jei.api.constants.RecipeTypes': ('CRAFTING;',),
