@@ -4,6 +4,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.ToString;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import slimeknights.tconstruct.library.utils.RegistryBuffer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.network.NetworkEvent.Context;
 import slimeknights.mantle.network.packet.BlockEntityPacket;
@@ -21,13 +22,13 @@ public class FluidUpdatePacket implements BlockEntityPacket<IFluidPacketReceiver
 
   public FluidUpdatePacket(FriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.fluid = buffer.readFluidStack();
+    this.fluid = FluidStack.OPTIONAL_STREAM_CODEC.decode(RegistryBuffer.require(buffer));
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeFluidStack(fluid);
+    FluidStack.OPTIONAL_STREAM_CODEC.encode(RegistryBuffer.require(buffer), fluid);
   }
 
   @Override

@@ -414,3 +414,12 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Remove obsolete LazyOptional owners and table wrapper assignments. Neighbor inventory selection and scaling chest screens resolve actual native block item handlers, retaining the modifiable-handler restriction and empty fallback.
 - Chest Items-only saves keep physical capacity independent of serialized Size and pass the supplied registry lookup to native item serialization. Chest color and station material use registry-aware save/load hooks; loading an uncolored chest clears stale custom color. Part chest duplicate matching compares native item components.
 - Add isolated native inventory checks for slot limits, simulation, highest/trailing visible slots, component-preserving Items-only save/load, shrinking after extraction and empty reloads. Await CI; full tables/recipes/GUI and TiC loading remain unfinished. Phase 2 is still in progress.
+
+
+### Container interactions, cannon projectile and native packet contents
+
+- Run 37035597802: Mantle, idempotence, independent compilation and all existing behavioral checks passed. TiC declaration diagnostics decreased from 188 to 160; full diagnostics decreased from 5,512 to 5,440. Full compilation and game loading are still unfinished.
+- Container filling recipes and tool tank interactions query native item/block handlers. Casting inputs expose a full FluidStack snapshot so filling preserves native component patches; legacy implementors retain their old metadata through a CUSTOM_DATA bridge. Casting wrapper initializes its fluid to EMPTY, supplies full snapshots, and exposes legacy custom data defensively.
+- Dropper rails use native sided ENTITY_AUTOMATION inventory access, preserving their downward eligibility/upward transfer queries. Fluid cannon projectiles query native block inventory access, use the native synced-data builder and dimensions accessors, and save/load fluids with the entity's registry lookup. Legacy/native cannon positions use TagUtil.
+- Station menus open through the native player extension. Item-slot and fluid-update payloads use native optional stream codecs and the real registry-aware play buffer provided by Mantle; absent lookup is rejected. Item-slot updates guard invalid indices and pass the actual client level/states to the renderer.
+- Add independent native packet round trips for empty and component-bearing item/fluid contents, amounts, slots, positions and buffer consumption. Await CI. Container/cannon gameplay, recipes and Phase 2 completion remain pending.

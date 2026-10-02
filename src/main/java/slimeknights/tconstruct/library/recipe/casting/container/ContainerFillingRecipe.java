@@ -12,7 +12,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.RecipeType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.material.Fluid;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidUtil;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
@@ -58,10 +58,8 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
 
   @Override
   public int getFluidAmount(ICastingContainer inv) {
-    Fluid fluid = inv.getFluid();
-    return inv.getStack().getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-              .map(handler -> handler.fill(new FluidStack(fluid, this.fluidAmount), FluidAction.SIMULATE))
-              .orElse(0);
+    var handler = inv.getStack().getCapability(Capabilities.FluidHandler.ITEM);
+    return handler == null ? 0 : handler.fill(inv.getFluidStack().copyWithAmount(this.fluidAmount), FluidAction.SIMULATE);
   }
 
   @Override
@@ -82,11 +80,11 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   @Override
   public boolean matches(ICastingContainer inv, Level worldIn) {
     ItemStack stack = inv.getStack();
-    Fluid fluid = inv.getFluid();
-    return stack.getItem() == this.container.asItem()
-           && stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM)
-                   .filter(handler -> handler.fill(new FluidStack(fluid, this.fluidAmount), FluidAction.SIMULATE) > 0)
-                   .isPresent();
+    if (stack.getItem() != this.container) {
+      return false;
+    }
+    var handler = stack.getCapability(Capabilities.FluidHandler.ITEM);
+    return handler != null && handler.fill(inv.getFluidStack().copyWithAmount(this.fluidAmount), FluidAction.SIMULATE) > 0;
   }
 
   /** @deprecated use {@link ICastingRecipe#assemble(Container, RegistryAccess)} */
@@ -99,10 +97,12 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   @Override
   public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
     ItemStack stack = inv.getStack().copy();
-    return stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).map(handler -> {
-      handler.fill(new FluidStack(inv.getFluid(), this.fluidAmount, inv.getFluidTag()), FluidAction.EXECUTE);
-      return handler.getContainer();
-    }).orElse(stack);
+    var handler = stack.getCapability(Capabilities.FluidHandler.ITEM);
+    if (handler == null) {
+      return stack;
+    }
+    handler.fill(inv.getFluidStack().copyWithAmount(this.fluidAmount), FluidAction.EXECUTE);
+    return handler.getContainer();
   }
 
   /* Display */
@@ -113,7 +113,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   public List<IDisplayableCastingRecipe> getRecipes(RegistryAccess access) {
     if (displayRecipes == null) {
       // filter fluid registry to just fluids we care about
-      List<FluidStack> fluids = BuiltInRegistries.FLUID.getValues().stream()
+      List<FluidStack> fluids = java.util.stream.StreamSupport.stream(BuiltInRegistries.FLUID.spliterator(), false)
         .filter(fluid -> {
           // skip flowing fluids (redundant to source), fluids with no bucket (probably internal), and fluids hidden from recipe viewers (they be hidden)
           if (fluid.isSource(fluid.defaultFluidState()) && !fluid.is(TinkerTags.Fluids.HIDE_IN_CREATIVE_TANKS)) {

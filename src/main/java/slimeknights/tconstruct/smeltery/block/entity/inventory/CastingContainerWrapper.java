@@ -3,6 +3,8 @@ package slimeknights.tconstruct.smeltery.block.entity.inventory;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -18,7 +20,7 @@ import javax.annotation.Nullable;
 public class CastingContainerWrapper implements ICastingContainer {
   private final CastingBlockEntity tile;
   @Setter
-  private FluidStack fluid;
+  private FluidStack fluid = FluidStack.EMPTY;
   private boolean switchSlots = false;
 
   @Override
@@ -38,7 +40,13 @@ public class CastingContainerWrapper implements ICastingContainer {
   @Nullable
   @Override
   public CompoundTag getFluidTag() {
-    return fluid.getTag();
+    CustomData data = fluid.get(DataComponents.CUSTOM_DATA);
+    return data == null ? null : data.copyTag();
+  }
+
+  @Override
+  public FluidStack getFluidStack() {
+    return fluid.copy();
   }
 
   /** Uses the input for input (default) */
