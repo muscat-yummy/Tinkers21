@@ -171,6 +171,7 @@ public final class TinkerCommons extends TinkerModule {
     SynchronizedDeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, TConstruct.MOD_ID);
   static {
     INGREDIENT_TYPES.register(BlockTagIngredient.ID.getPath(), () -> BlockTagIngredient.TYPE);
+    INGREDIENT_TYPES.register(NoContainerIngredient.ID.getPath(), () -> NoContainerIngredient.TYPE);
   }
 
   private static final SynchronizedDeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS =
@@ -224,7 +225,6 @@ public final class TinkerCommons extends TinkerModule {
   @SubscribeEvent
   void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      CraftingHelper.register(NoContainerIngredient.ID, NoContainerIngredient.Serializer.INSTANCE);
       CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
 
       //noinspection removal

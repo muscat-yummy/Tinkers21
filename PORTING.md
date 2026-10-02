@@ -2,7 +2,7 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
-## Current checkpoint (2026-10-01)
+## Current checkpoint (2026-10-02)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.
 
@@ -92,7 +92,7 @@ When investigating breakage, classify changes as:
 Move Gradle/build configuration to Minecraft 1.21.1, NeoForge, and Java 21. Resolve dependencies and reach a useful compile state. The compiler now reports source-level port errors against the resolved core classpath. Compilation itself is not yet successful; optional integration APIs remain in the later-content audit.
 
 ### Phase 2 — Bootstrap (in progress)
-Port mod initialization, registries, configuration, resource/data loading, and enough infrastructure for Minecraft to load the mod. The current build still fails in Mantle source before Minecraft can load.
+Port mod initialization, registries, configuration, resource/data loading, and enough infrastructure for Minecraft to load the mod. Mantle compiles; TiC still has declaration and method-body migration errors, so Minecraft loading has not been reached.
 
 ### Phase 3 — Core tool system
 Port and preserve the core material/tool/modifier systems, including MaterialId and material managers, ToolDefinition/ToolModule/ToolStack, IModifiable, Modifier/ModifierId/ModifierManager, modifier hooks/modules, and related serialization.
@@ -263,3 +263,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - BlockTagIngredient implements NeoForge ICustomIngredient and registers a native IngredientType on the injected mod bus. Its tag JSON field, item-form filtering, ordering and simple ingredient behavior remain intact; native codecs/wire wrappers replace the removed AbstractIngredient/IIngredientSerializer infrastructure.
 - Direct construction at native Ingredient call sites is wrapped with toVanilla, guarded by token-aware parsing and idempotence. Custom ingredient equality/hash follow the underlying tag. Matching reads currently bound tags instead of relying on removed Forge invalidation methods. Public addon callers must use the native wrapper as part of their 1.21 API migration.
 - Include the actual block-tag implementation in independent normal compilation. Runtime tag reload and recipe matching remain unverified.
+
+
+### Native block-tag implementation verified / no-container ingredients
+
+- Run 36986709814: native BlockTagIngredient compiled in the independent leaf task. One direct recipe construction call was wrapped; its second pass made zero changes. All established independent behavior checks passed. TiC declarations were 456 and normal compilation 6,159. Phase 2 remains incomplete.
+- NoContainerIngredient uses ICustomIngredient/IngredientType with native registry-aware wire codecs. Decode retains flat item/tag fields and nested match JSON, while serialization emits the canonical nested representation. Nonempty decoding follows the prior getIngredient(..., false) contract. Factories return native Ingredient wrappers.
+- Matching still delegates to the nested ingredient and rejects stacks with crafting remainders. The native item-stack extension method was checked in NeoForge 1.21.1 source. Equality/hash include the nested ingredient. Independent implementation compilation is expanded; actual container crafting and recipe synchronization remain unverified.
