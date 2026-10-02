@@ -53,7 +53,7 @@ public class PotionBucketItem extends PotionItem {
   public Component getName(ItemStack stack) {
     var potion = PotionData.get(stack).potion();
     String bucketKey = Potion.getName(potion, getDescriptionId() + ".effect.");
-    if (Util.canTranslate(bucketKey)) {
+    if (Language.getInstance().has(bucketKey)) {
       return Component.translatable(bucketKey);
     }
     // default to filling with the contents

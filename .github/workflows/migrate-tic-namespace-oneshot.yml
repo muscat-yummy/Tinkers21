@@ -1,4 +1,4 @@
-name: Port native food container capabilities and complete potion transfer checks
+name: Verify complete native potion and food container migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -6,6 +6,56 @@ on:
 permissions:
   contents: write
 jobs:
+  inspect_native_recipe_apis:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: port/1.21.1-neoforge
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Resolve native compile artifacts for public API inspection
+        run: |
+          cat > /tmp/native-api-inspect.init.gradle <<'GRADLE'
+          gradle.projectsEvaluated {
+              rootProject.tasks.register('nativeApiClasspath') {
+                  doLast {
+                      new File('/tmp/native-api-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :createMinecraftArtifacts :nativeApiClasspath --no-daemon --console=plain -I /tmp/native-api-inspect.init.gradle
+      - name: Inspect public native APIs without exporting project sources
+        shell: python
+        run: |
+          import pathlib, subprocess, zipfile
+          targets = set([
+              'net.minecraft.advancements.critereon.ItemSubPredicate$Type',
+              'net.minecraft.advancements.critereon.ItemPredicate$Builder',
+              'net.minecraft.world.entity.ai.attributes.Attributes',
+              'net.minecraft.world.level.ExplosionDamageCalculator',
+              'net.minecraft.world.item.enchantment.EnchantmentHelper',
+          ])
+          for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
+              jar = pathlib.Path(entry)
+              if not jar.is_file() or jar.suffix != '.jar':
+                  continue
+              with zipfile.ZipFile(jar) as archive:
+                  names = set(archive.namelist())
+              for cls in list(targets):
+                  if cls.replace('.', '/') + '.class' not in names:
+                      continue
+                  result = subprocess.run(['javap', '-classpath', str(jar), '-public', cls], capture_output=True, text=True, check=True)
+                  print('Public native API:', cls)
+                  print(result.stdout)
+                  targets.remove(cls)
+          if targets:
+              print('Native classes absent:', ', '.join(sorted(targets)))
   migrate:
     runs-on: ubuntu-latest
     steps:
