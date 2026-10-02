@@ -62,6 +62,24 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         text = re.sub(r'\b' + re.escape(source) + r'\b', target, text)
     if 'RegistryObject' in simple_renames:
         text = re.sub(r'\bDeferredHolder\s*<', 'DeferredHolder<?, ', text)
+    verified_type_moves = {
+        'net.minecraft.world.level.block.GlassBlock': 'net.minecraft.world.level.block.TransparentBlock',
+        'net.minecraft.world.level.block.AbstractGlassBlock': 'net.minecraft.world.level.block.TransparentBlock',
+        'net.minecraft.world.level.pathfinder.BlockPathTypes': 'net.minecraft.world.level.pathfinder.PathType',
+        'net.minecraft.core.BlockSource': 'net.minecraft.core.dispenser.BlockSource',
+        'net.minecraft.data.worldgen.BootstapContext': 'net.minecraft.data.worldgen.BootstrapContext',
+        'net.minecraft.advancements.FrameType': 'net.minecraft.advancements.AdvancementType',
+        'net.minecraft.advancements.RequirementsStrategy': 'net.minecraft.advancements.AdvancementRequirements.Strategy',
+        'mezz.jei.api.forge.ForgeTypes': 'mezz.jei.api.neoforge.NeoForgeTypes',
+        'net.neoforged.neoforge.event.entity.living.MobSpawnEvent.FinalizeSpawn': 'net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent',
+        'net.neoforged.neoforge.event.entity.living.LivingEvent.LivingTickEvent': 'net.neoforged.neoforge.event.entity.living.LivingTickEvent',
+    }
+    for source, target in verified_type_moves.items():
+        if source in text and target in classes:
+            text = text.replace(source, target)
+            old_name, new_name = source.split('.')[-1], target.split('.')[-1]
+            if old_name != new_name:
+                text = re.sub(r'\b' + old_name + r'\b', new_name, text)
     registry_fields = {
         'BLOCKS': 'BLOCK', 'ITEMS': 'ITEM', 'FLUIDS': 'FLUID',
         'ENTITY_TYPES': 'ENTITY_TYPE', 'MOB_EFFECTS': 'MOB_EFFECT',

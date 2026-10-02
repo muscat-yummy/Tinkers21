@@ -1,4 +1,4 @@
-name: Inspect TiC declarations and current particle APIs
+name: Compile TiC particle glass and mapped access migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -83,16 +83,20 @@ jobs:
           if targets:
               raise RuntimeError('API classes not found: ' + ', '.join(targets))
       - name: Migrate references to classes present in NeoForge
-        run: python3 scripts/port/migrate_tic_namespace.py
+        run: |
+          python3 scripts/port/migrate_tic_namespace.py
+          python3 scripts/port/migrate_tic_access_transformer.py
       - name: Persist the migration on the authorized port branch
         run: |
           git config user.name 'github-actions[bot]'
           git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/main/java
+          git add src/main/java src/main/resources/META-INF/accesstransformer.cfg
           if ! git diff --cached --quiet; then
             git commit -m "Port TiC references to resolved NeoForge 1.21.1 classes"
             git push origin HEAD:port/1.21.1-neoforge
           fi
+      - name: Apply verified mapped access changes to Minecraft artifacts
+        run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile Mantle
         run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Verify typed resource ID behavior independently of the remaining TiC port

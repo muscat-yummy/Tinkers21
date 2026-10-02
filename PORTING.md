@@ -175,3 +175,12 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - The first TiC namespace pass incorrectly represented Mantle registrations as native DeferredHolder declarations. Mantle's existing SynchronizedDeferredRegister and EnumDeferredRegister intentionally return its single-type RegistryObject adapter. Correct those TiC declarations to the actual adapter; direct generic registers without custom registry hooks use the same synchronized wrapper.
 - New native attachment DeferredHolder declarations with explicit registry types are preserved. Registers with makeRegistry/getEntries require individual review and are excluded from automatic wrapper replacement.
 - The next TiC compiler limit is 12,000 to capture a more complete baseline; counts from differently capped runs must not be compared as progress metrics. Phase 2 remains incomplete until TiC builds and loads.
+
+
+### Full TiC source baseline and declaration diagnosis
+
+- Run 36978088592: corrected registry handles in 19 Java files; Mantle compilation and the typed-ID smoke test passed. TiC reported 6,767 errors with a 12,000 diagnostic limit, yielding a complete baseline rather than another capped count.
+- Run 36978343726: a separate annotation/declaration task reported 643 diagnostics; the normal TiC compile still reported 6,767. Declaration and full-source counts are different checks and must not be compared with each other.
+- The mapped 1.21.1 ParticleType MapCodec/StreamCodec API and TransparentBlock constructor were inspected from the resolved Minecraft artifact. Fluid particles now use the complete native fluid codec/component payload. Glass and pane beacon colors use opaque ARGB while retaining the existing custom RGB values.
+- Spectator menu opening uses NeoForge's public player openMenu provider/BlockPos overload, retaining the block-position payload and syncOnOpen flow.
+- Legacy AT members are renamed only when the resolved mapped class contains the comment-named member with the original descriptor. Unmatched/removed members remain for deliberate source/API review. Minecraft artifacts are rebuilt after these AT changes.
