@@ -465,3 +465,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Run 37039085283: Mantle and every independent check passed after entity spawn migration. TiC declaration diagnostics decreased from 134 to 129; full diagnostics from 5,321 to 5,284. Actual entity tracking and multiplayer load are still unverified.
 - Json Things is published on CurseForge rather than under the attempted Modrinth slugs. Its publisher file page identifies JsonThings-1.21.1-0.13.7.jar, native NeoForge 1.21.1, file 7949745, with coordinate curse.maven:json-things-541617:7949745 (https://www.curseforge.com/minecraft/mc-mods/json-things/files/7949745). Pin it compile-only and retain all integration sources. Await dependency/API validation.
 - Modifier datagen uses Mantle's already ported MobType category model, matching the previously migrated Holy module. Native entity tags retain category semantics; no removed vanilla MobType import is used.
+
+### Potion component migration (in progress)
+
+- Bottle filling and deprecated potion transfers now use native `PotionContents`; fluid transfers retain component patches.
+- `PotionData` reads legacy `Potion`, `CustomPotionEffects`, and `CustomPotionColor`, writes native components, and preserves unrelated metadata.
+- Spilling and cloud effects retain their existing base-potion-only semantics and legacy predicate fields while reading native fluid contents.
+- A production-helper smoke check covers item/fluid transfer, effects/color, legacy conversion, predicate snapshots, and native JSON/wire/save round trips. CI validation is pending; full root compilation and game loading remain incomplete.
