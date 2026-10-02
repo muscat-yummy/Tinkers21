@@ -1,4 +1,4 @@
-name: Correct scaling chest final slot bounds and verify native recipe inputs
+name: Port raw book translations and holder aware crafting integration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -137,6 +137,9 @@ jobs:
               'net.minecraft.world.level.block.TransparentBlock': ('class ', 'TransparentBlock(',),
               'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
               'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
+              'net.minecraft.locale.Language': ('getInstance(', 'getOrDefault(',),
+              'net.minecraft.world.item.crafting.ShapedRecipe': ('getWidth(', 'getHeight(', 'canCraftInDimensions(',),
+              'mezz.jei.api.constants.RecipeTypes': ('CRAFTING;',),
               'net.minecraft.world.item.crafting.RecipeInput': ('interface ', 'size(', 'getItem(', 'isEmpty(',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
               'net.minecraft.world.level.block.Block': ('codec(', 'useWithoutItem(', 'useItemOn(', 'getCloneItemStack(',),

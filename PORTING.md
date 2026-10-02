@@ -433,3 +433,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 
 
 - Run 37036827316: Mantle, idempotence, independent compilation and existing behavioral checks passed. TiC declaration diagnostics decreased from 160 to 148; full diagnostics decreased from 5,440 to 5,407. The new scaling chest check found an existing last-slot visual-size overflow (slot+2 exceeded physical capacity); clamp expansion to the actual number of slots and rerun all persistence/shrinking checks. Do not count this new behavior check as passed before the rerun.
+
+
+### Native raw translations and holder-aware crafting display/transfer
+
+- Replace removed ForgeI18n pattern lookup with the native Language raw translation lookup in domain names, translation availability and book content. This retains literal percent signs and resource-pack translations without interpreting them as format strings. The already compiled Mantle TranslationHelper uses the same native API. Detect NeoForge by its actual neoforge mod ID.
+- Book crafting display resolves native RecipeHolders to their actual values, preserves vanilla shaped dimensions and searches station extra requirements through native recipe lists. JEI 1.21.1 crafting transfer uses RecipeHolder<CraftingRecipe>, as required by its published API, retaining slot layout and inventory restrictions. Eligibility uses the native recipe dimension contract and nine-ingredient limit.
+- Await CI. Native client rendering, complete book displays, JEI loading and Phase 2 game loading remain pending.

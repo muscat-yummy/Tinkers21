@@ -18,7 +18,7 @@ import net.minecraft.world.item.context.UseOnContext;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.Vec3;
-import net.minecraftforge.common.ForgeI18n;
+import net.minecraft.locale.Language;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.fml.ModList;
 import net.neoforged.fml.ModLoadingContext;
@@ -74,7 +74,7 @@ public class Util {
    * @return  True if it can be translated
    */
   public static boolean canTranslate(String key) {
-    return !ForgeI18n.getPattern(key).equals(key);
+    return !Language.getInstance().getOrDefault(key).equals(key);
   }
 
   /**
@@ -260,7 +260,7 @@ public class Util {
   /** Checks if we are currently running on NeoForge as opposed to Forge. Allows branching solutions for each loader if needed */
   public static boolean isNeo() {
     if (IS_NEO_FORGE == null) {
-      IS_NEO_FORGE = ModList.get().getModContainerById("forge").filter(mod -> mod.getModInfo().getDisplayName().equals("NeoForge")).isPresent();
+      IS_NEO_FORGE = ModList.get().getModContainerById("neoforge").isPresent();
     }
     return IS_NEO_FORGE;
   }
