@@ -1,4 +1,4 @@
-name: Migrate diagnosed TiC fluid copies without component loss
+name: Port TiC block-tag ingredients to native wrappers
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,7 +37,7 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java')
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
               }
@@ -105,6 +105,7 @@ jobs:
           python3 scripts/port/migrate_tic_namespace.py
           python3 scripts/port/migrate_tic_resource_locations.py
           python3 scripts/port/migrate_tic_fluid_copies.py
+          python3 scripts/port/migrate_tic_wrapped_ingredients.py
           python3 scripts/port/migrate_tic_access_transformer.py
       - name: Verify migration idempotence before persisting source
         shell: python
@@ -113,7 +114,7 @@ jobs:
           paths = sorted(pathlib.Path('src/main/java').rglob('*.java'))
           paths.append(pathlib.Path('src/main/resources/META-INF/accesstransformer.cfg'))
           before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
-          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_access_transformer.py'):
+          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_wrapped_ingredients.py', 'migrate_tic_access_transformer.py'):
               subprocess.run(['python3', 'scripts/port/' + script], check=True)
           changed = [str(p) for p in paths if before[str(p)] != hashlib.sha256(p.read_bytes()).hexdigest()]
           if changed:

@@ -30,6 +30,7 @@ import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.crafting.IngredientType;
 import com.mojang.serialization.MapCodec;
 import net.neoforged.neoforge.registries.NeoForgeRegistries;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
@@ -166,6 +167,12 @@ public final class TinkerCommons extends TinkerModule {
   public static final RegistryObject<ParticleType<FluidParticleData>> fluidParticle = PARTICLE_TYPES.register("fluid", FluidParticleData.Type::new);
 
   /* Loot conditions */
+  private static final SynchronizedDeferredRegister<IngredientType<?>> INGREDIENT_TYPES =
+    SynchronizedDeferredRegister.create(NeoForgeRegistries.Keys.INGREDIENT_TYPES, TConstruct.MOD_ID);
+  static {
+    INGREDIENT_TYPES.register(BlockTagIngredient.ID.getPath(), () -> BlockTagIngredient.TYPE);
+  }
+
   private static final SynchronizedDeferredRegister<MapCodec<? extends ICondition>> CONDITION_CODECS =
     SynchronizedDeferredRegister.create(NeoForgeRegistries.Keys.CONDITION_CODECS, TConstruct.MOD_ID);
   static {
@@ -203,6 +210,7 @@ public final class TinkerCommons extends TinkerModule {
   public TinkerCommons() {
     CRITERION_TRIGGERS.register(TConstruct.getModEventBus());
     CONDITION_CODECS.register(TConstruct.getModEventBus());
+    INGREDIENT_TYPES.register(TConstruct.getModEventBus());
     TConstructCommand.init();
     NeoForge.EVENT_BUS.addListener(RecipeCacheInvalidator::onReloadListenerReload);
   }
@@ -217,7 +225,6 @@ public final class TinkerCommons extends TinkerModule {
   void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
       CraftingHelper.register(NoContainerIngredient.ID, NoContainerIngredient.Serializer.INSTANCE);
-      CraftingHelper.register(BlockTagIngredient.Serializer.ID, BlockTagIngredient.Serializer.INSTANCE);
       CraftingHelper.register(InstrumentIngredient.ID, InstrumentIngredient.SERIALIZER);
 
       //noinspection removal

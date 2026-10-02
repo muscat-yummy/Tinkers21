@@ -255,3 +255,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Run 36985250995 verified DyedItemColor(int, boolean) and both BlockItem updateCustomBlockEntityTag signatures from the resolved mapped artifact. Migration idempotence, Mantle compile, ResourceId behavior, leaf compile, loot validation and tag behavior all passed. TiC declarations were 461 and full compilation 6,215; phase 2 remains incomplete.
 - Replace 29 FluidStack(FluidStack, int) sites in 19 files only where the previous full compiler identified the first argument as FluidStack. Use copyWithAmount to retain fluid components and leave the original stack amount unchanged. Raw Fluid/Holder constructors are not broadly rewritten.
 - NeoForge 1.21.1 FluidStack.copyWithAmount delegates to copy and changes only the copied amount; this source API was inspected directly. Exact diagnosed line matching, balanced token parsing, parser fixtures and migration idempotence guard the automated rewrite. Fluid game behavior remains a later runtime check.
+
+
+### Fluid-copy checkpoint / native block-tag ingredient migration
+
+- Run 36985970623 migrated all 29 diagnosed FluidStack-copy sites with zero pending forms; the second pass changed zero sites. Migration idempotence, Mantle compile, ResourceId behavior, leaf compile, loot JSON validation and tag behavior all passed. TiC declaration diagnostics remained 461 and normal compilation decreased from 6,215 to 6,185.
+- BlockTagIngredient implements NeoForge ICustomIngredient and registers a native IngredientType on the injected mod bus. Its tag JSON field, item-form filtering, ordering and simple ingredient behavior remain intact; native codecs/wire wrappers replace the removed AbstractIngredient/IIngredientSerializer infrastructure.
+- Direct construction at native Ingredient call sites is wrapped with toVanilla, guarded by token-aware parsing and idempotence. Custom ingredient equality/hash follow the underlying tag. Matching reads currently bound tags instead of relying on removed Forge invalidation methods. Public addon callers must use the native wrapper as part of their 1.21 API migration.
+- Include the actual block-tag implementation in independent normal compilation. Runtime tag reload and recipe matching remain unverified.
