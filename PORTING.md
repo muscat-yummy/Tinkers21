@@ -248,3 +248,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Add tconstruct:tinkers_chest to the native minecraft:dyeable item tag so the vanilla dye recipe still recognizes the chest after removal of DyeableLeatherItem. The tag merges with vanilla data rather than replacing it. Legacy-world and visible render/dye behavior remain unverified.
 
 - ToolClientEvents registers its screen through RegisterMenuScreensEvent instead of private MenuScreens.register, geometry loaders use namespaced ResourceLocation IDs, and the movement speed query uses the registered attribute Holder. Existing setup/reload/keybinding work remains in its previous phase. Full compile validation is pending.
+
+
+### Chest/client API verification and diagnosed fluid copies
+
+- Run 36985250995 verified DyedItemColor(int, boolean) and both BlockItem updateCustomBlockEntityTag signatures from the resolved mapped artifact. Migration idempotence, Mantle compile, ResourceId behavior, leaf compile, loot validation and tag behavior all passed. TiC declarations were 461 and full compilation 6,215; phase 2 remains incomplete.
+- Replace 29 FluidStack(FluidStack, int) sites in 19 files only where the previous full compiler identified the first argument as FluidStack. Use copyWithAmount to retain fluid components and leave the original stack amount unchanged. Raw Fluid/Holder constructors are not broadly rewritten.
+- NeoForge 1.21.1 FluidStack.copyWithAmount delegates to copy and changes only the copied amount; this source API was inspected directly. Exact diagnosed line matching, balanced token parsing, parser fixtures and migration idempotence guard the automated rewrite. Fluid game behavior remains a later runtime check.

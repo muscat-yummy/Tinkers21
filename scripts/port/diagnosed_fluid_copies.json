@@ -1,0 +1,147 @@
+[
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/IMeltingContainer.java",
+    "line": 24,
+    "source": "        return new FluidStack(fluid, applyOreBoost(rate, fluid.getAmount()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/FuelModule.java",
+    "line": 133,
+    "source": "            FluidStack drained = handler.drain(new FluidStack(fluid, amount), FluidAction.EXECUTE);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MultitankFuelModule.java",
+    "line": 352,
+    "source": "            resource = new FluidStack(resource, resource.getAmount() - filled);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MultitankFuelModule.java",
+    "line": 380,
+    "source": "            resource = new FluidStack(resource, resource.getAmount() - drained.getAmount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MultitankFuelModule.java",
+    "line": 413,
+    "source": "            toDrain = new FluidStack(drained, maxDrain - drained.getAmount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/fluid/FluidTankBase.java",
+    "line": 38,
+    "source": "        fluid = new FluidStack(resource, filled);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/tank/CastingFluidHandler.java",
+    "line": 76,
+    "source": "          fluid = new FluidStack(resource, amount);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/tank/CastingFluidHandler.java",
+    "line": 127,
+    "source": "      FluidStack stack = new FluidStack(fluid, drained);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/alloying/AlloyRecipe.java",
+    "line": 169,
+    "source": "          drainFluids[index] = new FluidStack(fluid, amount);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/FluidCannonBlockEntity.java",
+    "line": 142,
+    "source": "            FluidEffectProjectile projectile = new FluidEffectProjectile(level, worldPosition, facing, new FluidStack(fluid, amount), power);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/casting/material/AbstractMaterialCastingRecipe.java",
+    "line": 69,
+    "source": "      return new FluidStack(fluid, itemCost * fluid.getAmount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/DamageableMeltingRecipe.java",
+    "line": 55,
+    "source": "      return new FluidStack(fluid, amount);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/MaterialMeltingRecipe.java",
+    "line": 88,
+    "source": "      return new FluidStack(result.get(), result.getAmount() * cost);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/MaterialMeltingRecipe.java",
+    "line": 96,
+    "source": "          handler.fill(new FluidStack(byproduct.get(), byproduct.getAmount() * cost), FluidAction.EXECUTE);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/MaterialMeltingRecipe.java",
+    "line": 134,
+    "source": "            recipe.outputs(entries.stream().map(entry -> new FluidStack(output, output.getAmount() * entry.getIntValue())).toList());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/melting/MaterialMeltingRecipe.java",
+    "line": 138,
+    "source": "              recipe.byproduct(entries.stream().map(entry -> new FluidStack(fluid, fluid.getAmount() * entry.getIntValue())).toList());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/inventory/DuctTankWrapper.java",
+    "line": 107,
+    "source": "      return parent.drain(new FluidStack(fluid, maxDrain), action);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/fluid/SimpleFluidTank.java",
+    "line": 79,
+    "source": "          updateFluid(new FluidStack(resource, amount), amount);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/fluid/SimpleFluidTank.java",
+    "line": 107,
+    "source": "      FluidStack result = new FluidStack(fluid, drained);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/FluidModifierHookIterator.java",
+    "line": 85,
+    "source": "            resource = new FluidStack(resource, resource.getAmount() - drained.getAmount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/FluidModifierHookIterator.java",
+    "line": 127,
+    "source": "            toDrain = new FluidStack(drained, maxDrain - drained.getAmount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/ToolFluidCapability.java",
+    "line": 137,
+    "source": "        resource = new FluidStack(resource, resource.getAmount() / size);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/tools/modules/interaction/TankInteractionModule.java",
+    "line": 96,
+    "source": "          FluidStack drained = cap.drain(new FluidStack(fluidStack, TANK_HELPER.getCapacity(tool) - fluidStack.getAmount()), FluidAction.EXECUTE);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/tools/modules/interaction/SpittingModule.java",
+    "line": 104,
+    "source": "              FluidEffectProjectile spit = new FluidEffectProjectile(world, entity, new FluidStack(fluid, amount), power);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/modifiers/modules/capacity/FluidPredicateAsCapacityModule.java",
+    "line": 63,
+    "source": "        helper.setFluid(tool, new FluidStack(fluid, amount));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/TankModule.java",
+    "line": 146,
+    "source": "          FluidStack drained = new FluidStack(current, Math.min(current.getAmount(), resource.getAmount()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/tools/capability/fluid/TankModule.java",
+    "line": 170,
+    "source": "          FluidStack drained = new FluidStack(current, Math.min(current.getAmount(), maxDrain));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/plugin/ImmersiveEngineeringPlugin.java",
+    "line": 99,
+    "source": "          float consumed = recipe.applyToEntity(new FluidStack(fluid, amount), 1,"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/plugin/ImmersiveEngineeringPlugin.java",
+    "line": 139,
+    "source": "          float consumed = recipe.applyToBlock(new FluidStack(fluid, amount), 1,"
+  }
+]

@@ -1,4 +1,4 @@
-name: Port TiC chest dye components and client registrations
+name: Migrate diagnosed TiC fluid copies without component loss
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -104,6 +104,7 @@ jobs:
         run: |
           python3 scripts/port/migrate_tic_namespace.py
           python3 scripts/port/migrate_tic_resource_locations.py
+          python3 scripts/port/migrate_tic_fluid_copies.py
           python3 scripts/port/migrate_tic_access_transformer.py
       - name: Verify migration idempotence before persisting source
         shell: python
@@ -112,7 +113,7 @@ jobs:
           paths = sorted(pathlib.Path('src/main/java').rglob('*.java'))
           paths.append(pathlib.Path('src/main/resources/META-INF/accesstransformer.cfg'))
           before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
-          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_access_transformer.py'):
+          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_access_transformer.py'):
               subprocess.run(['python3', 'scripts/port/' + script], check=True)
           changed = [str(p) for p in paths if before[str(p)] != hashlib.sha256(p.read_bytes()).hexdigest()]
           if changed:
