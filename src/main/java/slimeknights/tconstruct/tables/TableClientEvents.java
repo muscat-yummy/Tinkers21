@@ -2,7 +2,7 @@ package slimeknights.tconstruct.tables;
 
 import net.minecraft.client.gui.screens.MenuScreens;
 import net.minecraft.client.renderer.blockentity.BlockEntityRendererProvider;
-import net.minecraft.world.item.DyeableLeatherItem;
+import slimeknights.tconstruct.tables.item.TinkersChestBlockItem;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -49,7 +49,7 @@ public class TableClientEvents extends ClientEventBase {
       if (world != null && pos != null) {
         BlockEntity te = world.getBlockEntity(pos);
         if (te instanceof TinkersChestBlockEntity) {
-          return ((TinkersChestBlockEntity)te).getColor();
+          return 0xFF000000 | ((TinkersChestBlockEntity)te).getColor();
         }
       }
       return -1;
@@ -58,6 +58,6 @@ public class TableClientEvents extends ClientEventBase {
 
   @SubscribeEvent
   static void registerItemColors(final RegisterColorHandlersEvent.Item event) {
-    event.register((stack, index) -> ((DyeableLeatherItem)stack.getItem()).getColor(stack), TinkerTables.tinkersChest.asItem());
+    event.register((stack, index) -> (0xFF000000 | ((TinkersChestBlockItem)stack.getItem()).getColor(stack)), TinkerTables.tinkersChest.asItem());
   }
 }

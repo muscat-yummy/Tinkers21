@@ -239,3 +239,12 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Client keybinding processing uses PlayerTickEvent.Pre and the player's actual logical side; game event subscriber bus constants use the verified FML GAME enum, retaining separation from MOD subscribers.
 - EntityModifierCapability uses a serialized ListTag attachment preserving ModifierNBT's existing serialized shape, modifier list merge behavior, entity predicates and the EMPTY fallback. Reads/writes defensively copy tags, and native entity lookup returns the same stored provider. Remaining callers use explicit Optional lookup helpers.
 - Attachment lifecycle, projectile serialization/sync and client equipment hooks still require full compilation and runtime verification. Import of legacy Forge capability data in existing worlds is not yet implemented or claimed.
+
+
+### Equipment/projectile attachment checkpoint and chest dye components
+
+- Run 36984408450: migration idempotence, Mantle compile, ResourceId behavior, expanded leaf compile, loot JSON validation and tag behavior all passed. TiC declarations decreased from 505 to 465 and normal compilation from 6,288 to 6,229. Full build/game loading still have not passed.
+- TinkersChestBlockItem stores color in DataComponents.DYED_COLOR and retains its public getColor/hasCustomColor/setColor/clearColor behavior. Placement and clone stack color transfer remain intact. Rendering supplies opaque ARGB while item/block storage retains RGB.
+- Add tconstruct:tinkers_chest to the native minecraft:dyeable item tag so the vanilla dye recipe still recognizes the chest after removal of DyeableLeatherItem. The tag merges with vanilla data rather than replacing it. Legacy-world and visible render/dye behavior remain unverified.
+
+- ToolClientEvents registers its screen through RegisterMenuScreensEvent instead of private MenuScreens.register, geometry loaders use namespaced ResourceLocation IDs, and the movement speed query uses the registered attribute Holder. Existing setup/reload/keybinding work remains in its previous phase. Full compile validation is pending.

@@ -1,4 +1,4 @@
-name: Port TiC player and projectile modifier attachments
+name: Port TiC chest dye components and client registrations
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -76,6 +76,8 @@ jobs:
               'net.minecraft.resources.ResourceLocation': ('class ', 'ResourceLocation(java.lang.String, java.lang.String)',),
               'net.minecraft.core.particles.ParticleType': ('ParticleType(', 'codec(', 'streamCodec(',),
               'net.minecraft.world.level.block.TransparentBlock': ('class ', 'TransparentBlock(',),
+              'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
+              'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
               'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ('EnchantmentDefinition(', 'slots(',),
               'net.minecraft.core.registries.BuiltInRegistries': ('Registry<',),
