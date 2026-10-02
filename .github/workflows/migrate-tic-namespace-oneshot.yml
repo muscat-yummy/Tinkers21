@@ -1,4 +1,4 @@
-name: Port smeltery IO with current master forwarding capabilities
+name: Port casting cannon proxy tank capabilities and registry aware saves
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -123,6 +123,8 @@ jobs:
               'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
               'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
               'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
+              'net.minecraft.world.level.block.Block': ('codec(', 'useWithoutItem(', 'useItemOn(', 'getCloneItemStack(',),
+              'net.neoforged.neoforge.fluids.FluidStack': ('save(', 'parseOptional(', 'isSameFluidSameComponents(',),
               'net.minecraft.world.item.ArmorMaterial$Layer': ('Layer(',),
               'net.minecraft.world.item.ArmorItem': ('ArmorItem(', 'getMaterial(',),
               'net.neoforged.neoforge.registries.DeferredRegister': ('create(', 'register(',),

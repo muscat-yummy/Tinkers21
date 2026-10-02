@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
+import net.neoforged.neoforge.capabilities.Capabilities;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandlerItem;
@@ -19,7 +19,6 @@ import slimeknights.tconstruct.library.fluid.IFluidTankUpdater;
 
 /** Fluid handler that proxies to an item stack tank */
 public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> extends SingleItemHandler<T> implements IFluidHandler {
-  private IFluidHandlerItem itemTank;
   public ProxyItemTank(T parent) {
     super(parent, 1);
   }
@@ -33,7 +32,7 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     Item craftRemainingItem = stack.getItem().getCraftingRemainingItem();
     return !stack.is(TinkerTags.Items.PROXY_TANK_BLACKLIST)
       && (craftRemainingItem == null || !RegistryHelper.contains(TinkerTags.Items.PROXY_TANK_BLACKLIST, craftRemainingItem))
-      && (stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).isPresent());
+      && (stack.getCapability(Capabilities.FluidHandler.ITEM) != null);
   }
 
   /** Used by the fluid handler logic to sync changes as we directly mutate the internal stack */
@@ -51,11 +50,10 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
     Level world = parent.getLevel();
     boolean needsUpdate = world != null && !world.isClientSide;
     if (oldStack != newStack) {
-      // if the stack instance changed, discard cached cap and sync
-      itemTank = null;
+      // If the stack instance changed, sync its current item and components.
       if (needsUpdate) {
         // both stacks being empty means our stack shrunk by 1 and is being replaced with ItemStack.EMPTY
-        needsUpdate = (oldStack.isEmpty() && newStack.isEmpty()) || !ItemStack.isSameItemSameTags(oldStack, newStack);
+        needsUpdate = (oldStack.isEmpty() && newStack.isEmpty()) || !ItemStack.isSameItemSameComponents(oldStack, newStack);
       }
     } else if (needsUpdate) {
       needsUpdate = syncSame;
@@ -75,11 +73,9 @@ public class ProxyItemTank<T extends MantleBlockEntity & IFluidTankUpdater> exte
 
   /** Gets the fluid handler for the item */
   private IFluidHandlerItem getItemTank() {
-    if (itemTank == null) {
-      ItemStack stack = getStack();
-      itemTank = stack.getCapability(ForgeCapabilities.FLUID_HANDLER_ITEM).orElseGet(() -> new EmptyFluidHandlerItem(stack));
-    }
-    return itemTank;
+    ItemStack stack = getStack();
+    IFluidHandlerItem itemTank = stack.getCapability(Capabilities.FluidHandler.ITEM);
+    return itemTank != null ? itemTank : new EmptyFluidHandlerItem(stack);
   }
 
   @Override

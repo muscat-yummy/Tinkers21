@@ -5,6 +5,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
+import slimeknights.tconstruct.library.fluid.StoredFluid;
 import net.minecraft.nbt.Tag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.material.Fluid;
@@ -80,7 +82,7 @@ public class CastingFluidHandler implements IFluidHandler {
     }
 
     // safety: should never be false, but good to check
-    if (!resource.isFluidEqual(fluid)) {
+    if (!FluidStack.isSameFluidSameComponents(resource, fluid)) {
       return 0;
     }
 
@@ -110,7 +112,7 @@ public class CastingFluidHandler implements IFluidHandler {
   @Nonnull
   @Override
   public FluidStack drain(FluidStack resource, FluidAction action) {
-    if (resource.isEmpty() || !resource.isFluidEqual(fluid)) {
+    if (resource.isEmpty() || !FluidStack.isSameFluidSameComponents(resource, fluid)) {
       return FluidStack.EMPTY;
     }
     return this.drain(resource.getAmount(), action);
@@ -171,22 +173,27 @@ public class CastingFluidHandler implements IFluidHandler {
   private static final String TAG_CAPACITY = "capacity";
 
   /** Reads the tank from Tag */
-  public void readFromTag(CompoundTag nbt) {
-    capacity = nbt.getInt(TAG_CAPACITY);
+  public void readFromTag(CompoundTag nbt, HolderLookup.Provider registries) {
+    capacity = Math.max(0, nbt.getInt(TAG_CAPACITY));
+    fluid = FluidStack.EMPTY;
+    filter = Fluids.EMPTY;
     if (nbt.contains(TAG_FLUID, Tag.TAG_COMPOUND)) {
-      setFluid(FluidStack.loadFluidStackFromNBT(nbt.getCompound(TAG_FLUID)));
+      setFluid(StoredFluid.readTank(nbt.getCompound(TAG_FLUID), registries));
     }
     if (nbt.contains(TAG_FILTER, Tag.TAG_STRING)) {
-      filter = BuiltInRegistries.FLUID.get(ResourceLocation.tryParse(nbt.getString(TAG_FILTER)));
+      ResourceLocation id = ResourceLocation.tryParse(nbt.getString(TAG_FILTER));
+      if (id != null && BuiltInRegistries.FLUID.containsKey(id)) {
+        filter = BuiltInRegistries.FLUID.get(id);
+      }
     }
   }
 
   /** Write the tank from NBT */
   @SuppressWarnings("deprecation")
-  public CompoundTag writeToTag(CompoundTag nbt) {
+  public CompoundTag writeToTag(CompoundTag nbt, HolderLookup.Provider registries) {
     nbt.putInt(TAG_CAPACITY, capacity);
     if (!fluid.isEmpty()) {
-      nbt.put(TAG_FLUID, fluid.writeToNBT(new CompoundTag()));
+      nbt.put(TAG_FLUID, fluid.save(registries));
     }
     if (filter != Fluids.EMPTY) {
       nbt.putString(TAG_FILTER, BuiltInRegistries.FLUID.getKey(filter).toString());

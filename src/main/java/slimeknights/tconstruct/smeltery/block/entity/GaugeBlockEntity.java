@@ -6,15 +6,16 @@ import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import slimeknights.tconstruct.library.utils.BlockCapabilitySource;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import slimeknights.tconstruct.smeltery.TinkerSmeltery;
 
 /** This class exists simply to allow us to have a block entity renderer for obsidian gauges. Though it is useful as a cache for the capability to render. */
 public class GaugeBlockEntity extends BlockEntity {
-  private LazyOptional<IFluidHandler> neighbor;
+  private BlockCapabilitySource<IFluidHandler> neighbor;
+  private Direction neighborSide;
   public GaugeBlockEntity(BlockEntityType<?> type, BlockPos pos, BlockState state) {
     super(type, pos, state);
   }
@@ -28,17 +29,12 @@ public class GaugeBlockEntity extends BlockEntity {
     if (level == null) {
       return EmptyFluidHandler.INSTANCE;
     }
-    // if we have not fetched the neighbor, fetch it
-    if (neighbor == null) {
-      Direction side = getBlockState().getValue(BlockStateProperties.FACING);
-      BlockEntity te = level.getBlockEntity(getBlockPos().relative(side.getOpposite()));
-      if (te != null) {
-        neighbor = te.getCapability(ForgeCapabilities.FLUID_HANDLER, side);
-      } else {
-        neighbor = LazyOptional.empty();
-      }
+    Direction side = getBlockState().getValue(BlockStateProperties.FACING);
+    if (neighbor == null || neighborSide != side) {
+      neighborSide = side;
+      neighbor = new BlockCapabilitySource<>(this, Capabilities.FluidHandler.BLOCK,
+        getBlockPos().relative(side.getOpposite()), side);
     }
-    // return tank or empty tank
-    return neighbor.orElse(EmptyFluidHandler.INSTANCE);
+    return neighbor.getOrDefault(EmptyFluidHandler.INSTANCE);
   }
 }

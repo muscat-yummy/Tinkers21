@@ -176,6 +176,16 @@ public final class TinkerSmeltery extends TinkerModule {
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, duct.get(), (blockEntity, side) -> blockEntity.getFluidHandler());
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, duct.get(), (blockEntity, side) -> blockEntity.getItemHandler());
     event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, chute.get(), (blockEntity, side) -> blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, basin.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, basin.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, table.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, table.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, castingTank.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, castingTank.get(), (blockEntity, side) -> blockEntity.getItemHandler(side));
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, fluidCannon.get(), (blockEntity, side) -> blockEntity.getTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, fluidCannon.get(), (blockEntity, side) -> blockEntity.getItemHandler());
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, proxyTank.get(), (blockEntity, side) -> blockEntity.getItemTank());
+    event.registerBlockEntity(Capabilities.ItemHandler.BLOCK, proxyTank.get(), (blockEntity, side) -> blockEntity.getItemTank());
   }
 
   /** Predicate for something that never happens */
