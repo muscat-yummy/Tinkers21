@@ -1,4 +1,4 @@
-name: Port raw book translations and holder aware crafting integration
+name: Port native entity pairing and registry aware complex spawn data
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -137,6 +137,9 @@ jobs:
               'net.minecraft.world.level.block.TransparentBlock': ('class ', 'TransparentBlock(',),
               'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
               'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
+              'net.minecraft.world.entity.Entity': ('getAddEntityPacket(',),
+              'net.minecraft.world.entity.projectile.ThrowableItemProjectile': ('getItem(', 'defineSynchedData(',),
+              'net.neoforged.neoforge.entity.IEntityWithComplexSpawn': ('SpawnData(',),
               'net.minecraft.locale.Language': ('getInstance(', 'getOrDefault(',),
               'net.minecraft.world.item.crafting.ShapedRecipe': ('getWidth(', 'getHeight(', 'canCraftInDimensions(',),
               'mezz.jei.api.constants.RecipeTypes': ('CRAFTING;',),

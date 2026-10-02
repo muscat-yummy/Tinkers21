@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.gadgets.entity;
 
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
 import net.minecraft.world.entity.EntityType;
@@ -9,9 +9,10 @@ import net.minecraft.world.entity.projectile.ThrowableItemProjectile;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.server.level.ServerEntity;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 
 import javax.annotation.Nonnull;
@@ -46,18 +47,18 @@ public class EFLNEntity extends ThrowableItemProjectile implements IEntityWithCo
   }
 
   @Override
-  public void writeSpawnData(FriendlyByteBuf buffer) {
-    buffer.writeItem(this.getItemRaw());
+  public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
+    ItemStack.OPTIONAL_STREAM_CODEC.encode(buffer, this.getItem());
   }
 
   @Override
-  public void readSpawnData(FriendlyByteBuf additionalData) {
-    this.setItem(additionalData.readItem());
+  public void readSpawnData(RegistryFriendlyByteBuf additionalData) {
+    this.setItem(ItemStack.OPTIONAL_STREAM_CODEC.decode(additionalData));
   }
 
   @Nonnull
   @Override
-  public Packet<ClientGamePacketListener> getAddEntityPacket() {
-    return NetworkHooks.getEntitySpawningPacket(this);
+  public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+    return super.getAddEntityPacket(serverEntity);
   }
 }

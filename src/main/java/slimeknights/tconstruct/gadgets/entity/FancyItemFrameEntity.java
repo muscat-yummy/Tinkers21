@@ -3,7 +3,7 @@ package slimeknights.tconstruct.gadgets.entity;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.RegistryFriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientGamePacketListener;
@@ -22,7 +22,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
-import net.minecraftforge.network.NetworkHooks;
+import net.minecraft.server.level.ServerEntity;
 import slimeknights.tconstruct.common.Sounds;
 import slimeknights.tconstruct.gadgets.TinkerGadgets;
 import slimeknights.tconstruct.library.utils.Util;
@@ -155,9 +155,9 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityWithComple
   }
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(VARIANT, 0);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(VARIANT, 0);
   }
 
   /** Gets the frame type */
@@ -235,19 +235,19 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityWithComple
   }
 
   @Override
-  public Packet<ClientGamePacketListener> getAddEntityPacket() {
-    return NetworkHooks.getEntitySpawningPacket(this);
+  public Packet<ClientGamePacketListener> getAddEntityPacket(ServerEntity serverEntity) {
+    return super.getAddEntityPacket(serverEntity);
   }
 
   @Override
-  public void writeSpawnData(FriendlyByteBuf buffer) {
+  public void writeSpawnData(RegistryFriendlyByteBuf buffer) {
     buffer.writeVarInt(this.getFrameId());
     buffer.writeBlockPos(this.pos);
     buffer.writeVarInt(this.direction.get3DDataValue());
   }
 
   @Override
-  public void readSpawnData(FriendlyByteBuf buffer) {
+  public void readSpawnData(RegistryFriendlyByteBuf buffer) {
     this.entityData.set(VARIANT, buffer.readVarInt());
     this.pos = buffer.readBlockPos();
     this.setDirection(Direction.from3DDataValue(buffer.readVarInt()));

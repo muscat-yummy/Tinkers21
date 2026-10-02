@@ -440,3 +440,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Replace removed ForgeI18n pattern lookup with the native Language raw translation lookup in domain names, translation availability and book content. This retains literal percent signs and resource-pack translations without interpreting them as format strings. The already compiled Mantle TranslationHelper uses the same native API. Detect NeoForge by its actual neoforge mod ID.
 - Book crafting display resolves native RecipeHolders to their actual values, preserves vanilla shaped dimensions and searches station extra requirements through native recipe lists. JEI 1.21.1 crafting transfer uses RecipeHolder<CraftingRecipe>, as required by its published API, retaining slot layout and inventory restrictions. Eligibility uses the native recipe dimension contract and nine-ingredient limit.
 - Await CI. Native client rendering, complete book displays, JEI loading and Phase 2 game loading remain pending.
+
+
+### Native entity pairing and complex spawn contents
+
+- Run 37037426846: Mantle, independent compilation, existing behavior checks and the new native item/fluid update packet checks passed. TiC declaration diagnostics decreased from 148 to 142; full diagnostics decreased from 5,407 to 5,376. The scaling chest check still reports the already diagnosed last-slot overflow in that earlier commit; its fix is queued in the later source.
+- Five custom entity spawn overrides accept the actual ServerEntity and delegate their base spawn packet to the native implementation. Keep IEntityWithComplexSpawn on legacy projectiles and custom item frames: native entity pairing appends their AdvancedAddEntityPayload through the real NeoForge extension, rather than discarding extra spawn information.
+- Complex spawn methods accept RegistryFriendlyByteBuf; projectile item contents use native optional component-aware ItemStack stream codecs and the native item view. Item-frame variant, attachment position and direction retain their extra payload fields. Item-frame synced data uses the native builder and calls its parent builder hook.
+- Verified the native pairing extension and server tracker patch in official NeoForge 1.21.1 source. Await compile/runtime checks. Actual entity tracking, frame rendering and multiplayer game loading remain pending.
