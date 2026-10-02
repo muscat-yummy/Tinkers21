@@ -163,6 +163,7 @@ public final class TinkerSmeltery extends TinkerModule {
         event.registerItem(Capabilities.FluidHandler.ITEM, (stack, context) -> new CopperCanFluidHandler(stack), item);
       }
     }
+    event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, channel.get(), (blockEntity, side) -> blockEntity.getFluidHandler(side));
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, tank.get(), (blockEntity, side) -> blockEntity.getTank());
     event.registerBlockEntity(Capabilities.FluidHandler.BLOCK, lantern.get(), (blockEntity, side) -> blockEntity.getTank());
   }
