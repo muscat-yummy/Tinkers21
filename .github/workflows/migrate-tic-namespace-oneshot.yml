@@ -1,4 +1,4 @@
-name: Bridge retained recipe inventories to native RecipeInput
+name: Correct scaling chest final slot bounds and verify native recipe inputs
 on:
   push:
     branches: [port/1.21.1-neoforge]

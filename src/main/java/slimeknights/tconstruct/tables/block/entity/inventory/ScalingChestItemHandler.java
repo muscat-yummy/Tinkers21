@@ -60,7 +60,7 @@ public abstract class ScalingChestItemHandler extends ItemStackHandler implement
     } else {
       // if the current index is past the max, increase visual size to this plus 1
       if (visualSize < maxSlots && visualSize < slotChanged + 2) {
-        visualSize =slotChanged + 2;
+        visualSize = Math.min(maxSlots, slotChanged + 2);
       }
     }
   }
