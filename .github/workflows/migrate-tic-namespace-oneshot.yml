@@ -1,4 +1,4 @@
-name: Port TiC tool-hook ingredient matching and native type registration
+name: Port block-item capability fallback and validated pattern IDs
 on:
   push:
     branches: [port/1.21.1-neoforge]

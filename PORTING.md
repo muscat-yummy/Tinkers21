@@ -277,3 +277,10 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Run 36987548119: NoContainerIngredient joined the successfully compiled leaf implementations, and every established independent behavior check passed. TiC declarations were 452 and normal compilation 6,129. Container crafting and full pack/client-server behavior still have not been tested; phase 2 remains incomplete.
 - ToolHookIngredient implements ICustomIngredient with Mantle's already ported RecordLoadable ingredient codec/stream bridge and native IngredientType registration in TinkerTools. Existing tag/hook JSON fields, default modifiable tag, matching by current tool definition hook, simple item matching and empty-tag barrier display are retained.
 - Factories produce native Ingredient wrappers. Equality/hash use tag and hook ID. The barrier label uses CUSTOM_NAME. Remaining recipe/stats/predicate registration in TinkerTools is retained; only the obsolete Forge ingredient serializer registration is replaced by mod-bus deferred type registration.
+
+
+### Tool-hook checkpoint / native block providers and pattern IDs
+
+- Run 36988393676: all established independent implementation and behavioral checks passed. Declaration diagnostics decreased from 452 to 446 and normal compilation from 6,129 to 6,111. ToolHookIngredient still depends on core Lombok-generated accessors while unresolved declaration errors prevent complete annotation processing; it is not independently verified.
+- BlockItemProviderCapability uses native ItemCapability and RegisterCapabilitiesEvent. The stateless fallback is registered at LOW priority, after normal custom providers across mod containers. NeoForge CapabilityHooks and FancyModLoader priority dispatch were inspected to verify this ordering. Native lookup returns nullable providers; original stack identity, placement data and consume behavior are preserved.
+- Pattern retains typed ResourceId inheritance and validated nullable factories, replacing the removed ResourceLocation.Dummy marker with the existing validated Void constructor. Full TiC compilation and game loading remain pending; phase 2 is incomplete.

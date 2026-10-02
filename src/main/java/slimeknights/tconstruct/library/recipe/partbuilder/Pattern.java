@@ -28,8 +28,8 @@ public class Pattern extends ResourceId {
     super(location);
   }
 
-  private Pattern(String namespace, String path, @Nullable Dummy pDummy) {
-    super(namespace, path, pDummy);
+  private Pattern(String namespace, String path, @Nullable Void validated) {
+    super(namespace, path, validated);
   }
 
   /**
