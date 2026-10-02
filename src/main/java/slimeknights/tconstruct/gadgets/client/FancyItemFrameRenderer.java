@@ -19,7 +19,7 @@ import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.client.event.RenderItemInFrameEvent;
 import net.neoforged.neoforge.client.event.RenderNameTagEvent;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.bus.api.Event.Result;
+import net.neoforged.neoforge.common.util.TriState;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.gadgets.entity.FancyItemFrameEntity;
 import slimeknights.tconstruct.gadgets.entity.FrameType;
@@ -57,7 +57,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
     // base entity rendering logic, since calling super gives us the item frame renderer that we are replacing
     RenderNameTagEvent renderNameplate = new RenderNameTagEvent(frame, frame.getDisplayName(), this, matrices, bufferIn, packedLight, partialTicks);
     NeoForge.EVENT_BUS.post(renderNameplate);
-    if (renderNameplate.getResult() == Result.ALLOW || (renderNameplate.getResult() != Result.DENY && this.shouldShowName(frame))) {
+    if (renderNameplate.canRender() == TriState.TRUE || (renderNameplate.canRender() != TriState.FALSE && this.shouldShowName(frame))) {
       this.renderNameTag(frame, renderNameplate.getContent(), matrices, bufferIn, packedLight);
     }
 

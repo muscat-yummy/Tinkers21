@@ -1,4 +1,4 @@
-name: Migrate TiC validated resource factories
+name: Port TiC event decisions and living tick handlers
 on:
   push:
     branches: [port/1.21.1-neoforge]

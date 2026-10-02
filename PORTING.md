@@ -136,7 +136,7 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 ## Known issues
 
 - The imported 1.20.1 source still references Forge APIs and cannot compile against NeoForge 1.21.1.
-- Mantle compatibility for NeoForge 1.21.1 is unresolved.
+- Mantle compiles on NeoForge 1.21.1; TiC full compilation, game loading and runtime compatibility remain unresolved.
 
 ## Upstream
 
@@ -199,3 +199,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 
 - Run 36979892903: Mantle compile, ResourceId behavior and the independent normal JavaCompile of FluidParticleData plus BlockContainerOpenedTrigger all passed. TiC declarations decreased from 561 to 539; normal compilation decreased from 6,446 to 6,413 with unchanged settings. Phase 2 remains incomplete and no game loading is claimed.
 - Move remaining ResourceLocation constructors to the native validated parse/fromNamespaceAndPath factories with a token-aware migration that preserves nested calls, quoted commas, comments and Java text blocks. Parser fixtures are checked before source mutation. Unhandled constructor forms are counted for manual review.
+
+
+### Validated factory / event migration (2026-10-02)
+
+- Run 36980904262 changed 11 ResourceLocation constructor calls in 10 files with zero unhandled forms reported. Mantle, ResourceId behavior and particle/criterion compilation passed again. TiC declaration diagnostics were 537; full compilation was 6,400. Phase 2 remains incomplete.
+- TiC harvest/shear events own their real mutable Result decision rather than using the removed Forge bus @HasResult contract. Existing ALLOW/DEFAULT/DENY semantics and post-then-read dispatch are retained; listeners and modules reference the TiC enum.
+- Native right-click item/block decisions use TriState, and name rendering reads RenderNameTagEvent.canRender. TRUE/FALSE preserve prior allow/deny semantics.
+- Boot walking, magnet and slime bounce handlers use EntityTickEvent.Pre with an explicit LivingEntity filter, retaining execution before normal entity work. These handlers still require full compile and runtime validation.

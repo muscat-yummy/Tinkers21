@@ -22,6 +22,19 @@ import javax.annotation.Nullable;
 @AllArgsConstructor
 @Getter
 public abstract class TinkerToolEvent extends Event {
+  /** TiC's harvest/shear decision, retained independently of the removed bus result API. */
+  public enum Result { DENY, DEFAULT, ALLOW }
+
+  private Result result = Result.DEFAULT;
+
+  public Result getResult() {
+    return result;
+  }
+
+  public void setResult(Result result) {
+    this.result = java.util.Objects.requireNonNull(result);
+  }
+
   private final ItemStack stack;
   private final IToolStackView tool;
   public TinkerToolEvent(ItemStack stack) {
@@ -32,7 +45,6 @@ public abstract class TinkerToolEvent extends Event {
   /**
    * Event fired when a kama tries to harvest a crop. Set result to {@link Result#ALLOW} if you handled the harvest yourself. Set the result to {@link Result#DENY} if the block cannot be harvested.
    */
-  @HasResult
   @Getter
   public static class ToolHarvestEvent extends TinkerToolEvent {
     /** Item context, note this is the original context, so some information (such as position) may not be accurate */
@@ -84,7 +96,6 @@ public abstract class TinkerToolEvent extends Event {
   /**
    * Event fired when a kama or scythe tries to shear an entity
    */
-  @HasResult
   @Getter
   public static class ToolShearEvent extends TinkerToolEvent {
     private final Level world;
