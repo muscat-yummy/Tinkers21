@@ -6,7 +6,6 @@ import slimeknights.tconstruct.library.utils.BlockCapabilitySource;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
-import net.neoforged.neoforge.common.CommonHooks;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import net.neoforged.neoforge.items.IItemHandler;
@@ -48,7 +47,7 @@ public class SolidFuelModule extends FuelModule {
   private int trySolidFuel(IItemHandler handler, boolean consume) {
     for (int i = 0; i < handler.getSlots(); i++) {
       ItemStack stack = handler.getStackInSlot(i);
-      int time = CommonHooks.getBurnTime(stack, TinkerRecipeTypes.FUEL.get()) / 4;
+      int time = stack.getBurnTime(TinkerRecipeTypes.FUEL.get()) / 4;
       if (time > 0) {
         MeltingFuel solid = MeltingFuelLookup.getSolid();
         if (consume) {

@@ -28,6 +28,7 @@ public final class ArmorMaterialRegistrationSmoke {
     // Use the normal registry mutation window in this isolated bootstrap process.
     ((BaseMappedRegistry<?>) BuiltInRegistries.ARMOR_MATERIAL).unfreeze();
     ((BaseMappedRegistry<?>) BuiltInRegistries.SOUND_EVENT).unfreeze();
+    ((BaseMappedRegistry<?>) BuiltInRegistries.ITEM).unfreeze();
     var firstBus = BusBuilder.builder().build();
     var addonBus = BusBuilder.builder().build();
     var soundId = ResourceLocation.fromNamespaceAndPath("port_armor_test", "equip");
@@ -57,6 +58,7 @@ public final class ArmorMaterialRegistrationSmoke {
     check(material.equipSound().value() == sound, "Deferred sound did not bind to the real registry");
     for (var type : List.of(ArmorItem.Type.BOOTS, ArmorItem.Type.LEGGINGS, ArmorItem.Type.CHESTPLATE, ArmorItem.Type.HELMET)) {
       var item = new ArmorItem(first.getHolder(), type, new Item.Properties().stacksTo(1));
+      Registry.register(BuiltInRegistries.ITEM, firstId.withSuffix("_" + type.getName()), item);
       check(item.getMaterial().is(first.getHolder().getKey()), "Armor item lost its registered material");
     }
     System.out.println("Native armor material events, addon bus ownership, deferred sound and player armor constructors: PASS");

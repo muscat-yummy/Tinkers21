@@ -4,18 +4,16 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import net.minecraft.core.BlockPos;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import slimeknights.tconstruct.library.utils.BlockCapabilitySource;
+import java.util.ArrayList;
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraftforge.common.capabilities.ForgeCapabilities;
-import net.minecraftforge.common.util.LazyOptional;
-import net.minecraftforge.common.util.NonNullConsumer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import net.neoforged.neoforge.fluids.capability.templates.EmptyFluidHandler;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
-import slimeknights.mantle.util.WeakConsumerWrapper;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.recipe.alloying.IMutableAlloyTank;
 
@@ -41,16 +39,12 @@ public class MixerAlloyTank implements IMutableAlloyTank {
 
   // side tank cache
   /** Cache of tanks for each of the sides */
-  private final Map<Direction,LazyOptional<IFluidHandler>> inputs = new EnumMap<>(Direction.class);
-  /** Map of invalidation listeners for each side */
-  private final Map<Direction,NonNullConsumer<LazyOptional<IFluidHandler>>> listeners = new EnumMap<>(Direction.class);
+  private final Map<Direction,BlockCapabilitySource<IFluidHandler>> inputs = new EnumMap<>(Direction.class);
   /** Map of tank index to tank on the side */
   @Nullable
   private IFluidHandler[] indexedList = null;
 
   // state
-  /** If true, tanks are marked for refresh later */
-  private boolean needsRefresh = true;
   /** Number of currently held tanks */
   private int currentTanks = 0;
 
@@ -62,22 +56,7 @@ public class MixerAlloyTank implements IMutableAlloyTank {
 
   /** Gets the map of index to direction */
   private IFluidHandler[] indexTanks() {
-    // convert map into indexed list of fluid handlers, will be cleared next time a side updates
-    if (indexedList == null) {
-      indexedList = new IFluidHandler[currentTanks];
-      if (currentTanks > 0) {
-        int nextTank = 0;
-        for (Direction direction : Direction.values()) {
-          if (direction != Direction.DOWN) {
-            LazyOptional<IFluidHandler> handler = inputs.getOrDefault(direction, LazyOptional.empty());
-            if (handler.isPresent()) {
-              indexedList[nextTank] = handler.orElse(EmptyFluidHandler.INSTANCE);
-              nextTank++;
-            }
-          }
-        }
-      }
-    }
+    checkTanks();
     return indexedList;
   }
 
@@ -128,58 +107,46 @@ public class MixerAlloyTank implements IMutableAlloyTank {
    * After calling this method, all five tank sides will have been fetched
    */
   private void checkTanks() {
-    // need world to do anything
     Level world = parent.getLevel();
-    if (world == null) {
+    if (world == null || parent.isRemoved()) {
+      inputs.clear();
+      indexedList = new IFluidHandler[0];
+      currentTanks = 0;
       return;
     }
-    if (needsRefresh) {
-      for (Direction direction : Direction.values()) {
-        // update each direction we are missing
-        if (direction != Direction.DOWN && !inputs.containsKey(direction)) {
-          BlockPos target = parent.getBlockPos().relative(direction);
-          // limit by blocks as that gives the modpack more control, say they want to allow only scorched tanks
-          if (world.getBlockState(target).is(TinkerTags.Blocks.ALLOYER_TANKS)) {
-            BlockEntity te = world.getBlockEntity(target);
-            if (te != null) {
-              // if we found a tank, increment the number of tanks
-              LazyOptional<IFluidHandler> capability = te.getCapability(ForgeCapabilities.FLUID_HANDLER, direction.getOpposite());
-              if (capability.isPresent()) {
-                // attach a listener so we know when the side invalidates
-                capability.addListener(listeners.computeIfAbsent(direction, dir -> new WeakConsumerWrapper<>(this, (self, handler) -> {
-                  if (handler == self.inputs.get(dir)) {
-                    refresh(dir, false);
-                  }
-                })));
-                inputs.put(direction, capability);
-                currentTanks++;
-              } else {
-                inputs.put(direction, LazyOptional.empty());
-              }
-            } else {
-              inputs.put(direction, LazyOptional.empty());
-            }
-          }
+    var tanks = new ArrayList<IFluidHandler>(5);
+    for (Direction direction : Direction.values()) {
+      if (direction == Direction.DOWN) {
+        continue;
+      }
+      BlockPos target = parent.getBlockPos().relative(direction);
+      // Retain the datapack tag restriction and avoid loading neighboring chunks.
+      if (world.hasChunkAt(target) && world.getBlockState(target).is(TinkerTags.Blocks.ALLOYER_TANKS)) {
+        var source = inputs.computeIfAbsent(direction,
+          side -> new BlockCapabilitySource<>(parent, Capabilities.FluidHandler.BLOCK, target, side.getOpposite()));
+        IFluidHandler handler = source.get();
+        if (handler != null && handler.getTanks() > 0) {
+          tanks.add(handler);
         }
       }
-      needsRefresh = false;
+    }
+    // Resolve every native cache before using an indexed list so absent/replaced handlers recover too.
+    boolean changed = indexedList == null || tanks.size() != currentTanks;
+    for (int index = 0; !changed && index < tanks.size(); index++) {
+      changed = indexedList[index] != tanks.get(index);
+    }
+    if (changed) {
+      indexedList = tanks.toArray(IFluidHandler[]::new);
+      currentTanks = indexedList.length;
     }
   }
 
-  /**
-   * Called on block update or when a capability invalidates to mark that a direction needs updates
-   * @param direction  Side updating
-   * @param checkInput If true, validates that the side contains an input before reducing tank count. False when invalidated through the capability
-   * */
+  /** Discard the lookup for a neighbor change; native sources handle capability invalidation. */
   public void refresh(Direction direction, boolean checkInput) {
-    if (direction == Direction.DOWN) {
-      return;
+    if (direction != Direction.DOWN) {
+      inputs.remove(direction);
+      indexedList = null;
     }
-    if (!checkInput || (inputs.containsKey(direction) && inputs.get(direction).isPresent())) {
-      currentTanks--;
-    }
-    inputs.remove(direction);
-    needsRefresh = true;
-    indexedList = null;
   }
+
 }

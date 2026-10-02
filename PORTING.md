@@ -378,3 +378,13 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - BlockCapabilitySource is compiled independently against the exact native API. Full fuel/structure runtime verification still requires completing TiC compilation and game loading; this source batch does not satisfy that gate.
 
 - Run 37030635355: Mantle and all existing independent behavior checks passed; declaration diagnostics decreased to 275 and full diagnostics to 5,676. The new armor check failed at compilation due to its BusBuilder import; correct it to the already verified native api package. Full root compilation still reports Lombok-generated getter cascades plus later armor API work; do not replace generated getters to hide those failures.
+
+
+### Melter/alloyer/heater and inventory menu capability migration
+
+- Register actual native block fluid handlers for the melter/alloyer, and item handlers for the melter/heater. Remove their obsolete provider overrides and LazyOptional owners. Native block entity lifecycle handles provider invalidation; existing inventories, heating rates and fuel modules remain in place. Their remaining persistence/rendering API migrations and actual game behavior are still pending.
+- MixerAlloyTank uses native capability sources on the five permitted sides, retaining the ALLOYER_TANKS tag restriction and opposite-side queries. Resolve current handlers before creating an indexed view so unavailable/replaced tanks and chunk reloads recover without a Forge listener. Exclude unloaded neighbor chunks from lookups. Outputs and simulation are unchanged.
+- Melter/alloyer fuel slots, single-item slots and table side inventories query actual native block item capabilities. Bucket input validation queries the native item fluid capability. SideInventoryContainer represents absent handlers with Optional and uses the native empty handler fallback; it is included in independent API compilation.
+- Await CI for this batch. Bootstrap Phase 2 is still incomplete; no distributable TiC JAR or Minecraft load is claimed.
+
+- Run 37031511247: Mantle, idempotence, independent compilation including BlockCapabilitySource, and all existing codec/behavior tests passed. Declaration diagnostics decreased from 275 to 254 and full diagnostics from 5,676 to 5,635. The armor check passed actual material events, namespace ownership, zero-stat descriptors and late sound binding, then stopped when constructing items because the isolated item registry was frozen. Open its normal mutation window too and register every fixture armor item, avoiding orphan intrusive holders. Fuel-module diagnostics left in this run are still unresolved Lombok/core-recipe cascades and the removed burn-time hook; the latter needs a native item extension call.
