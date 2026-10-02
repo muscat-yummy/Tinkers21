@@ -2,7 +2,7 @@ package slimeknights.tconstruct.fluids;
 
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.core.BlockPos;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.cauldron.CauldronInteraction;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
@@ -30,7 +30,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.MapColor;
-import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.level.pathfinder.PathType;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.SoundActions;
 import net.neoforged.neoforge.common.brewing.BrewingRecipe;
@@ -256,7 +256,7 @@ public final class TinkerFluids extends TinkerModule {
       // from forge lava type
       .motionScale(0.0023333333333333335D)
       .canSwim(false).canDrown(false)
-      .pathType(BlockPathTypes.LAVA).adjacentPathType(null);
+      .pathType(PathType.LAVA).adjacentPathType(null);
   }
 
   @SubscribeEvent

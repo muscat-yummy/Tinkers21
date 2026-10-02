@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.gadgets.item;
 
 import lombok.RequiredArgsConstructor;
-import net.minecraft.core.BlockSource;
+import net.minecraft.core.dispenser.BlockSource;
 import net.minecraft.core.Direction;
 import net.minecraft.core.Position;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;

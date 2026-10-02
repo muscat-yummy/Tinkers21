@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.casting;
 
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -131,7 +131,7 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
            .addRichTooltipCallback(FluidTooltipCallback.UNITS)
            .setFluidRenderer(capacity, false, 32, 32)
            .setOverlay(tankOverlay, 0, 0)
-           .addIngredients(ForgeTypes.FLUID_STACK, inputs)
+           .addIngredients(NeoForgeTypes.FLUID_STACK, inputs)
       .setSlotName(FLUID_SLOT);
     // pouring fluid
     int h = 11;
@@ -141,7 +141,7 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
     IRecipeSlotBuilder faucet = builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 43, 8)
       .addRichTooltipCallback(FluidTooltipCallback.UNITS)
       .setFluidRenderer(1, false, 6, h)
-      .addIngredients(ForgeTypes.FLUID_STACK, inputs)
+      .addIngredients(NeoForgeTypes.FLUID_STACK, inputs)
       .setSlotName(FAUCET_SLOT);
 
     // if requested, and they are the same size, link output and fluid
@@ -168,9 +168,9 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
       if (fluid != null) {
         IRecipeSlotDrawable faucet = CategoryUtil.findSlot(recipeSlots, FAUCET_SLOT);
         if (faucet != null) {
-          fluidSlot = new RecipeSlotWrapper<>(fluid, ForgeTypes.FLUID_STACK, FluidStack.EMPTY, faucet);
+          fluidSlot = new RecipeSlotWrapper<>(fluid, NeoForgeTypes.FLUID_STACK, FluidStack.EMPTY, faucet);
         } else {
-          fluidSlot = new RecipeSlotWrapper<>(fluid, ForgeTypes.FLUID_STACK, FluidStack.EMPTY);
+          fluidSlot = new RecipeSlotWrapper<>(fluid, NeoForgeTypes.FLUID_STACK, FluidStack.EMPTY);
         }
       } else {
         fluidSlot = RecipeSlot.EMPTY_FLUID;
@@ -194,7 +194,7 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
   private record CoolingArrowTooltip(IDisplayableCastingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements IRecipeWidgetTooltipCallback {
     @Override
     public void onTooltip(ITooltipBuilder tooltip) {
-      FluidStack fluid = fluidSlot.getDisplayedIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = fluidSlot.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       tooltip.add(Component.translatable(KEY_COOLING_TIME, recipe.getCoolingTime(fluid) / 20));
     }
   }

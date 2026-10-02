@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.plugin.jei.util;
 
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.ingredients.IIngredientHelper;
 import mezz.jei.api.ingredients.ITypedIngredient;
 import mezz.jei.api.runtime.IIngredientManager;
@@ -24,7 +24,7 @@ public record TankHidingIngredientListener(IIngredientManager manager, List<Item
   private List<ItemStack> getTanks(Collection<? extends ITypedIngredient<?>> ingredients) {
     List<ItemStack> list = new ArrayList<>();
     for (ITypedIngredient<?> ingredient : ingredients) {
-      FluidStack fluid = ingredient.getIngredient(ForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
+      FluidStack fluid = ingredient.getIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       if (!fluid.isEmpty()) {
         for (Item item : tanks) {
           ItemStack tank = new ItemStack(item);

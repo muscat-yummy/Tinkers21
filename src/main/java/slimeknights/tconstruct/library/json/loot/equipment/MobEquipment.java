@@ -16,7 +16,7 @@ import net.minecraft.world.level.ItemLike;
 import net.minecraft.world.level.ServerLevelAccessor;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.Fluids;
-import net.neoforged.neoforge.event.entity.living.MobSpawnEvent.FinalizeSpawn;
+import net.neoforged.neoforge.event.entity.living.FinalizeSpawnEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.mantle.data.loadable.Loadable;
@@ -66,7 +66,7 @@ public record MobEquipment(EquipmentSlot slot, IJsonPredicate<Item> match, ItemO
 
   /** Applies this replacement to the target mob */
   @SuppressWarnings({"deprecation", "OverrideOnly"})  // in that event, I can't call the event method, or I'll get a stack overflow
-  public static boolean apply(List<MobEquipment> replace, Mob mob, FinalizeSpawn event) {
+  public static boolean apply(List<MobEquipment> replace, Mob mob, FinalizeSpawnEvent event) {
     // first, figure out which slots are going to apply. This is because we take over mob finalizing only if at least one applies
     RandomSource random = mob.getRandom();
     List<MobEquipment> apply = new ArrayList<>(replace.size());

@@ -4,7 +4,7 @@ import mezz.jei.api.IModPlugin;
 import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
-import mezz.jei.api.forge.ForgeTypes;
+import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IModIdHelper;
@@ -513,7 +513,7 @@ public class JEIPlugin implements IModPlugin {
 
     // potions
     registry.registerSubtypeInterpreter(TinkerFluids.potion.asItem(), (PotionSubtypeInterpreter<ItemStack>)ItemStack::getTag);
-    registry.registerSubtypeInterpreter(ForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)FluidStack::getTag);
+    registry.registerSubtypeInterpreter(NeoForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)FluidStack::getTag);
 
     // parts
     for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.TOOL_PARTS)) {
@@ -673,7 +673,7 @@ public class JEIPlugin implements IModPlugin {
 
     // add potion fluids for each potion variant if requested
     if (Config.CLIENT.showPotionFluidInJEI.get()) {
-      manager.addIngredientsAtRuntime(ForgeTypes.FLUID_STACK,
+      manager.addIngredientsAtRuntime(NeoForgeTypes.FLUID_STACK,
                                       BuiltInRegistries.POTION.holders().filter(holder -> {
                                         Potion potion = holder.get();
                                         return potion != Potions.EMPTY && potion != Potions.WATER && !holder.is(TinkerTags.Potions.HIDDEN_FLUID);
@@ -696,7 +696,7 @@ public class JEIPlugin implements IModPlugin {
     if (!showItems.isEmpty()) {
       visibility.unhideIngredients(VanillaTypes.ITEM_STACK, showItems, Set.of(UidContext.Ingredient));
     }
-    manager.removeIngredientsAtRuntime(ForgeTypes.FLUID_STACK, removeFluids);
+    manager.removeIngredientsAtRuntime(NeoForgeTypes.FLUID_STACK, removeFluids);
 
     // hide easter egg recipes
     Level level = SafeClientAccess.getLevel();
