@@ -1,4 +1,4 @@
-name: Inspect exact native potion tier and predicate APIs
+name: Resolve native Json Things API and finish mob category datagen imports
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -220,6 +220,9 @@ jobs:
               'net.blay09.mods.craftingtweaks.api.CraftingGridProvider': ('interface ', 'buildCraftingGrids(',),
               'blusunrize.immersiveengineering.api.tool.ChemthrowerHandler$ChemthrowerEffect': ('applyToEntity(', 'applyToBlock(',),
               'net.mehvahdjukaar.dummmmmmy.common.TargetDummyEntity': ('class ', 'disableShield(',),
+              'dev.gigaherz.jsonthings.things.serializers.FlexItemType': ('class ', 'register(',),
+              'dev.gigaherz.jsonthings.things.serializers.IItemSerializer': ('interface ',),
+              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType': ('class ', 'register(',),
               'net.minecraft.locale.Language': ('getInstance(', 'getOrDefault(',),
               'net.minecraft.world.item.crafting.ShapedRecipe': ('getWidth(', 'getHeight(', 'canCraftInDimensions(',),
               'mezz.jei.api.constants.RecipeTypes': ('CRAFTING;',),

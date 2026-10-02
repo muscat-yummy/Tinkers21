@@ -17,6 +17,10 @@ repositories {
         content { includeGroup 'maven.modrinth' }
     }
     maven { url = uri('https://maven.blamejared.com/') }
+    maven {
+        url = uri('https://cursemaven.com')
+        content { includeGroup 'curse.maven' }
+    }
 }
 
 dependencies {
@@ -28,6 +32,7 @@ dependencies {
     compileOnly('maven.modrinth:DMu0oBKf:IhkQpEve') { transitive = false } // Crafting Tweaks 21.1.11
     compileOnly('maven.modrinth:tIm2nV03:uNRARSH2') { transitive = false } // IE 12.4.2-194
     compileOnly('maven.modrinth:Adega8YN:DldwQTMc') { transitive = false } // Dummy 1.21-2.1.2
+    compileOnly('curse.maven:json-things-541617:7949745') { transitive = false } // Json Things 0.13.7
     implementation project(':mantle-port')
 }
 
