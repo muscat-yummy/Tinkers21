@@ -112,6 +112,11 @@ public abstract class FluidOutput implements Supplier<FluidStack> {
     return new OfTagPreference(tag, amount, nbt == null ? null : nbt.copy(), DataComponentPatch.EMPTY);
   }
 
+  /** Creates a tag-preference output with a native component patch. */
+  public static FluidOutput fromTagWithComponents(TagKey<Fluid> tag, int amount, DataComponentPatch components) {
+    return new OfTagPreference(tag, amount, null, components);
+  }
+
   /**
    * Creates a new output for the given tag
    * @param tag   Tag

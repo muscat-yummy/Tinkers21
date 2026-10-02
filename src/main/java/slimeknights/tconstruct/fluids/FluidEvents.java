@@ -2,7 +2,6 @@ package slimeknights.tconstruct.fluids;
 
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraftforge.event.AttachCapabilitiesEvent;
 import net.neoforged.neoforge.event.furnace.FurnaceFuelBurnTimeEvent;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -27,13 +26,4 @@ public class FluidEvents {
     }
   }
 
-  @SubscribeEvent
-  static void attachCapabilities(AttachCapabilitiesEvent<ItemStack> event) {
-    ItemStack stack = event.getObject();
-    if (event.getObject().is(Items.POWDER_SNOW_BUCKET)) {
-      event.addCapability(
-        TConstruct.getResource("powdered_snow"),
-        new ConstantFluidContainerWrapper(new FluidStack(TinkerFluids.powderedSnow.get(), FluidType.BUCKET_VOLUME), stack, Items.BUCKET.getDefaultInstance()));
-    }
-  }
 }

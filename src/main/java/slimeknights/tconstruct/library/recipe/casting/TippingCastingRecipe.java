@@ -1,12 +1,14 @@
 package slimeknights.tconstruct.library.recipe.casting;
 
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.Tag;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.core.Holder;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.alchemy.PotionContents;
+import slimeknights.tconstruct.library.fluid.PotionData;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import net.minecraft.world.item.alchemy.PotionUtils;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.fluids.FluidStack;
@@ -45,20 +47,18 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
     if (super.matches(inv, level)) {
       // must also have a specific potion, it's what we are going to copy
       // but it can't match what is already on the stack
-      CompoundTag fluidTag = inv.getFluidTag();
-      return fluidTag != null && fluidTag.contains(PotionUtils.TAG_POTION, Tag.TAG_STRING)
-        && !ModifierUtil.getPersistentString(inv.getStack(), modifier).equals(fluidTag.getString(PotionUtils.TAG_POTION));
+      return PotionData.get(inv.getFluidStack()).potion().flatMap(Holder::unwrapKey)
+        .map(key -> !ModifierUtil.getPersistentString(inv.getStack(), modifier).equals(key.location().toString()))
+        .orElse(false);
     }
     return false;
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, HolderLookup.Provider access) {
     ItemStack result = inv.getStack().copy();
-    CompoundTag tag = inv.getFluidTag();
-    if (tag != null) {
-      ToolStack.from(result).getPersistentData().putString(modifier, tag.getString(PotionUtils.TAG_POTION));
-    }
+    PotionData.get(inv.getFluidStack()).potion().flatMap(Holder::unwrapKey)
+      .ifPresent(key -> ToolStack.from(result).getPersistentData().putString(modifier, key.location().toString()));
     return result;
   }
 
@@ -70,16 +70,16 @@ public class TippingCastingRecipe extends ModifierPotionCastingRecipe {
     if (displayRecipes == null) {
       // first, get a list of potion IDs
       List<String> potions = getPotionIds();
-      List<CompoundTag> potionNBT = potions.stream().map(id -> {
-        CompoundTag fluidNBT = new CompoundTag();
-        fluidNBT.putString(PotionUtils.TAG_POTION, id);
-        return fluidNBT;
-      }).toList();
+      List<PotionContents> contents = potions.stream().map(id -> new PotionContents(PotionData.potion(id).orElseThrow())).toList();
 
       // next, make 1 copy of the potion fluid with NBT list per potion fluid
       List<FluidStack> basePotions = this.fluid.getFluids();
       List<FluidStack> fluids = basePotions.stream()
-        .flatMap(fluid -> potionNBT.stream().map(nbt -> new FluidStack(fluid.getFluid(), fluid.getAmount(), nbt)))
+        .flatMap(fluid -> contents.stream().map(potion -> {
+          FluidStack stack = new FluidStack(fluid.getFluid(), fluid.getAmount());
+          stack.set(DataComponents.POTION_CONTENTS, potion);
+          return stack;
+        }))
         .toList();
 
       // finally, create 1 recipe per input tool

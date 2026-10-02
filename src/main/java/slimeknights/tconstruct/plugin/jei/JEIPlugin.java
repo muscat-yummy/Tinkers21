@@ -128,6 +128,7 @@ import slimeknights.tconstruct.plugin.jei.transfer.TinkerStationTransferInfo;
 import slimeknights.tconstruct.plugin.jei.transfer.ToolInventoryTransferInfo;
 import slimeknights.tconstruct.plugin.jei.util.GuiContainerTankHandler;
 import slimeknights.tconstruct.plugin.jei.util.PotionSubtypeInterpreter;
+import slimeknights.tconstruct.library.fluid.PotionData;
 import slimeknights.tconstruct.plugin.jei.util.TankHidingIngredientListener;
 import slimeknights.tconstruct.plugin.jei.util.ToolPartSubtypeInterpreter;
 import slimeknights.tconstruct.plugin.jei.util.ToolSubtypeInterpreter;
@@ -512,8 +513,8 @@ public class JEIPlugin implements IModPlugin {
     registry.registerSubtypeInterpreter(TinkerTables.scorchedAnvil.asItem(), anvils);
 
     // potions
-    registry.registerSubtypeInterpreter(TinkerFluids.potion.asItem(), (PotionSubtypeInterpreter<ItemStack>)ItemStack::getTag);
-    registry.registerSubtypeInterpreter(NeoForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)FluidStack::getTag);
+    registry.registerSubtypeInterpreter(TinkerFluids.potion.asItem(), (PotionSubtypeInterpreter<ItemStack>)PotionData::get);
+    registry.registerSubtypeInterpreter(NeoForgeTypes.FLUID_STACK, TinkerFluids.potion.get(), (PotionSubtypeInterpreter<FluidStack>)PotionData::get);
 
     // parts
     for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.TOOL_PARTS)) {

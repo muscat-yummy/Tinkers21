@@ -37,6 +37,9 @@ import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 import net.neoforged.neoforge.common.brewing.BrewingRecipeRegistry;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.SubscribeEvent;
+import net.neoforged.neoforge.capabilities.RegisterCapabilitiesEvent;
+import net.neoforged.neoforge.capabilities.Capabilities;
+import slimeknights.tconstruct.fluids.util.ConstantFluidContainerWrapper;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.FluidType;
 import net.neoforged.neoforge.fluids.BaseFlowingFluid;
@@ -92,6 +95,16 @@ import static slimeknights.tconstruct.fluids.block.MobEffectLiquidBlock.createEf
  */
 @SuppressWarnings("unused")
 public final class TinkerFluids extends TinkerModule {
+  @SubscribeEvent
+  public static void registerCapabilities(RegisterCapabilitiesEvent event) {
+    event.registerItem(Capabilities.FluidHandler.ITEM,
+      (stack, context) -> new PotionBucketItem.PotionBucketWrapper(stack), potion.asItem());
+    event.registerItem(Capabilities.FluidHandler.ITEM,
+      (stack, context) -> new ConstantFluidContainerWrapper(
+        new FluidStack(powderedSnow.get(), FluidType.BUCKET_VOLUME), stack, Items.BUCKET.getDefaultInstance()),
+      Items.POWDER_SNOW_BUCKET);
+  }
+
   public TinkerFluids() {
     NeoForgeMod.enableMilkFluid();
   }
@@ -486,10 +499,7 @@ public final class TinkerFluids extends TinkerModule {
     acceptCompat(output, moltenSteeleaf, MaterialIds.steeleaf);
     acceptCompat(output, fieryLiquid, "fiery", MaterialIds.fiery);
     // potion buckets
-    BuiltInRegistries.POTION.holders().filter(holder -> {
-      Potion potion = holder.get();
-      return potion != Potions.EMPTY && potion != Potions.WATER;
-    }).forEachOrdered(holder ->
+    BuiltInRegistries.POTION.holders().filter(holder -> !holder.is(Potions.WATER.unwrapKey().orElseThrow())).forEachOrdered(holder ->
       output.accept(PotionFluidType.potionBucket(holder.key())));
   }
 

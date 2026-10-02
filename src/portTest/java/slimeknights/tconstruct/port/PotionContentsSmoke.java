@@ -98,6 +98,33 @@ public final class PotionContentsSmoke {
     check(new PotionContents(Potions.WATER).is(Potions.WATER), "Plain water must match vanilla water contents");
     check(!new PotionContents(Optional.of(Potions.WATER), Optional.empty(), List.of(effect)).is(Potions.WATER),
       "Custom effects must distinguish special water");
-    System.out.println("Native potion item/fluid components, legacy effects/color, predicate snapshots and JSON/wire/save: PASS");
+    var wrapper = new slimeknights.tconstruct.fluids.item.PotionBucketItem.PotionBucketWrapper(refilled, Fluids.WATER);
+    var simulated = wrapper.drain(1000, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.SIMULATE);
+    check(PotionData.get(simulated).equals(contents) && wrapper.getContainer() == refilled, "Potion bucket simulated drain mutated container or lost contents");
+    var drained = wrapper.drain(1000, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE);
+    check(PotionData.get(drained).equals(contents) && wrapper.getContainer().is(Items.BUCKET), "Potion bucket drain lost contents or failed replacement");
+    check(wrapper.drain(1000, net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction.EXECUTE).isEmpty(), "Potion bucket drained twice");
+
+    slimeknights.tconstruct.plugin.jei.util.PotionSubtypeInterpreter<ItemStack> interpreter = PotionData::get;
+    String identity = interpreter.apply(refilled, mezz.jei.api.ingredients.subtypes.UidContext.Ingredient);
+    ItemStack alternate = refilled.copy();
+    alternate.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.of(Potions.HEALING), Optional.of(0x654321), List.of(effect)));
+    check(!identity.equals(interpreter.apply(alternate, mezz.jei.api.ingredients.subtypes.UidContext.Ingredient)), "JEI merged different custom colors");
+    alternate.set(DataComponents.POTION_CONTENTS, new PotionContents(Optional.of(Potions.HEALING), Optional.of(0x123456),
+      List.of(new MobEffectInstance(MobEffects.POISON, 322, 2, true, false, true))));
+    check(!identity.equals(interpreter.apply(alternate, mezz.jei.api.ingredients.subtypes.UidContext.Ingredient)), "JEI merged different custom effects");
+    slimeknights.tconstruct.plugin.jei.util.PotionSubtypeInterpreter<FluidStack> fluidInterpreter = PotionData::get;
+    check(identity.equals(fluidInterpreter.apply(fluid, mezz.jei.api.ingredients.subtypes.UidContext.Ingredient)), "Item and fluid subtype identity differ");
+    var patch = net.minecraft.core.component.DataComponentPatch.builder().set(DataComponents.POTION_CONTENTS, contents).build();
+    var output = slimeknights.mantle.recipe.helper.FluidOutput.fromTagWithComponents(net.minecraft.tags.FluidTags.WATER, 333, patch);
+    slimeknights.mantle.data.loadable.LoadableOps.with(ops, () -> {
+      var json = output.serialize();
+      check(json.has("components") && !json.has("nbt"), "Tag output emitted old potion NBT");
+      var restored = slimeknights.mantle.recipe.helper.FluidOutput.Loadable.REQUIRED.deserialize(json, slimeknights.mantle.util.typed.TypedMap.EMPTY);
+      check(restored.getTag().equals(net.minecraft.tags.FluidTags.WATER) && restored.getAmount() == 333, "Tag preference output identity changed");
+      check(restored.serialize().equals(json), "Tag component output JSON round trip");
+      return null;
+    });
+    System.out.println("Native potion item/fluid components, legacy effects/color, predicate snapshots, bucket simulation, JEI identities and JSON/wire/save: PASS");
   }
 }

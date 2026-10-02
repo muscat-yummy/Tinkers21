@@ -472,3 +472,7 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - `PotionData` reads legacy `Potion`, `CustomPotionEffects`, and `CustomPotionColor`, writes native components, and preserves unrelated metadata.
 - Spilling and cloud effects retain their existing base-potion-only semantics and legacy predicate fields while reading native fluid contents.
 - A production-helper smoke check covers item/fluid transfer, effects/color, legacy conversion, predicate snapshots, and native JSON/wire/save round trips. CI validation is pending; full root compilation and game loading remain incomplete.
+
+- Runs 37039893207 and 37040654632 resolved the pinned optional APIs and passed Mantle plus every existing independent check. Declaration/full diagnostics decreased to 114 / 5,244 and then 85 / 5,196 respectively. No root JAR or game-load success is claimed.
+- Further potion migration covers casting/display fluids, persistent tipped-tool IDs, model/tooltip colors, buckets, cauldron interactions, and JEI subtype identities. Native capabilities replace old bucket/powder-snow attachment; repeated bucket drain must return empty after container replacement.
+- Tag-preference fluid outputs now accept native component patches, preserving the potion tag preference rather than pinning one fluid. Expanded production smoke validation is pending.
