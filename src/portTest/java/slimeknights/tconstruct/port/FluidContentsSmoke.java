@@ -34,6 +34,7 @@ public final class FluidContentsSmoke {
     net.neoforged.fml.loading.LoadingModList.of(java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
+    net.neoforged.neoforge.registries.VanillaRegistryPortTestBootstrap.modifyRegistries();
     var registries = RegistryAccess.fromRegistryOfRegistries(BuiltInRegistries.REGISTRY);
     CompoundTag metadata = new CompoundTag();
     metadata.putString("fixture", "retained");
@@ -50,6 +51,16 @@ public final class FluidContentsSmoke {
     check(contents.toStack().getAmount() == 1000 && contents.toStack().has(DataComponents.CUSTOM_NAME), "Access leaked a mutable stored stack");
 
     var ops = RegistryOps.create(JsonOps.INSTANCE, registries);
+    var legacyBridge = slimeknights.mantle.data.loadable.common.LoadableJsonCodec.of(
+      new slimeknights.mantle.data.loadable.common.CodecLoadable<>(StoredFluid.CODEC));
+    var bridgedJson = legacyBridge.encodeStart(ops, contents).getOrThrow();
+    check(FluidStack.isSameFluidSameComponents(legacyBridge.parse(ops, bridgedJson).getOrThrow().toStack(), contents.toStack()),
+      "Loadable codec bridge lost actual registry context or fluid components");
+    var nbtOps = RegistryOps.create(net.minecraft.nbt.NbtOps.INSTANCE, registries);
+    var bridgedNbt = legacyBridge.encodeStart(nbtOps, contents).getOrThrow();
+    check(legacyBridge.parse(nbtOps, bridgedNbt).getOrThrow().amount() == 1000, "NBT loadable codec bridge changed amount");
+    check(legacyBridge.parse(ops, com.google.gson.JsonParser.parseString("{\"bad\":true}")).error().isPresent(), "Invalid loadable data accepted");
+    check(slimeknights.mantle.data.loadable.LoadableOps.current() == JsonOps.INSTANCE, "Loadable codec bridge leaked registry scope");
     var json = StoredFluid.CODEC.encodeStart(ops, contents).getOrThrow();
     StoredFluid roundTrip = StoredFluid.CODEC.parse(ops, json).getOrThrow();
     check(FluidStack.matches(contents.toStack(), roundTrip.toStack()), "JSON component patch round trip");

@@ -1,29 +1,30 @@
 package slimeknights.tconstruct.tools.modifiers.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.Serializer;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import slimeknights.mantle.util.JsonHelper;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import java.util.Set;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
-import slimeknights.tconstruct.tools.TinkerModifiers;
 
 /** Condition to check if a held tool has the given modifier */
 @RequiredArgsConstructor
 public class HasModifierLootCondition implements LootItemCondition {
   private final ModifierId modifier;
+  public static final MapCodec<HasModifierLootCondition> CODEC = ResourceLocation.CODEC.xmap(ModifierId::new, id -> id)
+    .fieldOf("modifier").xmap(HasModifierLootCondition::new, value -> value.modifier);
+  public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
 
   @Override
   public LootItemConditionType getType() {
-    return TinkerModifiers.hasModifierLootCondition.get();
+    return TYPE;
   }
 
   @Override
@@ -32,15 +33,8 @@ public class HasModifierLootCondition implements LootItemCondition {
     return tool != null && tool.is(TinkerTags.Items.MODIFIABLE) && ModifierUtil.getModifierLevel(tool, modifier) > 0;
   }
 
-  public static class ConditionSerializer implements Serializer<HasModifierLootCondition> {
-    @Override
-    public void serialize(JsonObject json, HasModifierLootCondition condition, JsonSerializationContext context) {
-      json.addProperty("modifier", condition.modifier.toString());
-    }
-
-    @Override
-    public HasModifierLootCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-      return new HasModifierLootCondition(new ModifierId(JsonHelper.getResourceLocation(json, "modifier")));
-    }
+  @Override
+  public Set<LootContextParam<?>> getReferencedContextParams() {
+    return Set.of(LootContextParams.TOOL);
   }
 }

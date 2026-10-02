@@ -192,7 +192,7 @@ public final class TinkerTools extends TinkerModule {
       .build());
 
   /** Loot function type for tool add data */
-  public static final RegistryObject<LootItemFunctionType> lootAddToolData = LOOT_FUNCTIONS.register("add_tool_data", () -> new LootItemFunctionType(AddToolDataFunction.SERIALIZER));
+  public static final RegistryObject<LootItemFunctionType> lootAddToolData = LOOT_FUNCTIONS.register("add_tool_data", () -> AddToolDataFunction.TYPE);
 
   /*
    * Items

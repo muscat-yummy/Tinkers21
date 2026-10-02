@@ -1,4 +1,4 @@
-name: Port native material ingredients and registry scope
+name: Port modifier loot conditions and inspect native bonus codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,7 +37,7 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/LoadableIngredientScopeSmoke.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/LoadableIngredientScopeSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java')
                   options.annotationProcessorPath = rootProject.configurations.annotationProcessor
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
@@ -88,6 +88,12 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount': ('class ', 'CODEC', 'FORMULA',),
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$Formula': ('interface ', 'CODEC', 'getType(',),
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$FormulaType': ('class ', 'record ', 'Codec',),
+              'net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction': ('class ', 'commonFields(', 'LootItemConditionalFunction(',),
+              'net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer': ('class ', 'singletonFields(', 'LootPoolSingletonContainer(',),
+          
               'net.minecraft.world.item.alchemy.PotionBrewing$Builder': ('addMix(', 'addRecipe('),
               'net.minecraft.resources.ResourceLocation': ('class ', 'ResourceLocation(java.lang.String, java.lang.String)',),
               'net.minecraft.core.particles.ParticleType': ('ParticleType(', 'codec(', 'streamCodec(',),

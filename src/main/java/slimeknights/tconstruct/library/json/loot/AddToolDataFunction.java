@@ -1,20 +1,18 @@
 package slimeknights.tconstruct.library.json.loot;
 
 import com.google.common.collect.ImmutableList;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
 import lombok.experimental.Accessors;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunction;
 import net.minecraft.world.level.storage.loot.functions.LootItemFunctionType;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
-import slimeknights.mantle.data.loadable.field.LoadableField;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import slimeknights.mantle.data.loadable.common.LoadableJsonCodec;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.materials.RandomMaterial;
@@ -23,24 +21,28 @@ import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 import slimeknights.tconstruct.library.tools.definition.module.material.ToolMaterialHook;
 import slimeknights.tconstruct.library.tools.nbt.ToolStack;
 import slimeknights.tconstruct.library.tools.stat.ToolStats;
-import slimeknights.tconstruct.tools.TinkerTools;
 
 import java.util.List;
 
 /** Loot function to add data to a tool. */
 public class AddToolDataFunction extends LootItemConditionalFunction {
   public static final ResourceLocation ID = TConstruct.getResource("add_tool_data");
-  public static final Serializer SERIALIZER = new Serializer();
+  public static final MapCodec<AddToolDataFunction> CODEC = RecordCodecBuilder.mapCodec(instance ->
+    commonFields(instance).and(instance.group(
+      Codec.floatRange(0, 1).optionalFieldOf("damage_percent", 0f).forGetter(value -> value.damage),
+      LoadableJsonCodec.of(RandomMaterial.LOADER).listOf().optionalFieldOf("materials", List.of()).forGetter(value -> value.materials)
+    )).apply(instance, AddToolDataFunction::new));
+  public static final LootItemFunctionType<AddToolDataFunction> TYPE = new LootItemFunctionType<>(CODEC);
 
   /** Percentage of damage on the tool, if 0 the tool is undamaged */
   private final float damage;
   /** Fixed materials on the tool, any nulls in the list will randomize */
   private final List<RandomMaterial> materials;
 
-  protected AddToolDataFunction(LootItemCondition[] conditionsIn, float damage, List<RandomMaterial> materials) {
+  protected AddToolDataFunction(List<LootItemCondition> conditionsIn, float damage, List<RandomMaterial> materials) {
     super(conditionsIn);
     this.damage = damage;
-    this.materials = materials;
+    this.materials = List.copyOf(materials);
   }
 
   /** Creates a new builder */
@@ -49,8 +51,8 @@ public class AddToolDataFunction extends LootItemConditionalFunction {
   }
 
   @Override
-  public LootItemFunctionType getType() {
-    return TinkerTools.lootAddToolData.get();
+  public LootItemFunctionType<AddToolDataFunction> getType() {
+    return TYPE;
   }
 
   @Override
@@ -70,31 +72,6 @@ public class AddToolDataFunction extends LootItemConditionalFunction {
       }
     }
     return stack;
-  }
-
-  /** Serializer logic for the function */
-  private static class Serializer extends LootItemConditionalFunction.Serializer<AddToolDataFunction> {
-    private static final LoadableField<List<RandomMaterial>,AddToolDataFunction> MATERIAL_LIST = RandomMaterial.LOADER.list(0).defaultField("materials", List.of(), d -> d.materials);
-
-    @Override
-    public void serialize(JsonObject json, AddToolDataFunction loot, JsonSerializationContext context) {
-      super.serialize(json, loot, context);
-      // initial damage
-      if (loot.damage > 0) {
-        json.addProperty("damage_percent", loot.damage);
-      }
-      MATERIAL_LIST.serialize(loot, json);
-    }
-
-    @Override
-    public AddToolDataFunction deserialize(JsonObject object, JsonDeserializationContext context, LootItemCondition[] conditions) {
-      float damage = GsonHelper.getAsFloat(object, "damage_percent", 0f);
-      if (damage < 0 || damage > 1) {
-        throw new JsonSyntaxException("damage_percent must be between 0 and 1, given " + damage);
-      }
-      List<RandomMaterial> materials = MATERIAL_LIST.get(object);
-      return new AddToolDataFunction(conditions, damage, materials);
-    }
   }
 
   /** Builder to create a new add tool data function */
