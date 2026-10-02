@@ -1,9 +1,8 @@
 package slimeknights.tconstruct.library.json.loot;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.storage.loot.LootContext;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
@@ -11,24 +10,32 @@ import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
 import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
 import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
 import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
-import slimeknights.mantle.util.JsonHelper;
-import slimeknights.tconstruct.shared.TinkerCommons;
-
-import java.util.Objects;
 
 /**
- * Loot condition that only runs if all required values in the given loot context set are present. Good heuristic for using that set.
+ * Loot condition requiring all values in the named loot context set.
  * TODO: migrate to Mantle
  */
 public record HasLootContextSetCondition(LootContextParamSet set) implements LootItemCondition {
-  /** Creates a new builder instance */
+  private static final Codec<LootContextParamSet> SET_CODEC = ResourceLocation.CODEC.flatXmap(
+    id -> {
+      LootContextParamSet set = LootContextParamSets.get(id);
+      return set == null ? DataResult.error(() -> "Unknown LootContextParamSet " + id) : DataResult.success(set);
+    },
+    set -> {
+      ResourceLocation id = LootContextParamSets.getKey(set);
+      return id == null ? DataResult.error(() -> "Unregistered LootContextParamSet") : DataResult.success(id);
+    });
+  public static final MapCodec<HasLootContextSetCondition> CODEC =
+    SET_CODEC.fieldOf("set").xmap(HasLootContextSetCondition::new, HasLootContextSetCondition::set);
+  public static final LootItemConditionType TYPE = new LootItemConditionType(CODEC);
+
   public static Builder builder(LootContextParamSet set) {
     return new Builder(set);
   }
 
   @Override
   public LootItemConditionType getType() {
-    return TinkerCommons.hasLootContextSet.get();
+    return TYPE;
   }
 
   @Override
@@ -41,28 +48,9 @@ public record HasLootContextSetCondition(LootContextParamSet set) implements Loo
     return true;
   }
 
-  /** Builder logic for this condition */
   public record Builder(LootContextParamSet set) implements LootItemCondition.Builder {
     @Override
     public LootItemCondition build() {
-      return new HasLootContextSetCondition(set);
-    }
-  }
-
-  /** Serializer logic */
-  public static class Serializer implements net.minecraft.world.level.storage.loot.Serializer<HasLootContextSetCondition> {
-    @Override
-    public void serialize(JsonObject json, HasLootContextSetCondition value, JsonSerializationContext context) {
-      json.addProperty("set", Objects.requireNonNull(LootContextParamSets.getKey(value.set), "Unregistered loot LootContextParamSets").toString());
-    }
-
-    @Override
-    public HasLootContextSetCondition deserialize(JsonObject json, JsonDeserializationContext context) {
-      ResourceLocation key = JsonHelper.getResourceLocation(json, "set");
-      LootContextParamSet set = LootContextParamSets.get(key);
-      if (set == null) {
-        throw new JsonSyntaxException("Unknown LootContextParamSet " + key);
-      }
       return new HasLootContextSetCondition(set);
     }
   }

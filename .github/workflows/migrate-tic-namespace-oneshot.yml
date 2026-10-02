@@ -1,4 +1,4 @@
-name: Port TiC event decisions and living tick handlers
+name: Verify TiC native loot condition codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,9 +37,14 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java')
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
+              }
+              rootProject.tasks.register('runLootConditionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.LootConditionSmoke')
               }
               rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -93,6 +98,19 @@ jobs:
           python3 scripts/port/migrate_tic_namespace.py
           python3 scripts/port/migrate_tic_resource_locations.py
           python3 scripts/port/migrate_tic_access_transformer.py
+      - name: Verify migration idempotence before persisting source
+        shell: python
+        run: |
+          import hashlib, pathlib, subprocess
+          paths = sorted(pathlib.Path('src/main/java').rglob('*.java'))
+          paths.append(pathlib.Path('src/main/resources/META-INF/accesstransformer.cfg'))
+          before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_access_transformer.py'):
+              subprocess.run(['python3', 'scripts/port/' + script], check=True)
+          changed = [str(p) for p in paths if before[str(p)] != hashlib.sha256(p.read_bytes()).hexdigest()]
+          if changed:
+              raise RuntimeError('Migration changed files on second pass: ' + ', '.join(changed))
+          print('Namespace/resource/access migration idempotence: PASS')
       - name: Persist the migration on the authorized port branch
         run: |
           git config user.name 'github-actions[bot]'
@@ -111,6 +129,9 @@ jobs:
       - name: Compile particle and criterion implementations independently
         continue-on-error: true
         run: ./gradlew :compileLeafPortChecks --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify loot condition JSON and invalid-set behavior
+        continue-on-error: true
+        run: ./gradlew :runLootConditionSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

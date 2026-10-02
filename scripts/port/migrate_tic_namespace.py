@@ -83,6 +83,8 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
     # Repair an earlier suffix-based glass rename only against actual vanilla classes.
     if 'net.minecraft.world.level.block.TintedGlassBlock' in classes:
         text = re.sub(r'\bTintedTransparentBlock\b', 'TintedGlassBlock', text)
+    if 'net.neoforged.neoforge.registries.NeoForgeRegistries' in classes:
+        text = re.sub(r'\b(?:Neo){2,}ForgeRegistries\b', 'NeoForgeRegistries', text)
     registry_fields = {
         'BLOCKS': 'BLOCK', 'ITEMS': 'ITEM', 'FLUIDS': 'FLUID',
         'ENTITY_TYPES': 'ENTITY_TYPE', 'MOB_EFFECTS': 'MOB_EFFECT',
@@ -98,10 +100,10 @@ for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
         'CHUNK_GENERATOR_SERIALIZERS': 'CHUNK_GENERATOR',
     }
     for source, target in registry_fields.items():
-        text = text.replace('ForgeRegistries.Keys.' + source, 'Registries.' + target)
+        text = re.sub(r'\bForgeRegistries\.Keys\.' + source + r'\b', 'Registries.' + target, text)
         text = re.sub(r'\bForgeRegistries\.' + source + r'\b', 'BuiltInRegistries.' + target, text)
     for source in ('ENTITY_DATA_SERIALIZERS', 'GLOBAL_LOOT_MODIFIER_SERIALIZERS', 'BIOME_MODIFIER_SERIALIZERS'):
-        text = text.replace('ForgeRegistries.Keys.' + source, 'NeoForgeRegistries.Keys.' + source)
+        text = re.sub(r'\bForgeRegistries\.Keys\.' + source + r'\b', 'NeoForgeRegistries.Keys.' + source, text)
     for cls, qualified in (
         ('BuiltInRegistries', 'net.minecraft.core.registries.BuiltInRegistries'),
         ('Registries', 'net.minecraft.core.registries.Registries'),

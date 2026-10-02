@@ -207,3 +207,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - TiC harvest/shear events own their real mutable Result decision rather than using the removed Forge bus @HasResult contract. Existing ALLOW/DEFAULT/DENY semantics and post-then-read dispatch are retained; listeners and modules reference the TiC enum.
 - Native right-click item/block decisions use TriState, and name rendering reads RenderNameTagEvent.canRender. TRUE/FALSE preserve prior allow/deny semantics.
 - Boot walking, magnet and slime bounce handlers use EntityTickEvent.Pre with an explicit LivingEntity filter, retaining execution before normal entity work. These handlers still require full compile and runtime validation.
+
+
+### Native loot condition Codec checkpoint
+
+- Run 36981466076: event changes retained successful Mantle compilation, ResourceId behavior and particle/criterion implementation compilation. TiC declarations decreased from 537 to 521, normal compilation from 6,400 to 6,351. No build/load success is claimed.
+- BlockOrEntityCondition uses a singleton MapCodec; HasLootContextSetCondition uses a validated named-set codec retaining the existing set JSON field. Both expose the exact LootItemConditionType registered by TinkerCommons, preserving type identity. Unknown/missing/unregistered parameter sets are rejected rather than silently substituted.
+- A separate behavioral check round-trips empty/chest/block/entity parameter set JSON and checks invalid inputs through the production codecs. Its result is pending until the next run completes.
+- Fixed a non-idempotent legacy registry-key substitution that matched ForgeRegistries inside NeoForgeRegistries and accumulated Neo prefixes on each run. The migration repairs the accumulated identifiers against the actual classpath and matches complete identifiers. CI reruns namespace/resource/access migration and rejects any second-pass source changes before persistence.
