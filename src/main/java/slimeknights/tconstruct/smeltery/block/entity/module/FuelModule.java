@@ -130,7 +130,7 @@ public abstract class FuelModule implements ContainerData {
       int amount = recipe.getAmount(fluid.getFluid());
       if (fluid.getAmount() >= amount) {
         if (consume) {
-          FluidStack drained = handler.drain(new FluidStack(fluid, amount), FluidAction.EXECUTE);
+          FluidStack drained = handler.drain((fluid).copyWithAmount(amount), FluidAction.EXECUTE);
           if (drained.getAmount() != amount) {
             TConstruct.LOG.error("Invalid amount of fuel drained from tank");
           }

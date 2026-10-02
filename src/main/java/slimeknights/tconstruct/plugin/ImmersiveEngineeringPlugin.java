@@ -96,7 +96,7 @@ public class ImmersiveEngineeringPlugin {
       int amount = (int) (projectileValue * projectiles.size());
       if (amount > 0) {
         // run the effect and consume projectiles
-        float consumed = recipe.applyToEntity(new FluidStack(fluid, amount), 1,
+        float consumed = recipe.applyToEntity((fluid).copyWithAmount(amount), 1,
           FluidEffectContext.builder(target.level()).user(shooter).stack(thrower).target(target),
           FluidAction.EXECUTE);
         consumeProjectiles(projectiles, consumed, projectileValue);
@@ -136,7 +136,7 @@ public class ImmersiveEngineeringPlugin {
       int amount = (int) (projectileValue * projectiles.size());
       if (amount > 0) {
         // run the effect and consume projectiles
-        float consumed = recipe.applyToBlock(new FluidStack(fluid, amount), 1,
+        float consumed = recipe.applyToBlock((fluid).copyWithAmount(amount), 1,
           FluidEffectContext.builder(world).user(shooter).stack(thrower).block(hitResult),
           FluidAction.EXECUTE);
         consumeProjectiles(projectiles, consumed, projectileValue);

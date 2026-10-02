@@ -35,7 +35,7 @@ public class FluidTankBase<T extends MantleBlockEntity> extends FluidTank {
       // FIX: the Forge implementation returns fluid.getAmount() here, which may be wrong if the fluid gets changed during onContentsChanged()
       // we instead use a local variable for the amount filled to guarantee its accurate
       int filled = Math.min(capacity, resource.getAmount());
-      fluid = new FluidStack(resource, filled);
+      fluid = (resource).copyWithAmount(filled);
       onContentsChanged();
       return filled;
     }

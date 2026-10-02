@@ -73,7 +73,7 @@ public class CastingFluidHandler implements IFluidHandler {
     if (fluid.isEmpty()) {
       int amount = Math.min(capacity, resource.getAmount());
       if (action.execute()) {
-        fluid = new FluidStack(resource, amount);
+        fluid = (resource).copyWithAmount(amount);
         tile.onContentsChanged();
       }
       return amount;
@@ -124,7 +124,7 @@ public class CastingFluidHandler implements IFluidHandler {
       return FluidStack.EMPTY;
     }
 
-    FluidStack stack = new FluidStack(fluid, drained);
+    FluidStack stack = (fluid).copyWithAmount(drained);
     if (action.execute()) {
       fluid.shrink(drained);
       if (fluid.isEmpty()) {

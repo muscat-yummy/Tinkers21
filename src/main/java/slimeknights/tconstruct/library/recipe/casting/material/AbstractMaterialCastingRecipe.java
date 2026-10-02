@@ -66,7 +66,7 @@ public abstract class AbstractMaterialCastingRecipe extends AbstractCastingRecip
     if (itemCost == 1) {
       return fluid;
     }
-    return new FluidStack(fluid, itemCost * fluid.getAmount());
+    return (fluid).copyWithAmount(itemCost * fluid.getAmount());
   }
 
   /** Resizes the list of the fluids with respect to the item cost */
