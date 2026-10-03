@@ -1,4 +1,4 @@
-name: Restore explicit recipe output IDs and native effect tick hooks
+name: Inspect native food, lifecycle and loot APIs after recipe ID migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,11 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.entity.LivingEntity': ['onEffectRemoved(', 'onEffectAdded(', 'getAttributeValue(', 'jumpFromGround(', 'isSuppressingSlidingDownLadder('],
+              'net.minecraft.world.food.FoodProperties$Builder': ['public '],
+              'net.minecraft.world.food.FoodProperties': ['public '],
+              'net.minecraft.world.effect.MobEffects': ['public '],
+              'net.minecraft.world.level.storage.loot.entries.LootPoolEntries': ['public '],
               'net.minecraft.world.effect.MobEffect': ['public ', 'protected '],
               'net.minecraft.world.entity.ai.attributes.Attributes': ['public '],
               'net.minecraft.world.entity.ai.attributes.AttributeModifier$Operation': ['public '],
