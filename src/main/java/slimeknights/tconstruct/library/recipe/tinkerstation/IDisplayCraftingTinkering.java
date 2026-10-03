@@ -63,7 +63,7 @@ public interface IDisplayCraftingTinkering extends IDisplayToolTinkering, Crafti
   }
 
   @Override
-  default ItemStack getResultItem(RegistryAccess access) {
+  default ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 

@@ -90,7 +90,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   /** @deprecated use {@link ICastingRecipe#assemble(Container, RegistryAccess)} */
   @Override
   @Deprecated
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return new ItemStack(this.container);
   }
 

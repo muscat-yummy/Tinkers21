@@ -65,7 +65,7 @@ public interface ITinkerStationRecipe extends ICommonRecipe<ITinkerStationContai
   /** @deprecated use {@link #getValidatedResult(ITinkerStationContainer, RegistryAccess)}*/
   @Deprecated
   @Override
-  default ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+  default ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider pRegistryAccess) {
     return ItemStack.EMPTY;
   }
 

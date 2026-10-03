@@ -334,7 +334,7 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
 
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return new ItemStack(this.output);
   }
 

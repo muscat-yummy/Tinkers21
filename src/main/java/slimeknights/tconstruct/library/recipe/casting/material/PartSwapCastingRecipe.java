@@ -147,7 +147,7 @@ public class PartSwapCastingRecipe extends AbstractMaterialCastingRecipe impleme
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess registryAccess) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider registryAccess) {
     return getCast().getItems()[0].copy();
   }
 

@@ -148,7 +148,7 @@ public interface IDisplayPartBuilderRecipe extends IPartBuilderRecipe {
 
     @Override
     @Deprecated(forRemoval = true)
-    default ItemStack getResultItem(RegistryAccess pRegistryAccess) {
+    default ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider pRegistryAccess) {
       throw new UnsupportedOperationException();
     }
 

@@ -148,7 +148,7 @@ public class PartBuilderRecycle implements IPartBuilderRecipe, IMultiRecipe<IDis
   /** @deprecated use {@link #assemble(IPartBuilderContainer, RegistryAccess, Pattern)} */
   @Deprecated
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 

@@ -34,7 +34,7 @@ public class CastDuplicationRecipe extends ItemCastingRecipe implements IMultiRe
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     ItemStack[] items = getCast().getItems();
     return items.length == 0 ? ItemStack.EMPTY : items[0];
   }

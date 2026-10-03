@@ -64,7 +64,7 @@ public class MoldingRecipe implements ICommonRecipe<IMoldingContainer> {
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return recipeOutput.get();
   }
 }

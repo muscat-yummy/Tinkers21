@@ -115,7 +115,7 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements IMultiRe
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return new ItemStack(result);
   }
 

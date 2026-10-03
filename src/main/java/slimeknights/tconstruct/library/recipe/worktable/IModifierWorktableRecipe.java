@@ -104,7 +104,7 @@ public interface IModifierWorktableRecipe extends ICommonRecipe<ITinkerableConta
 
   @Override
   @Deprecated
-  default ItemStack getResultItem(RegistryAccess access) {
+  default ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 

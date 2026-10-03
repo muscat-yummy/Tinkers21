@@ -132,7 +132,7 @@ public class ItemPartRecipe implements IDisplayPartBuilderRecipe {
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return result.get();
   }
 

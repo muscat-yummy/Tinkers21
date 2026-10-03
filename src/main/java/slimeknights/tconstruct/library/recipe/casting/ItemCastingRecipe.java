@@ -56,7 +56,7 @@ public class ItemCastingRecipe extends AbstractCastingRecipe implements IDisplay
   }
 
   @Override
-  public ItemStack getResultItem(RegistryAccess access) {
+  public ItemStack getResultItem(net.minecraft.core.HolderLookup.Provider access) {
     return this.result.get();
   }
 
