@@ -1,4 +1,4 @@
-name: Verify tinted vertex chains and native advancement criteria
+name: Verify material entity codec and native advancement builders
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,11 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.advancements.critereon.PlayerTrigger$TriggerInstance': ['public '],
+              'net.minecraft.advancements.critereon.PlayerInteractTrigger$TriggerInstance': ['public '],
+              'net.minecraft.advancements.critereon.ItemPredicate$Builder': ['public '],
+              'net.minecraft.advancements.critereon.EntityEquipmentPredicate$Builder': ['public '],
+              'net.minecraft.advancements.critereon.LocationPredicate$Builder': ['public '],
               'com.mojang.blaze3d.vertex.VertexConsumer': None,
               'net.minecraft.network.syncher.EntityDataSerializer': ['public '],
               'net.minecraft.network.codec.StreamCodec': ['public '],
