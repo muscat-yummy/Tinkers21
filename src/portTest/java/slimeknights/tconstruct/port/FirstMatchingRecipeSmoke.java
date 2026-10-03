@@ -6,6 +6,17 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.SharedConstants;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.core.Registry;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import java.util.Collection;
+import java.util.List;
+import java.util.Map;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonObject;
+import slimeknights.mantle.recipe.condition.TagFilledCondition;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
@@ -18,6 +29,18 @@ import java.util.Optional;
 import slimeknights.mantle.recipe.helper.FirstMatchingCodec;
 
 public final class FirstMatchingRecipeSmoke {
+  private static final ResourceLocation TAG = ResourceLocation.parse("tconstruct:test_ingots");
+
+  private static ICondition.IContext tagContext(List<Holder<Item>> values) {
+    return new ICondition.IContext() {
+      @Override
+      @SuppressWarnings({"unchecked", "rawtypes"})
+      public <T> Map<ResourceLocation, Collection<Holder<T>>> getAllTags(ResourceKey<? extends Registry<T>> registry) {
+        return registry.equals(Registries.ITEM) ? (Map) Map.of(TAG, values) : Map.of();
+      }
+    };
+  }
+
   public static void main(String[] args) {
     var codec = FirstMatchingCodec.create(Codec.INT.optionalFieldOf("recipe").codec()).codec();
     var first = JsonParser.parseString("{\"recipes\":[{}, {\"recipe\":3}, {\"recipe\":7}]}");
@@ -55,6 +78,25 @@ public final class FirstMatchingRecipeSmoke {
     if (ConditionalOps.createConditionalCodec(nativeCodec).parse(ops, allFalse).getOrThrow().isPresent()) {
       throw new AssertionError("A false outer condition must skip the entire recipe");
     }
-    System.out.println("Native conditional first match, disabled/later payload laziness, outer skip and malformed-entry validation: PASS");
+    Registry.register(NeoForgeRegistries.CONDITION_SERIALIZERS, ResourceLocation.parse("mantle:tag_filled"), TagFilledCondition.CODEC);
+    JsonObject tagged = new JsonObject();
+    tagged.addProperty("recipe", 3);
+    ICondition.writeConditions(ops, tagged, List.of(new TagFilledCondition<>(Registries.ITEM, TAG)));
+    JsonObject fallback = new JsonObject();
+    fallback.addProperty("recipe", 7);
+    JsonArray alternatives = new JsonArray();
+    alternatives.add(tagged);
+    alternatives.add(fallback);
+    JsonObject reload = new JsonObject();
+    reload.add("recipes", alternatives);
+    var filledOps = new ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.EMPTY),
+        tagContext(List.of(Items.STICK.builtInRegistryHolder())));
+    var emptyOps = new ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, RegistryAccess.EMPTY), tagContext(List.of()));
+    if (nativeCodec.parse(filledOps, reload).getOrThrow() != 3
+        || nativeCodec.parse(emptyOps, reload).getOrThrow() != 7
+        || nativeCodec.parse(filledOps, reload).getOrThrow() != 3) {
+      throw new AssertionError("Each reload must use its real tag context without retaining the previous choice");
+    }
+    System.out.println("Native conditional first match, payload laziness, outer skip, reload tag context and validation: PASS");
   }
 }

@@ -1,4 +1,4 @@
-name: Verify actual NeoForge conditional recipe decoding and tooltip policy
+name: Verify reload-aware alternatives and inspect native effect and attribute APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,12 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.effect.MobEffect': ['public ', 'protected '],
+              'net.minecraft.world.entity.ai.attributes.Attributes': ['public '],
+              'net.minecraft.world.entity.ai.attributes.AttributeModifier$Operation': ['public '],
+              'net.minecraft.world.entity.ai.attributes.AttributeInstance': ['public '],
+              'net.minecraft.world.item.alchemy.PotionBrewing$Builder': ['public '],
+              'net.minecraft.world.item.alchemy.PotionBrewing': ['public '],
               'net.minecraft.world.item.ItemStack': ['addToTooltip(', 'getTooltipLines(', 'getEnchantments(', 'getComponentsPatch('],
               'net.minecraft.world.item.enchantment.ItemEnchantments': ['public '],
               'net.minecraft.world.item.enchantment.Enchantment': ['getSlotItems(', 'matchingSlot(', 'definition('],
