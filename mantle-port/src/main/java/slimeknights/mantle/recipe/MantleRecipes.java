@@ -13,6 +13,7 @@ import slimeknights.mantle.recipe.cooking.SmokingResultRecipe;
 import slimeknights.mantle.recipe.crafting.ShapedFallbackRecipe;
 import slimeknights.mantle.recipe.crafting.ShapedRetexturedRecipe;
 import slimeknights.mantle.recipe.helper.LoadableRecipeSerializer;
+import slimeknights.mantle.recipe.helper.FirstMatchingRecipeSerializer;
 
 /** Handles any custom recipes added by Mantle */
 public class MantleRecipes {
@@ -24,6 +25,8 @@ public class MantleRecipes {
   public static void init(IEventBus bus) {
     RECIPES.register(bus);
   }
+
+  public static final RegistryObject<FirstMatchingRecipeSerializer> CONDITIONAL = RECIPES.register("conditional", FirstMatchingRecipeSerializer::new);
 
   // crafting
   public static final RegistryObject<ShapedFallbackRecipe.Serializer> CRAFTING_SHAPED_FALLBACK = RECIPES.register("crafting_shaped_fallback", ShapedFallbackRecipe.Serializer::new);

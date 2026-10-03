@@ -17,7 +17,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.material.Fluid;
 import net.neoforged.neoforge.common.Tags;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
+import slimeknights.mantle.recipe.data.FirstMatchingRecipeBuilder;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import net.neoforged.neoforge.common.crafting.IntersectionIngredient;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -320,7 +320,7 @@ public class SmelteryRecipeBuilder {
               .save(wrapped, location);
     } else {
       // multiple options, will need a conditonal recipe
-      ConditionalRecipe.Builder builder = ConditionalRecipe.builder();
+      FirstMatchingRecipeBuilder builder = FirstMatchingRecipeBuilder.builder();
       boolean alwaysPresent = false;
       for (IByproduct byproduct : oreByproducts) {
         // found an always present byproduct? no need to tag and we are done

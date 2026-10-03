@@ -28,7 +28,7 @@ import net.minecraft.world.level.material.Fluids;
 import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.Tags;
 import net.neoforged.neoforge.common.crafting.CompoundIngredient;
-import net.minecraftforge.common.crafting.ConditionalRecipe;
+import slimeknights.mantle.recipe.data.FirstMatchingRecipeBuilder;
 import net.neoforged.neoforge.common.crafting.DifferenceIngredient;
 import net.neoforged.neoforge.common.conditions.AndCondition;
 import net.neoforged.neoforge.common.conditions.ICondition;
@@ -195,7 +195,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     Consumer<RecipeConsumer> fastGrout = c ->
       SimpleCookingRecipeBuilder.blasting(Ingredient.of(TinkerSmeltery.grout), RecipeCategory.BUILDING_BLOCKS, TinkerSmeltery.searedBrick, 0.3f, 100)
                           .unlockedBy("has_item", has(TinkerSmeltery.grout)).save(c);
-    ConditionalRecipe.builder()
+    FirstMatchingRecipeBuilder.builder()
                      .addCondition(new ModLoadedCondition("ceramics"))
                      .addRecipe(c -> fastGrout.accept(ConsumerWrapperBuilder.wrap(ResourceLocation.fromNamespaceAndPath("ceramics", "kiln")).build(c)))
                      .addCondition(TrueCondition.INSTANCE)
@@ -646,7 +646,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     Consumer<RecipeConsumer> fastGrout = c ->
       SimpleCookingRecipeBuilder.blasting(Ingredient.of(TinkerSmeltery.netherGrout), RecipeCategory.BUILDING_BLOCKS, TinkerSmeltery.scorchedBrick, 0.3f, 100)
                                 .unlockedBy("has_item", has(TinkerSmeltery.netherGrout)).save(c);
-    ConditionalRecipe.builder()
+    FirstMatchingRecipeBuilder.builder()
                      .addCondition(new ModLoadedCondition("ceramics"))
                      .addRecipe(c -> fastGrout.accept(ConsumerWrapperBuilder.wrap(ResourceLocation.fromNamespaceAndPath("ceramics", "kiln")).build(c)))
                      .addCondition(TrueCondition.INSTANCE)
@@ -1927,7 +1927,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
                       .save(consumer, prefix(TinkerFluids.moltenHepatizon, folder));
 
     // netherite: 4 debris + 4 gold = 1 (why is this so dense vanilla?)
-    ConditionalRecipe.builder()
+    FirstMatchingRecipeBuilder.builder()
                      .addCondition(ConfigEnabledCondition.CHEAPER_NETHERITE_ALLOY)
                      .addRecipe(
                        AlloyRecipeBuilder.alloy(TinkerFluids.moltenNetherite, FluidValues.NUGGET)
@@ -1989,7 +1989,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
     // pewter
     ICondition lead = tagCondition("ingots/lead");
     ICondition tin = tagCondition("ingots/tin");
-    ConditionalRecipe.builder()
+    FirstMatchingRecipeBuilder.builder()
       // if we have both tin and lead, do the combined recipe. Ratio is from Metalborn/Allomancy
       .addCondition(new AndCondition(lead, tin))
       // ratio from Metalborn/Allomancy
@@ -2048,7 +2048,7 @@ public class SmelteryRecipeProvider extends BaseRecipeProvider implements ISmelt
                       .save(wrapped, prefix(TinkerFluids.moltenRefinedObsidian, folder));
 
     // nicrosil
-    ConditionalRecipe.builder()
+    FirstMatchingRecipeBuilder.builder()
       // if we have both chromium and nickel, can do the proper recipe
       .addCondition(new AndCondition(tagCondition("ingots/chromium"), tagCondition("ingots/nickel")))
       .addRecipe(AlloyRecipeBuilder.alloy(TinkerFluids.moltenNicrosil, FluidValues.INGOT * 4)
