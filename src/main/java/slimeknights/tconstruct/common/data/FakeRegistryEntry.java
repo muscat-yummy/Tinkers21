@@ -10,7 +10,7 @@ import net.minecraft.world.entity.MobCategory;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
-import net.minecraftforge.registries.ForgeRegistry;
+import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import slimeknights.tconstruct.common.TinkerEffect;
 
@@ -23,12 +23,15 @@ public class FakeRegistryEntry {
   @SuppressWarnings("UnstableApiUsage")
   private static <T> T getOrCreate(Registry<T> registry, ResourceLocation id, Supplier<T> constructor) {
     if (!registry.containsKey(id)) {
-      ((ForgeRegistry<T>)registry).unfreeze();
+      if (!(registry instanceof MappedRegistry<?> mapped)) {
+        throw new IllegalArgumentException("Datagen entry requires a native mapped registry");
+      }
+      mapped.unfreeze();
       T value = constructor.get();
-      registry.register(id, value);
+      Registry.register(registry, id, value);
       return value;
     }
-    return Objects.requireNonNull(registry.getValue(id));
+    return Objects.requireNonNull(registry.get(id));
   }
 
   /** Gets or creates a fake block with the given ID */

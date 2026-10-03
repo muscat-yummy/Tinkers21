@@ -1,4 +1,4 @@
-name: Port native plant support tags and slime grass codec
+name: Port native datagen registry entry creation
 on:
   push:
     branches: [port/1.21.1-neoforge]
