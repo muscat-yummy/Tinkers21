@@ -1,4 +1,4 @@
-name: Port native tooltip contexts for material and gadget item descriptions
+name: Persist common tag migration with concurrent port commits and inspect item validation
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,7 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.item.component.CustomData': ['public '],
               'net.minecraft.world.item.Item$TooltipContext': ['public '],
               'net.minecraft.network.syncher.SynchedEntityData$Builder': ['public '],
               'net.neoforged.neoforge.common.loot.LootModifier': ['public ', 'protected '],
@@ -40,7 +41,7 @@ jobs:
               'net.minecraft.world.level.storage.loot.parameters.LootContextParams': ['public '],
               'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
               'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight('],
-              'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers('],
+              'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers(', 'verifyComponentsAfterLoad(', 'appendHoverText('],
               'net.minecraft.world.item.component.ItemAttributeModifiers': ['public '],
               'net.minecraft.world.item.component.ItemAttributeModifiers$Builder': ['public '],
               'net.neoforged.fml.ModLoader': ['public '],
@@ -370,7 +371,20 @@ jobs:
           git add src/main/java src/main/resources/META-INF/accesstransformer.cfg
           if ! git diff --cached --quiet; then
             git commit -m "Port TiC references to resolved NeoForge 1.21.1 classes"
-            git push origin HEAD:port/1.21.1-neoforge
+            persisted=false
+            for attempt in 1 2 3; do
+              git fetch origin port/1.21.1-neoforge
+              # Rebase only the generated source commit; never overwrite concurrent port work.
+              git rebase origin/port/1.21.1-neoforge
+              if git push origin HEAD:port/1.21.1-neoforge; then
+                persisted=true
+                break
+              fi
+            done
+            if [ "$persisted" != true ]; then
+              echo "Concurrent updates prevented migration persistence after three attempts"
+              exit 1
+            fi
           fi
       - name: Apply verified mapped access changes to Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
