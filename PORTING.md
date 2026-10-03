@@ -2,7 +2,7 @@
 
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
-## Current checkpoint (2026-10-02)
+## Current checkpoint (2026-10-03)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.
 
@@ -487,3 +487,13 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 - Native critical state/multiplier, mob-effect applicability/cures, and cancellable projectile impact replace removed Forge event results. Critical behavior validation covers airborne/grounded hits, additive boosts, earlier addon multipliers, and suppression of a vanilla critical hit.
 - Explosion knockback damping now reads the native explosion-knockback resistance attribute, which is the mechanism used by native protection enchantments.
 - CI runs the same independent production tests in one Gradle invocation with `--continue`; root compilation remains a separate mandatory gate and sources are not excluded. New changes await CI validation.
+
+### Native shield, harvest, JEI widget and projectile continuation (2026-10-03)
+
+- Runs 37099651017, 37099737128, and 37099996569 reduced declaration diagnostics from 54 to 49, 46, and 39. Mantle compiled and every independent production check passed. The new JEI widget check verifies registration, relative/exclusive hover bounds, and dynamic displayed-value callbacks.
+- Hotbar rendering uses native GUI layer IDs and DeltaTracker. Shield blocking checks the native blocked state before applying tool durability because the native event also fires for unblocked attacks.
+- Mining and melting effectiveness use each actual tier's incorrect-blocks-for-drops tag. Named tier persistence and comparison still require migration; this does not replace custom tiers with vanilla numeric levels.
+- Pinned JEI 19.27 does not contain the newer 19.51 drawable widget builders used by the source. Production drawables now implement the supported IRecipeWidget contract, preserving animation and dynamic cooling/error tooltips without dropping them or raising the dependency blindly.
+- Modifiable arrows now supply their actual tool-aware projectile through ProjectileItem.asProjectile; dispenser behavior is constructed during common setup with the registered item. Enchantment-to-modifier packets use native registry-aware codecs instead of a removed static Forge registry. These changes await their own compiler checkpoint.
+- Slime armor rendering follows native material layers, NeoForge tint/model hooks, packed colors, profile components, and glint rendering. Biome modifier keys use NeoForge's actual registry key. Validation is pending.
+- Phase 2 remains in progress. The whole-source compile is blocked at declaration/annotation processing; no distributable JAR or Minecraft load is claimed. Declaration counts cannot be used as a count of all remaining method-body errors.

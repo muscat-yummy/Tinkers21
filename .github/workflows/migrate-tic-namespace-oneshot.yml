@@ -1,4 +1,4 @@
-name: Port arrow dispenser and dynamic enchantment packet codecs
+name: Port slime armor layers and biome registry keys
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -6,6 +6,50 @@ on:
 permissions:
   contents: write
 jobs:
+  inspect_native_next:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: port/1.21.1-neoforge
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+      - name: Resolve exact native API classpath
+        run: |
+          cat > /tmp/native-api.init.gradle <<'GRADLE'
+          gradle.projectsEvaluated {
+              rootProject.tasks.register('nativeApiClasspath') {
+                  doLast {
+                      new File('/tmp/native-api-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :createMinecraftArtifacts :nativeApiClasspath --no-daemon --console=plain -I /tmp/native-api.init.gradle
+      - name: Inspect public Minecraft APIs only
+        shell: python
+        run: |
+          import pathlib, subprocess, zipfile
+          targets = ["net.minecraft.world.level.block.grower.TreeGrower","net.minecraft.world.level.block.entity.BlockEntity","net.minecraft.data.loot.LootTableProvider","net.minecraft.data.loot.LootTableProvider$SubProviderEntry","net.minecraft.data.loot.BlockLootSubProvider","net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction$Builder","net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction$Source","net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction$Builder","net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction"]
+          for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
+              jar = pathlib.Path(entry)
+              if not jar.is_file() or jar.suffix != '.jar':
+                  continue
+              with zipfile.ZipFile(jar) as archive:
+                  names = set(archive.namelist())
+              for cls in list(targets):
+                  if cls.replace('.', '/') + '.class' not in names:
+                      continue
+                  result = subprocess.run(['javap', '-classpath', str(jar), '-p', cls], capture_output=True, text=True, check=True)
+                  print('Public native API:', cls)
+                  for line in result.stdout.splitlines():
+                      if 'public ' in line or 'protected ' in line:
+                          print(line)
+                  targets.remove(cls)
+          if targets:
+              raise RuntimeError('API classes not found: ' + ', '.join(targets))
   migrate:
     runs-on: ubuntu-latest
     steps:
