@@ -19,8 +19,10 @@ import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Set;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.neoforged.neoforge.common.EffectCure;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 import java.util.function.Consumer;
 
 /** Effect for rendering the charge up when you start using a helmet */
@@ -30,8 +32,9 @@ public class HelmetChargingEffect extends MobEffect {
   }
 
   @Override
-  public List<ItemStack> getCurativeItems() {
-    return new ArrayList<>();
+  public void fillEffectCures(Set<EffectCure> cures, MobEffectInstance instance) {
+    super.fillEffectCures(cures, instance);
+    cures.removeIf(EffectCureUtil::isItemCure);
   }
 
   @Override
@@ -85,7 +88,7 @@ public class HelmetChargingEffect extends MobEffect {
   /** Starts using the helmet with the charge time rendering */
   public static int startUsingHelmet(IToolStackView tool, LivingEntity living, float speedFactor) {
     int time = GeneralInteractionModifierHook.startDrawing(tool, living, speedFactor);
-    living.addEffect(new MobEffectInstance(TinkerModifiers.helmetCharging.get(), time + 20, 0, true, false, true));
+    living.addEffect(new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(TinkerModifiers.helmetCharging.get()), time + 20, 0, true, false, true));
     return time;
   }
 }

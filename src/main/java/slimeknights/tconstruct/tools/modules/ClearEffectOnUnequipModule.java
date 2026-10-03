@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.modules;
 
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -39,7 +40,7 @@ public record ClearEffectOnUnequipModule(MobEffect effect, ModifierCondition<ITo
   public void onUnequip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     LivingEntity entity = context.getEntity();
     if (!entity.level().isClientSide && condition.matches(tool, modifier) && EquipmentChangeModifierHook.didUnequip(tool, context)) {
-      entity.removeEffect(effect);
+      entity.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect));
     }
   }
 }

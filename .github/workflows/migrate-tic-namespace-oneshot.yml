@@ -1,4 +1,4 @@
-name: Preserve item cure selection and armor removal effect policies
+name: Port remaining effect holders food and carry tick behavior
 on:
   push:
     branches: [port/1.21.1-neoforge]
