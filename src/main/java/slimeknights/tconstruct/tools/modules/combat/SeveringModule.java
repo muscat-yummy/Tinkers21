@@ -50,7 +50,7 @@ public enum SeveringModule implements ModifierModule, ProcessLootModifierHook {
     Entity entity = context.getParamOrNull(LootContextParams.THIS_ENTITY);
     if (entity != null) {
       // ensure no head so far
-      if (generatedLoot.stream().noneMatch(stack -> stack.is(Tags.Items.HEADS))) {
+      if (generatedLoot.stream().noneMatch(stack -> stack.is(net.minecraft.tags.ItemTags.SKULLS))) {
         // find proper recipe
         Level world = context.getLevel();
         List<SeveringRecipe> recipes = SeveringRecipeCache.findRecipe(world.getRecipeManager(), entity.getType());

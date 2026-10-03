@@ -95,7 +95,7 @@ public class BlockTagProvider extends BlockTagsProvider {
 
     // glass
     IntrinsicTagAppender<Block> silicaPanes = tag(TinkerTags.Blocks.GLASS_PANES_SILICA);
-    this.tag(Tags.Blocks.GLASS).add(TinkerCommons.soulGlass.get());
+    this.tag(Tags.Blocks.GLASS_BLOCKS).add(TinkerCommons.soulGlass.get());
     this.tag(Tags.Blocks.GLASS_PANES).add(TinkerCommons.soulGlassPane.get());
     silicaPanes.add(
       Blocks.GLASS_PANE, TinkerCommons.clearGlassPane.get(),
@@ -103,7 +103,7 @@ public class BlockTagProvider extends BlockTagsProvider {
       Blocks.GRAY_STAINED_GLASS_PANE, Blocks.GREEN_STAINED_GLASS_PANE, Blocks.LIGHT_BLUE_STAINED_GLASS_PANE, Blocks.LIGHT_GRAY_STAINED_GLASS_PANE,
       Blocks.LIME_STAINED_GLASS_PANE, Blocks.MAGENTA_STAINED_GLASS_PANE, Blocks.ORANGE_STAINED_GLASS_PANE, Blocks.PINK_STAINED_GLASS_PANE,
       Blocks.PURPLE_STAINED_GLASS_PANE, Blocks.RED_STAINED_GLASS_PANE, Blocks.WHITE_STAINED_GLASS_PANE, Blocks.YELLOW_STAINED_GLASS_PANE);
-    this.tag(Tags.Blocks.GLASS_COLORLESS).add(TinkerCommons.clearGlass.get());
+    this.tag(Tags.Blocks.GLASS_BLOCKS_COLORLESS).add(TinkerCommons.clearGlass.get());
     this.tag(Tags.Blocks.GLASS_PANES_COLORLESS).add(TinkerCommons.clearGlassPane.get());
     addGlass(TinkerCommons.clearStainedGlass, "glass/", tag(Tags.Blocks.STAINED_GLASS));
     addGlass(TinkerCommons.clearStainedGlassPane, "glass_panes/", tag(Tags.Blocks.STAINED_GLASS_PANES));
@@ -118,7 +118,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     silicaGlass.add(TinkerCommons.clearGlass.get());
     TinkerCommons.clearStainedGlass.values().forEach(impermeable::add);
     TinkerCommons.clearStainedGlass.values().forEach(silicaGlass::add);
-    tag(Tags.Blocks.GLASS_TINTED).add(TinkerCommons.clearTintedGlass.get());
+    tag(Tags.Blocks.GLASS_BLOCKS_TINTED).add(TinkerCommons.clearTintedGlass.get());
 
     // soul speed on glass
     this.tag(BlockTags.SOUL_SPEED_BLOCKS).add(TinkerCommons.soulGlass.get(), TinkerCommons.soulGlassPane.get(),
@@ -536,7 +536,7 @@ public class BlockTagProvider extends BlockTagsProvider {
     // sword list is filled to best ability, but will be a bit inexact as vanilla uses materials, hopefully putting this tag under forge will get people to tag their blocks
     tag(TinkerTags.Blocks.MINABLE_WITH_SWORD).add(Blocks.COBWEB, Blocks.MOSS_BLOCK).addTags(BlockTags.SWORD_EFFICIENT);
     // dagger does hoe or sword blocks plus glass
-    tag(TinkerTags.Blocks.MINABLE_WITH_DAGGER).addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SWORD, Tags.Blocks.GLASS, Tags.Blocks.GLASS_PANES)
+    tag(TinkerTags.Blocks.MINABLE_WITH_DAGGER).addTags(MINEABLE_WITH_HOE, TinkerTags.Blocks.MINABLE_WITH_SWORD, Tags.Blocks.GLASS_BLOCKS, Tags.Blocks.GLASS_PANES)
       .add(Blocks.GLOWSTONE, Blocks.REDSTONE_LAMP, Blocks.SEA_LANTERN, Blocks.BEACON);
 
     // melting pan blacklist, basically anything that feels gross due to unsupported melting recipe

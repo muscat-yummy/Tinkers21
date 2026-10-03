@@ -205,7 +205,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .pattern("lcl")
       .define('c', travelersMaterial.apply(PlatingMaterialStats.CHESTPLATE.getId()))
       .define('l', cuirass)
-      .define('s', Tags.Items.STRING)
+      .define('s', Tags.Items.STRINGS)
       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
       .save(shapedMaterial, location(travelersFolder + "chestplate"));
     ShapedRecipeBuilder.shaped(RecipeCategory.COMBAT, TinkerTools.travelersGear.get(ArmorItem.Type.LEGGINGS))
@@ -223,7 +223,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .pattern("l l")
       .define('c', travelersMaterial.apply(PlatingMaterialStats.BOOTS.getId()))
       .define('l', cuirass)
-      .define('s', Tags.Items.STRING)
+      .define('s', Tags.Items.STRINGS)
       .unlockedBy("has_item", has(Tags.Items.INGOTS_COPPER))
       .save(shapedMaterial, location(travelersFolder + "boots"));
     // shield needs no special ingots, no compat shield cores exist
@@ -233,7 +233,7 @@ public class ToolsRecipeProvider extends BaseRecipeProvider implements IMaterial
       .define('l', cuirass)
       .define('c', MaterialValueIngredient.of(new MaterialStatTypePredicate(StatlessMaterialStats.SHIELD_CORE.getIdentifier()), 1))
       .define('s', Tags.Items.RODS_WOODEN)
-      .unlockedBy("has_item", has(Tags.Items.LEATHER))
+      .unlockedBy("has_item", has(Tags.Items.LEATHERS))
       .save(shapedMaterial, location(travelersFolder + "shield"));
 
     // travelers part swapping - cuirass casting
