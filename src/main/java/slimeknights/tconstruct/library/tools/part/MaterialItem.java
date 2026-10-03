@@ -51,7 +51,7 @@ public class MaterialItem extends Item implements IMaterialItem {
 
   @Override
   public MaterialVariantId getMaterial(ItemStack stack) {
-    return getMaterialId(stack.getTag());
+    return getMaterialId(MaterialItemData.read(stack));
   }
 
   @Nullable
@@ -176,7 +176,10 @@ public class MaterialItem extends Item implements IMaterialItem {
   }
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag nbt) {
-    verifyTag(nbt);
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    super.verifyComponentsAfterLoad(stack);
+    if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+      MaterialItemData.update(stack, MaterialItem::verifyTag);
+    }
   }
 }

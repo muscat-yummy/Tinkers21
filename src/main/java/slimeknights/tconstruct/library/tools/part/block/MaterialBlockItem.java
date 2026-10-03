@@ -13,6 +13,7 @@ import slimeknights.tconstruct.library.materials.MaterialRegistry;
 import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
 import slimeknights.tconstruct.library.tools.part.IMaterialItem;
 import slimeknights.tconstruct.library.tools.part.MaterialItem;
+import slimeknights.tconstruct.library.tools.part.MaterialItemData;
 
 import javax.annotation.Nullable;
 import java.util.List;
@@ -25,7 +26,7 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
 
   @Override
   public MaterialVariantId getMaterial(ItemStack stack) {
-    return MaterialItem.getMaterialId(stack.getTag());
+    return MaterialItem.getMaterialId(MaterialItemData.read(stack));
   }
 
   @Override
@@ -56,7 +57,10 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
   }
 
   @Override
-  public void verifyTagAfterLoad(CompoundTag tag) {
-    MaterialItem.verifyTag(tag);
+  public void verifyComponentsAfterLoad(ItemStack stack) {
+    super.verifyComponentsAfterLoad(stack);
+    if (stack.has(net.minecraft.core.component.DataComponents.CUSTOM_DATA)) {
+      MaterialItemData.update(stack, MaterialItem::verifyTag);
+    }
   }
 }

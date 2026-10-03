@@ -17,7 +17,7 @@ import java.util.function.Consumer;
  */
 public interface IMaterialItem extends ItemLike, IMaterialUser {
   /** Tag used in NBT for the material ID */
-  String MATERIAL_TAG = "Material";
+  String MATERIAL_TAG = MaterialItemData.KEY;
 
   /**
    * Returns the material ID of the part this itemstack holds.
@@ -37,7 +37,7 @@ public interface IMaterialItem extends ItemLike, IMaterialUser {
   /** Sets the material on the existing stack, bypassing the valid material check. */
   default ItemStack setMaterialForced(ItemStack stack, MaterialVariantId material) {
     // FIXME: it is odd that we assume the NBT format in this method but not in getMaterial, should be consistent in the implementation location
-    stack.getOrCreateTag().putString(MATERIAL_TAG, material.toString());
+    MaterialItemData.set(stack, material.toString());
     return stack;
   }
 
