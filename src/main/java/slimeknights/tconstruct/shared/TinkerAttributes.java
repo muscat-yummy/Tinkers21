@@ -2,6 +2,8 @@ package slimeknights.tconstruct.shared;
 
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.Attributes;
@@ -60,11 +62,11 @@ public class TinkerAttributes {
   @SubscribeEvent
   void addAttributes(EntityAttributeModificationEvent event) {
     // player attributes
-    event.add(EntityType.PLAYER, USE_ITEM_SPEED.get());
-    event.add(EntityType.PLAYER, CRITICAL_DAMAGE.get());
-    event.add(EntityType.PLAYER, MINING_SPEED_MULTIPLIER.get());
-    event.add(EntityType.PLAYER, EXPERIENCE_MULTIPLIER.get());
-    event.add(EntityType.PLAYER, JUMP_COUNT.get());
+    event.add(EntityType.PLAYER, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(USE_ITEM_SPEED.get()));
+    event.add(EntityType.PLAYER, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(CRITICAL_DAMAGE.get()));
+    event.add(EntityType.PLAYER, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(MINING_SPEED_MULTIPLIER.get()));
+    event.add(EntityType.PLAYER, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(EXPERIENCE_MULTIPLIER.get()));
+    event.add(EntityType.PLAYER, BuiltInRegistries.ATTRIBUTE.wrapAsHolder(JUMP_COUNT.get()));
     // general attributes
     addToAll(event, BOUNCY);
     addToAll(event, PROTECTION_CAP);
@@ -82,14 +84,14 @@ public class TinkerAttributes {
     event.enqueueWork(() -> {
       // make knockback resistance syncable, as we need that info clientside
       if (Config.COMMON.syncKnockbackResistance.get()) {
-        Attributes.KNOCKBACK_RESISTANCE.setSyncable(true);
+        Attributes.KNOCKBACK_RESISTANCE.value().setSyncable(true);
       }
     });
   }
 
   /** Adds an attribute to all entities */
   private static void addToAll(EntityAttributeModificationEvent event, RegistryObject<Attribute> attribute, double defaultValue) {
-    Attribute attr = attribute.get();
+    Holder<Attribute> attr = BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute.get());
     for (EntityType<? extends LivingEntity> entity : event.getTypes()) {
       event.add(entity, attr, defaultValue);
     }
