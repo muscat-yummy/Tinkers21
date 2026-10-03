@@ -1,4 +1,4 @@
-name: Verify native recipe result lookup across the full TiC source
+name: Verify native menu screen and geometry loader registration
 on:
   push:
     branches: [port/1.21.1-neoforge]

@@ -1,6 +1,6 @@
 package slimeknights.tconstruct.smeltery;
 
-import net.minecraft.client.gui.screens.MenuScreens;
+import net.neoforged.neoforge.client.event.RegisterMenuScreensEvent;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.EntityRenderersEvent;
@@ -58,11 +58,15 @@ public class SmelteryClientEvents extends ClientEventBase {
   }
 
   @SubscribeEvent
+  static void registerScreens(final RegisterMenuScreensEvent event) {
+    event.register(TinkerSmeltery.melterContainer.get(), MelterScreen::new);
+    event.register(TinkerSmeltery.smelteryContainer.get(), HeatingStructureScreen::new);
+    event.register(TinkerSmeltery.singleItemContainer.get(), new SingleItemScreenFactory());
+    event.register(TinkerSmeltery.alloyerContainer.get(), AlloyerScreen::new);
+  }
+
+  @SubscribeEvent
   static void clientSetup(final FMLClientSetupEvent event) {
-    MenuScreens.register(TinkerSmeltery.melterContainer.get(), MelterScreen::new);
-    MenuScreens.register(TinkerSmeltery.smelteryContainer.get(), HeatingStructureScreen::new);
-    MenuScreens.register(TinkerSmeltery.singleItemContainer.get(), new SingleItemScreenFactory());
-    MenuScreens.register(TinkerSmeltery.alloyerContainer.get(), AlloyerScreen::new);
     ToolModel.registerSmallTool(TinkerItemDisplays.MELTER);
     ToolModel.registerSmallTool(TinkerItemDisplays.CASTING_BASIN);
     ToolModel.registerSmallTool(TinkerItemDisplays.CASTING_TABLE);
@@ -70,7 +74,7 @@ public class SmelteryClientEvents extends ClientEventBase {
 
   @SubscribeEvent
   static void registerModelLoaders(RegisterGeometryLoaders event) {
-    event.register("tank", TankModel.LOADER);
-    event.register("fluid_texture", FluidTextureModel.LOADER);
+    event.register(TConstruct.getResource("tank"), TankModel.LOADER);
+    event.register(TConstruct.getResource("fluid_texture"), FluidTextureModel.LOADER);
   }
 }
