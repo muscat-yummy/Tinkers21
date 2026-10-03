@@ -94,7 +94,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
       this.pickup = AbstractArrow.Pickup.ALLOWED;
     }
     // trident - stack constructor
-    this.tridentItem = stack.copyWithCount(1);
+    this.setPickupItemStack(stack.copyWithCount(1));
     this.charge = charge;
     this.multiplier = multiplier;
     this.entityData.set(WATER_INERTIA, waterInertia);
@@ -103,12 +103,12 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
 
   /** Sets any relevant properties from the stack */
   private void updateFromStack() {
-    this.entityData.set(STACK, tridentItem);
-    this.entityData.set(ID_LOYALTY, (byte) ModifierUtil.getVolatileInt(tridentItem, LOYALTY));
-    this.entityData.set(ID_FOIL, ModifierUtil.checkVolatileFlag(tridentItem, ModifiableItem.SHINY));
-    this.noDespawn = ModifierUtil.checkVolatileFlag(tridentItem, IndestructibleItemEntity.INDESTRUCTIBLE_ENTITY);
+    this.entityData.set(STACK, getPickupItemStackOrigin());
+    this.entityData.set(ID_LOYALTY, (byte) ModifierUtil.getVolatileInt(getPickupItemStackOrigin(), LOYALTY));
+    this.entityData.set(ID_FOIL, ModifierUtil.checkVolatileFlag(getPickupItemStackOrigin(), ModifiableItem.SHINY));
+    this.noDespawn = ModifierUtil.checkVolatileFlag(getPickupItemStackOrigin(), IndestructibleItemEntity.INDESTRUCTIBLE_ENTITY);
     if (!level().isClientSide) {
-      this.magnet = ModifierUtil.getVolatileInt(tridentItem, MAGNET);
+      this.magnet = ModifierUtil.getVolatileInt(getPickupItemStackOrigin(), MAGNET);
     }
   }
 
@@ -116,9 +116,9 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   public void onRelease(LivingEntity entity, ModDataNBT arrowData) {
     IToolStackView tool = getTool();
     for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(ModifierHooks.PROJECTILE_THROWN).onProjectileShoot(tool, entry, entity, tridentItem, this, null, arrowData, true);
+      entry.getHook(ModifierHooks.PROJECTILE_THROWN).onProjectileShoot(tool, entry, entity, getPickupItemStackOrigin(), this, null, arrowData, true);
     }
-    this.tasks = ScheduledProjectileTaskModifierHook.createSchedule(tool, tridentItem, this, null, arrowData);
+    this.tasks = ScheduledProjectileTaskModifierHook.createSchedule(tool, getPickupItemStackOrigin(), this, null, arrowData);
   }
 
   @Override
@@ -126,18 +126,18 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
     return entityData.get(WATER_INERTIA);
   }
 
-  @Override
+  /** Modifier-driven channeling query retained for tool hooks and addon callers. */
   public boolean isChanneling() {
-    return !tridentItem.isEmpty() && getTool().getModifiers().getLevel(ModifierIds.channeling) > 0;
+    return !getPickupItemStackOrigin().isEmpty() && getTool().getModifiers().getLevel(ModifierIds.channeling) > 0;
   }
 
   @Override
   public Component getDisplayName() {
-    if (tridentItem.isEmpty()) {
+    if (getPickupItemStackOrigin().isEmpty()) {
       return super.getDisplayName();
     }
     IToolStackView tool = getTool();
-    return ToolNameHook.getName(tool.getDefinition(), tridentItem, tool);
+    return ToolNameHook.getName(tool.getDefinition(), getPickupItemStackOrigin(), tool);
   }
 
 
@@ -146,7 +146,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   @Override
   public void tickDespawn() {
     // if no pickup, despawn in 1 minute
-    if (pickup != Pickup.ALLOWED || tridentItem.isEmpty()) {
+    if (pickup != Pickup.ALLOWED || getPickupItemStackOrigin().isEmpty()) {
       life += 1;
       if (life >= 1200) {
         this.discard();
@@ -168,8 +168,8 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
       // ensure it returns
       dealtDamage = true;
       // we don't damage the tool on throw, so instead damage it when it hits a block or an entity
-      if (!tridentItem.isEmpty()) {
-        ToolDamageUtil.damage(getTool(), 1, getOwner() instanceof LivingEntity l ? l : null, tridentItem);
+      if (!getPickupItemStackOrigin().isEmpty()) {
+        ToolDamageUtil.damage(getTool(), 1, getOwner() instanceof LivingEntity l ? l : null, getPickupItemStackOrigin());
       }
     } else {
       super.onBelowWorld();
@@ -182,7 +182,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   /** Gets the tool instance, ensuring its created */
   private IToolStackView getTool() {
     if (tool == null) {
-      tool = ToolStack.from(tridentItem);
+      tool = ToolStack.from(getPickupItemStackOrigin());
     }
     return tool;
   }
@@ -192,11 +192,11 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
     // TODO: consider expiry time for loyalty
     if (!dealtDamage && inGroundTime > 4) {
       // we don't damage the tool on throw, so instead damage it when it hits a block or an entity
-      if (!tridentItem.isEmpty() && !level().isClientSide) {
-        ToolDamageUtil.damage(getTool(), 1, getOwner() instanceof LivingEntity l ? l : null, tridentItem);
+      if (!getPickupItemStackOrigin().isEmpty() && !level().isClientSide) {
+        ToolDamageUtil.damage(getTool(), 1, getOwner() instanceof LivingEntity l ? l : null, getPickupItemStackOrigin());
         // update the stack so visual changes to the tool render (e.g. broken or fluid)
         // need to force since its the same instance, just NBT changes
-        this.entityData.set(STACK, tridentItem, true);
+        this.entityData.set(STACK, getPickupItemStackOrigin(), true);
       }
       dealtDamage = true;
     }
@@ -208,8 +208,8 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
     }
 
     // check if any tasks are ready
-    if (!tasks.isEmpty() && !tridentItem.isEmpty()) {
-      ScheduledProjectileTaskModifierHook.checkSchedule(getTool(), tridentItem, this, null, tasks);
+    if (!tasks.isEmpty() && !getPickupItemStackOrigin().isEmpty()) {
+      ScheduledProjectileTaskModifierHook.checkSchedule(getTool(), getPickupItemStackOrigin(), this, null, tasks);
     }
   }
 
@@ -218,7 +218,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
     this.dealtDamage = true;
 
     // need a living entity to run our attack hooks, just do nothing if we lack an owner
-    if (!tridentItem.isEmpty() && this.getOwner() instanceof LivingEntity owner) {
+    if (!getPickupItemStackOrigin().isEmpty() && this.getOwner() instanceof LivingEntity owner) {
       Entity target = pResult.getEntity();
 
       IToolStackView tool = getTool();
@@ -233,19 +233,21 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
           ItemStack offhand = owner.getOffhandItem();
           boolean notSelf = owner != target;
           if (notSelf) {
-            owner.setItemInHand(InteractionHand.OFF_HAND, tridentItem);
+            owner.setItemInHand(InteractionHand.OFF_HAND, getPickupItemStackOrigin());
           }
           // TODO: consider whether redundant sound is fine
           ToolAttackContext context = ToolAttackContext.attacker(owner).target(target).hand(InteractionHand.OFF_HAND).baseDamage(tool.getStats().get(ToolStats.ATTACK_DAMAGE) * multiplier).cooldown(charge).projectile(this).build();
-          if (ToolAttackUtil.performAttack(tool, context)) {
-            if (target instanceof LivingEntity living) {
-              this.doPostHurtEffects(living);
+          try {
+            if (ToolAttackUtil.performAttack(tool, context)) {
+              if (target instanceof LivingEntity living) {
+                this.doPostHurtEffects(living);
+              }
             }
-          }
-
-          // restore held item
-          if (notSelf) {
-            owner.setItemInHand(InteractionHand.OFF_HAND, offhand);
+          } finally {
+            // Restore the owner's actual item even if an attack hook throws.
+            if (notSelf) {
+              owner.setItemInHand(InteractionHand.OFF_HAND, offhand);
+            }
           }
 
           // cancel post hit logic if it hit an enderman with no enderference
@@ -264,7 +266,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
         }
         // update the stack so visual changes to the tool render (e.g. broken or fluid)
         // need to force since its the same instance, just NBT changes
-        this.entityData.set(STACK, tridentItem, true);
+        this.entityData.set(STACK, getPickupItemStackOrigin(), true);
       }
     }
   }
@@ -279,7 +281,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
       // always mark as hit, don't want it deflecting off and hitting something else
       hitBlock = true;
       // skip if we hit a monster, also need a player as a lot of block breaking logic relies on players
-      if (!dealtDamage && !tridentItem.isEmpty() && tridentItem.is(TinkerTags.Items.HARVEST) && this.getOwner() instanceof ServerPlayer owner) {
+      if (!dealtDamage && !getPickupItemStackOrigin().isEmpty() && getPickupItemStackOrigin().is(TinkerTags.Items.HARVEST) && this.getOwner() instanceof ServerPlayer owner) {
         // tool can't be broken; no running vanilla logic
         IToolStackView tool = getTool();
         if (!tool.isBroken()) {
@@ -315,9 +317,13 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
             if (miningSpeed > 1.5 * hardness) {
               // hack: swap the mainhand for the tool so relevant modifier hooks (notably loot tables) run correctly
               ItemStack mainhand = owner.getMainHandItem();
-              owner.setItemInHand(InteractionHand.MAIN_HAND, tridentItem);
-              int harvested = ToolHarvestLogic.runBlockBreak(tridentItem, tool, state, pos, result.getDirection(), owner, this);
-              owner.setItemInHand(InteractionHand.MAIN_HAND, mainhand);
+              owner.setItemInHand(InteractionHand.MAIN_HAND, getPickupItemStackOrigin());
+              int harvested;
+              try {
+                harvested = ToolHarvestLogic.runBlockBreak(getPickupItemStackOrigin(), tool, state, pos, result.getDirection(), owner, this);
+              } finally {
+                owner.setItemInHand(InteractionHand.MAIN_HAND, mainhand);
+              }
 
               // if we broke anything, back off and skip standard stick in block logic
               if (harvested > 0) {
@@ -328,7 +334,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
                 // update the stack so visual changes to the tool render (e.g. broken or fluid)
                 // need to force since its the same instance, just NBT changes
                 if (!level.isClientSide) {
-                  this.entityData.set(STACK, tridentItem, true);
+                  this.entityData.set(STACK, getPickupItemStackOrigin(), true);
                 }
                 return;
               }
@@ -355,7 +361,7 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
       if (current.isEmpty()) {
         inventory.setItem(originalSlot, pickup);
         return true;
-      } else if (current.getCount() < current.getMaxStackSize() && ItemStack.isSameItemSameTags(current, pickup)) {
+      } else if (current.getCount() < current.getMaxStackSize() && ItemStack.isSameItemSameComponents(current, pickup)) {
         current.grow(1);
         return true;
       }
@@ -414,10 +420,10 @@ public class ThrownTool extends ThrownTrident implements ToolProjectile {
   @Override
   public void readAdditionalSaveData(CompoundTag tag) {
     super.readAdditionalSaveData(tag);
-    // update the tool to sync to client, if its set
-    if (tag.contains("Trident", CompoundTag.TAG_COMPOUND)) {
-      updateFromStack();
-    }
+    // Native AbstractArrow restores the canonical pickup stack under "item".
+    // Invalidate any cached tool view and restore modifier-driven synchronization after vanilla loading.
+    this.tool = null;
+    updateFromStack();
     this.charge = tag.getFloat(KEY_CHARGE);
     this.multiplier = tag.getFloat(KEY_MULTIPLIER);
     this.entityData.set(WATER_INERTIA, tag.getFloat(KEY_WATER_INERTIA));
