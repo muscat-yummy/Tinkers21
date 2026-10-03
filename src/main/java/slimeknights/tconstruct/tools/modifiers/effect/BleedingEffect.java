@@ -19,7 +19,7 @@ public class BleedingEffect extends NoMilkEffect {
   }
 
   @Override
-  public boolean isDurationEffectTick(int tick, int level) {
+  public boolean shouldApplyEffectTickThisTick(int tick, int level) {
     // every half second
     return tick > 0 && tick % 20 == 0;
   }

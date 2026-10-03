@@ -20,23 +20,24 @@ public class ReturningEffect extends TinkerEffect {
   private static final ResourceLocation KEY = TConstruct.getResource("returning");
   public ReturningEffect() {
     super(MobEffectCategory.NEUTRAL, 0xa92dff, true);
-    NeoForge.EVENT_BUS.addListener(this::onEffectAdded);
+    NeoForge.EVENT_BUS.addListener((MobEffectEvent.Added event) -> onReturningAdded(event));
   }
 
   /** Called to set the return position when the effect is added */
-  private void onEffectAdded(MobEffectEvent.Added event) {
+  private void onReturningAdded(MobEffectEvent.Added event) {
     // store entity's current position when the effect is added
     LivingEntity entity = event.getEntity();
-    if (!entity.level().isClientSide() && event.getOldEffectInstance() == null && event.getEffectInstance().getEffect() == this) {
+    if (!entity.level().isClientSide() && event.getOldEffectInstance() == null && event.getEffectInstance().getEffect().value() == this) {
       ModDataNBT data = PersistentDataCapability.getOrWarn(entity);
-      CompoundTag pos = NbtUtils.writeBlockPos(entity.blockPosition());
+      CompoundTag pos = new CompoundTag();
+      pos.put("pos", NbtUtils.writeBlockPos(entity.blockPosition()));
       pos.putString("dimension", entity.level().dimension().location().toString());
       data.put(KEY, pos);
     }
   }
 
   @Override
-  public boolean isDurationEffectTick(int duration, int amplifier) {
+  public boolean shouldApplyEffectTickThisTick(int duration, int amplifier) {
     return duration == 1;
   }
 
@@ -49,8 +50,14 @@ public class ReturningEffect extends TinkerEffect {
       // no teleporting if you switched dimensions
       // TODO: look into cross dimensional teleport, its doable with entity#teleportTo
       if (dimension != null && dimension.equals(living.level().dimension().location())) {
-        BlockPos pos = NbtUtils.readBlockPos(tag);
-        TeleportHelper.tryTeleport(new ReturningTeleportEvent(living, pos.getX(), pos.getY(), pos.getZ()));
+        BlockPos pos = NbtUtils.readBlockPos(tag, "pos").orElse(null);
+        if (pos == null && tag.contains("X", Tag.TAG_ANY_NUMERIC)
+            && tag.contains("Y", Tag.TAG_ANY_NUMERIC) && tag.contains("Z", Tag.TAG_ANY_NUMERIC)) {
+          pos = new BlockPos(tag.getInt("X"), tag.getInt("Y"), tag.getInt("Z"));
+        }
+        if (pos != null) {
+          TeleportHelper.tryTeleport(new ReturningTeleportEvent(living, pos.getX(), pos.getY(), pos.getZ()));
+        }
       }
     }
     return true;

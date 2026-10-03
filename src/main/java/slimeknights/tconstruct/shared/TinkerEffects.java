@@ -3,7 +3,7 @@ package slimeknights.tconstruct.shared;
 import slimeknights.mantle.registration.deferred.RegistryObject;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.Holder;
-import net.minecraft.world.item.Item;
+import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent;
 import net.minecraft.resources.ResourceLocation;
@@ -84,9 +84,9 @@ public class TinkerEffects extends TinkerModule {
   }
 
   /** Keeps vanilla potion-container, custom-component and feature-flag behavior. */
-  private static void brewing(PotionBrewing.Builder builder, EnumObject<PotionType,Potion> potion, Holder<Potion> base, Item ingredient) {
+  private static void brewing(PotionBrewing.Builder builder, EnumObject<PotionType,Potion> potion, Holder<Potion> base, ItemLike ingredient) {
     Holder<Potion> normal = BuiltInRegistries.POTION.wrapAsHolder(potion.get(PotionType.NORMAL));
-    builder.addMix(base, ingredient, normal);
+    builder.addMix(base, ingredient.asItem(), normal);
     Potion longer = potion.getOrNull(PotionType.LONG);
     if (longer != null) {
       builder.addMix(normal, Items.REDSTONE, BuiltInRegistries.POTION.wrapAsHolder(longer));
