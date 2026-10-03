@@ -45,7 +45,7 @@ public class HeaterBlockEntity extends NameableBlockEntity {
   /* NBT */
 
   @Override
-  protected void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
+  public void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
     super.loadAdditional(tags, registries);
     if (tags.contains(TAG_ITEM, Tag.TAG_COMPOUND)) {
       itemHandler.readFromNBT(tags.getCompound(TAG_ITEM), registries);

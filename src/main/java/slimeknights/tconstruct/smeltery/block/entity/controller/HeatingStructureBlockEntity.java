@@ -4,6 +4,7 @@ import lombok.Getter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -587,8 +588,8 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   }
 
   @Override
-  public void load(CompoundTag nbt) {
-    super.load(nbt);
+  public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+    super.loadAdditional(nbt, registries);
     if (nbt.contains(TAG_TANK, Tag.TAG_COMPOUND)) {
       tank.read(nbt.getCompound(TAG_TANK));
       FluidStack first = tank.getFluidInTank(0);
@@ -604,7 +605,7 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     }
     // only exists to be sent server to client in update packets
     if (nbt.contains(TAG_ERROR_POS, Tag.TAG_COMPOUND)) {
-      this.errorPos = NbtUtils.readBlockPos(nbt.getCompound(TAG_ERROR_POS)).offset(this.worldPosition);
+      this.errorPos = NbtUtils.readBlockPos(nbt, TAG_ERROR_POS).map(pos -> pos.offset(this.worldPosition)).orElse(null);
     }
     fuelModule.readFromTag(nbt);
     if (nbt.contains(TAG_TEXTURE, Tag.TAG_STRING)) {
@@ -614,9 +615,9 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   }
 
   @Override
-  public void saveAdditional(CompoundTag compound) {
+  public void saveAdditional(CompoundTag compound, HolderLookup.Provider registries) {
     // Tag that just writes to disk
-    super.saveAdditional(compound);
+    super.saveAdditional(compound, registries);
     if (structure != null) {
       compound.put(TAG_STRUCTURE, structure.writeToTag(this.worldPosition));
     }
@@ -624,9 +625,9 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   }
 
   @Override
-  public void saveSynced(CompoundTag compound) {
+  public void saveSynced(CompoundTag compound, HolderLookup.Provider registries) {
     // Tag that writes to disk and syncs to client
-    super.saveSynced(compound);
+    super.saveSynced(compound, registries);
     compound.put(TAG_TANK, tank.write(new CompoundTag()));
     compound.put(TAG_INVENTORY, meltingInventory.writeToTag());
     if (texture != Blocks.AIR) {
@@ -635,9 +636,9 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
   }
 
   @Override
-  public CompoundTag getUpdateTag() {
+  public CompoundTag getUpdateTag(HolderLookup.Provider registries) {
     // Tag that just syncs to client
-    CompoundTag nbt = super.getUpdateTag();
+    CompoundTag nbt = super.getUpdateTag(registries);
     if (structure != null) {
       nbt.put(TAG_STRUCTURE, structure.writeClientTag(this.worldPosition));
     }

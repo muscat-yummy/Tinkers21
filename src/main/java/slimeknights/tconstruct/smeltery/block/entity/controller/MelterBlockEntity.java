@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.world.entity.player.Inventory;
@@ -166,9 +167,9 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   }
 
   @Override
-  public void load(CompoundTag tag) {
-    super.load(tag);
-    tank.readFromNBT(tag.getCompound(NBTTags.TANK));
+  public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.loadAdditional(tag, registries);
+    tank.readFromNBT(registries, tag.getCompound(NBTTags.TANK));
     fuelModule.readFromTag(tag);
     if (tag.contains(TAG_INVENTORY, Tag.TAG_COMPOUND)) {
       meltingInventory.readFromTag(tag.getCompound(TAG_INVENTORY));
@@ -176,15 +177,15 @@ public class MelterBlockEntity extends NameableBlockEntity implements ITankInven
   }
 
   @Override
-  public void saveSynced(CompoundTag tag) {
-    super.saveSynced(tag);
-    tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
+  public void saveSynced(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveSynced(tag, registries);
+    tag.put(NBTTags.TANK, tank.writeToNBT(registries, new CompoundTag()));
     tag.put(TAG_INVENTORY, meltingInventory.writeToTag());
   }
 
   @Override
-  public void saveAdditional(CompoundTag tag) {
-    super.saveAdditional(tag);
+  public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveAdditional(tag, registries);
     fuelModule.writeToTag(tag);
   }
 }

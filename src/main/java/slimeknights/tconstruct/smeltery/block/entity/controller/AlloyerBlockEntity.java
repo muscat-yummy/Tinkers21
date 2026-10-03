@@ -5,6 +5,7 @@ import lombok.Setter;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -156,21 +157,21 @@ public class AlloyerBlockEntity extends NameableBlockEntity implements ITankBloc
   }
 
   @Override
-  public void saveSynced(CompoundTag tag) {
-    super.saveSynced(tag);
-    tag.put(NBTTags.TANK, tank.writeToNBT(new CompoundTag()));
+  public void saveSynced(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveSynced(tag, registries);
+    tag.put(NBTTags.TANK, tank.writeToNBT(registries, new CompoundTag()));
   }
 
   @Override
-  public void saveAdditional(CompoundTag tag) {
-    super.saveAdditional(tag);
+  public void saveAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+    super.saveAdditional(tag, registries);
     fuelModule.writeToTag(tag);
   }
 
   @Override
-  public void load(CompoundTag nbt) {
-    super.load(nbt);
-    tank.readFromNBT(nbt.getCompound(NBTTags.TANK));
+  public void loadAdditional(CompoundTag nbt, HolderLookup.Provider registries) {
+    super.loadAdditional(nbt, registries);
+    tank.readFromNBT(registries, nbt.getCompound(NBTTags.TANK));
     fuelModule.readFromTag(nbt);
   }
 }

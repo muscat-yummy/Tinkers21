@@ -585,7 +585,7 @@ public abstract class CastingBlockEntity extends TableBlockEntity implements Wor
 
   @SuppressWarnings("removal")
   @Override
-  protected void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
+  public void loadAdditional(CompoundTag tags, HolderLookup.Provider registries) {
     super.loadAdditional(tags, registries);
     tank.readFromTag(tags.getCompound(TAG_TANK), registries);
     timer = tags.getInt(TAG_TIMER);

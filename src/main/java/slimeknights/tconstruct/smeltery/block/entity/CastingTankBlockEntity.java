@@ -278,7 +278,7 @@ public class CastingTankBlockEntity extends TableBlockEntity implements ITankBlo
   }
 
   @Override
-  protected void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
+  public void loadAdditional(CompoundTag tag, HolderLookup.Provider registries) {
     tank.setCapacity(getCapacity(getBlockState().getBlock()));
     updateTank(StoredFluid.readTank(tag.getCompound(NBTTags.TANK), registries));
     lastRedstone = tag.getBoolean(TAG_REDSTONE);
