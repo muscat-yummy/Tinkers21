@@ -1,4 +1,4 @@
-name: Inspect native block entity renderer bounds and component comparisons
+name: Preserve native table and multiblock renderer bounding boxes
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,7 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.client.renderer.LevelRenderer': ['renderLineBox(', 'renderShape('],
               'net.minecraft.client.renderer.blockentity.BlockEntityRenderer': ['public '],
               'net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension': ['public '],
               'net.minecraft.world.phys.AABB': ['public '],

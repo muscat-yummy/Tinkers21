@@ -28,7 +28,7 @@ public abstract class RetexturedTableBlockEntity extends TableBlockEntity implem
   }
   @Override
   public AABB getRenderBoundingBox() {
-    return new AABB(worldPosition, worldPosition.offset(1, 2, 1));
+    return new AABB(net.minecraft.world.phys.Vec3.atLowerCornerOf(worldPosition), net.minecraft.world.phys.Vec3.atLowerCornerOf(worldPosition.offset(1, 2, 1)));
   }
 
 

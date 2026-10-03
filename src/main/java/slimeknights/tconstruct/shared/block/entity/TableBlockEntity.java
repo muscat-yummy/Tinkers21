@@ -30,6 +30,11 @@ public abstract class TableBlockEntity extends InventoryBlockEntity {
   /** tick sound was last played for each player */
   private final Map<UUID, Integer> lastSoundTick = new HashMap<>();
 
+  /** Bounds supplied to the native renderer, overridable by taller table displays. */
+  public net.minecraft.world.phys.AABB getRenderBoundingBox() {
+    return new net.minecraft.world.phys.AABB(getBlockPos());
+  }
+
   public TableBlockEntity(BlockEntityType<?> tileEntityTypeIn, BlockPos pos, BlockState state, Component name, int inventorySize) {
     super(tileEntityTypeIn, pos, state, name, false, inventorySize);
   }

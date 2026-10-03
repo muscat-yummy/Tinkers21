@@ -480,12 +480,12 @@ public abstract class HeatingStructureBlockEntity extends NameableBlockEntity im
     this.setChangedFast();
   }
 
-  @Override
+  /** Bounds supplied through the native block entity renderer callback. */
   public AABB getRenderBoundingBox() {
     if (structure != null) {
       return structure.getBounds();
     } else if (defaultBounds == null) {
-      defaultBounds = new AABB(worldPosition, worldPosition.offset(1, 1, 1));
+      defaultBounds = new AABB(worldPosition);
     }
     return defaultBounds;
   }
