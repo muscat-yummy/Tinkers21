@@ -39,7 +39,6 @@ import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
-import net.neoforged.neoforge.event.entity.ProjectileImpactEvent.ImpactResult;
 import net.neoforged.neoforge.event.entity.living.LivingDeathEvent;
 import net.neoforged.neoforge.event.entity.living.LivingDropsEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
@@ -51,7 +50,6 @@ import net.neoforged.neoforge.event.entity.living.LivingKnockBackEvent;
 import net.neoforged.neoforge.event.entity.living.MobEffectEvent;
 import net.neoforged.neoforge.event.entity.player.CriticalHitEvent;
 import net.neoforged.neoforge.event.level.BlockEvent.BreakEvent;
-import net.neoforged.bus.api.Event.Result;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.EventBusSubscriber;
@@ -161,8 +159,8 @@ public class ModifierEvents {
       if (multiset != null) {
         // only grant immunity if the amount is high enough
         MobEffectInstance effectInstance = event.getEffectInstance();
-        if (multiset.count(effectInstance.getEffect()) > effectInstance.getAmplifier()) {
-          event.setResult(Result.DENY);
+        if (multiset.count(effectInstance.getEffect().value()) > effectInstance.getAmplifier()) {
+          event.setResult(MobEffectEvent.Applicable.Result.DO_NOT_APPLY);
         }
       }
     };
@@ -284,38 +282,20 @@ public class ModifierEvents {
   @SuppressWarnings("removal")
   @SubscribeEvent
   static void onCritical(CriticalHitEvent event) {
-    if (event.getResult() != Result.DENY) {
-      // force critical if not already critical and in the air
-      LivingEntity living = event.getEntity();
-
-      // critical boost is defined where the base value is 150%, setting smaller amounts can reduce the critical damage
-      // this event however is defined in terms of adding or subtracting critical, so just treat it as additive
-      Attribute attribute = TinkerAttributes.CRITICAL_DAMAGE.get();
-      double criticalBoost = living.getAttributeValue(attribute) - attribute.getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
-      if (criticalBoost > 0) {
-        // make it critical if we meet our simpler conditions, note this does not boost attack damage
-        boolean isCritical = event.isVanillaCritical() || event.getResult() == Result.ALLOW;
-        if (!isCritical && TinkerPredicate.AIRBORNE.matches(living)) {
-          isCritical = true;
-          event.setResult(Result.ALLOW);
-        }
-
-        // if we either were or became critical, time to boost
-        if (isCritical) {
-          // adds +5% critical hit per level
-          event.setDamageModifier((float) (event.getDamageModifier() + criticalBoost));
-        }
-      }
-    }
+    LivingEntity living = event.getEntity();
+    Attribute attribute = TinkerAttributes.CRITICAL_DAMAGE.get();
+    double criticalBoost = living.getAttributeValue(net.minecraft.core.registries.BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute))
+      - attribute.getDefaultValue() + ArmorStatModule.getStat(living, TinkerDataKeys.CRITICAL_DAMAGE);
+    CriticalHitLogic.apply(event, TinkerPredicate.AIRBORNE.matches(living), criticalBoost);
   }
 
   @SuppressWarnings("removal")
   @SubscribeEvent
   static void onPotionStart(MobEffectEvent.Added event) {
     MobEffectInstance newEffect = event.getEffectInstance();
-    if (!newEffect.isInfiniteDuration() && !newEffect.getCurativeItems().isEmpty()) {
+    if (!newEffect.isInfiniteDuration() && !newEffect.getCures().isEmpty()) {
       // use two different stats based on whether the effect is beneficial
-      boolean beneficial = newEffect.getEffect().isBeneficial();
+      boolean beneficial = newEffect.getEffect().value().isBeneficial();
       LivingEntity entity = event.getEntity();
       double multiplier = entity.getAttributeValue(beneficial ? TinkerAttributes.GOOD_EFFECT_DURATION.get() : TinkerAttributes.BAD_EFFECT_DURATION.get())
                         + ArmorStatModule.getStat(entity, beneficial ? TinkerDataKeys.GOOD_EFFECT_DURATION : TinkerDataKeys.BAD_EFFECT_DURATION);
@@ -460,7 +440,7 @@ public class ModifierEvents {
                   TinkerNetwork.getInstance().sendVanillaPacket(new ClientboundSetEntityMotionPacket(projectile), target);
                 }
                 level.playSound(null, target.blockPosition(), SoundEvents.SHIELD_BLOCK, SoundSource.PLAYERS, 1.0F, 1.5F + level.random.nextFloat() * 0.4F);
-                event.setImpactResult(ImpactResult.SKIP_ENTITY);
+                event.setCanceled(true);
                 // damage the shield, and stop using it if needed
                 if (ToolDamageUtil.damageAnimated(tool, 3, target, target.getUsedItemHand())) {
                   target.stopUsingItem();

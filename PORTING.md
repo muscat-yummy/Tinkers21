@@ -479,3 +479,11 @@ This is an unofficial community port based on Tinkers' Construct by SlimeKnights
 
 - Run 37041757083 passed Mantle, compilation of the potion helper, and all previous independent checks; declarations/full diagnostics decreased to 81 / 5,179. The new potion wire check stopped because its isolated vanilla bootstrap omitted NeoForge's registry modification lifecycle. Add the same real lifecycle helper used by the already passing packet tests; no codec bypass or fabricated registry is introduced.
 - Food/magma bottle capabilities and JEI/generation lookups now use native item capability registration, retaining constant-container handlers and null/zero-tank handling. Native food tooltip effects and tick-rate formatting are migrated; validation is pending.
+
+### Native advancement predicates and combat event migration
+
+- Run 37043465493 compiled Mantle and all production leaf sources; every independent behavior check passed, including potion components, legacy effect/color migration, bucket simulation and repeated drain, JEI subtype distinction, tag-preference component output, and JSON/wire/save round trips. Declaration/full diagnostics are 58 / 5,061; Phase 2 remains incomplete.
+- Tool-stack advancement conditions now use the registered native `ItemSubPredicate.Type` and vanilla `ItemPredicate.Builder.withSubPredicate`, retaining existing datagen convenience methods and tool-tag safety. No final-class access-transformer workaround is introduced.
+- Native critical state/multiplier, mob-effect applicability/cures, and cancellable projectile impact replace removed Forge event results. Critical behavior validation covers airborne/grounded hits, additive boosts, earlier addon multipliers, and suppression of a vanilla critical hit.
+- Explosion knockback damping now reads the native explosion-knockback resistance attribute, which is the mechanism used by native protection enchantments.
+- CI runs the same independent production tests in one Gradle invocation with `--continue`; root compilation remains a separate mandatory gate and sources are not excluded. New changes await CI validation.

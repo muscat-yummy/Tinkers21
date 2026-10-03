@@ -69,6 +69,7 @@ import slimeknights.tconstruct.library.json.predicate.EntityVariableRangePredica
 import slimeknights.tconstruct.library.json.predicate.HarvestTierPredicate;
 import slimeknights.tconstruct.library.json.predicate.HasMobEffectPredicate;
 import slimeknights.tconstruct.library.json.predicate.TinkerPredicate;
+import slimeknights.tconstruct.library.json.predicate.tool.ToolStackItemPredicate;
 import slimeknights.tconstruct.library.recipe.ingredient.BlockTagIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.InstrumentIngredient;
 import slimeknights.tconstruct.library.recipe.ingredient.NoContainerIngredient;
@@ -209,6 +210,7 @@ public final class TinkerCommons extends TinkerModule {
   }
 
   public TinkerCommons() {
+    ToolStackItemPredicate.register(TConstruct.getModEventBus());
     CRITERION_TRIGGERS.register(TConstruct.getModEventBus());
     CONDITION_CODECS.register(TConstruct.getModEventBus());
     INGREDIENT_TYPES.register(TConstruct.getModEventBus());
