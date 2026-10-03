@@ -9,7 +9,7 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriteriaTriggers;
-import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.AdvancementRequirements.Strategy;
 import net.minecraft.advancements.critereon.BlockPredicate;
@@ -545,34 +545,34 @@ public class AdvancementsProvider extends GenericDataProvider {
   /**
    * Creates an item predicate for a tag
    */
-  private CriterionTriggerInstance hasTag(TagKey<Item> tag) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasTag(TagKey<Item> tag) {
     return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(tag).build());
   }
 
   /** Creates an item predicate for an item */
-  private CriterionTriggerInstance hasItem(ItemLike item) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasItem(ItemLike item) {
     return InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(item).build());
   }
 
   /** Creates a predicate for a tool stack */
-  private CriterionTriggerInstance hasToolStack(IJsonPredicate<IToolStackView> predicate) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasToolStack(IJsonPredicate<IToolStackView> predicate) {
     return InventoryChangeTrigger.TriggerInstance.hasItems(ToolStackItemPredicate.ofTool(predicate));
   }
 
   /** Creates a predicate for a tool stack */
   @SafeVarargs
-  private CriterionTriggerInstance hasToolStack(IJsonPredicate<IToolStackView>... predicate) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasToolStack(IJsonPredicate<IToolStackView>... predicate) {
     return hasToolStack(ToolStackPredicate.and(predicate));
   }
 
   /** Creates a predicate for a tool context */
-  private CriterionTriggerInstance hasTool(IJsonPredicate<IToolContext> predicate) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasTool(IJsonPredicate<IToolContext> predicate) {
     return InventoryChangeTrigger.TriggerInstance.hasItems(ToolStackItemPredicate.ofContext(predicate));
   }
 
   /** Creates a predicate for a tool context */
   @SafeVarargs
-  private CriterionTriggerInstance hasTool(IJsonPredicate<IToolContext>... predicate) {
+  private Criterion<InventoryChangeTrigger.TriggerInstance> hasTool(IJsonPredicate<IToolContext>... predicate) {
     return hasTool(ToolContextPredicate.and(predicate));
   }
 
