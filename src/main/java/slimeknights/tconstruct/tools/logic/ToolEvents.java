@@ -12,6 +12,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -34,11 +36,13 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
-import net.minecraftforge.event.entity.living.LivingAttackEvent;
+import net.neoforged.neoforge.event.entity.living.LivingIncomingDamageEvent;
+import net.neoforged.neoforge.common.damagesource.DamageContainer;
+import java.util.WeakHashMap;
+import java.util.Map;
 import net.neoforged.neoforge.event.entity.living.LivingDamageEvent;
 import net.neoforged.neoforge.event.tick.EntityTickEvent;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingVisibilityEvent;
-import net.minecraftforge.event.entity.living.LivingHurtEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
 import slimeknights.tconstruct.library.events.TinkerToolEvent.Result;
 import net.neoforged.bus.api.EventPriority;
@@ -196,8 +200,26 @@ public class ToolEvents {
     }
   }
 
+  private static final Map<DamageContainer,DamageStageLogic.Protection> PROTECTION = new WeakHashMap<>();
+
   @SubscribeEvent(priority = EventPriority.LOW)
-  static void livingAttack(LivingAttackEvent event) {
+  static void livingIncoming(LivingIncomingDamageEvent event) {
+    if (event.getEntity().level().isClientSide() || event.getEntity().isDeadOrDying()) return;
+    livingAttack(event);
+    if (event.isCanceled()) return;
+    livingHurt(event);
+    if (event.isCanceled()) return;
+    DamageStageLogic.afterAbsorption(event.getContainer(),
+      amount -> livingDamage(event.getEntity(), event.getSource(), (float) amount));
+  }
+
+  @SubscribeEvent(priority = EventPriority.LOW)
+  static void finishProtection(LivingDamageEvent.Pre event) {
+    DamageStageLogic.Protection plan = PROTECTION.remove(event.getContainer());
+    if (plan != null) DamageStageLogic.finishProtection(event.getContainer(), plan);
+  }
+
+  private static void livingAttack(LivingIncomingDamageEvent event) {
     LivingEntity entity = event.getEntity();
     // client side always returns false, so this should be fine?
     if (entity.level().isClientSide() || entity.isDeadOrDying()) {
@@ -250,32 +272,14 @@ public class ToolEvents {
     }
   }
 
-  /**
-   * Determines how much to damage armor based on the given damage to the player
-   * @param damage  Amount to damage the player
-   * @return  Amount to damage the armor
-   */
-  private static int getArmorDamage(float damage) {
-    damage /= 4;
-    if (damage < 1) {
-      return 1;
-    }
-    return (int)damage;
-  }
-
-  /** Modifier ID used for the extra correction damage on armor. Needs to be a "real modifier" for the tag so we use protection as a reasonable enough source. */
-  private static final ModifierId ARMOR_DAMAGE = new ModifierId(TConstruct.MOD_ID, "protection");
-
-  // low priority to minimize conflict as we apply reduction as if we are the final change to damage before vanilla
-  @SuppressWarnings("removal")
-  @SubscribeEvent(priority = EventPriority.LOW)
-  static void livingHurt(LivingHurtEvent event) {
+  /** Applies incoming damage modifiers and captures protection before armor durability changes. */
+  private static void livingHurt(LivingIncomingDamageEvent event) {
     LivingEntity entity = event.getEntity();
 
     // determine if there is any modifiable armor, if not nothing to do
     DamageSource source = event.getSource();
     EquipmentContext context = new EquipmentContext(entity);
-    int vanillaModifier = 0;
+    float vanillaModifier = 0;
     float modifierValue = 0;
     float originalDamage = event.getAmount();
 
@@ -314,7 +318,7 @@ public class ToolEvents {
 
       // run shulking global damage "boost", its a bit hardcoded Java wise to make it softcoded in JSON
       if (attacker.isCrouching()) {
-        double crouchMultiplier = living.getAttributeValue(TinkerAttributes.CROUCH_DAMAGE_MULTIPLIER.get());
+        double crouchMultiplier = living.getAttributeValue(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(TinkerAttributes.CROUCH_DAMAGE_MULTIPLIER.get()));
         crouchMultiplier += ArmorStatModule.getStat(attacker, TinkerDataKeys.CROUCH_DAMAGE);
         if (crouchMultiplier != 0) {
           originalDamage *= crouchMultiplier;
@@ -353,7 +357,7 @@ public class ToolEvents {
       // remaining logic is reducing damage like vanilla protection
       // fetch vanilla enchant level, assuming its not bypassed in vanilla
       if (DamageSourcePredicate.CAN_PROTECT.matches(source)) {
-        modifierValue = vanillaModifier = EnchantmentHelper.getDamageProtection(entity.getArmorSlots(), source);
+        modifierValue = vanillaModifier = entity.level() instanceof ServerLevel level ? EnchantmentHelper.getDamageProtection(level, entity, source) : 0;
       }
 
       // next, determine how much tinkers armor wants to change it
@@ -368,7 +372,7 @@ public class ToolEvents {
         modifierValue *= 4;
       }
     } else if (DamageSourcePredicate.CAN_PROTECT.matches(source) && entity.getType().is(TinkerTags.EntityTypes.SMALL_ARMOR)) {
-      vanillaModifier = EnchantmentHelper.getDamageProtection(entity.getArmorSlots(), source);
+      vanillaModifier = entity.level() instanceof ServerLevel level ? EnchantmentHelper.getDamageProtection(level, entity, source) : 0;
       modifierValue = vanillaModifier * 4;
     }
 
@@ -381,70 +385,32 @@ public class ToolEvents {
       cap = (float) ProtectionModifierHook.getProtectionCap(entity, context.getTinkerData());
     }
     if (vanillaModifier != modifierValue || (cap > 20 && vanillaModifier > 20) || (cap < 20 && vanillaModifier > cap)) {
-      // fetch armor and toughness if blockable, passing in 0 to the logic will skip the armor calculations
-      float armor = 0, toughness = 0;
-      if (!source.is(DamageTypeTags.BYPASSES_ARMOR)) {
-        armor = entity.getArmorValue();
-        toughness = (float)entity.getAttributeValue(Attributes.ARMOR_TOUGHNESS);
-      }
-
-      // set the final dealt damage
-      float finalDamage = ArmorUtil.getDamageForEvent(originalDamage, armor, toughness, vanillaModifier, modifierValue, cap);
-      event.setAmount(finalDamage);
-
-      // armor is damaged less as a result of our math, so damage the armor based on the difference if there is one
-      if (!source.is(DamageTypeTags.BYPASSES_ARMOR)) {
-        int damageMissed = getArmorDamage(originalDamage) - getArmorDamage(finalDamage);
-        // TODO: is this check sufficient for whether the armor should be damaged? I partly wonder if I need to use reflection to call damageArmor
-        if (damageMissed > 0 && entity instanceof Player) {
-          for (EquipmentSlot slotType : ModifiableArmorMaterial.ARMOR_SLOTS) {
-            // for our own armor, saves effort to damage directly with our utility
-            IToolStackView tool = context.getToolInSlot(slotType);
-            if (tool != null && (!source.is(DamageTypeTags.IS_FIRE) || !tool.getItem().isFireResistant())) {
-              // mark this as protection (any valid modifier really would do) so tanned can reduce it to not count it as separate damage
-              ToolDamageUtil.damageAnimated(tool, damageMissed, entity, slotType, ARMOR_DAMAGE);
-            } else {
-              // if not our armor, damage using vanilla like logic
-              ItemStack armorStack = entity.getItemBySlot(slotType);
-              if (!armorStack.isEmpty() && (!source.is(DamageTypeTags.IS_FIRE) || !armorStack.getItem().isFireResistant()) && armorStack.getItem() instanceof ArmorItem) {
-                armorStack.hurtAndBreak(damageMissed, entity, e -> e.broadcastBreakEvent(slotType));
-              }
-            }
-          }
-        }
-      }
+      PROTECTION.put(event.getContainer(), DamageStageLogic.prepareProtection(event.getContainer(), vanillaModifier, modifierValue, cap));
     }
   }
 
-  @SubscribeEvent
-  static void livingDamage(LivingDamageEvent event) {
-    LivingEntity entity = event.getEntity();
-    DamageSource source = event.getSource();
-
-    // give modifiers a chance to respond to damage happening
-    float amount = event.getAmount();
+  private static float livingDamage(LivingEntity entity, DamageSource source, float amount) {
+    // This hook runs after absorption, before health changes.
     EquipmentContext context = new EquipmentContext(entity);
     if (context.hasModifiableArmor()) {
       amount = ModifyDamageModifierHook.modifyDamageTaken(ModifierHooks.MODIFY_DAMAGE, context, source, amount, OnAttackedModifierHook.isDirectDamage(source));
-      event.setAmount(amount);
-      if (amount <= 0) {
-        event.setCanceled(true);
-      }
+      amount = Math.max(0, amount);
     }
 
     // for remaining code, ensure amount is not more than they will take
+    float finalDamage = amount;
     amount = Math.min(amount, entity.getHealth());
 
     // apply post hit modifier effects. Done regardless of damage dealt - don't care if absorption took it all
     if (Config.COMMON.allowMonsterMeleeModifiers.get() && source.is(TinkerTags.DamageTypes.MODIFIER_WHITELIST)) {
-      Entity attacker = event.getSource().getEntity();
+      Entity attacker = source.getEntity();
       if (attacker != null && !attacker.getType().is(TinkerTags.EntityTypes.DAMAGE_MODIFIER_BLACKLIST) && attacker instanceof LivingEntity living) {
         ItemStack weapon = living.getMainHandItem();
         if (!weapon.isEmpty()) {
           if (weapon.is(TinkerTags.Items.MELEE_WEAPON)) {
             // already know we are not a player
             IToolStackView tool = ToolStack.from(weapon);
-            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(event.getEntity()).applyAttributes().build();
+            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(entity).applyAttributes().build();
             for (ModifierEntry entry : tool.getModifiers()) {
               entry.getHook(ModifierHooks.MONSTER_MELEE_HIT).onMonsterMeleeHit(tool, entry, meleeContext, amount);
             }
@@ -455,7 +421,7 @@ public class ToolEvents {
           if (!unarmed.isEmpty() && unarmed.is(TinkerTags.Items.UNARMED)) {
             // already know we are not a player
             IToolStackView tool = ToolStack.from(unarmed);
-            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(event.getEntity()).applyAttributes().addBaseDamage(tool.getStats().get(ToolStats.ATTACK_DAMAGE)).slot(EquipmentSlot.CHEST, InteractionHand.MAIN_HAND).build();
+            ToolAttackContext meleeContext = ToolAttackContext.attacker(living, null).target(entity).applyAttributes().addBaseDamage(tool.getStats().get(ToolStats.ATTACK_DAMAGE)).slot(EquipmentSlot.CHEST, InteractionHand.MAIN_HAND).build();
             for (ModifierEntry entry : tool.getModifiers()) {
               entry.getHook(ModifierHooks.MONSTER_MELEE_HIT).onMonsterMeleeHit(tool, entry, meleeContext, amount);
             }
@@ -465,11 +431,12 @@ public class ToolEvents {
     }
 
     // when damaging ender dragons, may drop scales - must be player caused explosion, end crystals and TNT are examples
-    if (amount > 0 && Config.COMMON.dropDragonScales.get() && entity.getType() == EntityType.ENDER_DRAGON && event.getAmount() > 0
+    if (amount > 0 && Config.COMMON.dropDragonScales.get() && entity.getType() == EntityType.ENDER_DRAGON
         && source.is(DamageTypeTags.IS_EXPLOSION) && source.getEntity() != null && source.getEntity().getType() == EntityType.PLAYER) {
       // drops 1 - 8 scales
       ModifierUtil.dropItem(entity, new ItemStack(TinkerModifiers.dragonScale, 1 + entity.level().random.nextInt(8)));
     }
+    return finalDamage;
   }
 
   /** Called the modifier hook when an entity's position changes */

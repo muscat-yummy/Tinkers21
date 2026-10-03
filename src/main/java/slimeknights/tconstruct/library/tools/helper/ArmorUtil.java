@@ -48,11 +48,7 @@ public class ArmorUtil {
    * @return  Original damage to be dealt
    */
   public static float getDamageAfterMagicAbsorb(float damage, float enchantModifiers, float cap) {
-    // saves a bit of effort for 0 ranges
-    if (enchantModifiers == 0 || damage <= 0) {
-      return damage;
-    }
-    return damage * (1f - Mth.clamp(enchantModifiers, -20f, cap) / 25f);
+    return slimeknights.tconstruct.tools.logic.DamageStageLogic.afterProtection(damage, enchantModifiers, cap);
   }
 
   /**
