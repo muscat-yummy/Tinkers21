@@ -1,4 +1,4 @@
-name: Verify persistent item effect cures and native removal
+name: Verify dynamic enchantment keys and persistent item cures
 on:
   push:
     branches: [port/1.21.1-neoforge]
