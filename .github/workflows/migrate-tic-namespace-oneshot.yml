@@ -1,4 +1,4 @@
-name: Inspect native thrown tool pickup stack and projectile lifecycle
+name: Port public block highlight renderer and verify positioned crafting input
 on:
   push:
     branches: [port/1.21.1-neoforge]
