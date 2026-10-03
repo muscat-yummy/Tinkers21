@@ -9,6 +9,6 @@ public final class AttributeIdUtil {
 
   public static ResourceLocation fromUuid(UUID uuid) {
     // Keep the IDs already used by the effect port; the same old UUID must remain one modifier.
-    return ResourceLocation.fromNamespaceAndPath("tconstruct", "legacy_effect/" + uuid);
+    return ResourceLocation.fromNamespaceAndPath("tconstruct", "legacy_effect/" + java.util.Objects.requireNonNull(uuid));
   }
 }

@@ -1,4 +1,4 @@
-name: Verify stable equipment attribute IDs and native holder bridges
+name: Verify golden equipment attributes and native base attack IDs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,9 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers('],
+              'net.minecraft.world.item.component.ItemAttributeModifiers': ['public '],
+              'net.minecraft.world.item.component.ItemAttributeModifiers$Builder': ['public '],
               'net.neoforged.fml.ModLoader': ['public '],
               'net.neoforged.neoforge.event.AddReloadListenerEvent': ['public '],
               'net.minecraft.advancements.critereon.EntityPredicate': ['public '],
