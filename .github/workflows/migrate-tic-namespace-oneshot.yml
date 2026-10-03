@@ -1,4 +1,4 @@
-name: Verify native reload conditions through nested JSON and NBT scopes
+name: Port native entity synchronization builders and inspect loot codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,10 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.network.syncher.SynchedEntityData$Builder': ['public '],
+              'net.neoforged.neoforge.common.loot.LootModifier': ['public ', 'protected '],
+              'net.neoforged.neoforge.common.loot.IGlobalLootModifier': ['public '],
+              'net.minecraft.world.level.storage.loot.parameters.LootContextParams': ['public '],
               'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
               'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight('],
               'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers('],

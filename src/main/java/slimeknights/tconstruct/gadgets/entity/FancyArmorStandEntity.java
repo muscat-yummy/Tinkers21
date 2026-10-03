@@ -34,10 +34,10 @@ public class FancyArmorStandEntity extends ArmorStand {
   /* Data */
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(VARIANT, 0);
-    this.entityData.define(LEFT_HANDED, false);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(VARIANT, 0);
+    builder.define(LEFT_HANDED, false);
   }
 
   @Override

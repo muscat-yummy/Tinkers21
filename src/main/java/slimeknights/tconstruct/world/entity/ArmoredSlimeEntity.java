@@ -51,9 +51,9 @@ public abstract class ArmoredSlimeEntity extends Slime {
   }
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(METAL, false);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(METAL, false);
   }
 
   /** Sets this slime to have a metal core */

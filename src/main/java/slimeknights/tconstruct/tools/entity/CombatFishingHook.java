@@ -105,11 +105,11 @@ public class CombatFishingHook extends FishingHook implements ProjectileWithKnoc
   }
 
   @Override
-  protected void defineSynchedData() {
-    super.defineSynchedData();
-    this.entityData.define(GRAPPLE, (byte) GrappleType.NONE.ordinal());
-    this.entityData.define(COLLECTING, false);
-    this.entityData.define(MATERIAL, MaterialId.UNKNOWN);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    super.defineSynchedData(builder);
+    builder.define(GRAPPLE, (byte) GrappleType.NONE.ordinal());
+    builder.define(COLLECTING, false);
+    builder.define(MATERIAL, MaterialId.UNKNOWN);
   }
 
   /** Gets the currently displayed material */

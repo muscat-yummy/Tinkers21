@@ -88,9 +88,9 @@ public class CrystalshotItem extends ArrowItem {
     }
 
     @Override
-    protected void defineSynchedData() {
-      super.defineSynchedData();
-      this.entityData.define(SYNC_VARIANT, "");
+    protected void defineSynchedData(SynchedEntityData.Builder builder) {
+      super.defineSynchedData(builder);
+      builder.define(SYNC_VARIANT, "");
     }
 
     /** Gets the texture variant of this shot */

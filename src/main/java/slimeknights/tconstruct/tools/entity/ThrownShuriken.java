@@ -274,9 +274,9 @@ public class ThrownShuriken extends Projectile implements ToolProjectile, Projec
   /* Client */
 
   @Override
-  protected void defineSynchedData() {
-    this.entityData.define(STACK, ItemStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.8f);
+  protected void defineSynchedData(SynchedEntityData.Builder builder) {
+    builder.define(STACK, ItemStack.EMPTY);
+    builder.define(WATER_INERTIA, 0.8f);
   }
 
   @Override
