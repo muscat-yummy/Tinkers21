@@ -1,4 +1,4 @@
-name: Port JEI drawables and preserve dynamic recipe tooltips
+name: Port arrow dispenser and dynamic enchantment packet codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -140,6 +140,15 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': ('public ',),
+              'net.minecraft.data.loot.EntityLootSubProvider': ('protected ', 'public ',),
+              'net.neoforged.neoforge.common.data.GlobalLootModifierProvider': ('protected ', 'public ',),
+              'net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction': ('public ',),
+              'net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction': ('public ',),
+              'net.neoforged.neoforge.client.extensions.common.IClientItemExtensions': ('DyeColor(', 'LayerTintColor(', 'setupModelAnimations(',),
+              'net.minecraft.client.renderer.blockentity.SkullBlockRenderer': ('getRenderType(',),
+              'net.minecraft.world.item.ArmorMaterial$Layer': ('public ',),
+
               'mezz.jei.api.gui.widgets.IRecipeWidget': ('public ', 'abstract ', 'default ',),
               'mezz.jei.api.helpers.IGuiHelper': ('Arrow(',),
               'net.minecraft.core.dispenser.ProjectileDispenseBehavior': ('public ', 'protected ',),

@@ -312,7 +312,7 @@ public final class TinkerTools extends TinkerModule {
       event.enqueueWork(action);
     }
     event.enqueueWork(() -> {
-      DispenserBlock.registerBehavior(TinkerTools.arrow.get(), ModifiableArrowDispenserBehavior.INSTANCE);
+      DispenserBlock.registerBehavior(TinkerTools.arrow.get(), new ModifiableArrowDispenserBehavior(TinkerTools.arrow.get()));
       DispenserBlock.registerBehavior(TinkerTools.shuriken.get(), ModifiableShurikenDispenserBehavior.INSTANCE);
       DispenserBlock.registerBehavior(TinkerTools.throwingAxe.get(), ModifiableShurikenDispenserBehavior.INSTANCE);
       ModifierUtil.registerShieldDisabler(entity -> {
