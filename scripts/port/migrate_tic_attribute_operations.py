@@ -13,9 +13,19 @@ def migrate(source):
     native = re.search(r"import\s+(?:static\s+)?net\s*\.\s*minecraft\s*\.\s*world\s*\.\s*entity\s*\.\s*ai\s*\.\s*attributes\s*\.\s*AttributeModifier\b", code)
     if not native:
         return source, 0
+    operation_import = re.search(r"import\s+(?:static\s+)?net\s*\.\s*minecraft\s*\.\s*world\s*\.\s*entity\s*\.\s*ai\s*\.\s*attributes\s*\.\s*AttributeModifier\s*\.\s*Operation\s*;", code)
     edits = []
     for i in range(len(tokens) - 2):
         if tokens[i][0] == "Operation" and tokens[i+1][0] == "." and tokens[i+2][0] in RENAMES:
+            if i > 0 and tokens[i-1][0] == ".":
+                if i < 2 or tokens[i-2][0] != "AttributeModifier":
+                    continue
+                if i >= 3 and tokens[i-3][0] == ".":
+                    native_prefix = ["net", ".", "minecraft", ".", "world", ".", "entity", ".", "ai", ".", "attributes", ".", "AttributeModifier", "."]
+                    if i < len(native_prefix) or [t[0] for t in tokens[i-len(native_prefix):i]] != native_prefix:
+                        continue
+            elif not operation_import:
+                continue
             _, start, end = tokens[i+2]
             edits.append((start, end, RENAMES[tokens[i+2][0]]))
     for start, end, replacement in reversed(edits):
@@ -50,6 +60,14 @@ def check_parser():
         ('import other.Operation; Operation.ADDITION', 'import other.Operation; Operation.ADDITION'),
         ('// ' + prefix + 'Operation.ADDITION', '// ' + prefix + 'Operation.ADDITION'),
     ]
+    outer = "import net.minecraft.world.entity.ai.attributes.AttributeModifier;\n"
+    cases.extend([
+        (outer + "Other.Operation.ADDITION", outer + "Other.Operation.ADDITION"),
+        (outer + "Other.AttributeModifier.Operation.ADDITION", outer + "Other.AttributeModifier.Operation.ADDITION"),
+        (outer + "Operation.ADDITION", outer + "Operation.ADDITION"),
+        (prefix + "Other.Operation.ADDITION", prefix + "Other.Operation.ADDITION"),
+        (outer + "AttributeModifier.Operation.ADDITION", outer + "AttributeModifier.Operation.ADD_VALUE"),
+    ])
     for source, expected in cases:
         actual, _ = migrate(source)
         if actual != expected or migrate(actual)[0] != actual:
