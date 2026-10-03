@@ -1,4 +1,4 @@
-name: Inspect native modifier registration and registry reload context
+name: Verify owner-specific modifier events and scoped condition codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]

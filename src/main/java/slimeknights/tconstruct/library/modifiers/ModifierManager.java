@@ -6,6 +6,11 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
+import com.mojang.serialization.JsonOps;
+import com.mojang.serialization.DynamicOps;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
+import slimeknights.mantle.data.loadable.LoadableOps;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
@@ -24,7 +29,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import net.neoforged.neoforge.common.conditions.ICondition;
 import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
@@ -115,6 +119,12 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
   @Getter
   boolean dynamicModifiersLoaded = false;
   private IContext conditionContext = IContext.EMPTY;
+  @Nullable
+  private RegistryAccess reloadRegistries;
+
+  private DynamicOps<JsonElement> jsonOps() {
+    return reloadRegistries == null ? JsonOps.INSTANCE : RegistryOps.create(JsonOps.INSTANCE, reloadRegistries);
+  }
 
   private ModifierManager() {
     super(GSON, FOLDER);
@@ -133,7 +143,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
 
   /** Fires the modifier registry event */
   private void fireRegistryEvent() {
-    ModLoader.get().runEventGenerator(ModifierRegistrationEvent::new);
+    ModLoader.runEventGenerator(ModifierRegistrationEvent::new);
     modifiersRegistered = true;
   }
 
@@ -141,6 +151,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
   private void addDataPackListeners(final AddReloadListenerEvent event) {
     event.addListener(this);
     conditionContext = event.getConditionContext();
+    reloadRegistries = event.getRegistryAccess();
   }
 
   @SuppressWarnings({"removal", "deprecation"})
@@ -299,12 +310,13 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
       }
 
       // conditions
-      if (json.has("condition") && !CraftingHelper.getCondition(GsonHelper.getAsJsonObject(json, "condition")).test(conditionContext)) {
+      if (json.has("condition") && !ICondition.CODEC.parse(jsonOps(), GsonHelper.getAsJsonObject(json, "condition")).getOrThrow().test(conditionContext)) {
         return null;
       }
 
       // fallback to actual modifier
-      Modifier modifier = ComposableModifier.LOADER.deserialize(json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build());
+      Modifier modifier = LoadableOps.with(jsonOps(), () -> ComposableModifier.LOADER.deserialize(
+        json, contextBuilder(key).put(ContextKey.CONDITION_CONTEXT, conditionContext).build()));
       modifier.setId(new ModifierId(key));
       return modifier;
     } catch (JsonSyntaxException e) {
