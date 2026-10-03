@@ -10,6 +10,9 @@ import net.minecraft.resources.RegistryOps;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
+import slimeknights.tconstruct.library.fluid.FluidItemData;
+import slimeknights.tconstruct.library.fluid.StoredFluid;
+import slimeknights.tconstruct.library.fluid.TankContentsPredicate;
 import net.minecraft.advancements.AdvancementType;
 import net.minecraft.advancements.AdvancementRequirements.Strategy;
 import net.minecraft.advancements.critereon.BlockPredicate;
@@ -401,10 +404,10 @@ public class AdvancementsProvider extends GenericDataProvider {
     AdvancementHolder blazingBlood = builder(TankItem.setTank(new ItemStack(TinkerSmeltery.scorchedTank.get(TankType.FUEL_GAUGE)), getTankWith(TinkerFluids.blazingBlood.get(), TankType.FUEL_GAUGE.getCapacity())),
             resource("foundry/blaze"), foundry, AdvancementType.GOAL, builder -> {
       Consumer<SearedTankBlock> with = block -> {
-        CompoundTag nbt = new CompoundTag();
-        nbt.put(NBTTags.TANK, getTankWith(TinkerFluids.blazingBlood.get(), block.getCapacity()).writeToNBT(new CompoundTag()));
+        TankContentsPredicate contents = new TankContentsPredicate(StoredFluid.of(
+          getTankWith(TinkerFluids.blazingBlood.get(), block.getCapacity()).getFluid()));
         builder.addCriterion(Loadables.BLOCK.getKey(block).getPath(),
-                              InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(block).hasNbt(nbt).build()));
+                              InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(block).withSubPredicate(FluidItemData.TANK_PREDICATE.get(), contents).build()));
         builder.requirements(Strategy.OR);
       };
       TinkerSmeltery.searedTank.forEach(with);
@@ -415,11 +418,11 @@ public class AdvancementsProvider extends GenericDataProvider {
     builder(TankItem.setTank(new ItemStack(TinkerSmeltery.scorchedLantern), getTankWith(TinkerFluids.moltenManyullyn.get(), TinkerSmeltery.scorchedLantern.get().getCapacity())),
             resource("foundry/manyullyn_lanterns"), foundry, AdvancementType.CHALLENGE, builder -> {
       Consumer<SearedLanternBlock> with = block -> {
-        CompoundTag nbt = new CompoundTag();
-        nbt.put(NBTTags.TANK, getTankWith(TinkerFluids.moltenManyullyn.get(), block.getCapacity()).writeToNBT(new CompoundTag()));
+        TankContentsPredicate contents = new TankContentsPredicate(StoredFluid.of(
+          getTankWith(TinkerFluids.moltenManyullyn.get(), block.getCapacity()).getFluid()));
         builder.addCriterion(Loadables.BLOCK.getKey(block).getPath(),
-                              InventoryChangeTrigger.TriggerInstance.hasItems(new ItemPredicate(null, Collections.singleton(block.asItem()), MinMaxBounds.Ints.atLeast(64), MinMaxBounds.Ints.ANY,
-                                                                                                EnchantmentPredicate.NONE, EnchantmentPredicate.NONE, null, new NbtPredicate(nbt))));
+                              InventoryChangeTrigger.TriggerInstance.hasItems(ItemPredicate.Builder.item().of(block).withCount(MinMaxBounds.Ints.atLeast(64))
+                                .withSubPredicate(FluidItemData.TANK_PREDICATE.get(), contents).build()));
         builder.requirements(Strategy.OR);
       };
       with.accept(TinkerSmeltery.searedLantern.get());
@@ -446,7 +449,7 @@ public class AdvancementsProvider extends GenericDataProvider {
       builder.addCriterion("magma_cream", hasItem(Items.MAGMA_CREAM));
     });
     builder(TinkerGadgets.piggyBackpack, resource("world/piggybackpack"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("used_pack", PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(ContextAwarePredicate.ANY, ItemPredicate.Builder.item().of(TinkerGadgets.piggyBackpack), EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIG).build()))));
+      builder.addCriterion("used_pack", PlayerInteractTrigger.TriggerInstance.itemUsedOnEntity(ItemPredicate.Builder.item().of(TinkerGadgets.piggyBackpack), java.util.Optional.of(EntityPredicate.wrap(EntityPredicate.Builder.entity().of(EntityType.PIG))))));
     AdvancementHolder slimesuit = builder(new MaterialIdNBT(List.of(MaterialIds.bone, MaterialIds.skyslime)).updateStack(new ItemStack(TinkerTools.slimesuit.get(ArmorItem.Type.CHESTPLATE))), resource("world/slimesuit"), skyslimeIsland, AdvancementType.GOAL, builder ->
       TinkerTools.slimesuit.forEach((type, armor) -> builder.addCriterion("crafted_" + type.getName(), hasItem(armor))));
     builder(new MaterialIdNBT(List.of(MaterialIds.gunpowder, MaterialIds.enderslime)).updateStack(new ItemStack(TinkerTools.slimesuit.get(ArmorItem.Type.HELMET))),
@@ -515,7 +518,7 @@ public class AdvancementsProvider extends GenericDataProvider {
     grantAdvancement(resource("internal/walk_on_powder_snow"), AdvancementIds.WALK_ON_POWDER_SNOW, builder ->
       builder.addCriterion("has_boots", PlayerTrigger.TriggerInstance.located(EntityPredicate.Builder.entity()
         .equipment(EntityEquipmentPredicate.Builder.equipment().feet(ToolStackItemPredicate.builderTool(new VolatileDataPredicate(ModifiableArmorItem.SNOW_BOOTS))).build())
-        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW)).build())
+        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW)))
         .build()))
     );
     // despite having multiple criteria, these use an any condition so easier to just bypass criteria

@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.fluid;
 
 import net.minecraft.core.component.DataComponentType;
+import net.minecraft.advancements.critereon.ItemSubPredicate;
 import net.minecraft.core.component.DataComponents;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.nbt.CompoundTag;
@@ -19,10 +20,16 @@ public final class FluidItemData {
     COMPONENTS.register("fluid_contents", () -> DataComponentType.<StoredFluid>builder()
       .persistent(StoredFluid.CODEC).networkSynchronized(StoredFluid.STREAM_CODEC).build());
 
+  private static final DeferredRegister<ItemSubPredicate.Type<?>> PREDICATES =
+    DeferredRegister.create(Registries.ITEM_SUB_PREDICATE_TYPE, "tconstruct");
+  public static final DeferredHolder<ItemSubPredicate.Type<?>,ItemSubPredicate.Type<TankContentsPredicate>> TANK_PREDICATE =
+    PREDICATES.register("tank_contents", () -> new ItemSubPredicate.Type<>(TankContentsPredicate.CODEC));
+
   private FluidItemData() {}
 
   public static void register(IEventBus bus) {
     COMPONENTS.register(bus);
+    PREDICATES.register(bus);
   }
 
   public static CompoundTag legacyData(ItemStack stack) {

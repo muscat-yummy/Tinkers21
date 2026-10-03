@@ -72,6 +72,25 @@ public final class FluidContentsSmoke {
       buffer.release();
     }
 
+    var tankCriterion = new slimeknights.tconstruct.library.fluid.TankContentsPredicate(
+      StoredFluid.of(new FluidStack(Fluids.WATER, 1000)));
+    check(tankCriterion.matchesFluid(contents.toStack()), "Tank advancement rejected extra fluid metadata");
+    check(!tankCriterion.matchesFluid(contents.toStack().copyWithAmount(999))
+      && !tankCriterion.matchesFluid(new FluidStack(Fluids.LAVA, 1000))
+      && !tankCriterion.matchesFluid(FluidStack.EMPTY), "Tank advancement accepted wrong fluid, amount or empty tank");
+    var criterionJson = slimeknights.tconstruct.library.fluid.TankContentsPredicate.CODEC
+      .encodeStart(ops, tankCriterion).getOrThrow();
+    var decodedCriterion = slimeknights.tconstruct.library.fluid.TankContentsPredicate.CODEC
+      .parse(ops, criterionJson).getOrThrow();
+    check(decodedCriterion.matchesFluid(contents.toStack()), "Tank advancement codec lost fluid or amount");
+    CompoundTag oldTankCriterion = new CompoundTag();
+    oldTankCriterion.putString("FluidName", "minecraft:water");
+    oldTankCriterion.putInt("Amount", 1000);
+    oldTankCriterion.put("Tag", metadata.copy());
+    check(decodedCriterion.matchesFluid(StoredFluid.readLegacyTank(oldTankCriterion)),
+      "Tank advancement rejected a legacy tank with additional metadata");
+    System.out.println("Tank advancement exact amount, fluid identity, additional metadata, legacy contents and native codec: PASS");
+
     var tank = (ScaledFluidTank) ScaledFluidTank.create(1000, 4);
     tank.setFluid(contents.toStack().copyWithAmount(4000));
     check(tank.drain(5, FluidAction.SIMULATE).getAmount() == 4 && tank.getFluidAmount() == 4000, "Simulation or integral scale");
