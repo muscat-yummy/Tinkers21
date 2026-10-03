@@ -8,6 +8,8 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -115,6 +117,10 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
 
 
   /** Creates a builder instance */
+  static MobEffectModule.Builder builder(Holder<MobEffect> effect) {
+    return new Builder(effect.value());
+  }
+
   static MobEffectModule.Builder builder(MobEffect effect) {
     return new Builder(effect);
   }

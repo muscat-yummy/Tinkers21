@@ -1,4 +1,4 @@
-name: Inspect native food, lifecycle and loot APIs after recipe ID migration
+name: Port native food effects and exact antigravity removal lifecycle
 on:
   push:
     branches: [port/1.21.1-neoforge]
