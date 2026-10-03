@@ -1,4 +1,4 @@
-name: Verify reload-aware alternatives and inspect native effect and attribute APIs
+name: Initialize native standalone test loading context
 on:
   push:
     branches: [port/1.21.1-neoforge]

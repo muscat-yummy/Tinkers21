@@ -11,6 +11,7 @@ import slimeknights.tconstruct.library.tools.helper.ToolTooltipPolicy;
 
 public final class ToolTooltipPolicySmoke {
   public static void main(String[] args) {
+    net.neoforged.fml.loading.LoadingModList.of(java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
     ItemStack stack = new ItemStack(Items.STICK);

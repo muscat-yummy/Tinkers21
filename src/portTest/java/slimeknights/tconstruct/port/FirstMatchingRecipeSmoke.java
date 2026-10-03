@@ -63,6 +63,7 @@ public final class FirstMatchingRecipeSmoke {
     if (codec.parse(JsonOps.INSTANCE, encoded).getOrThrow() != 9) {
       throw new AssertionError("Selected recipe must retain its native encoding");
     }
+    net.neoforged.fml.loading.LoadingModList.of(java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
     // Standalone test bootstrap registers the actual native condition codecs, as the mod registry event does in game.
