@@ -6,6 +6,8 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
+import slimeknights.tconstruct.library.utils.AttributeIdUtil;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -76,12 +78,12 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
 
   @Override
   public void updateValue(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context, Holder data, float newLevel, float oldLevel) {
-    AttributeInstance instance = context.getEntity().getAttribute(attribute);
+    AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
     if (instance != null) {
-      instance.removeModifier(uuid);
+      instance.removeModifier(AttributeIdUtil.fromUuid(uuid));
       float attributeValue = amount.computeForLevel(newLevel);
       if (attributeValue != 0) {
-        instance.addTransientModifier(new AttributeModifier(uuid, unique, attributeValue, operation));
+        instance.addTransientModifier(new AttributeModifier(AttributeIdUtil.fromUuid(uuid), attributeValue, operation));
       }
     }
   }
@@ -99,6 +101,10 @@ public record MaxArmorAttributeModule(String unique, Attribute attribute, Operat
 
   /* Builder */
   
+  public static Builder builder(net.minecraft.core.Holder<Attribute> attribute, Operation operation) {
+    return builder(attribute.value(), operation);
+  }
+
   public static Builder builder(Attribute attribute, Operation operation) {
     return new Builder(attribute, operation);
   }

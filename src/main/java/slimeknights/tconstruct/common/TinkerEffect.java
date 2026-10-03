@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import java.util.UUID;
+import slimeknights.tconstruct.library.utils.AttributeIdUtil;
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.LivingEntity;
@@ -37,8 +38,7 @@ public class TinkerEffect extends MobEffect {
 
   /** Retains legacy TiC/addon UUID templates with stable namespaced native modifier IDs. */
   public TinkerEffect addAttributeModifier(Holder<Attribute> attribute, String uuid, double amount, Operation operation) {
-    return addAttributeModifier(attribute, ResourceLocation.fromNamespaceAndPath("tconstruct",
-        "legacy_effect/" + UUID.fromString(uuid)), amount, operation);
+    return addAttributeModifier(attribute, AttributeIdUtil.fromUuid(UUID.fromString(uuid)), amount, operation);
   }
 
   public TinkerEffect addAttributeModifier(Attribute attribute, String uuid, double amount, Operation operation) {

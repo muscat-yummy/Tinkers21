@@ -46,6 +46,28 @@ public final class EffectFoundationSmoke {
     } catch (IllegalArgumentException expected) {
       // The legacy contract also required a UUID.
     }
+    var attributeId = slimeknights.tconstruct.library.utils.AttributeIdUtil.fromUuid(java.util.UUID.fromString(uuid));
+    if (!attributeId.equals(modifiers.getFirst().id())) {
+      throw new AssertionError("Effect and equipment legacy UUIDs must identify the same native modifier");
+    }
+    var attributeInstance = new net.minecraft.world.entity.ai.attributes.AttributeInstance(
+      Attributes.MOVEMENT_SPEED, changed -> {});
+    attributeInstance.setBaseValue(10);
+    attributeInstance.addTransientModifier(new AttributeModifier(attributeId, 2, AttributeModifier.Operation.ADD_VALUE));
+    if (attributeInstance.getValue() != 12) {
+      throw new AssertionError("Native legacy attribute modifier was not applied");
+    }
+    attributeInstance.removeModifier(attributeId);
+    attributeInstance.addTransientModifier(new AttributeModifier(attributeId, 4, AttributeModifier.Operation.ADD_VALUE));
+    if (attributeInstance.getValue() != 14 || attributeInstance.getModifiers().size() != 1) {
+      throw new AssertionError("Legacy attribute update stacked instead of replacing its stable ID");
+    }
+    attributeInstance.removeModifier(attributeId);
+    if (attributeInstance.getValue() != 10 || !attributeInstance.getModifiers().isEmpty()) {
+      throw new AssertionError("Legacy attribute unequip did not restore the native base value");
+    }
+    System.out.println("Shared legacy effect/equipment IDs and native attribute replace/remove lifecycle: PASS");
+
     var normal = new MobEffectInstance(Holder.direct(new TinkerEffect(MobEffectCategory.HARMFUL, true)), 20);
     var noMilk = new MobEffectInstance(Holder.direct(new NoMilkEffect(MobEffectCategory.HARMFUL, 0xffffff, true)), 20);
     if (!normal.getCures().contains(EffectCures.MILK) || noMilk.getCures().contains(EffectCures.MILK)

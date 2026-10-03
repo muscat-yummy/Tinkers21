@@ -4,6 +4,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import slimeknights.tconstruct.library.utils.AttributeIdUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
@@ -110,7 +113,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   private AttributeModifier createModifier(IToolStackView tool, ModifierEntry modifier, EquipmentSlot slot) {
     UUID uuid = getUUID(slot);
     if (uuid != null) {
-      return new AttributeModifier(uuid, unique + "." + slot.getName(), formula.apply(tool, modifier), operation);
+      return new AttributeModifier(AttributeIdUtil.fromUuid(uuid), formula.apply(tool, modifier), operation);
     }
     return null;
   }
@@ -130,12 +133,12 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
   @Override
   public void onEquip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     if (condition.matches(tool, modifier)) {
-      AttributeInstance instance = context.getEntity().getAttribute(attribute);
+      AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
         AttributeModifier attributeModifier = createModifier(tool, modifier, context.getChangedSlot());
         if (attributeModifier != null) {
           // for safety, remove it already there
-          instance.removeModifier(attributeModifier.getId());
+          instance.removeModifier(attributeModifier.id());
           instance.addTransientModifier(attributeModifier);
         }
       }
@@ -147,9 +150,9 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
     if (condition.matches(tool, modifier)) {
       UUID uuid = getUUID(context.getChangedSlot());
       if (uuid != null) {
-        AttributeInstance instance = context.getEntity().getAttribute(attribute);
+        AttributeInstance instance = context.getEntity().getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         if (instance != null) {
-          instance.removeModifier(uuid);
+          instance.removeModifier(AttributeIdUtil.fromUuid(uuid));
         }
       }
     }
@@ -199,6 +202,10 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
 
 
   /** Creates a new builder instance */
+  public static Builder builder(Holder<Attribute> attribute, Operation operation) {
+    return builder(attribute.value(), operation);
+  }
+
   public static Builder builder(Attribute attribute, Operation operation) {
     return new Builder(attribute, operation);
   }
