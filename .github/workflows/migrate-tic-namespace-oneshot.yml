@@ -1,4 +1,4 @@
-name: Port event attribute holders soulbound metadata and native block experience drops
+name: Port native dispenser record accessors and inspect projectile combat APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -34,6 +34,8 @@ jobs:
           import pathlib, subprocess, zipfile
           targets = {
               'net.neoforged.neoforge.event.level.BlockDropsEvent': ['public '],
+              'net.minecraft.core.dispenser.BlockSource': ['public '],
+              'net.minecraft.world.entity.projectile.AbstractHurtingProjectile': None,
               'net.minecraft.world.entity.projectile.AbstractArrow': None,
               'net.minecraft.world.entity.projectile.ThrownTrident': None,
               'net.minecraft.world.item.crafting.CraftingInput': None,
@@ -93,7 +95,7 @@ jobs:
               'net.minecraft.world.level.storage.loot.LootContext': ['getParam(', 'getParamOrNull(', 'hasParam('],
               'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': None,
               'net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition': None,
-              'net.minecraft.world.item.enchantment.EnchantmentHelper': ['getEnchantmentLevel(']
+              'net.minecraft.world.item.enchantment.EnchantmentHelper': None
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
