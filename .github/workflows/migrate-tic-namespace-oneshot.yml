@@ -1,4 +1,4 @@
-name: Inspect exact native liquid block and fire APIs
+name: Verify native liquid effect copies and fire duration behavior
 on:
   push:
     branches: [port/1.21.1-neoforge]

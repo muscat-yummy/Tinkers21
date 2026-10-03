@@ -101,6 +101,15 @@ public final class EffectFoundationSmoke {
     if (!custom.getCures().contains(EffectCures.MILK) || !custom.getCures().contains(EffectCures.HONEY)) {
       throw new AssertionError("Vanilla curative items must use native cures");
     }
+    var liquidTemplate = new MobEffectInstance(net.minecraft.world.effect.MobEffects.POISON, 20);
+    var liquidEffect = new MobEffectInstance(liquidTemplate);
+    slimeknights.tconstruct.library.utils.EffectCureUtil.setItemCures(liquidEffect, List.of());
+    if (liquidEffect.getCures().contains(EffectCures.MILK) || liquidEffect.getCures().contains(EffectCures.HONEY)
+        || !liquidEffect.getCures().contains(EffectCures.PROTECTED_BY_TOTEM)
+        || !liquidTemplate.getCures().contains(EffectCures.MILK) || !liquidTemplate.getCures().contains(EffectCures.HONEY)) {
+      throw new AssertionError("Liquid effect instance mutated its template or lost totem protection");
+    }
+    System.out.println("Liquid effect copy isolates item cures while retaining native totem removal: PASS");
     System.out.println("Custom item cures, empty lists, native milk/honey, copy/codec identity and retained totem/addon cures: PASS");
     System.out.println("Native effect holder templates, stable legacy IDs/scaling, milk immunity and totem removal: PASS");
   }
