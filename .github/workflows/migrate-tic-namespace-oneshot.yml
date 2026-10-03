@@ -1,4 +1,4 @@
-name: Port native entity synchronization builders and inspect loot codecs
+name: Port native modifier loot maps and remaining entity ignition
 on:
   push:
     branches: [port/1.21.1-neoforge]

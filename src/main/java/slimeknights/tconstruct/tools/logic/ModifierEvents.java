@@ -493,7 +493,7 @@ public class ModifierEvents {
         // handle fire
         int remainingFire = target.getRemainingFireTicks();
         if (arrow.isOnFire()) {
-          target.setSecondsOnFire(5);
+          target.igniteForSeconds(5);
         }
 
         // hurt the enderman
