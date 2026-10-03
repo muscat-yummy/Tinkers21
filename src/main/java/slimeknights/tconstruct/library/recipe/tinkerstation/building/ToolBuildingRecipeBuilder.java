@@ -87,9 +87,9 @@ public class ToolBuildingRecipeBuilder extends AbstractRecipeBuilder<ToolBuildin
       if (extraRequirements.size() != 1) {
         throw new IllegalArgumentException("Must have exactly one ingredient for modifier transform");
       }
-      consumerIn.accept(new LoadableFinishedRecipe<>(new TippedToolTransformRecipe(id, group, output, layoutSlot, extraRequirements.get(0), extraMaterials, tippedModifier), TippedToolTransformRecipe.LOADER, advancementId));
+      consumerIn.accept(new LoadableFinishedRecipe<>(id, new TippedToolTransformRecipe(id, group, output, layoutSlot, extraRequirements.get(0), extraMaterials, tippedModifier), TippedToolTransformRecipe.LOADER, advancementId));
     } else {
-      consumerIn.accept(new LoadableFinishedRecipe<>(new ToolBuildingRecipe(id, group, output, outputSize, layoutSlot, extraRequirements, partsOverride, extraMaterials), ToolBuildingRecipe.LOADER, advancementId));
+      consumerIn.accept(new LoadableFinishedRecipe<>(id, new ToolBuildingRecipe(id, group, output, outputSize, layoutSlot, extraRequirements, partsOverride, extraMaterials), ToolBuildingRecipe.LOADER, advancementId));
     }
   }
 }

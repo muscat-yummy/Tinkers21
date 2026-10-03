@@ -66,6 +66,6 @@ public class MeltingFuelBuilder extends AbstractRecipeBuilder<MeltingFuelBuilder
   @Override
   public void save(RecipeConsumer consumer, ResourceLocation id) {
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "melting_fuel");
-    consumer.accept(new LoadableFinishedRecipe<>(new MeltingFuel(id, input, duration, temperature, rate), MeltingFuel.LOADER, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(id, new MeltingFuel(id, input, duration, temperature, rate), MeltingFuel.LOADER, advancementId));
   }
 }

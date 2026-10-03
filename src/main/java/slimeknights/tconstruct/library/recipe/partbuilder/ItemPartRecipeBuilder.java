@@ -47,6 +47,6 @@ public class ItemPartRecipeBuilder extends AbstractRecipeBuilder<ItemPartRecipeB
   @Override
   public void save(RecipeConsumer consumer, ResourceLocation id) {
     ResourceLocation advancementId = buildOptionalAdvancement(id, "parts");
-    consumer.accept(new LoadableFinishedRecipe<>(new ItemPartRecipe(id, materialId, pattern, patternItem, cost, result, titleKey), ItemPartRecipe.LOADER, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(id, new ItemPartRecipe(id, materialId, pattern, patternItem, cost, result, titleKey), ItemPartRecipe.LOADER, advancementId));
   }
 }

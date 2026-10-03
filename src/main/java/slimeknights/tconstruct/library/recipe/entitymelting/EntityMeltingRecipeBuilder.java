@@ -42,6 +42,6 @@ public class EntityMeltingRecipeBuilder extends AbstractRecipeBuilder<EntityMelt
   @Override
   public void save(RecipeConsumer consumer, ResourceLocation id) {
     ResourceLocation advancementId = this.buildOptionalAdvancement(id, "entity_melting");
-    consumer.accept(new LoadableFinishedRecipe<>(new EntityMeltingRecipe(id, ingredient, output, damage), EntityMeltingRecipe.LOADER, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(id, new EntityMeltingRecipe(id, ingredient, output, damage), EntityMeltingRecipe.LOADER, advancementId));
   }
 }

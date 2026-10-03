@@ -118,11 +118,11 @@ public class MaterialSwappingRecipeBuilder extends AbstractRecipeBuilder<Materia
       if (ingredient != SizedIngredient.EMPTY) {
         throw new IllegalStateException("Cannot set both part and ingredient");
       }
-      consumer.accept(new LoadableFinishedRecipe<>(new PartSwappingOverrideRecipe(id, tools, maxStackSize, part, indices, extraRequirements), PartSwappingOverrideRecipe.LOADER, null));
+      consumer.accept(new LoadableFinishedRecipe<>(id, new PartSwappingOverrideRecipe(id, tools, maxStackSize, part, indices, extraRequirements), PartSwappingOverrideRecipe.LOADER, null));
     } else if (material != MaterialId.UNKNOWN) {
-      consumer.accept(new LoadableFinishedRecipe<>(new FixedMaterialSwappingRecipe(id, tools, maxStackSize, ingredient, material, indices, repairValue, extraRequirements), FixedMaterialSwappingRecipe.LOADER, null));
+      consumer.accept(new LoadableFinishedRecipe<>(id, new FixedMaterialSwappingRecipe(id, tools, maxStackSize, ingredient, material, indices, repairValue, extraRequirements), FixedMaterialSwappingRecipe.LOADER, null));
     } else if (repairValue > 0) {
-      consumer.accept(new LoadableFinishedRecipe<>(new MaterialValueSwappingRecipe(id, tools, maxStackSize, materials, repairValue, indices, extraRequirements), MaterialValueSwappingRecipe.LOADER, null));
+      consumer.accept(new LoadableFinishedRecipe<>(id, new MaterialValueSwappingRecipe(id, tools, maxStackSize, materials, repairValue, indices, extraRequirements), MaterialValueSwappingRecipe.LOADER, null));
     }
   }
 }
