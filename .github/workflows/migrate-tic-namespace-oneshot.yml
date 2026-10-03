@@ -1,4 +1,4 @@
-name: Migrate reviewed native common tag fields with parser and API checks
+name: Port native tooltip contexts for material and gadget item descriptions
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,7 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.item.Item$TooltipContext': ['public '],
               'net.minecraft.network.syncher.SynchedEntityData$Builder': ['public '],
               'net.neoforged.neoforge.common.loot.LootModifier': ['public ', 'protected '],
               'net.neoforged.neoforge.common.loot.IGlobalLootModifier': ['public '],

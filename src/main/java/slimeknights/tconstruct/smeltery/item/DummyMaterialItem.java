@@ -19,7 +19,7 @@ public class DummyMaterialItem extends Item {
   }
 
   @Override
-  public void appendHoverText(ItemStack pStack, @Nullable Level pLevel, List<Component> tooltip, TooltipFlag pIsAdvanced) {
+  public void appendHoverText(ItemStack pStack, TooltipContext context, List<Component> tooltip, TooltipFlag pIsAdvanced) {
     tooltip.add(DUMMY_TOOL_PART);
   }
 }

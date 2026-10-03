@@ -45,8 +45,8 @@ public class EFLNItem extends SnowballItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     TranslationHelper.addOptionalTooltip(stack, tooltip);
-    super.appendHoverText(stack, level, tooltip, flag);
+    super.appendHoverText(stack, context, tooltip, flag);
   }
 }

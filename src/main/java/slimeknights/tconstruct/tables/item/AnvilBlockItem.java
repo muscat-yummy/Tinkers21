@@ -70,9 +70,9 @@ public class AnvilBlockItem extends MaterialBlockItem {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     // ditch the super call advanced tooltip material ID, we will handle it ourselves later
-    this.getBlock().appendHoverText(stack, level, tooltip, flag);
+    this.getBlock().appendHoverText(stack, context, tooltip, flag);
     MaterialVariantId material = getMaterial(stack);
     if (!MaterialId.UNKNOWN.equals(material)) {
       // put tool material in tooltip. Its technically below texture but the two should never coexist.
