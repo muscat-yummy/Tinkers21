@@ -1,4 +1,4 @@
-name: Port block entity persistence callbacks and registry-aware fluid tank saves
+name: Verify material item wire snapshots with actual NeoForge registry synchronization bootstrap
 on:
   push:
     branches: [port/1.21.1-neoforge]

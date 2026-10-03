@@ -21,6 +21,7 @@ public final class MaterialItemDataSmoke {
     net.neoforged.fml.loading.LoadingModList.of(java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.List.of(), java.util.Map.of());
     SharedConstants.tryDetectVersion();
     Bootstrap.bootStrap();
+    net.neoforged.neoforge.registries.VanillaRegistryPortTestBootstrap.modifyRegistries();
     ItemStack stack = new ItemStack(Items.IRON_INGOT, 3);
     stack.set(DataComponents.CUSTOM_NAME, Component.literal("Material part"));
     MaterialItemData.update(stack, tag -> tag.putInt("OtherMod", 7));
