@@ -1,4 +1,4 @@
-name: Port native shield block and hotbar render events
+name: Port native harvest correctness and inspect projectile APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -135,6 +135,13 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.core.dispenser.ProjectileDispenseBehavior': ('public ', 'protected ',),
+              'net.minecraft.world.item.ProjectileItem': ('public ', 'abstract ', 'default ',),
+              'net.minecraft.world.item.ProjectileItem$DispenseConfig': ('public ',),
+              'net.minecraft.world.item.ArrowItem': ('public ', 'protected ',),
+              'net.minecraft.client.DeltaTracker': ('public ', 'abstract ',),
+              'net.minecraft.network.codec.ByteBufCodecs': ('registry(', 'holderRegistry(',),
+              'net.minecraft.world.item.Tier': ('public ', 'abstract ',),
               'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount': ('class ', 'CODEC', 'FORMULA',),
               'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$Formula': ('interface ', 'CODEC', 'getType(',),
               'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$FormulaType': ('class ', 'record ', 'Codec',),
