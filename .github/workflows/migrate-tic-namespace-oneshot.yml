@@ -1,4 +1,4 @@
-name: Port native loot data and slime tree growers
+name: Port named native harvest tiers and preserve addon ordering
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -6,50 +6,6 @@ on:
 permissions:
   contents: write
 jobs:
-  inspect_native_next:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-        with:
-          ref: port/1.21.1-neoforge
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-      - name: Resolve exact native API classpath
-        run: |
-          cat > /tmp/native-api.init.gradle <<'GRADLE'
-          gradle.projectsEvaluated {
-              rootProject.tasks.register('nativeApiClasspath') {
-                  doLast {
-                      new File('/tmp/native-api-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
-                  }
-              }
-          }
-          GRADLE
-          ./gradlew :createMinecraftArtifacts :nativeApiClasspath --no-daemon --console=plain -I /tmp/native-api.init.gradle
-      - name: Inspect public Minecraft APIs only
-        shell: python
-        run: |
-          import pathlib, subprocess, zipfile
-          targets = ["net.minecraft.world.level.block.grower.TreeGrower","net.minecraft.world.level.block.entity.BlockEntity","net.minecraft.data.loot.LootTableProvider","net.minecraft.data.loot.LootTableProvider$SubProviderEntry","net.minecraft.data.loot.BlockLootSubProvider","net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction$Builder","net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction$Source","net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction$Builder","net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction"]
-          for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
-              jar = pathlib.Path(entry)
-              if not jar.is_file() or jar.suffix != '.jar':
-                  continue
-              with zipfile.ZipFile(jar) as archive:
-                  names = set(archive.namelist())
-              for cls in list(targets):
-                  if cls.replace('.', '/') + '.class' not in names:
-                      continue
-                  result = subprocess.run(['javap', '-classpath', str(jar), '-p'] + (['-c'] if cls.endswith('.TreeGrower') else []) + [cls], capture_output=True, text=True, check=True)
-                  print('Public native API:', cls)
-                  for line in result.stdout.splitlines():
-                      if cls.endswith('.TreeGrower') or 'public ' in line or 'protected ' in line:
-                          print(line)
-                  targets.remove(cls)
-          if targets:
-              raise RuntimeError('API classes not found: ' + ', '.join(targets))
   migrate:
     runs-on: ubuntu-latest
     steps:
@@ -81,7 +37,7 @@ jobs:
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/plugin/jei/util/DrawableTooltipWidget.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeWidgetSmoke.java', 'src/main/java/slimeknights/tconstruct/tools/logic/CriticalHitLogic.java', 'src/portTest/java/slimeknights/tconstruct/port/CriticalHitSmoke.java', 'src/main/java/slimeknights/tconstruct/fluids/item/ContainerFoodItem.java', 'src/main/java/slimeknights/tconstruct/plugin/jei/util/PotionSubtypeInterpreter.java', 'src/main/java/slimeknights/tconstruct/fluids/item/PotionBucketItem.java', 'src/main/java/slimeknights/tconstruct/fluids/util/FillBottle.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoWater.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoEmpty.java', 'src/main/java/slimeknights/tconstruct/library/fluid/PotionData.java', 'src/main/java/slimeknights/tconstruct/fluids/item/BottleItem.java', 'src/portTest/java/slimeknights/tconstruct/port/PotionContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeInputSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/RegistryBuffer.java', 'src/main/java/slimeknights/tconstruct/common/network/InventorySlotSyncPacket.java', 'src/main/java/slimeknights/tconstruct/smeltery/network/FluidUpdatePacket.java', 'src/portTest/java/slimeknights/tconstruct/port/InventoryPacketSmoke.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IChestItemHandler.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IScalingContainer.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/ScalingChestItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ScalingChestSmoke.java', 'src/main/java/slimeknights/tconstruct/library/fluid/ForwardingFluidHandler.java', 'src/main/java/slimeknights/tconstruct/library/utils/ForwardingItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ForwardingCapabilitySmoke.java', 'src/main/java/slimeknights/tconstruct/tables/menu/module/SideInventoryContainer.java', 'src/main/java/slimeknights/tconstruct/library/utils/BlockCapabilitySource.java', 'src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/LoadableIngredientScopeSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java', 'src/main/java/slimeknights/tconstruct/tools/modifiers/loot/BonusFormulaCodec.java', 'src/portTest/java/slimeknights/tconstruct/port/BonusFormulaSmoke.java')
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/utils/HarvestTierRegistry.java', 'src/portTest/java/slimeknights/tconstruct/port/HarvestTierSmoke.java', 'src/main/java/slimeknights/tconstruct/plugin/jei/util/DrawableTooltipWidget.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeWidgetSmoke.java', 'src/main/java/slimeknights/tconstruct/tools/logic/CriticalHitLogic.java', 'src/portTest/java/slimeknights/tconstruct/port/CriticalHitSmoke.java', 'src/main/java/slimeknights/tconstruct/fluids/item/ContainerFoodItem.java', 'src/main/java/slimeknights/tconstruct/plugin/jei/util/PotionSubtypeInterpreter.java', 'src/main/java/slimeknights/tconstruct/fluids/item/PotionBucketItem.java', 'src/main/java/slimeknights/tconstruct/fluids/util/FillBottle.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoWater.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoEmpty.java', 'src/main/java/slimeknights/tconstruct/library/fluid/PotionData.java', 'src/main/java/slimeknights/tconstruct/fluids/item/BottleItem.java', 'src/portTest/java/slimeknights/tconstruct/port/PotionContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeInputSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/RegistryBuffer.java', 'src/main/java/slimeknights/tconstruct/common/network/InventorySlotSyncPacket.java', 'src/main/java/slimeknights/tconstruct/smeltery/network/FluidUpdatePacket.java', 'src/portTest/java/slimeknights/tconstruct/port/InventoryPacketSmoke.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IChestItemHandler.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IScalingContainer.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/ScalingChestItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ScalingChestSmoke.java', 'src/main/java/slimeknights/tconstruct/library/fluid/ForwardingFluidHandler.java', 'src/main/java/slimeknights/tconstruct/library/utils/ForwardingItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ForwardingCapabilitySmoke.java', 'src/main/java/slimeknights/tconstruct/tables/menu/module/SideInventoryContainer.java', 'src/main/java/slimeknights/tconstruct/library/utils/BlockCapabilitySource.java', 'src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/LoadableIngredientScopeSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java', 'src/main/java/slimeknights/tconstruct/tools/modifiers/loot/BonusFormulaCodec.java', 'src/portTest/java/slimeknights/tconstruct/port/BonusFormulaSmoke.java')
                   options.annotationProcessorPath = rootProject.configurations.annotationProcessor
                   classpath = rootProject.sourceSets.main.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
@@ -140,6 +96,11 @@ jobs:
                   dependsOn 'compileLeafPortChecks'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
                   mainClass.set('slimeknights.tconstruct.port.PotionContentsSmoke')
+              }
+              rootProject.tasks.register('runHarvestTierSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.HarvestTierSmoke')
               }
               rootProject.tasks.register('runRecipeWidgetSmoke', JavaExec) {
                   dependsOn 'compileLeafPortChecks'
@@ -296,7 +257,7 @@ jobs:
           :runFluidContentsSmoke :runInstrumentIngredientSmoke :runLoadableIngredientScopeSmoke
           :runBonusFormulaSmoke :runForwardingCapabilitySmoke :runScalingChestSmoke
           :runInventoryPacketSmoke :runRecipeInputSmoke :runPotionContentsSmoke
-          :runCriticalHitSmoke :runRecipeWidgetSmoke :runArmorRegistryCheck --continue
+          :runCriticalHitSmoke :runRecipeWidgetSmoke :runHarvestTierSmoke :runArmorRegistryCheck --continue
           --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
