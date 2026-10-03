@@ -1,4 +1,4 @@
-name: Verify native and legacy tank advancement predicates
+name: Inspect native modifier registration and registry reload context
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,8 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.neoforged.fml.ModLoader': ['public '],
+              'net.neoforged.neoforge.event.AddReloadListenerEvent': ['public '],
               'net.minecraft.advancements.critereon.EntityPredicate': ['public '],
               'net.minecraft.advancements.critereon.EntityPredicate$Builder': ['public '],
               'net.minecraft.advancements.critereon.ItemCustomDataPredicate': ['public '],
