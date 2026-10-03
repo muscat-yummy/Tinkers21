@@ -4,6 +4,8 @@ import com.google.gson.JsonElement;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.resources.RegistryOps;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
+import net.neoforged.neoforge.common.conditions.ICondition;
 
 import java.util.function.Supplier;
 
@@ -18,10 +20,19 @@ public final class LoadableOps {
     return ops == null ? JsonOps.INSTANCE : ops;
   }
 
+  private static <T> ICondition.IContext conditionContext(DynamicOps<T> ops) {
+    return ConditionalOps.retrieveContext().codec().parse(ops, ops.emptyMap()).getOrThrow();
+  }
+
   /** Always restores the enclosing scope, including when decoding fails. */
   public static <T> T with(DynamicOps<?> ops, Supplier<T> operation) {
     DynamicOps<JsonElement> previous = CURRENT.get();
-    CURRENT.set(ops instanceof RegistryOps<?> registryOps ? registryOps.withParent(JsonOps.INSTANCE) : JsonOps.INSTANCE);
+    DynamicOps<JsonElement> jsonOps = JsonOps.INSTANCE;
+    if (ops instanceof RegistryOps<?> registryOps) {
+      RegistryOps<JsonElement> normalized = registryOps.withParent(JsonOps.INSTANCE);
+      jsonOps = ops instanceof ConditionalOps<?> ? new ConditionalOps<>(normalized, conditionContext(ops)) : normalized;
+    }
+    CURRENT.set(jsonOps);
     try {
       return operation.get();
     } finally {

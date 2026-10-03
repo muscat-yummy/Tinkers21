@@ -30,6 +30,7 @@ import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.enchantment.Enchantment;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.common.conditions.ICondition;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
 import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -123,7 +124,8 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
   private RegistryAccess reloadRegistries;
 
   private DynamicOps<JsonElement> jsonOps() {
-    return reloadRegistries == null ? JsonOps.INSTANCE : RegistryOps.create(JsonOps.INSTANCE, reloadRegistries);
+    return reloadRegistries == null ? JsonOps.INSTANCE
+      : new ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, reloadRegistries), conditionContext);
   }
 
   private ModifierManager() {

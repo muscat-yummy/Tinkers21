@@ -98,6 +98,37 @@ public final class FirstMatchingRecipeSmoke {
         || nativeCodec.parse(filledOps, reload).getOrThrow() != 3) {
       throw new AssertionError("Each reload must use its real tag context without retaining the previous choice");
     }
+    var loadableBridge = slimeknights.mantle.data.loadable.common.LoadableJsonCodec.of(
+        new slimeknights.mantle.data.loadable.common.CodecLoadable<>(nativeCodec));
+    if (loadableBridge.parse(filledOps, reload).getOrThrow() != 3
+        || loadableBridge.parse(emptyOps, reload).getOrThrow() != 7
+        || loadableBridge.parse(filledOps, reload).getOrThrow() != 3) {
+      throw new AssertionError("Nested loadables lost or cached native reload conditions");
+    }
+    var filledNbtOps = new ConditionalOps<>(RegistryOps.create(net.minecraft.nbt.NbtOps.INSTANCE, RegistryAccess.EMPTY),
+        tagContext(List.of(Items.STICK.builtInRegistryHolder())));
+    var nbtReload = JsonOps.INSTANCE.convertTo(net.minecraft.nbt.NbtOps.INSTANCE, reload);
+    if (loadableBridge.parse(filledNbtOps, nbtReload).getOrThrow() != 3) {
+      throw new AssertionError("NBT-to-JSON loadable scope lost native condition context");
+    }
+    slimeknights.mantle.data.loadable.LoadableOps.with(filledOps, () -> {
+      try {
+        slimeknights.mantle.data.loadable.LoadableOps.with(emptyOps, () -> {
+          throw new IllegalStateException("intentional nested parse failure");
+        });
+        throw new AssertionError("Nested parse failure was swallowed");
+      } catch (IllegalStateException expectedFailure) {
+        if (!expectedFailure.getMessage().equals("intentional nested parse failure")) throw expectedFailure;
+      }
+      if (nativeCodec.parse(slimeknights.mantle.data.loadable.LoadableOps.current(), reload).getOrThrow() != 3) {
+        throw new AssertionError("Nested failure did not restore the outer condition context");
+      }
+      return null;
+    });
+    if (slimeknights.mantle.data.loadable.LoadableOps.current() != JsonOps.INSTANCE) {
+      throw new AssertionError("Native condition context leaked after the loadable scope");
+    }
+    System.out.println("Nested native reload conditions across JSON/NBT loadable scopes and failure restoration: PASS");
     System.out.println("Native conditional first match, payload laziness, outer skip, reload tag context and validation: PASS");
   }
 }

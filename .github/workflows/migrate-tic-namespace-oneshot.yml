@@ -1,4 +1,4 @@
-name: Verify native liquid effect copies and fire duration behavior
+name: Verify native reload conditions through nested JSON and NBT scopes
 on:
   push:
     branches: [port/1.21.1-neoforge]
