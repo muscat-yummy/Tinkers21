@@ -95,7 +95,7 @@ public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBui
       throw new IllegalStateException("Missing material for molding recipe");
     }
     ResourceLocation advancementId = buildOptionalAdvancement(id, "molding");
-    consumer.accept(new LoadableFinishedRecipe<>(new MoldingRecipe(serializer, id, material, pattern, patternConsumed, output), MoldingRecipe.LOADER, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(id, new MoldingRecipe(serializer, id, material, pattern, patternConsumed, output), MoldingRecipe.LOADER, advancementId));
   }
 
   private class Finished extends AbstractFinishedRecipe {

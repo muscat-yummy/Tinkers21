@@ -181,7 +181,7 @@ public abstract class AbstractModifierRecipeBuilder<T extends AbstractModifierRe
       throw new IllegalStateException("Must set modifier slots to apply modifier salvage.");
     }
     ResourceLocation advancementId = buildOptionalAdvancement(id, "modifiers");
-    consumer.accept(new LoadableFinishedRecipe<>(makeSalvage(id), ModifierSalvage.LOADER, advancementId));
+    consumer.accept(new LoadableFinishedRecipe<>(id, makeSalvage(id), ModifierSalvage.LOADER, advancementId));
     return (T) this;
   }
 

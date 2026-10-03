@@ -1,4 +1,4 @@
-name: Port native food effects and exact antigravity removal lifecycle
+name: Verify explicit casting and per-level salvage recipe IDs
 on:
   push:
     branches: [port/1.21.1-neoforge]
