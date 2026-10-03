@@ -17,7 +17,6 @@ import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.ItemStack.TooltipPart;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.Level;
 import net.neoforged.neoforge.common.ItemAbilities;
@@ -75,9 +74,10 @@ public class TooltipUtil {
   public static final BiPredicate<Attribute, Operation> SHOW_ARMOR_ATTRIBUTES = (att, op) -> op != Operation.ADDITION || (att != Attributes.ARMOR && att != Attributes.ARMOR_TOUGHNESS && att != Attributes.KNOCKBACK_RESISTANCE);
 
   /** Flags used when not holding control or shift */
-  private static final int DEFAULT_HIDE_FLAGS = TooltipPart.ENCHANTMENTS.getMask();
+  // Legacy HideFlags NBT bits, retained for callers importing old stacks.
+  private static final int DEFAULT_HIDE_FLAGS = 1;
   /** Flags used when holding control or shift */
-  private static final int MODIFIER_HIDE_FLAGS = TooltipPart.ENCHANTMENTS.getMask() | TooltipPart.MODIFIERS.getMask();
+  private static final int MODIFIER_HIDE_FLAGS = 1 | 2;
 
   private TooltipUtil() {}
 
@@ -491,11 +491,17 @@ public class TooltipUtil {
   }
 
   /** Gets the tooltip flags for the current ctrl+shift combination, used to hide enchantments and modifiers from the tooltip as needed */
+  @Deprecated
   public static int getModifierHideFlags(ToolDefinition definition) {
+    return shouldHideAttributes(definition) ? MODIFIER_HIDE_FLAGS : DEFAULT_HIDE_FLAGS;
+  }
+
+  /** Native tooltip policy; querying this never changes the stack's components. */
+  public static boolean shouldHideAttributes(ToolDefinition definition) {
     TooltipKey key = SafeClientAccess.getTooltipKey();
     if (key == TooltipKey.SHIFT || (key == TooltipKey.CONTROL && definition.hasMaterials())) {
-      return MODIFIER_HIDE_FLAGS;
+      return true;
     }
-    return DEFAULT_HIDE_FLAGS;
+    return false;
   }
 }

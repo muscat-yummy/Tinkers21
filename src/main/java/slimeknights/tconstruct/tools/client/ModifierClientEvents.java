@@ -23,6 +23,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.client.event.ClientPlayerNetworkEvent.LoggingOut;
 import net.neoforged.neoforge.client.event.ComputeFovModifierEvent;
+import net.neoforged.neoforge.client.event.GatherSkippedAttributeTooltipsEvent;
 import net.neoforged.neoforge.client.event.RenderGuiLayerEvent;
 import net.neoforged.neoforge.client.event.RenderHandEvent;
 import net.neoforged.neoforge.client.extensions.common.IClientMobEffectExtensions;
@@ -45,6 +46,7 @@ import slimeknights.tconstruct.library.tools.capability.TinkerDataKeys;
 import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability;
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
+import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableBowItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -62,6 +64,14 @@ import java.util.List;
 /** Modifier event hooks that run client side */
 @EventBusSubscriber(modid = TConstruct.MOD_ID, value = Dist.CLIENT, bus = Bus.GAME)
 public class ModifierClientEvents {
+  @SubscribeEvent
+  static void skipToolAttributes(GatherSkippedAttributeTooltipsEvent event) {
+    if (event.getStack().getItem() instanceof IModifiableDisplay tool
+        && TooltipUtil.shouldHideAttributes(tool.getToolDefinition())) {
+      event.setSkipAll(true);
+    }
+  }
+
   @SubscribeEvent
   static void onTooltipEvent(ItemTooltipEvent event) {
     // suppress durability from advanced, we display our own

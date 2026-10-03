@@ -7,10 +7,15 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.core.Holder;
+import net.minecraft.world.item.enchantment.Enchantment;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.Enchantments;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import net.neoforged.neoforge.common.NeoForge;
-import net.minecraftforge.event.entity.living.LootingLevelEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent.PlayerLoggedOutEvent;
-import net.neoforged.bus.api.EventPriority;
 import slimeknights.tconstruct.common.TinkerDamageTypes;
 import slimeknights.tconstruct.common.TinkerEffect;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -45,8 +50,6 @@ public class ModifierLootingHandler {
       return;
     }
     init = true;
-    // we overwrite looting values from vanilla in a couple cases, but mod effects that globally boost looting should still boost us
-    NeoForge.EVENT_BUS.addListener(EventPriority.HIGH, ModifierLootingHandler::onLooting);
     NeoForge.EVENT_BUS.addListener(ModifierLootingHandler::onLeaveServer);
   }
 
@@ -69,25 +72,20 @@ public class ModifierLootingHandler {
   }
 
   /** Applies the looting bonus for modifiers */
-  private static void onLooting(LootingLevelEvent event) {
-    // must be an attacker with our tool
-    DamageSource damageSource = event.getDamageSource();
+  public static int getLooting(LivingEntity target, @Nullable DamageSource damageSource, int level) {
     if (damageSource == null) {
-      return;
+      return level;
     }
-    LivingEntity target = event.getEntity();
 
     // bleeding kills use the level of the effect for looting
     if (damageSource.is(TinkerDamageTypes.BLEEDING)) {
-      event.setLootingLevel(Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get())));
-      return;
+      return Math.max(0, TinkerEffect.getAmplifier(target, TinkerEffects.bleeding.get()));
     }
 
     // otherwise, use the proper tool
     Entity source = damageSource.getEntity();
     if (source instanceof LivingEntity holder) {
       Entity direct = damageSource.getDirectEntity();
-      int level = event.getLootingLevel();
 
       // determine who is in charge of the looting
       LootingContext context;
@@ -120,8 +118,50 @@ public class ModifierLootingHandler {
       // boost looting with armor regardless, hopefully you did not switch your pants mid arrow firing
       level = ArmorLootingModifierHook.getLooting(tool, context, level);
       // we allow the hook to return negatives to cancel out looting, so ensure its at least 0
-      event.setLootingLevel(Math.max(level, 0));
+      return Math.max(level, 0);
     }
+    return level;
+  }
+
+  /**
+   * Supplies a query holder for bleeding kills without replacing the actual loot context.
+   * Native enchanted loot functions otherwise skip querying a level when no living attacker exists.
+   */
+  public static <T> T getLootingQueryEntity(LootContext context, LootContextParam<T> param, Holder<Enchantment> enchantment) {
+    T value = context.getParamOrNull(param);
+    if (!(value instanceof LivingEntity) && param == LootContextParams.ATTACKING_ENTITY
+        && enchantment.is(Enchantments.LOOTING)) {
+      DamageSource damage = context.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
+      Entity target = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+      if (damage != null && damage.is(TinkerDamageTypes.BLEEDING) && target instanceof LivingEntity) {
+        @SuppressWarnings("unchecked")
+        T queryEntity = (T) target;
+        return queryEntity;
+      }
+    }
+    return value;
+  }
+
+  /** Applies context-aware tool looting to native count and chance queries. */
+  public static int getEnchantmentLooting(Holder<Enchantment> enchantment, LivingEntity queryEntity, LootContext context) {
+    // A victim supplied above is only a query holder; its equipped enchantments are not an attacker bonus.
+    Entity attacker = context.getParamOrNull(LootContextParams.ATTACKING_ENTITY);
+    Entity target = context.getParamOrNull(LootContextParams.THIS_ENTITY);
+    DamageSource damage = context.getParamOrNull(LootContextParams.DAMAGE_SOURCE);
+    if (enchantment.is(Enchantments.LOOTING) && target instanceof LivingEntity living
+        && damage != null && damage.is(TinkerDamageTypes.BLEEDING) && !(attacker instanceof LivingEntity)) {
+      return getLooting(living, damage, 0);
+    }
+    int queried = EnchantmentHelper.getEnchantmentLevel(enchantment, queryEntity);
+    if (!enchantment.is(Enchantments.LOOTING) || !(target instanceof LivingEntity living) || damage == null) {
+      return queried;
+    }
+    int vanilla = 0;
+    for (ItemStack stack : enchantment.value().getSlotItems(queryEntity).values()) {
+      vanilla = Math.max(vanilla, stack.getEnchantments().getLevel(enchantment));
+    }
+    // Preserve NeoForge query-event adjustments even when projectile/offhand logic replaces the vanilla base.
+    return Math.max(0, getLooting(living, damage, vanilla) + queried - vanilla);
   }
 
   /** Called when a player leaves the server to clear the face */

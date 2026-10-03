@@ -1,4 +1,4 @@
-name: Isolate optional Diet SDK and verify native tooltip and looting hooks
+name: Port native component tooltips and contextual looting
 on:
   push:
     branches: [port/1.21.1-neoforge]
