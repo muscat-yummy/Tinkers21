@@ -5,6 +5,9 @@ import lombok.Setter;
 import lombok.experimental.Accessors;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.component.DataComponentMap;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.DyedItemColor;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.chat.Component;
@@ -44,6 +47,23 @@ public class TinkersChestBlockEntity extends AbstractChestBlockEntity {
   public void setColor(int color) {
     this.color = color;
     this.hasColor = true;
+  }
+
+  @Override
+  protected void collectImplicitComponents(DataComponentMap.Builder builder) {
+    super.collectImplicitComponents(builder);
+    if (hasColor) {
+      builder.set(DataComponents.DYED_COLOR, new DyedItemColor(color, true));
+    }
+  }
+
+  @Override
+  protected void applyImplicitComponents(DataComponentInput input) {
+    super.applyImplicitComponents(input);
+    DyedItemColor dyed = input.get(DataComponents.DYED_COLOR);
+    if (dyed != null) {
+      setColor(dyed.rgb());
+    }
   }
 
   @Override

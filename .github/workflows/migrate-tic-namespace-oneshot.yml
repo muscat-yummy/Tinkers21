@@ -1,4 +1,4 @@
-name: Port slime armor layers and biome registry keys
+name: Port native loot data and slime tree growers
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -42,10 +42,10 @@ jobs:
               for cls in list(targets):
                   if cls.replace('.', '/') + '.class' not in names:
                       continue
-                  result = subprocess.run(['javap', '-classpath', str(jar), '-p', cls], capture_output=True, text=True, check=True)
+                  result = subprocess.run(['javap', '-classpath', str(jar), '-p'] + (['-c'] if cls.endswith('.TreeGrower') else []) + [cls], capture_output=True, text=True, check=True)
                   print('Public native API:', cls)
                   for line in result.stdout.splitlines():
-                      if 'public ' in line or 'protected ' in line:
+                      if cls.endswith('.TreeGrower') or 'public ' in line or 'protected ' in line:
                           print(line)
                   targets.remove(cls)
           if targets:

@@ -1,28 +1,40 @@
 package slimeknights.tconstruct.world.worldgen.trees;
 
 import net.minecraft.resources.ResourceKey;
-import net.minecraft.util.RandomSource;
-import net.minecraft.world.level.block.grower.AbstractTreeGrower;
+import net.minecraft.world.level.block.grower.TreeGrower;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.block.FoliageType;
 
-public class SlimeTree extends AbstractTreeGrower {
+import java.util.EnumMap;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Optional;
 
-  private final FoliageType foliageType;
+/** Native tree growers, including the original 85 percent tall ender-tree selection. */
+public final class SlimeTree {
+  private static final Map<FoliageType,TreeGrower> GROWERS = new EnumMap<>(FoliageType.class);
 
-  public SlimeTree(FoliageType foliageType) {
-    this.foliageType = foliageType;
+  private SlimeTree() {}
+
+  public static TreeGrower get(FoliageType foliage) {
+    return GROWERS.computeIfAbsent(foliage, SlimeTree::create);
   }
 
-  @Override
-  protected ResourceKey<ConfiguredFeature<?, ?>> getConfiguredFeature(RandomSource random, boolean largeHive) {
-    return switch (this.foliageType) {
+  private static TreeGrower create(FoliageType foliage) {
+    String name = "tconstruct:" + foliage.name().toLowerCase(Locale.ROOT) + "_slime";
+    if (foliage == FoliageType.ENDER) {
+      return new TreeGrower(name, 0.85F, Optional.empty(), Optional.empty(),
+        Optional.of(TinkerStructures.enderSlimeTree), Optional.of(TinkerStructures.enderSlimeTreeTall),
+        Optional.of(TinkerStructures.enderSlimeTree), Optional.of(TinkerStructures.enderSlimeTreeTall));
+    }
+    ResourceKey<ConfiguredFeature<?,?>> feature = switch (foliage) {
       case EARTH -> TinkerStructures.earthSlimeTree;
       case SKY -> TinkerStructures.skySlimeTree;
-      case ENDER -> random.nextFloat() < 0.85f ? TinkerStructures.enderSlimeTreeTall : TinkerStructures.enderSlimeTree;
       case BLOOD -> TinkerStructures.bloodSlimeFungus;
       case ICHOR -> TinkerStructures.ichorSlimeFungus;
+      case ENDER -> throw new IllegalStateException("Ender grower uses two features");
     };
+    return new TreeGrower(name, Optional.empty(), Optional.of(feature), Optional.of(feature));
   }
 }
