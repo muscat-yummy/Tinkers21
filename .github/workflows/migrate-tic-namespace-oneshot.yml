@@ -1,4 +1,4 @@
-name: Port crafting station native recipe identities and verify trimmed remainder slots
+name: Inspect native thrown tool pickup stack and projectile lifecycle
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,8 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.entity.projectile.AbstractArrow': None,
+              'net.minecraft.world.entity.projectile.ThrownTrident': None,
               'net.minecraft.world.item.crafting.CraftingInput': None,
               'net.minecraft.world.item.crafting.CraftingInput$Positioned': ['public '],
               'net.minecraft.world.inventory.CraftingContainer': None,
