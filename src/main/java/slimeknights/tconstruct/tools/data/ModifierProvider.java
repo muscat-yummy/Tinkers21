@@ -386,8 +386,8 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
 
     // general abilities
     buildModifier(ModifierIds.reach)
-      .addModule(AttributeModule.builder(NeoForgeMod.BLOCK_REACH.get(), Operation.ADD_VALUE).eachLevel(1))
-      .addModule(AttributeModule.builder(NeoForgeMod.ENTITY_REACH.get(), Operation.ADD_VALUE).eachLevel(1));
+      .addModule(AttributeModule.builder(Attributes.BLOCK_INTERACTION_RANGE.value(), Operation.ADD_VALUE).eachLevel(1))
+      .addModule(AttributeModule.builder(Attributes.ENTITY_INTERACTION_RANGE.value(), Operation.ADD_VALUE).eachLevel(1));
     buildModifier(ModifierIds.expanded).addModule(new VolatileIntModule(IModifiable.EXPANDED, LevelingInt.eachLevel(1)));
     // fire primer is just expanded now, isn't that neat? this might have a hidden application
     buildModifier(ModifierIds.fireprimer).addModule(new VolatileIntModule(IModifiable.EXPANDED, LevelingInt.flat(1))).levelDisplay(ModifierLevelDisplay.NO_LEVELS);
@@ -1066,7 +1066,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
     buildModifier(ModifierIds.skyfall)
       .levelDisplay(ModifierLevelDisplay.SINGLE_LEVEL)
       // goes from -15% to -25%
-      .addModule(AttributeModule.builder(NeoForgeMod.ENTITY_GRAVITY.get(), Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).amount(-0.05f, -0.1f))
+      .addModule(AttributeModule.builder(Attributes.GRAVITY.value(), Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).amount(-0.05f, -0.1f))
       .addModule(AttributeModule.builder(TinkerAttributes.SAFE_FALL_DISTANCE.get(), Operation.ADD_VALUE).eachLevel(1));
     buildModifier(ModifierIds.godspeed)
       .levelDisplay(ModifierLevelDisplay.SINGLE_LEVEL)
@@ -1198,7 +1198,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       .addModule(StatBoostModule.add(ToolStats.KNOCKBACK_RESISTANCE).eachLevel(0.15f))
       .addModule(AttributeModule.builder(Attributes.KNOCKBACK_RESISTANCE, Operation.ADD_MULTIPLIED_BASE).toolItem(ItemPredicate.tag(ARMOR).inverted()).eachLevel(0.1f))
       .addModule(AttributeModule.builder(Attributes.MOVEMENT_SPEED, Operation.ADD_MULTIPLIED_BASE).eachLevel(-0.1f))
-      .addModule(AttributeModule.builder(NeoForgeMod.ENTITY_GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.05f));
+      .addModule(AttributeModule.builder(Attributes.GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.05f));
     buildModifier(ModifierIds.featherweight)
       .addModule(StatBoostModule.add(ToolStats.DRAW_SPEED).eachLevel(0.05f))
       .addModule(StatBoostModule.add(ToolStats.ACCURACY).eachLevel(0.05f))
@@ -1462,7 +1462,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       .addModule(StatBoostModule.add(ToolStats.PROJECTILE_DAMAGE).eachLevel(0.75f))
       .addModule(ProtectionModule.builder().toolTag(ARMOR).eachLevel(1.25f))
       .addModule(AttributeModule.builder(Attributes.MOVEMENT_SPEED, Operation.ADD_MULTIPLIED_BASE).eachLevel(-0.1f))
-      .addModule(AttributeModule.builder(NeoForgeMod.ENTITY_GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.05f));
+      .addModule(AttributeModule.builder(Attributes.GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.05f));
     buildModifier(ModifierIds.shock)
       .addModule(ConditionalMeleeDamageModule.builder()
         .formula()
@@ -1516,7 +1516,7 @@ public class ModifierProvider extends AbstractModifierProvider implements ICondi
       // for defensive builds, offhand debuffs main hand attack speed
       .addModule(AttributeModule.builder(Attributes.ATTACK_SPEED, Operation.ADD_MULTIPLIED_TOTAL).slots(EquipmentSlot.OFFHAND).toolItem(ItemPredicate.tag(TinkerTags.Items.HELD_ARMOR)).eachLevel(-0.1f))
       .addModule(AttributeModule.builder(Attributes.MOVEMENT_SPEED, Operation.ADD_MULTIPLIED_TOTAL).slots(ARMOR_SLOTS).eachLevel(-0.1f))
-      .addModule(AttributeModule.builder(NeoForgeMod.ENTITY_GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.1f));
+      .addModule(AttributeModule.builder(Attributes.GRAVITY, Operation.ADD_MULTIPLIED_TOTAL).tooltipStyle(TooltipStyle.PERCENT).eachLevel(0.1f));
     // multiply valiant bonus by 4 for entities with fewer armor slots (slimes basically)
     buildModifier(ModifierIds.valiant)
       .addModule(ConditionalMeleeDamageModule.builder()

@@ -1,4 +1,4 @@
-name: Verify native held armor and base weapon attribute IDs
+name: Verify native reach gravity and effect predicate bindings
 on:
   push:
     branches: [port/1.21.1-neoforge]

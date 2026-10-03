@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.library.json.predicate;
 
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -15,9 +17,13 @@ import slimeknights.mantle.data.predicate.entity.LivingEntityPredicate;
 public record HasMobEffectPredicate(MobEffect effect) implements LivingEntityPredicate {
   public static final RecordLoadable<HasMobEffectPredicate> LOADER = RecordLoadable.create(Loadables.MOB_EFFECT.requiredField("effect", HasMobEffectPredicate::effect), HasMobEffectPredicate::new);
 
+  public HasMobEffectPredicate(Holder<MobEffect> effect) {
+    this(effect.value());
+  }
+
   @Override
   public boolean matches(LivingEntity living) {
-    return living.hasEffect(effect);
+    return living.hasEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect));
   }
 
   @Override
