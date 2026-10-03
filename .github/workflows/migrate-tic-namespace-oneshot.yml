@@ -1,4 +1,4 @@
-name: Verify dynamic enchantment keys and persistent item cures
+name: Verify native fluid effect holders and configurable item cures
 on:
   push:
     branches: [port/1.21.1-neoforge]

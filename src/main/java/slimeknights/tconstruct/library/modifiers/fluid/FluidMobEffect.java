@@ -2,6 +2,9 @@ package slimeknights.tconstruct.library.modifiers.fluid;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.chat.Component;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
@@ -19,7 +22,6 @@ import slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffe
 import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Locale;
-import java.util.stream.Collectors;
 
 /**
  * Common logic for effects between {@link slimeknights.tconstruct.library.modifiers.fluid.entity.MobEffectFluidEffect} and {@link slimeknights.tconstruct.library.modifiers.fluid.block.MobEffectCloudFluidEffect}
@@ -53,9 +55,9 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
 
   /** Creates the final effect */
   public MobEffectInstance effectWithTime(int time) {
-    MobEffectInstance instance = new MobEffectInstance(effect, time, this.level - 1);
+    MobEffectInstance instance = new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect), time, this.level - 1);
     if (curativeItems != null) {
-      instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
+      EffectCureUtil.setItemCures(instance, curativeItems);
     }
     return instance;
   }
@@ -84,7 +86,7 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
       used = 1;
     } else {
       // add and set both have distinct behavior under an existing effect, same otherwise
-      MobEffectInstance existingInstance = target.getEffect(effect);
+      MobEffectInstance existingInstance = target.getEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect));
       int amplifier = amplifier();
       if (existingInstance != null && existingInstance.getAmplifier() >= amplifier) {
         // if the existing level is larger, just skip, would be a cheese to increase said level
@@ -152,6 +154,18 @@ public record FluidMobEffect(MobEffect effect, int time, int level, @Nullable Li
     private final ImmutableList.Builder<FluidMobEffect> effects = ImmutableList.builder();
 
     private Builder() {}
+
+    public Builder effectCure(Holder<MobEffect> effect, int time, int level, Item... curativeItems) {
+      return effectCure(effect.value(), time, level, curativeItems);
+    }
+
+    public Builder effect(Holder<MobEffect> effect, int time, int level) {
+      return effect(effect.value(), time, level);
+    }
+
+    public Builder effect(Holder<MobEffect> effect, int time) {
+      return effect(effect.value(), time);
+    }
 
     /** Adds an effect to the builder with the passed cures. If none are passed, effect will have no cure*/
     public Builder effectCure(MobEffect effect, int time, int level, Item... curativeItems) {
