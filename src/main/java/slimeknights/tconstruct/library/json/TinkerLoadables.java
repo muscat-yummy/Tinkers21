@@ -39,7 +39,7 @@ import java.util.Set;
 @SuppressWarnings("deprecation")
 public class TinkerLoadables {
   /* Enums */
-  public static final StringLoadable<Operation> OPERATION = new EnumLoadable<>(Operation.class);
+  public static final StringLoadable<Operation> OPERATION = AttributeOperationLoadable.INSTANCE;
   public static final StringLoadable<EquipmentSlot> EQUIPMENT_SLOT = new EnumLoadable<>(EquipmentSlot.class);
   public static final Loadable<Set<EquipmentSlot>> EQUIPMENT_SLOT_SET = EQUIPMENT_SLOT.set();
   public static final StringLoadable<ArmorItem.Type> ARMOR_SLOT = new EnumLoadable<>(ArmorItem.Type.class);
