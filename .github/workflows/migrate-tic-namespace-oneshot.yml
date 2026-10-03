@@ -1,4 +1,4 @@
-name: Port entity and tool container fluid component synchronization
+name: Preserve item cure selection and armor removal effect policies
 on:
   push:
     branches: [port/1.21.1-neoforge]

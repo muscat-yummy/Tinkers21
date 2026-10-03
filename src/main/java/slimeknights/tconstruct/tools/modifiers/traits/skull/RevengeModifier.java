@@ -2,6 +2,8 @@ package slimeknights.tconstruct.tools.modifiers.traits.skull;
 
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
+import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -32,8 +34,7 @@ public class RevengeModifier extends NoLevelsModifier implements EquipmentChange
     LivingEntity living = context.getEntity();
     if (trueSource != null && trueSource != living) { // no making yourself mad with slurping or self-destruct or alike
       MobEffectInstance effect = new MobEffectInstance(MobEffects.DAMAGE_BOOST, 300);
-      effect.getCurativeItems().clear();
-      effect.getCurativeItems().add(new ItemStack(living.getItemBySlot(slotType).getItem()));
+      EffectCureUtil.setItemCures(effect, List.of(living.getItemBySlot(slotType).getItem()));
       living.addEffect(effect);
     }
   }
@@ -44,7 +45,7 @@ public class RevengeModifier extends NoLevelsModifier implements EquipmentChange
       IToolStackView replacement = context.getReplacementTool();
       if (replacement == null || replacement.getModifierLevel(this) == 0) {
         // cure effects using the helmet
-        context.getEntity().curePotionEffects(new ItemStack(tool.getItem()));
+        EffectCureUtil.cure(context.getEntity(), new ItemStack(tool.getItem()));
       }
     }
   }

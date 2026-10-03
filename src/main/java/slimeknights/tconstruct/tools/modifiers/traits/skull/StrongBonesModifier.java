@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.tools.modifiers.traits.skull;
 
 import net.minecraft.world.effect.MobEffectInstance;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
+import java.util.List;
 import net.minecraft.world.effect.MobEffects;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
@@ -48,8 +50,7 @@ public class StrongBonesModifier extends SingleLevelModifier {
     int level = ModifierUtil.getModifierLevel(helmet, TinkerModifiers.strongBones.getId());
     if (level > 0) {
       MobEffectInstance effect = new MobEffectInstance(MobEffects.DAMAGE_RESISTANCE, flat + eachLevel * level);
-      effect.getCurativeItems().clear();
-      effect.getCurativeItems().add(new ItemStack(helmet.getItem()));
+      EffectCureUtil.setItemCures(effect, List.of(helmet.getItem()));
       // on simulate, don't apply the effect, just ask if we can apply
       didSomething = action.execute() ? living.addEffect(effect) : living.canBeAffected(effect);
       // quick exit on simulate: no more information needed
@@ -59,7 +60,7 @@ public class StrongBonesModifier extends SingleLevelModifier {
     }
     level = ArmorLevelModule.getLevel(living, CALCIFIABLE);
     if (level > 0) {
-      MobEffectInstance effect = new MobEffectInstance(TinkerModifiers.calcifiedEffect.get(), flat + eachLevel * level, 0);
+      MobEffectInstance effect = new MobEffectInstance(TinkerModifiers.calcifiedEffect.get().holder(), flat + eachLevel * level, 0);
       didSomething |= action.execute() ? living.addEffect(effect) : living.canBeAffected(effect);
     }
     return didSomething;

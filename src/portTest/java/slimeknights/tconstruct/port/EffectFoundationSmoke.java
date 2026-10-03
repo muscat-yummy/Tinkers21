@@ -96,6 +96,11 @@ public final class EffectFoundationSmoke {
     if (custom.getCures().contains(stick) || !custom.getCures().contains(EffectCures.PROTECTED_BY_TOTEM)) {
       throw new AssertionError("Empty curative list must remove item cures and retain totem removal");
     }
+    if (slimeknights.tconstruct.library.utils.EffectCureUtil.hasItemCures(custom)
+        || !slimeknights.tconstruct.library.utils.EffectCureUtil.hasItemCures(copied)) {
+      throw new AssertionError("Item-curable policy confused totem/addon cures with custom item cures");
+    }
+    System.out.println("Item-curable effect policy separates custom item cures from totem/addon cures: PASS");
     slimeknights.tconstruct.library.utils.EffectCureUtil.setItemCures(custom,
       List.of(net.minecraft.world.item.Items.MILK_BUCKET, net.minecraft.world.item.Items.HONEY_BOTTLE));
     if (!custom.getCures().contains(EffectCures.MILK) || !custom.getCures().contains(EffectCures.HONEY)) {

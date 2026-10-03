@@ -3,6 +3,7 @@ package slimeknights.tconstruct.tools.modifiers.traits.skull;
 import net.minecraft.tags.DamageTypeTags;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
@@ -26,7 +27,7 @@ public class PlagueModifier extends NoLevelsModifier implements DamageDealtModif
       // copy all negative effects to target
       LivingEntity attacker = context.getEntity();
       for (MobEffectInstance effect : context.getEntity().getActiveEffects()) {
-        if (!effect.getEffect().isBeneficial() && !effect.getCurativeItems().isEmpty()) {
+        if (!effect.getEffect().value().isBeneficial() && EffectCureUtil.hasItemCures(effect)) {
           target.addEffect(new MobEffectInstance(effect), attacker);
         }
       }

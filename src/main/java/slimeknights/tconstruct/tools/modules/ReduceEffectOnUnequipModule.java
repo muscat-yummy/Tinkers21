@@ -2,6 +2,7 @@ package slimeknights.tconstruct.tools.modules;
 
 import net.minecraft.world.effect.MobEffectCategory;
 import net.minecraft.world.effect.MobEffectInstance;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.data.loadable.primitive.EnumLoadable;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
@@ -47,7 +48,7 @@ public record ReduceEffectOnUnequipModule(MobEffectCategory category, LevelingVa
       if (percent != 0) {
         // iterate all matching effects, updating the duration
         for (MobEffectInstance instance : entity.getActiveEffects()) {
-          if (!instance.isInfiniteDuration() && instance.getEffect().getCategory() == this.category && !instance.getCurativeItems().isEmpty()) {
+          if (!instance.isInfiniteDuration() && instance.getEffect().value().getCategory() == this.category && EffectCureUtil.hasItemCures(instance)) {
             instance.duration = Math.max(1, (int) (instance.duration * (1 - percent)));
           }
         }

@@ -26,10 +26,18 @@ public final class EffectCureUtil {
     return EffectCure.get(ITEM_PREFIX + BuiltInRegistries.ITEM.getKey(item));
   }
 
+  /** Identifies item cures separately from totem and other non-item cures. */
+  public static boolean isItemCure(EffectCure cure) {
+    return cure == EffectCures.MILK || cure == EffectCures.HONEY || cure.name().startsWith(ITEM_PREFIX);
+  }
+
+  public static boolean hasItemCures(MobEffectInstance instance) {
+    return instance.getCures().stream().anyMatch(EffectCureUtil::isItemCure);
+  }
+
   /** Replaces item cures while retaining native non-item cures, including totem protection. */
   public static void setItemCures(MobEffectInstance instance, List<Item> items) {
-    instance.getCures().removeIf(cure ->
-      cure == EffectCures.MILK || cure == EffectCures.HONEY || cure.name().startsWith(ITEM_PREFIX));
+    instance.getCures().removeIf(EffectCureUtil::isItemCure);
     for (Item item : items) {
       instance.getCures().add(forItem(item));
     }
