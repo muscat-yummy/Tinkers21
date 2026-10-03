@@ -1,4 +1,4 @@
-name: Verify native reach gravity and effect predicate bindings
+name: Inspect exact native liquid block and fire APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,8 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
+              'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight('],
               'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers('],
               'net.minecraft.world.item.component.ItemAttributeModifiers': ['public '],
               'net.minecraft.world.item.component.ItemAttributeModifiers$Builder': ['public '],
