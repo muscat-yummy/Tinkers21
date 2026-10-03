@@ -1,4 +1,4 @@
-name: Persist common tag migration with concurrent port commits and inspect item validation
+name: Port native recipe holder lookups while retaining mutable alloy caches and ID ordering
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,8 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.item.crafting.RecipeManager': ['public '],
+              'net.minecraft.world.item.crafting.RecipeHolder': ['public '],
               'net.minecraft.world.item.component.CustomData': ['public '],
               'net.minecraft.world.item.Item$TooltipContext': ['public '],
               'net.minecraft.network.syncher.SynchedEntityData$Builder': ['public '],

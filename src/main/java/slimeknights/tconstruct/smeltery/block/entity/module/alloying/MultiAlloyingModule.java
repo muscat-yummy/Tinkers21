@@ -47,7 +47,9 @@ public class MultiAlloyingModule implements IAlloyingModule {
    */
   private List<AlloyRecipe> getRecipes() {
     if (lastRecipes == null) {
-      lastRecipes = getLevel().getRecipeManager().getRecipesFor(TinkerRecipeTypes.ALLOYING.get(), alloyTank, getLevel());
+      lastRecipes = getLevel().getRecipeManager().getRecipesFor(TinkerRecipeTypes.ALLOYING.get(), alloyTank, getLevel())
+        .stream().map(net.minecraft.world.item.crafting.RecipeHolder::value)
+        .collect(java.util.stream.Collectors.toCollection(java.util.ArrayList::new));
     }
     return lastRecipes;
   }
