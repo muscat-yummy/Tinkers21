@@ -1,4 +1,4 @@
-name: Port native tool sub-predicates and critical impact events
+name: Port native shield block and hotbar render events
 on:
   push:
     branches: [port/1.21.1-neoforge]
