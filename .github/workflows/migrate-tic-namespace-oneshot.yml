@@ -1,4 +1,4 @@
-name: Verify native fluid effect holders and configurable item cures
+name: Verify ordered alloy and material condition lists
 on:
   push:
     branches: [port/1.21.1-neoforge]
