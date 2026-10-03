@@ -1,4 +1,4 @@
-name: Port remaining effect holders food and carry tick behavior
+name: Migrate reviewed native common tag fields with parser and API checks
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -348,6 +348,7 @@ jobs:
           python3 scripts/port/migrate_tic_attribute_operations.py
           python3 scripts/port/migrate_tic_finished_recipe_ids.py
           python3 scripts/port/migrate_tic_recipe_result_lookup.py
+          python3 scripts/port/migrate_tic_common_tags.py
       - name: Verify migration idempotence before persisting source
         shell: python
         run: |
@@ -355,7 +356,7 @@ jobs:
           paths = sorted(pathlib.Path('src/main/java').rglob('*.java'))
           paths.append(pathlib.Path('src/main/resources/META-INF/accesstransformer.cfg'))
           before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
-          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_wrapped_ingredients.py', 'migrate_tic_access_transformer.py', 'migrate_tic_attribute_operations.py', 'migrate_tic_finished_recipe_ids.py', 'migrate_tic_recipe_result_lookup.py'):
+          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_wrapped_ingredients.py', 'migrate_tic_access_transformer.py', 'migrate_tic_attribute_operations.py', 'migrate_tic_finished_recipe_ids.py', 'migrate_tic_recipe_result_lookup.py', 'migrate_tic_common_tags.py'):
               subprocess.run(['python3', 'scripts/port/' + script], check=True)
           changed = [str(p) for p in paths if before[str(p)] != hashlib.sha256(p.read_bytes()).hexdigest()]
           if changed:
