@@ -1,4 +1,4 @@
-name: Verify material entity codec and native advancement builders
+name: Inspect native slime spawning and compost registration
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,9 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.entity.SpawnPlacementTypes': ['public '],
+              'net.minecraft.world.level.block.ComposterBlock': ['COMPOSTABLES', 'add('],
+              'net.minecraft.world.entity.EntityType': ['create('],
               'net.minecraft.advancements.critereon.PlayerTrigger$TriggerInstance': ['public '],
               'net.minecraft.advancements.critereon.PlayerInteractTrigger$TriggerInstance': ['public '],
               'net.minecraft.advancements.critereon.ItemPredicate$Builder': ['public '],
