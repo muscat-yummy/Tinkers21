@@ -1,4 +1,4 @@
-name: Verify golden equipment attributes and native base attack IDs
+name: Verify native held armor and base weapon attribute IDs
 on:
   push:
     branches: [port/1.21.1-neoforge]
