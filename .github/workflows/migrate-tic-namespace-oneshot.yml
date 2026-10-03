@@ -1,4 +1,4 @@
-name: Port material item data to native components with snapshot and remap checks
+name: Preserve component patches in faucet and smeltery tank synchronization
 on:
   push:
     branches: [port/1.21.1-neoforge]

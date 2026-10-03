@@ -3,6 +3,7 @@ package slimeknights.tconstruct.smeltery.network;
 import lombok.AllArgsConstructor;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.FriendlyByteBuf;
+import slimeknights.tconstruct.library.utils.RegistryBuffer;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.network.NetworkEvent.Context;
 import slimeknights.mantle.network.packet.BlockEntityPacket;
@@ -25,7 +26,7 @@ public class SmelteryTankUpdatePacket implements BlockEntityPacket<ISmelteryTank
     int size = buffer.readVarInt();
     fluids = new ArrayList<>(size);
     for (int i = 0; i < size; i++) {
-      fluids.add(buffer.readFluidStack());
+      fluids.add(FluidStack.OPTIONAL_STREAM_CODEC.decode(RegistryBuffer.require(buffer)));
     }
   }
 
@@ -34,7 +35,7 @@ public class SmelteryTankUpdatePacket implements BlockEntityPacket<ISmelteryTank
     buffer.writeBlockPos(pos);
     buffer.writeVarInt(fluids.size());
     for (FluidStack fluid : fluids) {
-      buffer.writeFluidStack(fluid);
+      FluidStack.OPTIONAL_STREAM_CODEC.encode(RegistryBuffer.require(buffer), fluid);
     }
   }
 
