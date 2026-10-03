@@ -1,4 +1,4 @@
-name: Preserve native table and multiblock renderer bounding boxes
+name: Inspect native positioned crafting input and recipe holder synchronization
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,10 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.item.crafting.CraftingInput': None,
+              'net.minecraft.world.item.crafting.CraftingInput$Positioned': ['public '],
+              'net.minecraft.world.inventory.CraftingContainer': None,
+              'net.neoforged.neoforge.common.CommonHooks': ['CraftingPlayer('],
               'net.minecraft.client.renderer.LevelRenderer': ['renderLineBox(', 'renderShape('],
               'net.minecraft.client.renderer.blockentity.BlockEntityRenderer': ['public '],
               'net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension': ['public '],
