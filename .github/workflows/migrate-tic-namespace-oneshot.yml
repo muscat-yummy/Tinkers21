@@ -1,4 +1,4 @@
-name: Verify slime bootstrap and native advancement criteria
+name: Verify native item predicates and continued full source compilation
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,7 +35,7 @@ jobs:
           targets = {
               'net.minecraft.advancements.critereon.EntityPredicate': ['public '],
               'net.minecraft.advancements.critereon.EntityPredicate$Builder': ['public '],
-              'net.minecraft.advancements.critereon.CustomDataPredicate': ['public '],
+              'net.minecraft.advancements.critereon.ItemCustomDataPredicate': ['public '],
               'net.minecraft.advancements.critereon.ItemSubPredicates': ['public '],
               'net.minecraft.world.entity.SpawnPlacementTypes': ['public '],
               'net.minecraft.world.level.block.ComposterBlock': ['COMPOSTABLES', 'add('],
