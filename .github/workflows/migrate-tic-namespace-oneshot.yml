@@ -1,4 +1,4 @@
-name: Verify read-only native tooltip policy and legacy HideFlags
+name: Verify actual NeoForge conditional recipe decoding and tooltip policy
 on:
   push:
     branches: [port/1.21.1-neoforge]
