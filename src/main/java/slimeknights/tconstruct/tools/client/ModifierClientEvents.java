@@ -47,6 +47,7 @@ import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryC
 import slimeknights.tconstruct.library.tools.context.EquipmentChangeContext;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.helper.TooltipUtil;
+import slimeknights.tconstruct.library.tools.helper.ToolTooltipPolicy;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
 import slimeknights.tconstruct.library.tools.item.ranged.ModifiableBowItem;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -67,7 +68,7 @@ public class ModifierClientEvents {
   @SubscribeEvent
   static void skipToolAttributes(GatherSkippedAttributeTooltipsEvent event) {
     if (event.getStack().getItem() instanceof IModifiableDisplay tool
-        && TooltipUtil.shouldHideAttributes(tool.getToolDefinition())) {
+        && ToolTooltipPolicy.hideAttributes(event.getStack(), TooltipUtil.shouldHideAttributes(tool.getToolDefinition()))) {
       event.setSkipAll(true);
     }
   }

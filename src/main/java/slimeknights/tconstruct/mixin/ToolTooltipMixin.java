@@ -13,6 +13,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import slimeknights.tconstruct.library.tools.item.IModifiableDisplay;
+import slimeknights.tconstruct.library.tools.helper.ToolTooltipPolicy;
 
 /** TiC renders enchantments through its modifier tooltip, without mutating component data. */
 @Mixin(ItemStack.class)
@@ -22,7 +23,8 @@ public abstract class ToolTooltipMixin {
       DataComponentType<T> type, Item.TooltipContext context, Consumer<Component> output,
       TooltipFlag flags, CallbackInfo ci) {
     if ((type == DataComponents.ENCHANTMENTS || type == DataComponents.STORED_ENCHANTMENTS)
-        && ((ItemStack) (Object) this).getItem() instanceof IModifiableDisplay) {
+        && ((ItemStack) (Object) this).getItem() instanceof IModifiableDisplay
+        && ToolTooltipPolicy.hideEnchantments((ItemStack) (Object) this)) {
       ci.cancel();
     }
   }
