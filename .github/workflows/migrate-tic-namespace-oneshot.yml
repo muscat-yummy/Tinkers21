@@ -1,4 +1,4 @@
-name: Verify ordered alloy and material condition lists
+name: Inspect native vertex chains and entity data codecs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,9 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'com.mojang.blaze3d.vertex.VertexConsumer': None,
+              'net.minecraft.network.syncher.EntityDataSerializer': ['public '],
+              'net.minecraft.network.codec.StreamCodec': ['public '],
               'net.minecraft.world.entity.LivingEntity': ['onEffectRemoved(', 'onEffectAdded(', 'getAttributeValue(', 'jumpFromGround(', 'isSuppressingSlidingDownLadder('],
               'net.minecraft.world.food.FoodProperties$Builder': ['public '],
               'net.minecraft.world.food.FoodProperties': ['public '],
