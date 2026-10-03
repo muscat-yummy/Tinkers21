@@ -2,6 +2,8 @@ package slimeknights.tconstruct.library.tools.helper;
 
 import lombok.AccessLevel;
 import lombok.NoArgsConstructor;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -113,7 +115,7 @@ public final class ModifierUtil {
    */
   public static int getModifierLevel(ItemStack stack, ModifierId modifier) {
     if (!stack.isEmpty() && stack.is(TinkerTags.Items.MODIFIABLE)) {
-      CompoundTag nbt = stack.getTag();
+      CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
       if (nbt != null && nbt.contains(ToolStack.TAG_MODIFIERS, Tag.TAG_LIST)) {
         ListTag list = nbt.getList(ToolStack.TAG_MODIFIERS, Tag.TAG_COMPOUND);
         int size = list.size();
@@ -134,7 +136,7 @@ public final class ModifierUtil {
   /** Checks if the given stack has upgrades */
   public static boolean hasUpgrades(ItemStack stack) {
     if (!stack.isEmpty() && stack.is(TinkerTags.Items.MODIFIABLE)) {
-      CompoundTag nbt = stack.getTag();
+      CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
       return nbt != null && !nbt.getList(ToolStack.TAG_UPGRADES, Tag.TAG_COMPOUND).isEmpty();
     }
     return false;
@@ -152,7 +154,7 @@ public final class ModifierUtil {
 
   /** Shortcut to get a volatile flag when the tool stack is not needed otherwise */
   public static boolean checkVolatileFlag(ItemStack stack, ResourceLocation flag) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(ToolStack.TAG_VOLATILE_MOD_DATA, Tag.TAG_COMPOUND)) {
       return nbt.getCompound(ToolStack.TAG_VOLATILE_MOD_DATA).getBoolean(flag.toString());
     }
@@ -161,7 +163,7 @@ public final class ModifierUtil {
 
   /** Shortcut to get a persistent flag when the tool stack is not needed otherwise */
   public static boolean checkPersistentPresent(ItemStack stack, ResourceLocation key) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(ToolStack.TAG_VOLATILE_MOD_DATA, Tag.TAG_COMPOUND)) {
       return nbt.getCompound(ToolStack.TAG_VOLATILE_MOD_DATA).contains(key.toString());
     }
@@ -170,7 +172,7 @@ public final class ModifierUtil {
 
   /** Shortcut to get a volatile int value when the tool stack is not needed otherwise */
   public static int getVolatileInt(ItemStack stack, ResourceLocation flag) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(ToolStack.TAG_VOLATILE_MOD_DATA, Tag.TAG_COMPOUND)) {
       return nbt.getCompound(ToolStack.TAG_VOLATILE_MOD_DATA).getInt(flag.toString());
     }
@@ -179,7 +181,7 @@ public final class ModifierUtil {
 
   /** Shortcut to get a volatile int value when the tool stack is not needed otherwise */
   public static int getPersistentInt(ItemStack stack, ResourceLocation flag, int defealtValue) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(ToolStack.TAG_PERSISTENT_MOD_DATA, Tag.TAG_COMPOUND)) {
       CompoundTag persistent = nbt.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA);
       String flagString = flag.toString();
@@ -192,7 +194,7 @@ public final class ModifierUtil {
 
   /** Shortcut to get a persistent string value when the tool stack is not needed otherwise */
   public static String getPersistentString(ItemStack stack, ResourceLocation flag) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(ToolStack.TAG_PERSISTENT_MOD_DATA, Tag.TAG_COMPOUND)) {
       return nbt.getCompound(ToolStack.TAG_PERSISTENT_MOD_DATA).getString(flag.toString());
     }

@@ -1,4 +1,4 @@
-name: Port native dispenser record accessors and inspect projectile combat APIs
+name: Port read only modifier component queries and inspect native arrow item APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,6 +35,10 @@ jobs:
           targets = {
               'net.neoforged.neoforge.event.level.BlockDropsEvent': ['public '],
               'net.minecraft.core.dispenser.BlockSource': ['public '],
+              'net.minecraft.world.item.ArrowItem': None,
+              'net.neoforged.neoforge.common.extensions.IArrowItemExtension': ['public '],
+              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['public '],
+              'net.minecraft.world.item.enchantment.Enchantments': ['public '],
               'net.minecraft.world.entity.projectile.AbstractHurtingProjectile': None,
               'net.minecraft.world.entity.projectile.AbstractArrow': None,
               'net.minecraft.world.entity.projectile.ThrownTrident': None,
