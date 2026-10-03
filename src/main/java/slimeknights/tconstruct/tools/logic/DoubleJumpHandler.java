@@ -1,12 +1,15 @@
 package slimeknights.tconstruct.tools.logic;
 
+import net.minecraft.world.entity.ai.attributes.Attributes;
+
+import net.minecraft.core.registries.BuiltInRegistries;
+
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.neoforged.neoforge.common.NeoForgeMod;
 import net.neoforged.neoforge.event.entity.living.LivingEvent.LivingJumpEvent;
 import net.neoforged.neoforge.event.entity.living.LivingFallEvent;
 import net.neoforged.bus.api.SubscribeEvent;
@@ -29,7 +32,7 @@ public class DoubleJumpHandler {
   @SubscribeEvent
   static void onJump(LivingJumpEvent event) {
     LivingEntity living = event.getEntity();
-    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(NeoForgeMod.ENTITY_GRAVITY.get()) < 0)) {
+    if (living.onGround() || (living.verticalCollision && !living.verticalCollisionBelow && living.getAttributeValue(Attributes.GRAVITY) < 0)) {
       PersistentDataCapability.getOptionalData(living).ifPresent(data -> data.remove(JUMPS));
     }
   }
@@ -49,7 +52,7 @@ public class DoubleJumpHandler {
     // validate preconditions, no using when swimming, elytra, or on the ground
     if (!entity.onGround() && !entity.onClimbable() && !entity.isInWaterOrBubble()) {
       // determine max jumps
-      int extraJumps = Mth.floor(entity.getAttributeValue(TinkerAttributes.JUMP_COUNT.get())) - 1;
+      int extraJumps = Mth.floor(entity.getAttributeValue(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(TinkerAttributes.JUMP_COUNT.get()))) - 1;
       if (extraJumps > 0) {
         // check that we can take more jumps
         ModDataNBT data = PersistentDataCapability.getOrWarn(entity);

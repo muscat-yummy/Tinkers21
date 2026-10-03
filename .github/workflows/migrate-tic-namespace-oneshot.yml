@@ -1,4 +1,4 @@
-name: Port canonical thrown tool pickup stack and retained channeling modifier hooks
+name: Port event attribute holders soulbound metadata and native block experience drops
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,7 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.neoforged.neoforge.event.level.BlockDropsEvent': ['public '],
               'net.minecraft.world.entity.projectile.AbstractArrow': None,
               'net.minecraft.world.entity.projectile.ThrownTrident': None,
               'net.minecraft.world.item.crafting.CraftingInput': None,
