@@ -46,7 +46,7 @@ import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
 import net.minecraft.world.level.levelgen.placement.PlacedFeature;
 import net.minecraft.world.level.material.MapColor;
 import net.minecraft.world.level.material.PushReaction;
-import net.minecraftforge.common.PlantType;
+import net.minecraft.tags.TagKey;
 import net.neoforged.neoforge.common.world.BiomeModifier;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.event.entity.EntityAttributeCreationEvent;
@@ -115,7 +115,8 @@ public final class TinkerWorld extends TinkerModule {
     MobEquipmentManager.init();
   }
 
-  public static final PlantType SLIME_PLANT_TYPE = PlantType.get("slime");
+  public static final TagKey<Block> SLIME_PLANT_TYPE = TagKey.create(Registries.BLOCK, TConstruct.getResource("slime_plants"));
+  public static final TagKey<Block> PLAINS_PLANT_TYPE = TagKey.create(Registries.BLOCK, TConstruct.getResource("plains_plants"));
 
   /** Creative tab for anything that is naturally found in the world */
   public static final RegistryObject<CreativeModeTab> tabWorld = CREATIVE_TABS.register(

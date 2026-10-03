@@ -209,6 +209,13 @@ public class BlockTagProvider extends BlockTagsProvider {
 
 
   private void addWorld() {
+    // Native plant classifications replacing the removed Forge PlantType contract.
+    tagBlocks(TinkerWorld.SLIME_PLANT_TYPE, TinkerWorld.slimeTallGrass, TinkerWorld.slimeFern, TinkerWorld.slimeSapling);
+    this.tag(TinkerWorld.PLAINS_PLANT_TYPE).addTags(BlockTags.FLOWERS, BlockTags.SAPLINGS)
+      .add(Blocks.SHORT_GRASS, Blocks.TALL_GRASS, Blocks.FERN, Blocks.LARGE_FERN,
+        Blocks.AZALEA, Blocks.FLOWERING_AZALEA, Blocks.SWEET_BERRY_BUSH,
+        Blocks.BAMBOO, Blocks.BAMBOO_SAPLING, Blocks.SMALL_DRIPLEAF, Blocks.BIG_DRIPLEAF, Blocks.BIG_DRIPLEAF_STEM);
+
     // ores
     this.tag(TinkerTags.Blocks.ORES_COBALT).add(TinkerWorld.cobaltOre.get());
     this.tag(Tags.Blocks.ORES).addTag(TinkerTags.Blocks.ORES_COBALT);

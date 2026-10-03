@@ -1,4 +1,4 @@
-name: Port named native harvest tiers and preserve addon ordering
+name: Port native plant support tags and slime grass codec
 on:
   push:
     branches: [port/1.21.1-neoforge]
