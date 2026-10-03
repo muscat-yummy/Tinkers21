@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.tools.logic;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multiset;
 import it.unimi.dsi.fastutil.ints.IntOpenHashSet;
