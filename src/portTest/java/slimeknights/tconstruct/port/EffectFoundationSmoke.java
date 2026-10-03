@@ -55,6 +55,31 @@ public final class EffectFoundationSmoke {
     if (new MobEffectInstance(noMilk).getCures().contains(EffectCures.MILK)) {
       throw new AssertionError("Effect copy lost milk immunity");
     }
+    var custom = new MobEffectInstance(normal);
+    var addon = net.neoforged.neoforge.common.EffectCure.get("othermod:custom");
+    custom.getCures().add(addon);
+    slimeknights.tconstruct.library.utils.EffectCureUtil.setItemCures(custom, List.of(net.minecraft.world.item.Items.STICK));
+    var stick = slimeknights.tconstruct.library.utils.EffectCureUtil.forItem(net.minecraft.world.item.Items.STICK);
+    if (custom.getCures().contains(EffectCures.MILK) || !custom.getCures().contains(stick)
+        || !custom.getCures().contains(EffectCures.PROTECTED_BY_TOTEM) || !custom.getCures().contains(addon)) {
+      throw new AssertionError("Custom item cure lost non-item cures or retained milk");
+    }
+    var copied = new MobEffectInstance(custom);
+    if (!copied.getCures().contains(stick)
+        || net.neoforged.neoforge.common.EffectCure.CODEC.parse(com.mojang.serialization.JsonOps.INSTANCE,
+          net.neoforged.neoforge.common.EffectCure.CODEC.encodeStart(com.mojang.serialization.JsonOps.INSTANCE, stick).getOrThrow()).getOrThrow() != stick) {
+      throw new AssertionError("Custom item cure lost copy or persistent codec identity");
+    }
+    slimeknights.tconstruct.library.utils.EffectCureUtil.setItemCures(custom, List.of());
+    if (custom.getCures().contains(stick) || !custom.getCures().contains(EffectCures.PROTECTED_BY_TOTEM)) {
+      throw new AssertionError("Empty curative list must remove item cures and retain totem removal");
+    }
+    slimeknights.tconstruct.library.utils.EffectCureUtil.setItemCures(custom,
+      List.of(net.minecraft.world.item.Items.MILK_BUCKET, net.minecraft.world.item.Items.HONEY_BOTTLE));
+    if (!custom.getCures().contains(EffectCures.MILK) || !custom.getCures().contains(EffectCures.HONEY)) {
+      throw new AssertionError("Vanilla curative items must use native cures");
+    }
+    System.out.println("Custom item cures, empty lists, native milk/honey, copy/codec identity and retained totem/addon cures: PASS");
     System.out.println("Native effect holder templates, stable legacy IDs/scaling, milk immunity and totem removal: PASS");
   }
 }

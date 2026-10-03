@@ -72,7 +72,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.function.Supplier;
-import java.util.stream.Collectors;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 
 import static java.util.Objects.requireNonNullElse;
 import static slimeknights.tconstruct.TConstruct.RANDOM;
@@ -244,11 +244,11 @@ public interface MobEffectModule extends ModifierModule, ConditionalModule<ITool
       }
       float duration = this.time.computeValue(scaledLevel);
       if (duration > 0) {
-        MobEffectInstance instance = new MobEffectInstance(effect, (int)duration, level);
+        MobEffectInstance instance = new MobEffectInstance(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect), (int)duration, level);
         if (curativeItems != null) {
-          instance.setCurativeItems(curativeItems.stream().map(ItemStack::new).collect(Collectors.toList()));
+          EffectCureUtil.setItemCures(instance, curativeItems);
         }
-        target.addEffect(new MobEffectInstance(effect, (int)duration, level), cause);
+        target.addEffect(instance, cause);
       }
     }
 
