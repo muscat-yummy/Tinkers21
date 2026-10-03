@@ -5,7 +5,7 @@ import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.widgets.IDrawableWidget;
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocus;
@@ -85,7 +85,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
     List<IRecipeSlotDrawable> slots = builder.getRecipeSlots().getSlots();
     IRecipeSlotDrawable resultSlot = CategoryUtil.findSlot(slots, RESULT_TOOL_SLOT);
     if (resultSlot != null && resultSlot.getDisplayedItemStack().isEmpty()) {
-      IDrawableWidget arrow = builder.addDrawableWidget(errorArrow).setPosition(xPos, yPos);
+      DrawableTooltipWidget arrow = DrawableTooltipWidget.add(builder, errorArrow).setPosition(xPos, yPos);
       // need to compute the error message again as no good way to store it between methods
       // fortunately, we can just fetch the item from the input slot; only case we would have such an output error is if that is unique
       IRecipeSlotDrawable toolSlot = CategoryUtil.findSlot(slots, TOOL_SLOT);
@@ -103,7 +103,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, T recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(71, 33);
+    builder.addRecipeArrow().setPosition(71, 33);
 
     Component levelText = getVariantText(recipe);
     if (levelText != null) {

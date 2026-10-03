@@ -1,0 +1,64 @@
+package slimeknights.tconstruct.plugin.jei.util;
+
+import mezz.jei.api.gui.builder.ITooltipBuilder;
+import mezz.jei.api.gui.drawable.IDrawable;
+import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
+import mezz.jei.api.gui.widgets.IRecipeWidget;
+import net.minecraft.client.gui.GuiGraphics;
+import net.minecraft.client.gui.navigation.ScreenPosition;
+import net.minecraft.network.chat.Component;
+
+import java.util.function.Consumer;
+
+/** Drawable and hover tooltip using the widget contract in the pinned JEI 19 API. */
+public final class DrawableTooltipWidget implements IRecipeWidget {
+  private final IDrawable drawable;
+  private ScreenPosition position = new ScreenPosition(0, 0);
+  private Consumer<ITooltipBuilder> tooltip = builder -> {};
+
+  private DrawableTooltipWidget(IDrawable drawable) {
+    this.drawable = drawable;
+  }
+
+  public static DrawableTooltipWidget add(IRecipeExtrasBuilder builder, IDrawable drawable) {
+    DrawableTooltipWidget widget = new DrawableTooltipWidget(drawable);
+    builder.addWidget(widget);
+    return widget;
+  }
+
+  public DrawableTooltipWidget setPosition(int x, int y) {
+    position = new ScreenPosition(x, y);
+    return this;
+  }
+
+  public DrawableTooltipWidget setTooltip(Component text) {
+    return setTooltip(builder -> builder.add(text));
+  }
+
+  public DrawableTooltipWidget setTooltip(Consumer<ITooltipBuilder> callback) {
+    tooltip = callback;
+    return this;
+  }
+
+  @Override
+  public ScreenPosition getPosition() {
+    return position;
+  }
+
+  @Override
+  public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
+    drawable.draw(graphics);
+  }
+
+  @Override
+  public void getTooltip(ITooltipBuilder builder, double mouseX, double mouseY) {
+    if (contains(mouseX, mouseY, drawable.getWidth(), drawable.getHeight())) {
+      tooltip.accept(builder);
+    }
+  }
+
+  /** Bounds are relative to the widget and exclude their upper edges. */
+  public static boolean contains(double x, double y, int width, int height) {
+    return x >= 0 && y >= 0 && x < width && y < height;
+  }
+}

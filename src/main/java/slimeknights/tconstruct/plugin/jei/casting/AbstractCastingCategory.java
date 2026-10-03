@@ -8,9 +8,9 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.drawable.IDrawableAnimated.StartDirection;
 import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
-import mezz.jei.api.gui.widgets.IDrawableWidget;
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.IRecipeWidgetTooltipCallback;
+import java.util.function.Consumer;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -65,11 +65,11 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayableCastingRecipe recipe, IFocusGroup focuses) {
-    builder.addDrawableWidget(block).setPosition(38, 35);
+    DrawableTooltipWidget.add(builder, block).setPosition(38, 35);
     int coolingTime = recipe.getCoolingTime();
     IDrawable arrow = guiHelper.drawableBuilder(BACKGROUND_LOC, 117, 32, 24, 17)
                                   .buildAnimated(Math.max(5, coolingTime), StartDirection.LEFT, false);
-    IDrawableWidget arrowWidget = builder.addDrawableWidget(arrow).setPosition(58, 18);
+    DrawableTooltipWidget arrowWidget = DrawableTooltipWidget.add(builder, arrow).setPosition(58, 18);
     arrowTooltip:
     {
       if (recipe.isCoolingTimeDynamic()) {
@@ -83,7 +83,7 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
     }
     if (recipe.hasCast()) {
       boolean consumed = recipe.isConsumed();
-      builder.addDrawableWidget(consumed ? castConsumed : castKept)
+      DrawableTooltipWidget.add(builder, consumed ? castConsumed : castKept)
         .setPosition(63, 39)
         .setTooltip(consumed ? CAST_CONSUMED : CAST_KEPT);
     }
@@ -191,9 +191,9 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
   }
 
   /** Handles the tooltip for the arrow */
-  private record CoolingArrowTooltip(IDisplayableCastingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements IRecipeWidgetTooltipCallback {
+  private record CoolingArrowTooltip(IDisplayableCastingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements Consumer<ITooltipBuilder> {
     @Override
-    public void onTooltip(ITooltipBuilder tooltip) {
+    public void accept(ITooltipBuilder tooltip) {
       FluidStack fluid = fluidSlot.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       tooltip.add(Component.translatable(KEY_COOLING_TIME, recipe.getCoolingTime(fluid) / 20));
     }

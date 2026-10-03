@@ -9,9 +9,9 @@ import mezz.jei.api.gui.ingredient.IRecipeSlotDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.ingredient.IRecipeSlotsView;
 import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.widgets.IDrawableWidget;
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.IRecipeWidgetTooltipCallback;
+import java.util.function.Consumer;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocusGroup;
 import mezz.jei.api.recipe.RecipeType;
@@ -52,11 +52,13 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   };
 
   private final IDrawable background;
+  private final IGuiHelper guiHelper;
   protected final IDrawableStatic tankOverlay;
   protected final IDrawableStatic plus;
 
   public AbstractMeltingCategory(IGuiHelper helper, RecipeType<IDisplayableMeltingRecipe> recipeType, Component title, IDrawable icon) {
     super(recipeType, title, icon, 132, 40);
+    this.guiHelper = helper;
     this.background = helper.createDrawable(BACKGROUND_LOC, 0, 0, 132, 40);
     this.tankOverlay = helper.createDrawable(BACKGROUND_LOC, 132, 0, 32, 32);
     this.plus = helper.drawableBuilder(BACKGROUND_LOC, 132, 32, 8, 8)
@@ -68,7 +70,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
     // includes both the static arrow background and animated foreground
     int time = recipe.getTime();
-    IDrawableWidget arrow = builder.addAnimatedRecipeArrowWidget(time * 5).setPosition(56, 18);
+    DrawableTooltipWidget arrow = DrawableTooltipWidget.add(builder, guiHelper.createAnimatedRecipeArrow(time * 5)).setPosition(56, 18);
     arrowTooltip:
     {
       if (recipe.isTimeDynamic()) {
@@ -83,7 +85,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
     }
 
     if (recipe.getOreType() != null) {
-      builder.addDrawableWidget(plus).setPosition(83, 26).setTooltip(TOOLTIP_ORE);
+      DrawableTooltipWidget.add(builder, plus).setPosition(83, 26).setTooltip(TOOLTIP_ORE);
     }
     builder.addText(Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 113, 9)
       .setPosition(0, 3)
@@ -126,9 +128,9 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
   }
 
   /** Handles the tooltip for the arrow */
-  private record MeltingArrowTooltip(IDisplayableMeltingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements IRecipeWidgetTooltipCallback {
+  private record MeltingArrowTooltip(IDisplayableMeltingRecipe recipe, IRecipeSlotDrawable fluidSlot) implements Consumer<ITooltipBuilder> {
     @Override
-    public void onTooltip(ITooltipBuilder tooltip) {
+    public void accept(ITooltipBuilder tooltip) {
       FluidStack fluid = fluidSlot.getDisplayedIngredient(NeoForgeTypes.FLUID_STACK).orElse(FluidStack.EMPTY);
       tooltip.add(Component.translatable(KEY_COOLING_TIME, recipe.getTime(fluid) / 4));
     }
