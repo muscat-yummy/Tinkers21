@@ -31,6 +31,8 @@ import net.minecraft.data.PackOutput.Target;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.item.ArmorItem;
@@ -428,15 +430,15 @@ public class AdvancementsProvider extends GenericDataProvider {
     AdvancementHolder tinkersGadgetry = builder(TinkerCommons.tinkersGadgetry, resource("world/tinkers_gadgetry"), materialsAndYou, AdvancementType.TASK, builder ->
       builder.addCriterion("crafted_book", hasItem(TinkerCommons.tinkersGadgetry)));
     builder(TinkerWorld.slimeSapling.get(FoliageType.EARTH), resource("world/earth_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(Objects.requireNonNull(TinkerStructures.earthSlimeIsland)))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(registryLookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(TinkerStructures.earthSlimeIsland)))));
     AdvancementHolder skyslimeIsland = builder(TinkerWorld.slimeSapling.get(FoliageType.SKY), resource("world/sky_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(Objects.requireNonNull(TinkerStructures.skySlimeIsland)))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(registryLookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(TinkerStructures.skySlimeIsland)))));
     builder(TinkerWorld.slimeSapling.get(FoliageType.BLOOD), resource("world/blood_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(Objects.requireNonNull(TinkerStructures.bloodIsland)))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(registryLookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(TinkerStructures.bloodIsland)))));
     builder(TinkerWorld.slimeSapling.get(FoliageType.ENDER), resource("world/ender_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(Objects.requireNonNull(TinkerStructures.endSlimeIsland)))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(registryLookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(TinkerStructures.endSlimeIsland)))));
     builder(Items.CLAY_BALL, resource("world/clay_island"), tinkersGadgetry, AdvancementType.GOAL, builder ->
-      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.inStructure(Objects.requireNonNull(TinkerStructures.clayIsland)))));
+      builder.addCriterion("found_island", PlayerTrigger.TriggerInstance.located(LocationPredicate.Builder.inStructure(registryLookup.lookupOrThrow(Registries.STRUCTURE).getOrThrow(TinkerStructures.clayIsland)))));
     builder(TinkerCommons.slimeball.get(SlimeType.ICHOR), resource("world/slime_collector"), tinkersGadgetry, AdvancementType.TASK, builder -> {
       for (SlimeType type : SlimeType.values()) {
         builder.addCriterion(type.getSerializedName(), hasTag(type.getSlimeballTag()));
@@ -484,8 +486,8 @@ public class AdvancementsProvider extends GenericDataProvider {
 
     // internal advancements
     hiddenBuilder(resource("internal/starting_book"), ConfigEnabledCondition.SPAWN_WITH_BOOK, builder -> {
-      builder.addCriterion("tick", new PlayerTrigger.TriggerInstance(CriteriaTriggers.TICK.getId(), ContextAwarePredicate.ANY));
-      builder.rewards(AdvancementRewards.Builder.loot(TConstruct.getResource("gameplay/starting_book")));
+      builder.addCriterion("tick", PlayerTrigger.TriggerInstance.tick());
+      builder.rewards(AdvancementRewards.Builder.loot(ResourceKey.create(Registries.LOOT_TABLE, TConstruct.getResource("gameplay/starting_book"))));
     });
 
     // grant vanilla advancements
@@ -512,8 +514,8 @@ public class AdvancementsProvider extends GenericDataProvider {
     // boots with the snow boots flag can walk on powder snow
     grantAdvancement(resource("internal/walk_on_powder_snow"), AdvancementIds.WALK_ON_POWDER_SNOW, builder ->
       builder.addCriterion("has_boots", PlayerTrigger.TriggerInstance.located(EntityPredicate.Builder.entity()
-        .equipment(EntityEquipmentPredicate.Builder.equipment().feet(ToolStackItemPredicate.ofTool(new VolatileDataPredicate(ModifiableArmorItem.SNOW_BOOTS))).build())
-        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW).build()).build())
+        .equipment(EntityEquipmentPredicate.Builder.equipment().feet(ToolStackItemPredicate.builderTool(new VolatileDataPredicate(ModifiableArmorItem.SNOW_BOOTS))).build())
+        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW)).build())
         .build()))
     );
     // despite having multiple criteria, these use an any condition so easier to just bypass criteria

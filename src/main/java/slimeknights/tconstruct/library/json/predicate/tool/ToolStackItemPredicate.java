@@ -36,8 +36,12 @@ public class ToolStackItemPredicate implements ItemSubPredicate {
     TYPES.register(bus);
   }
 
+  public static ItemPredicate.Builder builderTool(IJsonPredicate<IToolStackView> predicate) {
+    return ItemPredicate.Builder.item().withSubPredicate(TYPE.get(), subPredicate(predicate));
+  }
+
   public static ItemPredicate ofTool(IJsonPredicate<IToolStackView> predicate) {
-    return ItemPredicate.Builder.item().withSubPredicate(TYPE.get(), subPredicate(predicate)).build();
+    return builderTool(predicate).build();
   }
 
   public static ItemPredicate ofContext(IJsonPredicate<IToolContext> predicate) {

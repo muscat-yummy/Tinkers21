@@ -1,4 +1,4 @@
-name: Inspect native slime spawning and compost registration
+name: Verify slime bootstrap and native advancement criteria
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,10 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.advancements.critereon.EntityPredicate': ['public '],
+              'net.minecraft.advancements.critereon.EntityPredicate$Builder': ['public '],
+              'net.minecraft.advancements.critereon.CustomDataPredicate': ['public '],
+              'net.minecraft.advancements.critereon.ItemSubPredicates': ['public '],
               'net.minecraft.world.entity.SpawnPlacementTypes': ['public '],
               'net.minecraft.world.level.block.ComposterBlock': ['COMPOSTABLES', 'add('],
               'net.minecraft.world.entity.EntityType': ['create('],
