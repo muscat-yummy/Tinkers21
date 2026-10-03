@@ -58,6 +58,24 @@ public final class InventoryPacketSmoke {
       } finally { buffer.release(); }
     }
 
+    var entitySerializer = new slimeknights.tconstruct.tools.network.FluidDataSerializer();
+    for (FluidStack value : new FluidStack[] {namedFluid, FluidStack.EMPTY}) {
+      var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
+      try {
+        entitySerializer.codec().encode(buffer, value);
+        var decoded = entitySerializer.codec().decode(buffer);
+        check(FluidStack.matches(value, decoded), "Entity fluid sync lost amount or component patch");
+        check(buffer.readableBytes() == 0, "Entity fluid sync left unread bytes");
+      } finally { buffer.release(); }
+    }
+    var snapshot = entitySerializer.copy(namedFluid);
+    snapshot.setAmount(1);
+    snapshot.set(DataComponents.CUSTOM_NAME, Component.literal("Changed copy"));
+    check(namedFluid.getAmount() == 275
+      && namedFluid.get(DataComponents.CUSTOM_NAME).equals(Component.literal("Synced fluid")),
+      "Entity fluid snapshot mutated the source");
+    System.out.println("Native entity fluid codec empty/component round trips and isolated snapshots: PASS");
+
     FriendlyByteBuf plain = new FriendlyByteBuf(Unpooled.buffer());
     try {
       boolean rejected = false;

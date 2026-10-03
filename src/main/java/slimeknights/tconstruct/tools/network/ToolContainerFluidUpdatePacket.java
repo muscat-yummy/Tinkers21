@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.network;
 
 import net.minecraft.network.FriendlyByteBuf;
+import slimeknights.tconstruct.library.utils.RegistryBuffer;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.neoforge.fluids.FluidStack;
 import slimeknights.mantle.network.NetworkEvent.Context;
@@ -11,12 +12,12 @@ import slimeknights.tconstruct.tools.menu.ToolContainerMenu;
 /** Packet used when a fluid is changed inside a tool container menu */
 public record ToolContainerFluidUpdatePacket(FluidStack fluid) implements IThreadsafePacket {
   public ToolContainerFluidUpdatePacket(FriendlyByteBuf buffer) {
-    this(buffer.readFluidStack());
+    this(FluidStack.OPTIONAL_STREAM_CODEC.decode(RegistryBuffer.require(buffer)));
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer) {
-    buffer.writeFluidStack(fluid);
+    FluidStack.OPTIONAL_STREAM_CODEC.encode(RegistryBuffer.require(buffer), fluid);
   }
 
   @Override
