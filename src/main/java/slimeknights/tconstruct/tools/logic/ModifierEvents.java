@@ -10,6 +10,8 @@ import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.network.protocol.game.ClientboundSetEntityMotionPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.enchantment.EnchantmentEffectComponents;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.tags.ItemTags;
@@ -184,7 +186,7 @@ public class ModifierEvents {
           RandomSource random = target.getRandom();
           // if the stack is gold, and it drops, we get it
           // don't have to worry about checking if it already dropped, the stacks are removed on drop
-          if (!stack.isEmpty() && !EnchantmentHelper.hasVanishingCurse(stack) && stack.makesPiglinsNeutral(target) && random.nextFloat() < extraChance) {
+          if (!stack.isEmpty() && !EnchantmentHelper.has(stack, EnchantmentEffectComponents.PREVENT_EQUIPMENT_DROP) && stack.makesPiglinsNeutral(target) && random.nextFloat() < extraChance) {
             // mobs damage items on drop, its kinda weird
             if (stack.isDamageableItem()) {
               stack.setDamageValue(stack.getMaxDamage() - random.nextInt(1 + random.nextInt(Math.max(stack.getMaxDamage() - 3, 1))));
@@ -441,9 +443,8 @@ public class ModifierEvents {
                 float velocity = ConditionalStatModifierHook.getModifiedStat(tool, target, ToolStats.VELOCITY) * 1.1f;
                 projectile.shoot(reboundAngle.x, reboundAngle.y, reboundAngle.z, velocity, ModifierUtil.getInaccuracy(tool, target));
                 if (projectile instanceof AbstractHurtingProjectile hurting) {
-                  hurting.xPower = reboundAngle.x * 0.1;
-                  hurting.yPower = reboundAngle.y * 0.1;
-                  hurting.zPower = reboundAngle.z * 0.1;
+                  // Native hurting projectiles accelerate along their current reflected movement.
+                  hurting.accelerationPower = 0.1;
                 }
                 if (target.getType() == EntityType.PLAYER) {
                   TinkerNetwork.getInstance().sendVanillaPacket(new ClientboundSetEntityMotionPacket(projectile), target);
@@ -510,18 +511,11 @@ public class ModifierEvents {
             target.setArrowCount(target.getArrowCount() + 1);
           }
 
-          // knockback from punch
-          int knockback = arrow.getKnockback();
-          if (knockback > 0) {
-            Vec3 knockbackVec = arrow.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D).normalize().scale(knockback * 0.6D);
-            if (knockbackVec.lengthSqr() > 0.0D) {
-              target.push(knockbackVec.x, 0.1D, knockbackVec.z);
-            }
-          }
+          // Use the native callback, including the fired weapon's enchantments and target resistance.
+          arrow.doKnockback(target, damageSource);
 
-          if (!level.isClientSide && livingOwner != null) {
-            EnchantmentHelper.doPostHurtEffects(target, livingOwner);
-            EnchantmentHelper.doPostDamageEffects(livingOwner, target);
+          if (level instanceof ServerLevel serverLevel && livingOwner != null) {
+            EnchantmentHelper.doPostAttackEffectsWithItemSource(serverLevel, target, damageSource, arrow.getWeaponItem());
           }
 
           arrow.doPostHurtEffects(target);
@@ -564,7 +558,7 @@ public class ModifierEvents {
 
   @SubscribeEvent
   static void onTeleport(EntityTeleportEvent event) {
-    if (event.getEntity() instanceof LivingEntity living && living.hasEffect(TinkerEffects.enderference.get())) {
+    if (event.getEntity() instanceof LivingEntity living && living.hasEffect(TinkerEffects.enderference.get().holder())) {
       event.setCanceled(true);
     }
   }

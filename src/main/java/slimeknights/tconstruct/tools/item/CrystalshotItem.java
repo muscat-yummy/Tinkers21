@@ -1,5 +1,11 @@
 package slimeknights.tconstruct.tools.item;
 
+import net.minecraft.core.Direction;
+import net.minecraft.core.Position;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.network.syncher.EntityDataAccessor;
@@ -9,7 +15,6 @@ import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
@@ -41,10 +46,10 @@ public class CrystalshotItem extends ArrowItem {
   }
 
   @Override
-  public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter) {
-    CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter);
+  public AbstractArrow createArrow(Level pLevel, ItemStack pStack, LivingEntity pShooter, ItemStack weapon) {
+    CrystalshotEntity arrow = new CrystalshotEntity(pLevel, pShooter, pStack.copyWithCount(1), weapon);
     String variant = "random";
-    CompoundTag tag = pStack.getTag();
+    CompoundTag tag = pStack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (tag != null && tag.contains(TAG_VARIANT, Tag.TAG_STRING)) {
       variant = tag.getString(TAG_VARIANT);
     }
@@ -56,14 +61,29 @@ public class CrystalshotItem extends ArrowItem {
   }
 
   @Override
-  public boolean isInfinite(ItemStack stack, ItemStack bow, Player player) {
-    return bow.getEnchantmentLevel(Enchantments.INFINITY_ARROWS) > 0;
+  public boolean isInfinite(ItemStack stack, ItemStack bow, LivingEntity shooter) {
+    return shooter.registryAccess().registryOrThrow(Registries.ENCHANTMENT).getHolder(Enchantments.INFINITY)
+      .map(enchantment -> bow.getEnchantmentLevel(enchantment) > 0).orElse(false);
+  }
+
+  /** Native dispenser callback must create the crystalshot entity, rather than a vanilla arrow. */
+  @Override
+  public Projectile asProjectile(Level level, Position position, ItemStack stack, Direction direction) {
+    CrystalshotEntity arrow = new CrystalshotEntity(TinkerTools.crystalshotEntity.get(), level);
+    arrow.setPos(position.x(), position.y(), position.z());
+    String variant = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag().getString(TAG_VARIANT);
+    if (variant.isEmpty() || "random".equals(variant)) {
+      variant = RANDOM_VARIANTS.get(level.getRandom().nextInt(RANDOM_VARIANTS.size()));
+    }
+    arrow.setVariant(variant);
+    arrow.pickup = AbstractArrow.Pickup.ALLOWED;
+    return arrow;
   }
 
   /** Creates a crystal shot with the given variant */
   public static ItemStack withVariant(String variant, int size) {
     ItemStack stack = new ItemStack(TinkerTools.crystalshotItem, size);
-    stack.getOrCreateTag().putString(TAG_VARIANT, variant);
+    CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(TAG_VARIANT, variant));
     return stack;
   }
 
@@ -76,7 +96,11 @@ public class CrystalshotItem extends ArrowItem {
     }
 
     public CrystalshotEntity(Level level, LivingEntity shooter) {
-      super(TinkerTools.crystalshotEntity.get(), shooter, level);
+      this(level, shooter, new ItemStack(TinkerTools.crystalshotItem.get()), null);
+    }
+
+    public CrystalshotEntity(Level level, LivingEntity shooter, ItemStack stack, ItemStack weapon) {
+      super(TinkerTools.crystalshotEntity.get(), shooter, level, stack, weapon);
       soundEvent = Sounds.CRYSTALSHOT.getSound();
     }
 
@@ -105,6 +129,11 @@ public class CrystalshotItem extends ArrowItem {
     /** Sets the arrow's variant */
     public void setVariant(String variant) {
       this.entityData.set(SYNC_VARIANT, variant);
+    }
+
+    @Override
+    protected ItemStack getDefaultPickupItem() {
+      return withVariant("amethyst", 1);
     }
 
     @Override
