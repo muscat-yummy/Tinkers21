@@ -1,4 +1,4 @@
-name: Port native map identities frame render cancellation and attribute tooltip values
+name: Port HUD native time tracker and inspect block harvest callbacks
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,11 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.client.gui.Gui': ['renderSlot('],
+              'net.minecraft.world.level.block.state.BlockBehaviour': ['isPathfindable(', 'useItemOn(', 'useWithoutItem('],
+              'net.minecraft.world.level.block.BonemealableBlock': ['public '],
+              'net.minecraft.server.level.ServerPlayerGameMode': None,
+              'net.minecraft.world.item.component.ItemContainerContents': None,
               'net.neoforged.neoforge.common.extensions.IItemExtension': ['damageItem(', 'getDamage(', 'getMaxDamage(', 'isDamageable(', 'setDamage('],
               'net.minecraft.world.item.alchemy.PotionBrewing$Mix': None,
               'net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent': None,
@@ -60,7 +65,7 @@ jobs:
               'net.minecraft.world.item.crafting.CraftingInput': None,
               'net.minecraft.world.item.crafting.CraftingInput$Positioned': ['public '],
               'net.minecraft.world.inventory.CraftingContainer': None,
-              'net.neoforged.neoforge.common.CommonHooks': ['CraftingPlayer('],
+              'net.neoforged.neoforge.common.CommonHooks': ['CraftingPlayer(', 'BlockBreak', 'BlockDrops'],
               'net.minecraft.client.renderer.LevelRenderer': ['renderLineBox(', 'renderShape('],
               'net.minecraft.client.renderer.blockentity.BlockEntityRenderer': ['public '],
               'net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension': ['public '],
