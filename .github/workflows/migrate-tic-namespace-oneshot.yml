@@ -1,4 +1,4 @@
-name: Port native crystalshot and projectile reflection combat callbacks
+name: Port native modifiable arrow constructors persistence and weapon context
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -38,6 +38,9 @@ jobs:
               'net.minecraft.world.item.crafting.ShapedRecipePattern': None,
               'net.minecraft.world.item.crafting.ShapedRecipePattern$Data': ['public '],
               'net.minecraft.world.item.crafting.ShapedRecipe$Serializer': ['public '],
+              'net.minecraft.world.level.block.BeehiveBlock': ['hiveContainsBees('],
+              'net.minecraft.world.item.crafting.ShapedRecipe': ['pattern', 'public '],
+              'net.minecraft.world.item.crafting.ShapelessRecipe$Serializer': ['public '],
               'net.minecraft.world.item.ArrowItem': None,
               'net.neoforged.neoforge.common.extensions.IArrowItemExtension': ['public '],
               'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['public '],
@@ -85,7 +88,7 @@ jobs:
               'com.mojang.blaze3d.vertex.VertexConsumer': None,
               'net.minecraft.network.syncher.EntityDataSerializer': ['public '],
               'net.minecraft.network.codec.StreamCodec': ['public '],
-              'net.minecraft.world.entity.LivingEntity': ['onEffectRemoved(', 'onEffectAdded(', 'getAttributeValue(', 'jumpFromGround(', 'isSuppressingSlidingDownLadder('],
+              'net.minecraft.world.entity.LivingEntity': ['lastPos', 'onEffectRemoved(', 'onEffectAdded(', 'getAttributeValue(', 'jumpFromGround(', 'isSuppressingSlidingDownLadder('],
               'net.minecraft.world.food.FoodProperties$Builder': ['public '],
               'net.minecraft.world.food.FoodProperties': ['public '],
               'net.minecraft.world.effect.MobEffects': ['public '],

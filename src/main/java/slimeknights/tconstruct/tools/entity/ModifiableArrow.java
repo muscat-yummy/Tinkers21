@@ -49,11 +49,20 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   }
 
   public ModifiableArrow(Level level, double pX, double pY, double pZ) {
-    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level);
+    super(TinkerTools.materialArrow.get(), pX, pY, pZ, level, new ItemStack(TinkerTools.arrow.get()), null);
   }
 
   public ModifiableArrow(Level level, LivingEntity shooter) {
-    super(TinkerTools.materialArrow.get(), shooter, level);
+    this(level, shooter, null);
+  }
+
+  public ModifiableArrow(Level level, LivingEntity shooter, @Nullable ItemStack weapon) {
+    super(TinkerTools.materialArrow.get(), shooter, level, new ItemStack(TinkerTools.arrow.get()), weapon);
+  }
+
+  @Override
+  protected ItemStack getDefaultPickupItem() {
+    return new ItemStack(TinkerTools.arrow.get());
   }
 
 
@@ -66,8 +75,10 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
 
   /** Updates the stack on the arrow */
   private void setStack(ItemStack stack) {
-    this.stack = stack;
-    this.entityData.set(STACK, stack);
+    setPickupItemStack(stack);
+    this.stack = getPickupItemStackOrigin();
+    this.tool = null;
+    this.entityData.set(STACK, this.stack);
     this.reclaim = ModifierUtil.checkVolatileFlag(stack, IndestructibleItemEntity.INDESTRUCTIBLE_ENTITY);
   }
 
@@ -231,7 +242,7 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   @Override
   public void addAdditionalSaveData(CompoundTag tag) {
     super.addAdditionalSaveData(tag);
-    tag.put(KEY_STACK, this.stack.save(new CompoundTag()));
+    tag.put(KEY_STACK, this.stack.saveOptional(registryAccess()));
     tag.putFloat(KEY_WATER_INERTIA, this.entityData.get(WATER_INERTIA));
     tag.putBoolean(KEY_DEALT_DAMAGE, dealtDamage);
     if (!this.tasks.isEmpty()) {
@@ -243,7 +254,9 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
   public void readAdditionalSaveData(CompoundTag tag) {
     super.readAdditionalSaveData(tag);
     if (tag.contains(KEY_STACK, CompoundTag.TAG_COMPOUND)) {
-      setStack(ItemStack.of(tag.getCompound(KEY_STACK)));
+      setStack(ItemStack.parseOptional(registryAccess(), tag.getCompound(KEY_STACK)));
+    } else {
+      setStack(getPickupItemStackOrigin());
     }
     this.entityData.set(WATER_INERTIA, tag.getFloat(KEY_WATER_INERTIA));
     this.dealtDamage = tag.getBoolean(KEY_DEALT_DAMAGE);
