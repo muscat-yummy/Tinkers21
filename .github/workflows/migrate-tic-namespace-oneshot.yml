@@ -1,4 +1,4 @@
-name: Port worldgen map codecs and registry-aware spilling enchantments
+name: Port launcher snapshots and native NBT readers
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -175,7 +175,11 @@ jobs:
               'net.minecraft.world.item.enchantment.EnchantmentHelper': None,
               'net.minecraft.world.entity.Mob': ['finalizeSpawn(', 'populateDefaultEquipment', 'enchantSpawnedArmor(', 'dropCustomDeathLoot(', 'getEquipmentDropChance(', 'doHurtTarget('],
               'net.minecraft.world.entity.monster.Slime': None,
-              'net.minecraft.world.entity.projectile.Fireball': ['public ', 'protected '],
+              'net.minecraft.world.entity.projectile.Fireball': None,
+              'net.minecraft.world.item.ProjectileWeaponItem': None,
+              'net.minecraft.world.item.BowItem': None,
+              'net.minecraft.world.item.CrossbowItem': None,
+              'net.minecraft.nbt.NbtAccounter': ['unlimitedHeap('],
               'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_EQUIPMENT_DROP', 'EQUIPMENT_DROPS'],
               'net.minecraft.world.item.trading.ItemCost': ['public '],
               'net.minecraft.world.level.block.LiquidBlockContainer': ['public ']
@@ -236,9 +240,21 @@ jobs:
               for number, line in enumerate(path.read_text().splitlines(), 1):
                   if pattern.search(line):
                       print(f'{path}:{number}: {line.strip()}')
-      - name: Audit authoritative recipe identity callers
+      - name: Audit authoritative recipe identity and launcher callers
+        shell: python
         run: |
-          rg -n 'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(' src/main/java || test "$?" -eq 1
+          import pathlib, re, shutil, subprocess
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO'
+          if shutil.which('rg'):
+              result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
+              if result.returncode not in (0, 1):
+                  raise RuntimeError('Caller audit failed: ' + str(result.returncode))
+          else:
+              pattern = re.compile(expression)
+              for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
+                  for number, line in enumerate(path.read_text().splitlines(), 1):
+                      if pattern.search(line):
+                          print(f'{path}:{number}: {line.strip()}')
       - name: Audit mutable tool data view boundaries
         run: python3 scripts/port/audit_tic_tool_data_views.py
   migrate:

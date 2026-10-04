@@ -1,6 +1,5 @@
 package slimeknights.tconstruct.library.tools.item.ranged;
 
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvent;
 import net.minecraft.sounds.SoundEvents;
@@ -131,7 +130,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     // store either ammo or boolean as requested
     if (!ammo.isEmpty()) {
       if (storeDrawingItem) {
-        tool.getPersistentData().put(KEY_DRAWBACK_AMMO, ammo.save(new CompoundTag()));
+        tool.getPersistentData().put(KEY_DRAWBACK_AMMO, ammo.save(level.registryAccess()));
       } else {
         // boolean is enough to get detected by the property override, but won't bother the model
         tool.getPersistentData().putBoolean(KEY_DRAWBACK_AMMO, true);
@@ -239,7 +238,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
       float waterInertia = 0.6f;
       SoundEvent sound = SoundEvents.ARROW_SHOOT;
       if (thrownTool) {
-        sound = SoundEvents.TRIDENT_THROW;
+        sound = SoundEvents.TRIDENT_THROW.value();
         IToolStackView thrown = ToolStack.from(ammo);
         float thrownVelocity = ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.VELOCITY);
         power *= thrownVelocity * ConditionalStatModifierHook.getModifiedStat(thrown, living, ToolStats.DRAW_SPEED) / 1.5f;
@@ -259,7 +258,7 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
           thrown.setOriginalSlot(originalSlot);
           arrow = thrown;
         } else {
-          arrow = arrowItem.createArrow(level, ammo, living);
+          arrow = arrowItem.createArrow(level, ammo, living, bow);
         }
         float angle = startAngle + (10 * arrowIndex);
         arrow.shootFromRotation(living, living.getXRot() + angle, living.getYRot(), 0, power * 3.0F, inaccuracy);
