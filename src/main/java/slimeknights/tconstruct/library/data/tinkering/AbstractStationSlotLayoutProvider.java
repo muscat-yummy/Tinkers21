@@ -41,10 +41,12 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   /** Index for armor */
   protected static final int SORT_ARMOR = 15;
 
+  private final CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider;
   private final Map<ResourceLocation,SerializeLayout> allLayouts = new HashMap<>();
 
-  public AbstractStationSlotLayoutProvider(PackOutput packOutput) {
+  public AbstractStationSlotLayoutProvider(PackOutput packOutput, CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider) {
     super(packOutput, Target.DATA_PACK, StationSlotLayoutLoader.FOLDER, StationSlotLayoutLoader.GSON);
+    this.lookupProvider = lookupProvider;
   }
 
   /**
@@ -89,7 +91,9 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addLayouts();
-    return allOf(allLayouts.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())));
+    return lookupProvider.thenCompose(registries -> slimeknights.mantle.data.loadable.LoadableOps.with(
+      net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, registries),
+      () -> allOf(allLayouts.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())))));
   }
 
   /** Stores the pair of conditions and builder. */
@@ -102,7 +106,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
     public JsonObject serialize() {
       JsonObject json = StationSlotLayoutLoader.GSON.toJsonTree(builder.build()).getAsJsonObject();
       if (!conditions.isEmpty()) {
-        json.add("conditions", CraftingHelper.serialize(conditions.toArray(ICondition[]::new)));
+        json.add("conditions", ICondition.LIST_CODEC.encodeStart(slimeknights.mantle.data.loadable.LoadableOps.current(), conditions).getOrThrow());
       }
       return json;
     }

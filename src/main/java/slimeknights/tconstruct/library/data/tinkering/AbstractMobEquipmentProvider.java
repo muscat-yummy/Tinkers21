@@ -26,10 +26,12 @@ import java.util.concurrent.CompletableFuture;
 public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   private final Map<String, EquipmentJson> equipment = new HashMap<>();
   private final String modId;
+  private final CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider;
 
-  public AbstractMobEquipmentProvider(PackOutput output, String modId) {
+  public AbstractMobEquipmentProvider(PackOutput output, String modId, CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider) {
     super(output, Target.DATA_PACK, MobEquipmentManager.FOLDER, JsonHelper.DEFAULT_GSON);
     this.modId = modId;
+    this.lookupProvider = lookupProvider;
   }
 
   /** Adds all equipment for this provider */
@@ -39,7 +41,9 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
     addEquipment();
-    return allOf(equipment.entrySet().stream().map(entry -> saveJson(cache, ResourceLocation.fromNamespaceAndPath(modId, entry.getKey()), entry.getValue().serialize())));
+    return lookupProvider.thenCompose(registries -> slimeknights.mantle.data.loadable.LoadableOps.with(
+      net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, registries),
+      () -> allOf(equipment.entrySet().stream().map(entry -> saveJson(cache, ResourceLocation.fromNamespaceAndPath(modId, entry.getKey()), entry.getValue().serialize())))));
   }
 
   /** Creates a builder for the given entity */
@@ -116,7 +120,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
       json.add("equip", MobEquipment.LIST_LOADABLE.serialize(equipment.build()));
       // serialize conditions
       if (conditions.length > 0) {
-        json.add("conditions", CraftingHelper.serialize(conditions));
+        json.add("conditions", ICondition.LIST_CODEC.encodeStart(slimeknights.mantle.data.loadable.LoadableOps.current(), java.util.Arrays.asList(conditions)).getOrThrow());
       }
       return json;
     }

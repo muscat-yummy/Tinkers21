@@ -15,8 +15,8 @@ import slimeknights.tconstruct.tools.TinkerTools;
 import java.util.function.Consumer;
 
 public class StationSlotLayoutProvider extends AbstractStationSlotLayoutProvider {
-  public StationSlotLayoutProvider(PackOutput packOutput) {
-    super(packOutput);
+  public StationSlotLayoutProvider(PackOutput packOutput, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider) {
+    super(packOutput, lookupProvider);
   }
 
   @Override

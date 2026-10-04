@@ -26,6 +26,11 @@ public interface IMaterialItem extends ItemLike, IMaterialUser {
    */
   MaterialVariantId getMaterial(ItemStack stack);
 
+  /** Material display state is resolved from the currently loaded material registry. */
+  default net.minecraft.world.item.Rarity getMaterialRarity(ItemStack stack) {
+    return MaterialRegistry.getMaterial(getMaterial(stack).getId()).getRarity();
+  }
+
   /** Sets the material on the existing stack. */
   default ItemStack setMaterial(ItemStack stack, MaterialVariantId material) {
     if (canUseMaterial(material.getId())) {

@@ -416,7 +416,7 @@ public final class TinkerTools extends TinkerModule {
     generator.addProvider(server, new MaterialStatsDataProvider(packOutput, materials));
     generator.addProvider(server, new MaterialTraitsDataProvider(packOutput, materials));
     generator.addProvider(server, new ToolDefinitionDataProvider(packOutput));
-    generator.addProvider(server, new StationSlotLayoutProvider(packOutput));
+    generator.addProvider(server, new StationSlotLayoutProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new MaterialTagProvider(packOutput, existingFileHelper));
     generator.addProvider(client, new ToolItemModelProvider(packOutput, existingFileHelper));
     TinkerMaterialSpriteProvider materialSprites = new TinkerMaterialSpriteProvider();

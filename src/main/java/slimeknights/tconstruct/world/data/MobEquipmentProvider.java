@@ -19,8 +19,8 @@ import java.util.List;
 
 /** Provider for custom mob equipment */
 public class MobEquipmentProvider extends AbstractMobEquipmentProvider {
-  public MobEquipmentProvider(PackOutput output) {
-    super(output, TConstruct.MOD_ID);
+  public MobEquipmentProvider(PackOutput output, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider) {
+    super(output, TConstruct.MOD_ID, lookupProvider);
   }
 
   @SuppressWarnings("removal")

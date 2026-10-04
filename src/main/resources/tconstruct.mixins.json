@@ -14,7 +14,8 @@
     "RecipeHolderIdentityMixin",
     "BrushItemInvoker",
     "ProtectionEquipmentSlotMixin",
-    "ProtectionEnchantmentSlotMixin"
+    "ProtectionEnchantmentSlotMixin",
+    "MaterialItemRarityMixin"
   ],
   "client": [
     "ToolTooltipMixin"

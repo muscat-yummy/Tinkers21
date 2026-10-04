@@ -1,4 +1,4 @@
-name: Port display stacks and registry-aware sprite data generation
+name: Preserve material rarity and native optional integration behavior
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,14 +35,12 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.item.ItemStack': {'methods': ['getRarity(']},
-              'net.neoforged.fml.ModLoader': ['postEvent(', 'runEventGenerator('],
-              'dev.gigaherz.jsonthings.things.builders.ItemBuilder': ['public '],
-              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType': ['public '],
-              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType$DefaultTypeProperties': ['public '],
-              'dev.gigaherz.jsonthings.things.blocks.FlexLiquidBlock': ['public ', 'protected '],
-              'com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator': ['public '],
-              'net.minecraft.world.entity.Mob': ['finalizeSpawn(']
+              'net.neoforged.neoforge.fluids.FluidStack': ['public '],
+              'net.minecraft.network.codec.ByteBufCodecs': ['map(', 'collection(', 'registry(', 'idMapper(', 'holderRegistry('],
+              'net.minecraft.core.component.DataComponentType$Builder': ['public '],
+              'net.minecraft.resources.RegistryOps': ['public '],
+              'net.minecraft.world.damagesource.DamageSources': ['mobProjectile('],
+              'net.minecraft.world.item.ItemStack': ['CODEC', 'STREAM_CODEC', 'parse(', 'save(']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -112,7 +110,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable'
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable|ToolTankHelper.PARSE_FLUID|InventoryModule.writeStack|new DummyToolStack|getProjectile\\(\\)'
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):

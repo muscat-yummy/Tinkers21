@@ -17,7 +17,7 @@ public class FlexBurningLiquidBlock extends FlexLiquidBlock {
   private final int burnTime;
   private final float damage;
   public FlexBurningLiquidBlock(Properties properties, Map<Property<?>,Comparable<?>> propertyDefaultValues, Supplier<FlowingFluid> fluidSupplier, int burnTime, float damage) {
-    super(properties, propertyDefaultValues, fluidSupplier);
+    super(properties, propertyDefaultValues, fluidSupplier.get());
     this.burnTime = burnTime;
     this.damage = damage;
   }

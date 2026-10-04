@@ -35,7 +35,7 @@ public class MaterialBlockItem extends BlockItem implements IMaterialItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
+  public Rarity getMaterialRarity(ItemStack stack) {
     return MaterialRegistry.getMaterial(getMaterial(stack).getId()).getRarity();
   }
 

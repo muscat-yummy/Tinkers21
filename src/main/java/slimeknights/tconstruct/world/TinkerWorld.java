@@ -419,7 +419,7 @@ public final class TinkerWorld extends TinkerModule {
     boolean server = event.includeServer();
     PackOutput packOutput = generator.getPackOutput();
     generator.addProvider(server, new WorldRecipeProvider(packOutput, event.getLookupProvider()));
-    generator.addProvider(server, new MobEquipmentProvider(packOutput));
+    generator.addProvider(server, new MobEquipmentProvider(packOutput, event.getLookupProvider()));
   }
 
   /** Adds all relevant items to the creative tab */
