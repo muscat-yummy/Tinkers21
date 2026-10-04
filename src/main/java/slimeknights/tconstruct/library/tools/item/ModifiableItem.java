@@ -207,7 +207,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public boolean canBeDepleted() {
+  public boolean isDamageable(ItemStack stack) {
     return true;
   }
 
@@ -218,7 +218,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
 
   @Override
   public int getDamage(ItemStack stack) {
-    if (!canBeDepleted()) {
+    if (!isDamageable(stack)) {
       return 0;
     }
     return ToolStack.from(stack).getDamage();
@@ -226,13 +226,13 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
 
   @Override
   public void setDamage(ItemStack stack, int damage) {
-    if (canBeDepleted()) {
+    if (isDamageable(stack)) {
       ToolStack.from(stack).setDamage(damage);
     }
   }
 
   @Override
-  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<T> onBroken) {
+  public <T extends LivingEntity> int damageItem(ItemStack stack, int amount, T damager, Consumer<Item> onBroken) {
     ToolDamageUtil.handleDamageItem(stack, amount, damager, onBroken);
     return 0;
   }
