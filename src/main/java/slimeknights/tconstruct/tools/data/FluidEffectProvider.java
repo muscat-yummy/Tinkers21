@@ -201,7 +201,7 @@ public class FluidEffectProvider extends AbstractFluidEffectProvider {
     addGem(TinkerFluids.moltenAmethyst).addBlockEffect(new HarvestTierPredicate(Tiers.STONE),     new BreakBlockFluidEffect(3));
     addGem(TinkerFluids.moltenQuartz  ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(5));
     addGem(TinkerFluids.moltenEmerald ).addBlockEffect(new HarvestTierPredicate(Tiers.IRON),      new BreakBlockFluidEffect(10, Enchantments.SILK_TOUCH, 1));
-    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, Enchantments.BLOCK_FORTUNE, 3));
+    addGem(TinkerFluids.moltenDiamond ).addBlockEffect(new HarvestTierPredicate(Tiers.DIAMOND),   new BreakBlockFluidEffect(10, Enchantments.FORTUNE, 3));
     addMetal(TinkerFluids.moltenDebris).addBlockEffect(new HarvestTierPredicate(Tiers.NETHERITE), new BreakBlockFluidEffect(50));
 
     // foods - setup to give equivalent saturation on a full bowl/bottle to their food counterparts, though hunger may be slightly different

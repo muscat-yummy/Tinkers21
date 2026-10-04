@@ -3,6 +3,9 @@ package slimeknights.tconstruct.world.entity;
 import net.minecraft.core.particles.ParticleOptions;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.sounds.SoundEvents;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.Level;
@@ -27,10 +30,17 @@ public class EnderSlimeEntity extends TravelersPlateSlimeEntity {
   }
 
   @Override
-  public void doEnchantDamageEffects(LivingEntity slime, Entity target) {
-    super.doEnchantDamageEffects(slime, target);
-    if (target instanceof LivingEntity) {
-      TeleportHelper.randomNearbyTeleport((LivingEntity) target, teleportPredicate);
+  protected void dealDamage(LivingEntity target) {
+    // Preserve the pinned native slime hit boundary and post-attack effects before teleporting.
+    if (isAlive() && isWithinMeleeAttackRange(target) && hasLineOfSight(target)) {
+      DamageSource source = damageSources().mobAttack(this);
+      if (target.hurt(source, getAttackDamage())) {
+        playSound(SoundEvents.SLIME_ATTACK, 1.0f, 1.0f + (random.nextFloat() - random.nextFloat()) * 0.2f);
+        if (level() instanceof ServerLevel server) {
+          EnchantmentHelper.doPostAttackEffects(server, target, source);
+          TeleportHelper.randomNearbyTeleport(target, teleportPredicate);
+        }
+      }
     }
   }
 

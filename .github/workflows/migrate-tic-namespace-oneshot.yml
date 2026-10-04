@@ -1,4 +1,4 @@
-name: Port station holder synchronization and native mob projectile behavior
+name: Port worldgen map codecs and registry-aware spilling enchantments
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -118,7 +118,9 @@ jobs:
               'net.minecraft.world.phys.AABB': ['public '],
               'net.minecraft.nbt.NbtUtils': ['readBlockPos(', 'writeBlockPos('],
               'net.neoforged.neoforge.fluids.capability.templates.FluidTank': ['readFromNBT(', 'writeToNBT('],
-              'net.minecraft.world.item.crafting.RecipeManager': ['public '],
+              'net.minecraft.world.item.crafting.RecipeManager': None,
+              'net.minecraft.network.FriendlyByteBuf': ['readNbt(', 'writeNbt('],
+              'net.minecraft.nbt.NbtIo': ['readCompressed('],
               'net.minecraft.world.item.crafting.RecipeHolder': ['public '],
               'net.minecraft.world.item.component.CustomData': ['public '],
               'net.minecraft.world.item.Item$TooltipContext': ['public '],
@@ -236,7 +238,7 @@ jobs:
                       print(f'{path}:{number}: {line.strip()}')
       - name: Audit authoritative recipe identity callers
         run: |
-          rg -n 'LoadableFinishedRecipe\\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\\.updateRecipe\\(' src/main/java || test "$?" -eq 1
+          rg -n 'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(' src/main/java || test "$?" -eq 1
       - name: Audit mutable tool data view boundaries
         run: python3 scripts/port/audit_tic_tool_data_views.py
   migrate:
