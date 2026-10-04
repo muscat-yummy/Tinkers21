@@ -12,6 +12,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.server.Bootstrap;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.Unbreakable;
 import slimeknights.tconstruct.library.tools.nbt.ToolStackData;
@@ -103,6 +104,21 @@ public final class ToolStackDataSmoke {
     copied.commit();
     check(custom(copied.createStack(1)).getCompound("tic_persistent").getInt("counter") == 5
       && custom(source).getCompound("tic_persistent").getInt("counter") == 3, "Tool data copy shared mutable state");
+
+    live.setRarity(Rarity.EPIC);
+    check(source.get(DataComponents.RARITY) == Rarity.EPIC && alias.get(DataComponents.RARITY) == Rarity.EPIC
+      && nativeCopy.get(DataComponents.RARITY) == Rarity.COMMON, "Native rarity did not respect binding/copy boundaries");
+    check(live.createStack(1).get(DataComponents.RARITY) == Rarity.EPIC,
+      "Native rarity was lost on tool stack creation");
+    live.setRarity(Rarity.COMMON);
+    check(source.get(DataComponents.RARITY) == Rarity.COMMON && alias.get(DataComponents.RARITY) == Rarity.COMMON,
+      "Removing the rarity modifier did not reset the native component");
+    ItemStack rarityOutput = source.copy();
+    rarityOutput.set(DataComponents.RARITY, Rarity.EPIC);
+    live.updateStack(rarityOutput, true);
+    check(rarityOutput.get(DataComponents.RARITY) == Rarity.COMMON,
+      "Default rarity did not overwrite an older output's native rarity");
+
 
     // copyData=true deliberately detaches a previously bound output.
     live.updateStack(alias, true);

@@ -161,7 +161,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
   }
 
-  @Override
+  /** @deprecated Native rarity is written when volatile tool data rebuilds or loads. */
+  @Deprecated
   public Rarity getRarity(ItemStack stack) {
     return RarityModule.getRarity(stack);
   }

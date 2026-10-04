@@ -6,6 +6,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.item.component.Unbreakable;
 
@@ -23,6 +24,7 @@ public final class ToolStackData {
   private final CompoundTag data;
   private CompoundTag committed;
   private final ItemStack template;
+  private Rarity ownedRarity;
   private final Map<ItemStack, State> attached = new IdentityHashMap<>();
 
   private record State(CustomData customData, Integer damage, Unbreakable unbreakable, DataComponentPatch components) {
@@ -42,6 +44,7 @@ public final class ToolStackData {
     this.data = data;
     this.committed = data.copy();
     this.template = new ItemStack(item);
+    this.ownedRarity = template.getOrDefault(DataComponents.RARITY, Rarity.COMMON);
     applyFull(template);
     attached.put(template, State.read(template));
   }
@@ -50,6 +53,7 @@ public final class ToolStackData {
     this.data = read(source);
     this.committed = data.copy();
     this.template = source.copy();
+    this.ownedRarity = source.getOrDefault(DataComponents.RARITY, Rarity.COMMON);
     applyFull(template);
     attached.put(template, State.read(template));
     if (attach && !source.isEmpty()) {
@@ -79,6 +83,7 @@ public final class ToolStackData {
     copy.data.getAllKeys().clear();
     copy.data.merge(data.copy());
     copy.committed = copy.data.copy();
+    copy.ownedRarity = ownedRarity;
     copy.applyFull(copy.template);
     copy.attached.put(copy.template, State.read(copy.template));
     return copy;
@@ -111,6 +116,18 @@ public final class ToolStackData {
     return stack;
   }
 
+  /** Owned tool display state is synchronized to every explicitly attached native item. */
+  public void setRarity(Rarity rarity) {
+    ownedRarity = rarity;
+    for (Map.Entry<ItemStack, State> entry : attached.entrySet()) {
+      ItemStack stack = entry.getKey();
+      if (stack.isEmpty()) continue;
+      boolean externallyChanged = !entry.getValue().matches(stack);
+      stack.set(DataComponents.RARITY, rarity);
+      if (!externallyChanged) entry.setValue(State.read(stack));
+    }
+  }
+
   private static boolean vanillaKey(String key) {
     return key.equals(DAMAGE) || key.equals(UNBREAKABLE);
   }
@@ -124,6 +141,7 @@ public final class ToolStackData {
     else stack.set(DataComponents.CUSTOM_DATA, CustomData.of(custom));
     writeDamage(stack);
     writeUnbreakable(stack);
+    if (ownedRarity != null) stack.set(DataComponents.RARITY, ownedRarity);
   }
 
   private void writeDamage(ItemStack stack) {

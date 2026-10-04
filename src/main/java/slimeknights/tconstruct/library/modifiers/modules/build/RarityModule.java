@@ -15,6 +15,7 @@ import slimeknights.tconstruct.library.module.HookProvider;
 import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.tools.helper.ModifierUtil;
 import slimeknights.tconstruct.library.tools.nbt.IToolContext;
+import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
 import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 
@@ -49,9 +50,18 @@ public record RarityModule(Rarity rarity) implements VolatileDataModifierHook, M
 
   /** Gets the rarity for the given stack */
   public static Rarity getRarity(ItemStack stack) {
-    int rarity = ModifierUtil.getVolatileInt(stack, RARITY);
+    return getRarity(ModifierUtil.getVolatileInt(stack, RARITY));
+  }
+
+  /** Gets display rarity from the tool's current working data. */
+  public static Rarity getRarity(IToolStackView tool) {
+    return getRarity(tool.getVolatileData().getInt(RARITY));
+  }
+
+  /** Malformed saved indices are bounded to the actual enum's valid range. */
+  public static Rarity getRarity(int index) {
     Rarity[] values = Rarity.values();
-    return values[Mth.clamp(rarity, 0, values.length)];
+    return values[Mth.clamp(index, 0, values.length - 1)];
   }
 
   /**

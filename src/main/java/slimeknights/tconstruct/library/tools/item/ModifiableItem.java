@@ -173,7 +173,8 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     return ModifierUtil.checkVolatileFlag(stack, SHINY);
   }
 
-  @Override
+  /** @deprecated Native rarity is written when volatile tool data rebuilds or loads. */
+  @Deprecated
   public Rarity getRarity(ItemStack stack) {
     return RarityModule.getRarity(stack);
   }

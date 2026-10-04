@@ -10,6 +10,7 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.library.modifiers.modules.build.RarityModule;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import slimeknights.tconstruct.TConstruct;
@@ -642,12 +643,17 @@ public class ToolStack implements IToolStackView {
       nbt.remove(TAG_VOLATILE_MOD_DATA);
     } else {
       volatileModData = modData;
-      modData.setOnChanged(componentData::commit);
+      modData.setOnChanged(this::commitVolatileData);
       nbt.put(TAG_VOLATILE_MOD_DATA, data);
     }
-    componentData.commit();
+    commitVolatileData();
   }
 
+
+  private void commitVolatileData() {
+    componentData.commit();
+    componentData.setRarity(RarityModule.getRarity(this));
+  }
 
   /* Utilities */
 
@@ -824,6 +830,8 @@ public class ToolStack implements IToolStackView {
     ToolStackData data = ToolStackData.from(stack, true);
     verifyTag(stack.getItem(), data.data(), definition);
     data.commit();
+    data.setRarity(RarityModule.getRarity(data.data().getCompound(TAG_VOLATILE_MOD_DATA)
+      .getInt(RarityModule.RARITY.toString())));
   }
 
   /**

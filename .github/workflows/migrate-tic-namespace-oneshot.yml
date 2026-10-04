@@ -1,4 +1,4 @@
-name: Port entity aware item use duration and native tooltip contexts
+name: Synchronize tool display rarity to native components
 on:
   push:
     branches: [port/1.21.1-neoforge]
