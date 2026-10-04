@@ -2,17 +2,25 @@
 import pathlib
 import re
 import subprocess
+import shutil
 
-files = subprocess.run(
-    ['rg', '-l', r'\b(?:ModDataNBT|ToolDataNBT|RestrictedCompoundTag)\b', 'src/main/java'],
-    check=False, capture_output=True, text=True)
-if files.returncode not in (0, 1):
-    raise RuntimeError(files.stderr)
+declaration = r'\b(?:ModDataNBT|ToolDataNBT|IModDataView|RestrictedCompoundTag)\b'
+if shutil.which('rg'):
+    files = subprocess.run(['rg', '-l', declaration, 'src/main/java'],
+                           check=False, capture_output=True, text=True)
+    if files.returncode not in (0, 1):
+        raise RuntimeError(files.stderr)
+    filenames = files.stdout.splitlines()
+else:
+    # GitHub's runner image does not always provide ripgrep.
+    match = re.compile(declaration)
+    filenames = [str(path) for path in pathlib.Path('src/main/java').rglob('*.java')
+                 if match.search(path.read_text())]
 total = 0
-for filename in sorted(files.stdout.splitlines()):
+for filename in sorted(filenames):
     path = pathlib.Path(filename)
     source = path.read_text()
-    aliases = set(re.findall(r'\b(?:ModDataNBT|ToolDataNBT|RestrictedCompoundTag)\s+(\w+)\b', source))
+    aliases = set(re.findall(r'\b(?:ModDataNBT|ToolDataNBT|IModDataView|RestrictedCompoundTag)\s+(\w+)\b', source))
     if not aliases:
         continue
     receiver = r'(?:' + '|'.join(re.escape(alias) for alias in sorted(aliases)) + r')'

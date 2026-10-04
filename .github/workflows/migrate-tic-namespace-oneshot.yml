@@ -1,4 +1,4 @@
-name: Verify native brewing slot counts and bucket dispenser position
+name: Verify brewing integration and portable tool data view audit
 on:
   push:
     branches: [port/1.21.1-neoforge]
