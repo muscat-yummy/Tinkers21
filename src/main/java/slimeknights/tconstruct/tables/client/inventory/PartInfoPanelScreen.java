@@ -48,7 +48,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
 
   /** If true, has pattern cost text */
   private boolean hasPatternCost() {
-    return this.patternCost != null && this.patternCost.getContents() != ComponentContents.EMPTY;
+    return this.patternCost != null && this.patternCost.getContents() != net.minecraft.network.chat.contents.PlainTextContents.EMPTY;
   }
 
   /* Material value */
@@ -72,7 +72,7 @@ public class PartInfoPanelScreen extends InfoPanelScreen<PartBuilderScreen,PartB
 
   /** If true, has material value text */
   private boolean hasMaterialValue() {
-    return this.materialValue != null && this.materialValue.getContents() != ComponentContents.EMPTY;
+    return this.materialValue != null && this.materialValue.getContents() != net.minecraft.network.chat.contents.PlainTextContents.EMPTY;
   }
 
   @Override

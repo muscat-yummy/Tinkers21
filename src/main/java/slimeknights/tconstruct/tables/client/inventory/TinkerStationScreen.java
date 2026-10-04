@@ -470,7 +470,7 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
   }
 
   @Override
-  public boolean mouseScrolled(double mouseX, double mouseY, double delta) {
+  public boolean mouseScrolled(double mouseX, double mouseY, double horizontalDelta, double delta) {
     if (this.tinkerInfo.handleMouseScrolled(mouseX, mouseY, delta)) {
       return false;
     }
@@ -479,7 +479,7 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
       return false;
     }
 
-    return super.mouseScrolled(mouseX, mouseY, delta);
+    return super.mouseScrolled(mouseX, mouseY, horizontalDelta, delta);
   }
 
   @Override
@@ -635,7 +635,6 @@ public class TinkerStationScreen extends ToolTableScreen<TinkerStationBlockEntit
   @Override
   public void containerTick() {
     super.containerTick();
-    this.textField.tick();
   }
 
   @Override

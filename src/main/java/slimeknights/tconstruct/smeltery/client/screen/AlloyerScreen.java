@@ -67,7 +67,6 @@ public class AlloyerScreen extends AbstractContainerScreen<AlloyerContainerMenu>
 
   @Override
   public void render(GuiGraphics graphics, int x, int y, float partialTicks) {
-    this.renderBackground(graphics);
     super.render(graphics, x, y, partialTicks);
     this.renderTooltip(graphics, x, y);
   }

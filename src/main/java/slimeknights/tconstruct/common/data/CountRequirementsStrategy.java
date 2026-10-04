@@ -13,6 +13,13 @@ public class CountRequirementsStrategy implements Strategy {
   }
 
   @Override
+  public net.minecraft.advancements.AdvancementRequirements create(Collection<String> strings) {
+    return new net.minecraft.advancements.AdvancementRequirements(
+      java.util.Arrays.stream(createRequirements(strings)).map(group -> List.of(group)).toList());
+  }
+
+  /** Legacy grouped-array view retained for callers; native builders use create(). */
+  @Deprecated
   public String[][] createRequirements(Collection<String> strings) {
     String[][] requirements = new String[sizes.length][];
     List<String> list = new ArrayList<>(strings);
