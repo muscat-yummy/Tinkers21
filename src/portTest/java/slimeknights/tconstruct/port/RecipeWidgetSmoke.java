@@ -1,6 +1,10 @@
 package slimeknights.tconstruct.port;
 
 import java.lang.reflect.Proxy;
+import java.util.ArrayList;
+import java.util.List;
+import mezz.jei.api.gui.builder.ITooltipBuilder;
+import net.minecraft.network.chat.Component;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.atomic.AtomicReference;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -44,6 +48,28 @@ public final class RecipeWidgetSmoke {
       widget.getTooltip(null, point[0], point[1]);
       if (seen.get() != -1) throw new AssertionError("Outside widget tooltip");
     }
+    List<Component> text = new ArrayList<>(List.of(Component.literal("first"), Component.literal("second")));
+    AtomicReference<List<?>> tooltipText = new AtomicReference<>();
+    ITooltipBuilder tooltip = (ITooltipBuilder) Proxy.newProxyInstance(
+      ITooltipBuilder.class.getClassLoader(), new Class<?>[] {ITooltipBuilder.class},
+      (proxy, method, arguments) -> {
+        if (method.getName().equals("addAll")) {
+          tooltipText.set(List.copyOf((List<?>) arguments[0]));
+          return method.getReturnType().isInstance(proxy) ? proxy : null;
+        }
+        throw new AssertionError("Unexpected tooltip call " + method.getName());
+      });
+    DrawableTooltipWidget area = DrawableTooltipWidget.area(builder, 3, 2, 118, 9).setTooltip(text);
+    text.clear();
+    area.drawWidget(null, 0, 0);
+    area.getTooltip(tooltip, 117.99, 8.99);
+    if (registered.get() != area || tooltipText.get() == null || tooltipText.get().size() != 2
+        || area.getPosition().x() != 3 || area.getPosition().y() != 2) {
+      throw new AssertionError("Tooltip area must preserve position and text snapshot");
+    }
+    tooltipText.set(null);
+    area.getTooltip(tooltip, 118, 0);
+    if (tooltipText.get() != null) throw new AssertionError("Tooltip area upper edge must be exclusive");
     System.out.println("Pinned JEI widget registration, relative/exclusive hover bounds and dynamic tooltip: PASS");
   }
 }

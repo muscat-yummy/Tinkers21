@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
@@ -96,13 +97,13 @@ public class ModifierRecipeCategory extends AbstractTinkerStationCategory<IDispl
     ModifierEntry result = recipe.getDisplayResult();
     Component requirementsError = result.getHook(ModifierHooks.REQUIREMENTS).requirementsError(result);
     if (requirementsError != null) {
-      builder.addDrawableWidget(requirements).setPosition(66, 58).setTooltip(requirementsError);
+      DrawableTooltipWidget.add(builder, requirements).setPosition(66, 58).setTooltip(requirementsError);
     }
     if (recipe.isIncremental()) {
-      builder.addDrawableWidget(incremental).setPosition(83, 59).setTooltip(TEXT_INCREMENTAL);
+      DrawableTooltipWidget.add(builder, incremental).setPosition(83, 59).setTooltip(TEXT_INCREMENTAL);
     }
     if (recipe.getSlots() == null) {
-      builder.addDrawableWidget(SLOTLESS)
+      DrawableTooltipWidget.add(builder, SLOTLESS)
         .setPosition(102, 58)
         .setTooltip(SlotIngredientRenderer.TEXT_FREE);
     }

@@ -8,6 +8,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.navigation.ScreenPosition;
 import net.minecraft.network.chat.Component;
 
+import java.util.List;
 import java.util.function.Consumer;
 
 /** Drawable and hover tooltip using the widget contract in the pinned JEI 19 API. */
@@ -24,6 +25,21 @@ public final class DrawableTooltipWidget implements IRecipeWidget {
     DrawableTooltipWidget widget = new DrawableTooltipWidget(drawable);
     builder.addWidget(widget);
     return widget;
+  }
+
+  /** A tooltip-only region on JEI versions without a tooltip-area builder. */
+  public static DrawableTooltipWidget area(IRecipeExtrasBuilder builder, int x, int y, int width, int height) {
+    IDrawable bounds = new IDrawable() {
+      @Override public int getWidth() { return width; }
+      @Override public int getHeight() { return height; }
+      @Override public void draw(GuiGraphics graphics, int xOffset, int yOffset) {}
+    };
+    return add(builder, bounds).setPosition(x, y);
+  }
+
+  public DrawableTooltipWidget setTooltip(List<Component> text) {
+    List<Component> snapshot = List.copyOf(text);
+    return setTooltip(builder -> builder.addAll(snapshot));
   }
 
   public DrawableTooltipWidget setPosition(int x, int y) {

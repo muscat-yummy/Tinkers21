@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.entity;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IIngredientAcceptor;
@@ -59,7 +60,7 @@ public class EntityMeltingRecipeCategory extends AbstractRecipeCategory<EntityMe
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, EntityMeltingRecipe recipe, IFocusGroup focuses) {
-    builder.addDrawableWidget(arrow).setPosition(71, 21);
+    DrawableTooltipWidget.add(builder, arrow).setPosition(71, 21);
     builder.addText(Component.literal(Float.toString(recipe.getDamage() / 2f)), 84, 9)
       .setPosition(0, 8)
       .setColor(Color.RED.getRGB())

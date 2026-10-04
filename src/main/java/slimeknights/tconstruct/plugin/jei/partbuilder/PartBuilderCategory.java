@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.partbuilder;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.builder.ITooltipBuilder;
@@ -7,7 +8,6 @@ import mezz.jei.api.gui.drawable.IDrawable;
 import mezz.jei.api.gui.ingredient.IRecipeSlotRichTooltipCallback;
 import mezz.jei.api.gui.ingredient.IRecipeSlotView;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
-import mezz.jei.api.gui.widgets.ITextWidget;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.recipe.IFocus;
 import mezz.jei.api.recipe.IFocusGroup;
@@ -53,16 +53,16 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayPartBuilderRecipe recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(66, 15);
+    builder.addRecipeArrow().setPosition(66, 15);
     Component title = recipe.getDisplayTitle();
     if (title != null && recipe.getMaterials().isEmpty()) {
-      ITextWidget widget = builder.addText(title, 118, 9)
+      builder.addText(title, 118, 9)
         .setPosition(3, 2)
         .setColor(-1)
         .setShadow(true);
       List<Component> tooltip = recipe.getTooltip();
       if (!tooltip.isEmpty()) {
-        widget.setTooltip(tooltip);
+        DrawableTooltipWidget.area(builder, 3, 2, 118, 9).setTooltip(tooltip);
       }
     }
   }

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.placement.HorizontalAlignment;
 import mezz.jei.api.gui.widgets.IRecipeExtrasBuilder;
 import mezz.jei.api.helpers.IGuiHelper;
@@ -32,7 +33,7 @@ public class ToolTinkeringCategory extends AbstractTinkerStationCategory<IDispla
     // add title and tooltip
     builder.addText(recipe.getTitle(), 124, 10)
       .setShadow(true).setColor(Color.WHITE.getRGB())
-      .setTextAlignment(HorizontalAlignment.CENTER).setPosition(3, 3)
-      .setTooltip(recipe.getTooltip());
+      .setTextAlignment(HorizontalAlignment.CENTER).setPosition(3, 3);
+    DrawableTooltipWidget.area(builder, 3, 3, 124, 10).setTooltip(recipe.getTooltip());
   }
 }

@@ -1,4 +1,4 @@
-name: Port native JEI crafting holders and inspect display runtime interfaces
+name: Port JEI category widgets and native loading-error guards
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -44,6 +44,8 @@ jobs:
               'net.minecraft.world.item.armortrim.TrimPattern': ['public '],
               'net.minecraft.client.renderer.Sheets': ['armorTrimsSheet('],
               'net.minecraft.core.registries.Registries': ['tagsDirPath('],
+              'mezz.jei.api.gui.widgets.IRecipeExtrasBuilder': ['public '],
+              'mezz.jei.api.gui.widgets.ITextWidget': ['public '],
               'mezz.jei.api.runtime.IIngredientVisibility': ['public '],
               'mezz.jei.api.runtime.IIngredientFilter': ['public '],
               'mezz.jei.api.runtime.IIngredientManager': ['public '],

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.modifiers;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
 import mezz.jei.api.gui.drawable.IDrawable;
@@ -42,7 +43,7 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierW
     builder.addText(recipe.getTitle(), 115, 9)
       .setPosition(3, 2)
       .setColor(0x404040);
-    builder.addTooltipArea(0, 2, 121, 11).setTooltip(recipe.getDescription(null));
+    DrawableTooltipWidget.area(builder, 0, 2, 121, 11).setTooltip(recipe.getDescription(null));
   }
 
   @Override

@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei.material;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import mezz.jei.api.neoforge.NeoForgeTypes;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
 import mezz.jei.api.gui.builder.IRecipeSlotBuilder;
@@ -175,8 +176,8 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     int value = recipe.getValue();
     if (value > 0) {
       builder.addText(Component.translatable(KEY_VALUE, value), 111, 9)
-        .setPosition(21, 11).setColor(Color.GRAY.getRGB())
-        .setTooltip(VALUE_TOOLTIP);
+        .setPosition(21, 11).setColor(Color.GRAY.getRGB());
+      DrawableTooltipWidget.area(builder, 21, 11, 111, 9).setTooltip(VALUE_TOOLTIP);
     } else {
       IRecipeSlotView fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
       if (fluid != null) {
@@ -186,9 +187,9 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     // craftable icon
     if (!recipe.getDisplayItems().isEmpty()) {
       if (recipe.getMaterial().get().isCraftable()) {
-        builder.addDrawableWidget(partBuilder).setPosition(21, 20).setTooltip(CRAFTABLE);
+        DrawableTooltipWidget.add(builder, partBuilder).setPosition(21, 20).setTooltip(CRAFTABLE);
       } else {
-        builder.addDrawableWidget(castingTable).setPosition(21, 20).setTooltip(UNCRAFTABLE);
+        DrawableTooltipWidget.add(builder, castingTable).setPosition(21, 20).setTooltip(UNCRAFTABLE);
       }
     }
   }
@@ -198,11 +199,6 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
     @Override
     public ScreenPosition getPosition() {
       return rectangle.position();
-    }
-
-    @Override
-    public @Nullable ScreenRectangle getScreenRectangle() {
-      return rectangle;
     }
 
     @Override
@@ -216,7 +212,9 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
 
     @Override
     public void getTooltip(ITooltipBuilder tooltip, double mouseX, double mouseY) {
-      tooltip.add(AMOUNT_TOOLTIP);
+      if (DrawableTooltipWidget.contains(mouseX, mouseY, rectangle.width(), rectangle.height())) {
+        tooltip.add(AMOUNT_TOOLTIP);
+      }
     }
   }
 }

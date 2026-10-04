@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jei;
 
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
 import mezz.jei.api.gui.builder.IRecipeLayoutBuilder;
@@ -63,9 +64,9 @@ public class ToolBuildingCategory extends AbstractRecipeCategory<ToolBuildingRec
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, ToolBuildingRecipe recipe, IFocusGroup focuses) {
-    builder.addRecipeArrowWidget().setPosition(74, 22);
+    builder.addRecipeArrow().setPosition(74, 22);
     if (recipe.requiresAnvil()) {
-      builder.addDrawableWidget(anvil).setPosition(76, 44).setTooltip(ANVIL);
+      DrawableTooltipWidget.add(builder, anvil).setPosition(76, 44).setTooltip(ANVIL);
     }
   }
 
