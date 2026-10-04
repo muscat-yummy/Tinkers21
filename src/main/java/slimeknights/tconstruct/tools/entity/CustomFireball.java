@@ -18,6 +18,9 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import net.minecraft.world.phys.Vec3;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import slimeknights.mantle.util.CombatHelper;
 import slimeknights.tconstruct.library.modifiers.entity.ProjectileWithPower;
 import slimeknights.tconstruct.shared.TinkerEffects;
@@ -41,11 +44,11 @@ public class CustomFireball extends Fireball implements ProjectileWithPower {
   }
 
   public CustomFireball(Level level, LivingEntity shooter, double xOffset, double yOffset, double zOffset) {
-    super(TinkerModifiers.fireball.get(), shooter, xOffset, yOffset, zOffset, level);
+    super(TinkerModifiers.fireball.get(), shooter, new Vec3(xOffset, yOffset, zOffset), level);
   }
 
   public CustomFireball(Level pLevel, double x, double y, double z, double xOffset, double yOffset, double zOffset) {
-    super(TinkerModifiers.fireball.get(), x, y, z, xOffset, yOffset, zOffset, pLevel);
+    super(TinkerModifiers.fireball.get(), x, y, z, new Vec3(xOffset, yOffset, zOffset), pLevel);
   }
 
 
@@ -94,11 +97,12 @@ public class CustomFireball extends Fireball implements ProjectileWithPower {
     super.onHitEntity(hit);
 
     // based on SmallFireball, uses custom damage type and power though
-    if (!this.level().isClientSide) {
+    if (this.level() instanceof ServerLevel server) {
       Entity target = hit.getEntity();
       Entity owner = this.getOwner();
-      if (target.hurt(CombatHelper.damageSource(TinkerEffects.needsEnderferenceOverride(target) ? enderferenceType : damageType, this, owner), getDamage()) && owner instanceof LivingEntity livingOwner) {
-        this.doEnchantDamageEffects(livingOwner, target);
+      DamageSource source = CombatHelper.damageSource(TinkerEffects.needsEnderferenceOverride(target) ? enderferenceType : damageType, this, owner);
+      if (target.hurt(source, getDamage()) && owner instanceof LivingEntity) {
+        EnchantmentHelper.doPostAttackEffects(server, target, source);
       }
     }
   }

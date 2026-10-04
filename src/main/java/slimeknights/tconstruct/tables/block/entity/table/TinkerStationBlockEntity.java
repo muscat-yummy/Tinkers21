@@ -13,6 +13,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.RecipeManager;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.neoforged.neoforge.client.model.data.ModelData;
@@ -57,6 +58,9 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
   /** Last crafted crafting recipe */
   @Nullable @Getter
   private ITinkerStationRecipe lastRecipe;
+  /** Authoritative native identity of the selected recipe; refreshed after recipe reloads. */
+  @Nullable
+  private RecipeHolder<ITinkerStationRecipe> lastRecipeHolder;
   /** Result inventory, lazy loads results */
   @Getter
   private final LazyResultContainer craftingResult;
@@ -156,22 +160,24 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       RecipeManager manager = this.level.getServer().getRecipeManager();
 
       // first, try the cached recipe
-      ITinkerStationRecipe recipe = lastRecipe;
-      // if it does not match, find a new recipe
-      if (recipe == null || !recipe.matches(this.inventoryWrapper, this.level)) {
-        recipe = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).map(net.minecraft.world.item.crafting.RecipeHolder::value).orElse(null);
+      RecipeHolder<ITinkerStationRecipe> holder = lastRecipeHolder;
+      if (holder == null || manager.byKey(holder.id()).map(current -> current.value() != lastRecipe).orElse(true)
+          || !holder.value().matches(this.inventoryWrapper, this.level)) {
+        holder = manager.getRecipeFor(TinkerRecipeTypes.TINKER_STATION.get(), this.inventoryWrapper, this.level).orElse(null);
+      }
+      ITinkerStationRecipe recipe = holder == null ? null : holder.value();
+
+      // A replacement at the same ID and a missing match both require a client update.
+      boolean changed = lastRecipeHolder != holder || lastRecipe != recipe;
+      if (changed) {
+        this.lastRecipeHolder = holder;
+        this.lastRecipe = recipe;
+        this.syncToRelevantPlayers(this::syncRecipe);
       }
 
       // if we have a recipe, fetch its result
-      boolean needsSync = true;
+      boolean needsSync = !changed || recipe == null;
       if (recipe != null) {
-        // sync if the recipe is different
-        if (lastRecipe != recipe) {
-          this.lastRecipe = recipe;
-          this.syncToRelevantPlayers(this::syncRecipe);
-          needsSync = false;
-        }
-
         // try for UI errors
         RecipeResult<LazyToolStack> validatedResult = recipe.getValidatedResult(this.inventoryWrapper, level.registryAccess());
         if (validatedResult.isSuccess()) {
@@ -292,8 +298,8 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
    */
   public void syncRecipe(Player player) {
     // must have a last recipe and a server level
-    if (this.lastRecipe != null && this.level != null && !this.level.isClientSide && player instanceof ServerPlayer server) {
-      TinkerNetwork.getInstance().sendTo(new UpdateTinkerStationRecipePacket(this.worldPosition, this.lastRecipe), server);
+    if (this.level != null && !this.level.isClientSide && player instanceof ServerPlayer server) {
+      TinkerNetwork.getInstance().sendTo(new UpdateTinkerStationRecipePacket(this.worldPosition, this.lastRecipeHolder), server);
     }
   }
 
@@ -302,7 +308,15 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
    * @param recipe  New recipe
    */
   public void updateRecipe(ITinkerStationRecipe recipe) {
+    this.lastRecipeHolder = null;
     this.lastRecipe = recipe;
+    this.craftingResult.clearContent();
+  }
+
+  /** Updates the selected value and its actual native ID together, including clearing no-match state. */
+  public void updateRecipeHolder(@Nullable RecipeHolder<ITinkerStationRecipe> holder) {
+    this.lastRecipeHolder = holder;
+    this.lastRecipe = holder == null ? null : holder.value();
     this.craftingResult.clearContent();
   }
 

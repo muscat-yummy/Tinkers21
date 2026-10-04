@@ -8,7 +8,8 @@ import net.minecraft.world.level.Level;
 import slimeknights.mantle.network.NetworkEvent.Context;
 import slimeknights.mantle.network.packet.BlockEntityPacket;
 import slimeknights.mantle.network.packet.IThreadsafePacket;
-import slimeknights.mantle.recipe.helper.RecipeHelper;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import javax.annotation.Nullable;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.recipe.tinkerstation.ITinkerStationRecipe;
 import slimeknights.tconstruct.tables.block.entity.table.TinkerStationBlockEntity;
@@ -20,21 +21,23 @@ import slimeknights.tconstruct.tables.client.inventory.TinkerStationScreen;
  */
 public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
   private final BlockPos pos;
+  @Nullable
   private final ResourceLocation recipe;
-  public UpdateTinkerStationRecipePacket(BlockPos pos, ITinkerStationRecipe recipe) {
+  public UpdateTinkerStationRecipePacket(BlockPos pos, @Nullable RecipeHolder<ITinkerStationRecipe> recipe) {
     this.pos = pos;
-    this.recipe = recipe.getId();
+    this.recipe = recipe == null ? null : recipe.id();
   }
 
   public UpdateTinkerStationRecipePacket(FriendlyByteBuf buffer) {
     this.pos = buffer.readBlockPos();
-    this.recipe = buffer.readResourceLocation();
+    this.recipe = buffer.readBoolean() ? buffer.readResourceLocation() : null;
   }
 
   @Override
   public void encode(FriendlyByteBuf buffer) {
     buffer.writeBlockPos(pos);
-    buffer.writeResourceLocation(recipe);
+    buffer.writeBoolean(recipe != null);
+    if (recipe != null) buffer.writeResourceLocation(recipe);
   }
 
   @Override
@@ -49,8 +52,14 @@ public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
       Level world = mc.level;
       if (world != null) {
         // start by fetching the recipe, no further work if it's missing
-        ITinkerStationRecipe recipe = RecipeHelper.getRecipe(world.getRecipeManager(), packet.recipe, ITinkerStationRecipe.class).orElse(null);
-        if (recipe == null) {
+        RecipeHolder<ITinkerStationRecipe> recipe = null;
+        if (packet.recipe != null) {
+          RecipeHolder<?> holder = world.getRecipeManager().byKey(packet.recipe).orElse(null);
+          if (holder != null && holder.value() instanceof ITinkerStationRecipe stationRecipe) {
+            recipe = new RecipeHolder<>(holder.id(), stationRecipe);
+          }
+        }
+        if (packet.recipe != null && recipe == null) {
           TConstruct.LOG.error("Failed to update Tinker Station Recipe at {}: unknown recipe {}", packet.pos, packet.recipe);
           return;
         }
@@ -58,14 +67,14 @@ public class UpdateTinkerStationRecipePacket implements IThreadsafePacket {
         if (mc.screen instanceof TinkerStationScreen stationScreen) {
           TinkerStationBlockEntity te = stationScreen.getTileEntity();
           if (te != null && te.getBlockPos().equals(packet.pos)) {
-            te.updateRecipe(recipe);
+            te.updateRecipeHolder(recipe);
             stationScreen.updateDisplay();
             return;
           }
         }
         // if the wrong screen is open or no screen, use the tile directly
         if (BlockEntityPacket.getBlockEntity(world, packet.pos, packet) instanceof TinkerStationBlockEntity be) {
-          be.updateRecipe(recipe);
+          be.updateRecipeHolder(recipe);
         } else {
           TConstruct.LOG.error("Failed to update Tinker Station Recipe at {} to {}: unable to find Tinker Station", packet.pos, packet.recipe);
         }

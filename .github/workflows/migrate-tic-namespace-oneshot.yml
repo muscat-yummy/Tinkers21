@@ -1,4 +1,4 @@
-name: Port native bucket shearing and effect interactions
+name: Port station holder synchronization and native mob projectile behavior
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -172,7 +172,7 @@ jobs:
               'net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition': None,
               'net.minecraft.world.item.enchantment.EnchantmentHelper': None,
               'net.minecraft.world.entity.Mob': ['finalizeSpawn(', 'populateDefaultEquipment', 'enchantSpawnedArmor(', 'dropCustomDeathLoot(', 'getEquipmentDropChance(', 'doHurtTarget('],
-              'net.minecraft.world.entity.monster.Slime': ['protected ', 'public '],
+              'net.minecraft.world.entity.monster.Slime': None,
               'net.minecraft.world.entity.projectile.Fireball': ['public ', 'protected '],
               'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_EQUIPMENT_DROP', 'EQUIPMENT_DROPS'],
               'net.minecraft.world.item.trading.ItemCost': ['public '],
@@ -234,6 +234,9 @@ jobs:
               for number, line in enumerate(path.read_text().splitlines(), 1):
                   if pattern.search(line):
                       print(f'{path}:{number}: {line.strip()}')
+      - name: Audit authoritative recipe identity callers
+        run: |
+          rg -n 'LoadableFinishedRecipe\\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\\.updateRecipe\\(' src/main/java || test "$?" -eq 1
       - name: Audit mutable tool data view boundaries
         run: python3 scripts/port/audit_tic_tool_data_views.py
   migrate:
