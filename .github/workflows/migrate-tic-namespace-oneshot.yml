@@ -1,4 +1,4 @@
-name: Port native enchantment hooks harvest restoration and registry aware datagen
+name: Verify enchantment integration and inspect native armor attribute defaults
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -78,6 +78,8 @@ jobs:
               'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
               'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight('],
               'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers(', 'verifyComponentsAfterLoad(', 'appendHoverText('],
+              'net.minecraft.world.item.ArmorItem': None,
+              'net.minecraft.world.entity.EquipmentSlotGroup': None,
               'net.minecraft.world.item.component.ItemAttributeModifiers': ['public '],
               'net.minecraft.world.item.component.ItemAttributeModifiers$Builder': ['public '],
               'net.neoforged.fml.ModLoader': ['public '],
