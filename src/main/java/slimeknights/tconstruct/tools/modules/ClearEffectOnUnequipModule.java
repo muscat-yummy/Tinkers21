@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.modules;
 
 import net.minecraft.world.effect.MobEffect;
+import net.minecraft.core.Holder;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.LivingEntity;
 import slimeknights.mantle.data.loadable.Loadables;
@@ -19,12 +20,17 @@ import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import java.util.List;
 
 /** Module to reduce duration of effects on unequip. Used to prevent an exploit with {@link slimeknights.tconstruct.shared.TinkerAttributes#GOOD_EFFECT_DURATION} */
-public record ClearEffectOnUnequipModule(MobEffect effect, ModifierCondition<IToolStackView> condition) implements ModifierModule, EquipmentChangeModifierHook, ConditionalModule<IToolStackView> {
+public record ClearEffectOnUnequipModule(Holder<MobEffect> effect, ModifierCondition<IToolStackView> condition) implements ModifierModule, EquipmentChangeModifierHook, ConditionalModule<IToolStackView> {
   private static final List<ModuleHook<?>> DEFAULT_HOOKS = HookProvider.<ClearEffectOnUnequipModule>defaultHooks(ModifierHooks.EQUIPMENT_CHANGE);
   public static final RecordLoadable<ClearEffectOnUnequipModule> LOADER = RecordLoadable.create(
-    Loadables.MOB_EFFECT.requiredField("effect", ClearEffectOnUnequipModule::effect),
+    Loadables.MOB_EFFECT.requiredField("effect", module -> module.effect().value()),
     ModifierCondition.TOOL_FIELD,
     ClearEffectOnUnequipModule::new);
+
+  /** Compatibility constructor using the authoritative built-in effect registry. */
+  public ClearEffectOnUnequipModule(MobEffect effect, ModifierCondition<IToolStackView> condition) {
+    this(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect), condition);
+  }
 
   @Override
   public RecordLoadable<ClearEffectOnUnequipModule> getLoader() {
@@ -40,7 +46,7 @@ public record ClearEffectOnUnequipModule(MobEffect effect, ModifierCondition<ITo
   public void onUnequip(IToolStackView tool, ModifierEntry modifier, EquipmentChangeContext context) {
     LivingEntity entity = context.getEntity();
     if (!entity.level().isClientSide && condition.matches(tool, modifier) && EquipmentChangeModifierHook.didUnequip(tool, context)) {
-      entity.removeEffect(BuiltInRegistries.MOB_EFFECT.wrapAsHolder(effect));
+      entity.removeEffect(effect);
     }
   }
 }

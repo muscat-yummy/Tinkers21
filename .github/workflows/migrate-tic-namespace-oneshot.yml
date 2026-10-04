@@ -1,4 +1,4 @@
-name: Port item tooltip and armor hooks; inspect native explosion and published JEI APIs
+name: Verify native crafting display bootstrap and effect holder modules
 on:
   push:
     branches: [port/1.21.1-neoforge]

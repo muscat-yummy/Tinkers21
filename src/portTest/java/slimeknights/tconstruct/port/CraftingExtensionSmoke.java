@@ -18,6 +18,9 @@ import slimeknights.tconstruct.plugin.jei.util.CraftingExtensionFactory;
 /** Exercise the production singleton adapter with actual native recipe holders and JEI callbacks. */
 public final class CraftingExtensionSmoke {
   public static void main(String[] args) {
+    net.neoforged.fml.loading.LoadingModList.of(List.of(), List.of(), List.of(), List.of(), java.util.Map.of());
+    net.minecraft.SharedConstants.tryDetectVersion();
+    net.minecraft.server.Bootstrap.bootStrap();
     RecipeHolder<BookCloningRecipe> first = new RecipeHolder<>(
       ResourceLocation.fromNamespaceAndPath("tconstruct", "repair"), new BookCloningRecipe(CraftingBookCategory.MISC));
     RecipeHolder<BookCloningRecipe> reloaded = new RecipeHolder<>(first.id(), new BookCloningRecipe(CraftingBookCategory.MISC));
