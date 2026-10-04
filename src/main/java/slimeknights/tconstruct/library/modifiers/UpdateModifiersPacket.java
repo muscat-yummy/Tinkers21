@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableMap;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
 import net.minecraft.core.registries.Registries;
+import net.minecraft.core.Holder;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.TagKey;
@@ -28,7 +29,7 @@ import java.util.Map.Entry;
 /** Packet to sync modifiers */
 @RequiredArgsConstructor
 public class UpdateModifiersPacket implements IThreadsafePacket {
-  private static final StreamCodec<RegistryFriendlyByteBuf,Enchantment> ENCHANTMENTS = ByteBufCodecs.registry(Registries.ENCHANTMENT);
+  private static final StreamCodec<RegistryFriendlyByteBuf,Holder<Enchantment>> ENCHANTMENTS = ByteBufCodecs.holderRegistry(Registries.ENCHANTMENT);
   /** Collection of all modifiers */
   private final Map<ModifierId,Modifier> allModifiers;
   /** Map of all modifier tags */
@@ -38,7 +39,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
   /** Map of modifier redirect ID pairs */
   private Map<ModifierId,ModifierId> redirects;
   /** Map of enchantment to modifier pair */
-  private final Map<Enchantment,Modifier> enchantmentMap;
+  private final Map<Holder<Enchantment>,Modifier> enchantmentMap;
   /** Collection of all enchantment tag mappings */
   private final Map<TagKey<Enchantment>, Modifier> enchantmentTagMappings;
 
@@ -104,7 +105,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
     this.tags = GenericTagUtil.decodeTags(buffer, ModifierManager.REGISTRY_KEY, id -> getModifier(modifiers, new ModifierId(id)));
 
     // read in enchantment to modifier mapping
-    ImmutableMap.Builder<Enchantment,Modifier> enchantmentBuilder = ImmutableMap.builder();
+    ImmutableMap.Builder<Holder<Enchantment>,Modifier> enchantmentBuilder = ImmutableMap.builder();
     size = buffer.readVarInt();
     for (int i = 0; i < size; i++) {
       enchantmentBuilder.put(
@@ -148,7 +149,7 @@ public class UpdateModifiersPacket implements IThreadsafePacket {
 
     // enchantment mapping
     buffer.writeVarInt(enchantmentMap.size());
-    for (Entry<Enchantment,Modifier> entry : enchantmentMap.entrySet()) {
+    for (Entry<Holder<Enchantment>,Modifier> entry : enchantmentMap.entrySet()) {
       ENCHANTMENTS.encode(RegistryBuffer.require(buffer), entry.getKey());
       buffer.writeResourceLocation(entry.getValue().getId());
     }

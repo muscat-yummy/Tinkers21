@@ -1,4 +1,4 @@
-name: Port recipe metadata and registry-aware conditional reloads
+name: Port native enchantment holders and conversion components
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -16,6 +16,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
       - name: Resolve exact native API classpath
         run: |
           cat > /tmp/native-api.init.gradle <<'GRADLE'
@@ -33,16 +35,15 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.entity.player.Player': {'methods': ['attack(']},
-              'net.minecraft.world.item.crafting.FireworkStarRecipe': ['SHAPE_'],
-              'net.minecraft.world.ItemInteractionResult': ['public '],
-              'net.minecraft.world.item.enchantment.Enchantment': ['STREAM_CODEC', 'DIRECT_CODEC'],
-              'net.minecraft.world.item.enchantment.ItemEnchantments': ['public '],
-              'net.minecraft.network.codec.ByteBufCodecs': ['holderRegistry('],
-              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_ARMOR_CHANGE'],
-              'net.minecraft.world.item.ItemStack': ['hurtAndBreak(', 'getAllEnchantments('],
-              'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase': ['useItemOn(', 'useWithoutItem('],
-              'net.minecraft.world.level.block.Blocks': ['never(']
+              'net.minecraft.world.item.enchantment.ItemEnchantments$Mutable': ['public '],
+              'net.minecraft.world.item.component.ResolvableProfile': ['public '],
+              'net.minecraft.world.entity.player.Player': ['blockInteractionRange('],
+              'net.minecraft.client.gui.Gui': ['renderSlot('],
+              'net.minecraft.client.renderer.texture.atlas.SpriteSources': ['register('],
+              'net.minecraft.world.entity.decoration.ArmorStand': {'methods': ['brokenByAnything(', 'brokenByPlayer(', 'causeDamage(']},
+              'net.minecraft.world.level.block.entity.BlockSource': ['public '],
+              'net.minecraft.world.entity.Entity': ['maxUpStep(', 'getStepHeight('],
+              'net.minecraft.core.HolderLookup$Provider': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -112,7 +113,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer'
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\\(|setLeftClickEventResult'
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):
@@ -136,6 +137,8 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
       - name: Resolve the exact compile classpath
         run: |
           cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'

@@ -18,6 +18,7 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
@@ -298,7 +299,7 @@ public class CombatFishingHook extends FishingHook implements ProjectileWithKnoc
     knockback = knockback.scale(GRAPPLE_STRENGTH * Math.pow(knockback.lengthSqr(), -0.25f));
     owner.push(knockback.x, knockback.y, knockback.z);
     if (isDrill() && owner instanceof Player player) {
-      player.startAutoSpinAttack(20);
+      player.startAutoSpinAttack(20, (float)player.getAttributeValue(Attributes.ATTACK_DAMAGE), player.getMainHandItem());
     }
     if (owner instanceof ServerPlayer player) {
       player.connection.send(new ClientboundSetEntityMotionPacket(player.getId(), player.getDeltaMovement()));
