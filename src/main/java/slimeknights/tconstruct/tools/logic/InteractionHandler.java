@@ -3,7 +3,7 @@ package slimeknights.tconstruct.tools.logic;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
-import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.stats.Stats;
@@ -148,7 +148,7 @@ public class InteractionHandler {
     Player player = context.getPlayer();
     Level world = context.getLevel();
     BlockInWorld info = new BlockInWorld(world, context.getClickedPos(), false);
-    if (player != null && !player.getAbilities().mayBuild && !stack.hasAdventureModePlaceTagForBlock(BuiltInRegistries.BLOCK, info)) {
+    if (player != null && !player.getAbilities().mayBuild && !stack.canPlaceOnBlockInAdventureMode(info)) {
       return InteractionResult.PASS;
     }
 
@@ -200,7 +200,10 @@ public class InteractionHandler {
         Level level = player.level();
         if (useBlock == TriState.TRUE || (useBlock != TriState.FALSE
                                          && (!player.isSecondaryUseActive() || player.getItemInHand(Util.getOpposite(hand)).doesSneakBypassUse(level, pos, player)))) {
-          InteractionResult result = level.getBlockState(pos).use(level, player, hand, trace);
+          var state = level.getBlockState(pos);
+          ItemInteractionResult itemResult = state.useItemOn(event.getItemStack(), level, player, hand, trace);
+          InteractionResult result = itemResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+            ? state.useWithoutItem(level, player, trace) : itemResult.result();
           if (result.consumesAction()) {
             if (player instanceof ServerPlayer serverPlayer) {
               CriteriaTriggers.ITEM_USED_ON_BLOCK.trigger(serverPlayer, pos, ItemStack.EMPTY);
@@ -362,13 +365,13 @@ public class InteractionHandler {
   }
 
   /** Sets the event result and swings the hand */
-  private static void setLeftClickEventResult(PlayerInteractEvent event, InteractionResult result) {
+  private static void setLeftClickEventResult(LeftClickBlock event, InteractionResult result) {
     if (result.consumesAction()) {
       // success means swing hand
       if (result == InteractionResult.SUCCESS) {
         event.getEntity().swing(event.getHand());
       }
-      event.setCancellationResult(result);
+      // LeftClickBlock has no result field in NeoForge; native cancellation controls mining.
       // don't cancel the result in survival as it does not actually prevent breaking the block, just causes really weird desyncs
       // leaving uncanceled lets us still do blocky stuff but if you hold click it digs
       if (event.getEntity().getAbilities().instabuild) {

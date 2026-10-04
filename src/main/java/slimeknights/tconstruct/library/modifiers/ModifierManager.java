@@ -302,7 +302,7 @@ public class ModifierManager extends SimpleJsonResourceReloadListener {
 
       // processed first so a modifier can both conditionally redirect and fallback to a conditional modifier
       if (json.has("redirects")) {
-        for (JsonRedirect redirect : JsonHelper.parseList(json, "redirects", JsonRedirect::fromJson)) {
+        for (JsonRedirect redirect : LoadableOps.with(jsonOps(), () -> JsonHelper.parseList(json, "redirects", JsonRedirect::fromJson))) {
           ICondition redirectCondition = redirect.getCondition();
           if (redirectCondition == null || redirectCondition.test(conditionContext)) {
             ModifierId redirectTarget = new ModifierId(redirect.getId());

@@ -40,7 +40,7 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import net.minecraft.world.phys.HitResult.Type;
 import net.minecraft.world.phys.Vec3;
-import net.neoforged.neoforge.common.NeoForgeMod;
+import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.neoforged.neoforge.common.util.FakePlayer;
 import net.neoforged.neoforge.event.entity.EntityTeleportEvent;
 import net.neoforged.neoforge.event.entity.ProjectileImpactEvent;
@@ -322,7 +322,7 @@ public class ModifierEvents {
   static void bounceOnFall(LivingFallEvent event) {
     LivingEntity living = event.getEntity();
     // using fall distance as the event distance could be reduced by jump boost
-    if (living == null || (living.fallDistance < 3 && living.getDeltaMovement().y > -0.3) || living.fallDistance <= 0.5f + living.getAttributeValue(NeoForgeMod.STEP_HEIGHT_ADDITION.get())) {
+    if (living == null || (living.fallDistance < 3 && living.getDeltaMovement().y > -0.3) || living.fallDistance <= 0.5f + (living.maxUpStep() - Attributes.STEP_HEIGHT.value().getDefaultValue())) {
       return;
     }
     // can the entity bounce?

@@ -8,6 +8,11 @@ import com.google.gson.JsonObject;
 import lombok.Setter;
 import lombok.extern.log4j.Log4j2;
 import net.minecraft.core.Registry;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.JsonOps;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
+import slimeknights.mantle.data.loadable.LoadableOps;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.ResourceManager;
@@ -84,6 +89,9 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
   /** Context for conditions */
   @Setter
   private IContext conditionContext = IContext.EMPTY;
+  /** Actual server reload registry context for condition codecs. */
+  @Setter
+  private HolderLookup.Provider reloadRegistries;
 
   public MaterialManager(Runnable onLoaded) {
     super(GSON, FOLDER);
@@ -246,7 +254,9 @@ public class MaterialManager extends SimpleJsonResourceReloadListener {
   @Nullable
   private IMaterial loadMaterial(ResourceLocation materialId, JsonObject jsonObject, Map<MaterialId, MaterialId> redirects) {
     try {
-      MaterialJson materialJson = GSON.fromJson(jsonObject, MaterialJson.class);
+      MaterialJson materialJson = LoadableOps.with(
+        new ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, Objects.requireNonNull(reloadRegistries, "Material reload registry context")), conditionContext),
+        () -> GSON.fromJson(jsonObject, MaterialJson.class));
 
       // if defined, the material will redirect to another material
       // processed first so a material can both conditionally redirect and fallback to a conditional material
