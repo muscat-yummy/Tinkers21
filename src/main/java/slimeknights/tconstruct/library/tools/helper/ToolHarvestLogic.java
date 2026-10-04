@@ -120,24 +120,26 @@ public class ToolHarvestLogic {
    * @param tool      Tool instance
    * @param stack     Stack instance for vanilla functions
    * @param context   Harvest context
-   * @param useLastXP If true, fetches the XP from {@link BlockSideHitListener} instead of firing the event. Prevents firing {@link net.neoforged.neoforge.event.level.BlockEvent.BreakEvent} twice.
+   * @param useLastXP If true, the native break event was already approved for this block. XP is handled by the native drops event.
    * @return  True if broken
    */
   protected static boolean breakBlock(IToolStackView tool, ItemStack stack, ToolHarvestContext context, boolean useLastXP) {
-    // have to rerun the event to get the EXP, also ensures extra blocks broken get EXP properly
+    // Secondary and projectile breaks need their own permission event. The game mode already approved a player's center block.
     ServerPlayer player = Objects.requireNonNull(context.getPlayer());
     ServerLevel world = context.getWorld();
     BlockPos pos = context.getPos();
     GameType type = player.gameMode.getGameModeForPlayer();
-    int exp = useLastXP ? BlockSideHitListener.getLastXP(player) : CommonHooks.onBlockBreakEvent(world, type, player, pos);
-    if (exp == -1) {
+    if (!useLastXP && CommonHooks.fireBlockBreak(world, type, player, pos, context.getState()).isCanceled()) {
       return false;
     }
-    // checked after the Forge hook, so we have to recheck
-    // TODO: is this needed? Seems its called inside CommonHooks.onBlockBreakEvent
+    // Recheck restrictions even if another listener uncancels a pre-canceled event.
     if (player.blockActionRestricted(world, pos, type)) {
       return false;
     }
+
+    // Keep vanilla pre-destruction effects and the state returned by the native callback.
+    BlockState beforeDestroy = context.getState();
+    context = context.forState(beforeDestroy.getBlock().playerWillDestroy(world, pos, beforeDestroy, player));
 
     // creative just removes the block
     if (player.isCreative()) {
@@ -160,10 +162,7 @@ public class ToolHarvestLogic {
       block.playerDestroy(world, player, pos, state, te, stack);
     }
 
-    // drop XP
-    if (removed && exp > 0) {
-      block.popExperience(world, pos, exp);
-    }
+    // playerDestroy routes item drops and XP through the native BlockDropsEvent exactly once.
 
     // handle modifiers if not broken
     // broken means we are using "empty hand"
@@ -214,7 +213,7 @@ public class ToolHarvestLogic {
 
   /**
    * Call on block break to break a block.
-   * Used in {@link net.neoforged.neoforge.common.extensions.IItemExtension#onBlockStartBreak(ItemStack, BlockPos, Player)}.
+   * Called by the server game-mode harvest bridge after the native permission event succeeds.
    * See also {@link net.minecraft.client.multiplayer.MultiPlayerGameMode#destroyBlock(BlockPos)} (client)
    * and {@link net.minecraft.server.level.ServerPlayerGameMode#destroyBlock(BlockPos)} (server)
    * @param stack   Stack instance
@@ -253,11 +252,14 @@ public class ToolHarvestLogic {
       player.setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
       ToolHarvestContext context = new ToolHarvestContext(world, serverPlayer, state, pos, sideHit,
         !player.isCreative() && state.canHarvestBlock(world, pos, player), false);
-      breakBlock(tool, ItemStack.EMPTY, context, true);
-      player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+      try {
+        breakBlock(tool, ItemStack.EMPTY, context, true);
+      } finally {
+        player.setItemInHand(InteractionHand.MAIN_HAND, stack);
+      }
     } else {
       // run standard breaking logic
-      runBlockBreak(stack, tool, state, pos, sideHit, serverPlayer, null);
+      runBlockBreak(stack, tool, state, pos, sideHit, serverPlayer, null, true);
     }
     return true;
   }
@@ -272,6 +274,11 @@ public class ToolHarvestLogic {
    * @return Number of blocks broken
    */
   public static int runBlockBreak(ItemStack stack, IToolStackView tool, BlockState state, BlockPos pos, Direction sideHit, ServerPlayer player, @Nullable Projectile projectile) {
+    return runBlockBreak(stack, tool, state, pos, sideHit, player, projectile, false);
+  }
+
+  /** The game-mode bridge alone may reuse its already approved center-block event. */
+  private static int runBlockBreak(ItemStack stack, IToolStackView tool, BlockState state, BlockPos pos, Direction sideHit, ServerPlayer player, @Nullable Projectile projectile, boolean centerEventApproved) {
     // create contexts
     ServerLevel world = player.serverLevel();
 
@@ -294,7 +301,7 @@ public class ToolHarvestLogic {
       Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();
 
       // actually break the block, run AOE if successful
-      if (breakBlock(tool, stack, context, true)) {
+      if (breakBlock(tool, stack, context, centerEventApproved)) {
         harvested += 1;
         for (BlockPos extraPos : extraBlocks) {
           BlockState extraState = world.getBlockState(extraPos);

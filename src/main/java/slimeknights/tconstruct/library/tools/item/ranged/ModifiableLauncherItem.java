@@ -409,7 +409,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
     return MiningSpeedToolHook.getDestroySpeed(stack, state);
   }
 
-  @Override
+  /** Owned harvest callback invoked by the native server game-mode bridge. */
+  @Deprecated
   public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
     return ToolHarvestLogic.handleBlockBreak(stack, pos, player);
   }

@@ -307,6 +307,12 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
+  public boolean canAttackBlock(BlockState state, Level level, BlockPos pos, Player player) {
+    return player.getMainHandItem().getCount() == 1;
+  }
+
+  /** Owned harvest callback invoked by the native server game-mode bridge. */
+  @Deprecated
   public boolean onBlockStartBreak(ItemStack stack, BlockPos pos, Player player) {
     return stack.getCount() > 1 || ToolHarvestLogic.handleBlockBreak(stack, pos, player);
   }

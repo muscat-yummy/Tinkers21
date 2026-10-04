@@ -75,6 +75,13 @@ public class ToolHarvestContext {
     return new ToolHarvestContext(world, living, player, projectile, state, pos, this.sideHit, state.canHarvestBlock(world, pos, player), true, true, targetedPos, targetedState);
   }
 
+  /** Replace the destroyed state while retaining the original target and AOE identity. */
+  public ToolHarvestContext forState(BlockState state) {
+    boolean harvest = player == null ? canHarvest : !player.isCreative() && state.canHarvestBlock(world, pos, player);
+    return new ToolHarvestContext(world, living, player, projectile, state, pos, sideHit,
+      harvest, isEffective, isAOE, targetedPos, targetedState);
+  }
+
   /** Checks if this is a projectile */
   public boolean isProjectile() {
     return projectile != null;

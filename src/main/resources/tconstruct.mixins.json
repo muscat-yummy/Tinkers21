@@ -6,7 +6,8 @@
   "mixins": [
     "LootCountMixin",
     "LootChanceMixin",
-    "EffectRemovalMixin"
+    "EffectRemovalMixin",
+    "ToolHarvestGameModeMixin"
   ],
   "client": [
     "ToolTooltipMixin"
