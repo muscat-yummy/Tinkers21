@@ -275,6 +275,12 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
           }
         }
       }
+      // ModDataNBT exposes snapshots; explicitly commit updated cooking timers and inputs.
+      if (list.isEmpty()) {
+        data.remove(key);
+      } else {
+        data.put(key, list);
+      }
     }
   }
 

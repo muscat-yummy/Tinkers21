@@ -122,7 +122,7 @@ public final class ToolStackDataSmoke {
     check(!custom(source).contains("tic_persistent") && !source.has(DataComponents.UNBREAKABLE),
       "Owned field removal was not committed");
 
-    ItemStack saved = ItemStack.parseOptional(registries, source.saveOptional(registries));
+    ItemStack saved = ItemStack.parse(registries, source.saveOptional(registries)).orElseThrow();
     check(ItemStack.isSameItemSameComponents(source, saved), "Native save round trip changed tool components");
     var buffer = new RegistryFriendlyByteBuf(Unpooled.buffer(), registries);
     try {

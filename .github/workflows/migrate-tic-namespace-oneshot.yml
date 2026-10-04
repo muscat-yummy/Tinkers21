@@ -1,4 +1,4 @@
-name: Port native tool data bindings and verify immutable save wire snapshots
+name: Verify native tool data save and commit smelting inventory snapshots
 on:
   push:
     branches: [port/1.21.1-neoforge]
