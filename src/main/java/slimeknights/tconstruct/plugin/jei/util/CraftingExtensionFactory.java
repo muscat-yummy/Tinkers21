@@ -14,16 +14,34 @@ import net.minecraft.world.item.crafting.RecipeHolder;
 import org.jetbrains.annotations.Nullable;
 
 import java.lang.ref.WeakReference;
+import java.lang.ref.Reference;
+import java.lang.ref.ReferenceQueue;
 import java.util.List;
 import java.util.Map;
-import java.util.WeakHashMap;
+import java.util.HashMap;
 import java.util.function.Function;
 
 /** Register one native JEI extension while retaining computed material displays per recipe holder. */
 public final class CraftingExtensionFactory<R extends CraftingRecipe> implements ICraftingCategoryExtension<R> {
   private final Function<RecipeHolder<R>, ? extends ICraftingCategoryExtension<R>> factory;
   // Both references are weak: a renderer may refer back to its holder, and must not retain old worlds.
-  private final Map<RecipeHolder<R>, WeakReference<ICraftingCategoryExtension<R>>> extensions = new WeakHashMap<>();
+  private final ReferenceQueue<RecipeHolder<R>> discarded = new ReferenceQueue<>();
+  private final Map<HolderIdentity<R>, WeakReference<ICraftingCategoryExtension<R>>> extensions = new HashMap<>();
+
+  /** RecipeHolder equality uses its ID; reloads and display variants require reference identity instead. */
+  private static final class HolderIdentity<R extends CraftingRecipe> extends WeakReference<RecipeHolder<R>> {
+    private final int hash;
+    private HolderIdentity(RecipeHolder<R> holder, ReferenceQueue<RecipeHolder<R>> queue) {
+      super(holder, queue);
+      hash = System.identityHashCode(holder);
+    }
+    @Override public int hashCode() { return hash; }
+    @Override public boolean equals(Object other) {
+      if (this == other) return true;
+      RecipeHolder<R> holder = get();
+      return holder != null && other instanceof HolderIdentity<?> identity && holder == identity.get();
+    }
+  }
 
   public CraftingExtensionFactory(Function<RecipeHolder<R>, ? extends ICraftingCategoryExtension<R>> factory) {
     this.factory = factory;
@@ -31,12 +49,14 @@ public final class CraftingExtensionFactory<R extends CraftingRecipe> implements
 
   @Nullable
   private ICraftingCategoryExtension<R> get(RecipeHolder<R> holder) {
-    WeakReference<ICraftingCategoryExtension<R>> reference = extensions.get(holder);
+    Reference<? extends RecipeHolder<R>> stale;
+    while ((stale = discarded.poll()) != null) extensions.remove(stale);
+    WeakReference<ICraftingCategoryExtension<R>> reference = extensions.get(new HolderIdentity<>(holder, null));
     ICraftingCategoryExtension<R> extension = reference == null ? null : reference.get();
     if (extension == null) {
       extension = factory.apply(holder);
       if (extension != null) {
-        extensions.put(holder, new WeakReference<>(extension));
+        extensions.put(new HolderIdentity<>(holder, discarded), new WeakReference<>(extension));
       }
     }
     return extension;

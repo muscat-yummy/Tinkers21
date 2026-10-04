@@ -1,4 +1,4 @@
-name: Port native custom explosion synchronization and verify JEI 19.51 API compatibility
+name: Port native cooking recipe inputs and preserve cached holder identity
 on:
   push:
     branches: [port/1.21.1-neoforge]
