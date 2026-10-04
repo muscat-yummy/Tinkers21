@@ -8,7 +8,8 @@
     "LootChanceMixin",
     "EffectRemovalMixin",
     "ToolHarvestGameModeMixin",
-    "CrossbowArrowMixin"
+    "CrossbowArrowMixin",
+    "ArrowKnockbackMixin"
   ],
   "client": [
     "ToolTooltipMixin"

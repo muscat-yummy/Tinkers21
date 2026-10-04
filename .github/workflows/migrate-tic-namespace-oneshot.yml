@@ -1,4 +1,4 @@
-name: Port crossbow firing and casting assembly contexts
+name: Port native arrow knockback and inspect remaining damage contexts
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,156 +33,17 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.level.Explosion': ['public ', 'private ', 'protected '],
-              'net.minecraft.network.protocol.game.ClientboundExplodePacket': ['public '],
-              'net.minecraft.sounds.SoundEvents': ['GENERIC_EXPLODE'],
-              'net.minecraft.world.entity.Entity': ['ignoreExplosion'],
-              'net.minecraft.client.gui.screens.inventory.InventoryScreen': None,
-              'net.minecraft.client.gui.screens.inventory.SmithingScreen': None,
-              'net.minecraft.client.gui.components.EditBox': None,
-              'net.minecraft.world.item.BucketItem': ['public ', 'protected '],
-              'net.minecraft.world.entity.EquipmentSlot$Type': ['public '],
-              'net.minecraft.world.item.Tiers': ['public '],
-              'net.minecraft.resources.ResourceLocation': ['public '],
-              'net.minecraft.tags.TagManager': ['public '],
-              'net.minecraft.world.item.armortrim.TrimPattern': ['public '],
-              'net.minecraft.client.renderer.Sheets': ['armorTrimsSheet('],
-              'net.minecraft.core.registries.Registries': ['tagsDirPath('],
-              'mezz.jei.api.gui.widgets.IRecipeExtrasBuilder': ['public '],
-              'mezz.jei.api.gui.widgets.ITextWidget': ['public '],
-              'mezz.jei.api.runtime.IIngredientVisibility': ['public '],
-              'mezz.jei.api.runtime.IIngredientFilter': ['public '],
-              'mezz.jei.api.runtime.IIngredientManager': ['public '],
-              'mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension': ['public '],
-              'mezz.jei.api.registration.IRecipeCatalystRegistration': ['public '],
-              'mezz.jei.api.recipe.category.extensions.vanilla.crafting.IExtendableCraftingRecipeCategory': ['public '],
-              'mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension': ['public '],
-              'mezz.jei.api.recipe.RecipeType': ['public '],
-              'mezz.jei.api.registration.IRecipeTransferRegistration': ['public '],
-              'mezz.jei.api.recipe.transfer.IRecipeTransferInfo': ['public '],
-              'net.minecraft.client.gui.Gui': ['renderSlot('],
-              'net.minecraft.util.FastColor$ARGB32': ['colorFromFloat('],
-              'net.minecraft.client.model.Model': ['renderToBuffer('],
-              'net.minecraft.advancements.AdvancementRequirements': ['public '],
-              'net.minecraft.advancements.AdvancementRequirements$Strategy': ['public '],
-              'net.minecraft.client.renderer.entity.ItemRenderer': ['getArmorFoilBuffer('],
-              'net.minecraft.world.item.DyeColor': ['getTextureDiffuseColor('],
-              'net.minecraft.world.level.block.FungusBlock': ['public '],
-              'net.minecraft.client.renderer.texture.SpriteContents': ['public '],
-              'net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader': ['public '],
-              'net.minecraft.client.renderer.texture.atlas.SpriteSource$SpriteSupplier': ['public '],
-              'net.minecraft.world.level.block.entity.BannerPattern': ['public '],
-              'net.minecraft.world.level.block.entity.BannerPatternLayers': ['public '],
-              'net.minecraft.world.level.block.entity.BannerPatternLayers$Layer': ['public '],
-              'com.mojang.serialization.MapCodec': ['flatXmap(', 'validate('],
-              'net.minecraft.world.ItemInteractionResult': ['public '],
-              'net.minecraft.world.level.block.ChangeOverTimeBlock': None,
-              'net.minecraft.world.food.FoodProperties$PossibleEffect': ['public '],
-              'net.minecraft.world.food.FoodData': ['eat('],
-              'net.minecraft.client.resources.model.ModelResourceLocation': ['public '],
-              'net.minecraft.world.level.block.state.BlockBehaviour': ['isPathfindable(', 'useItemOn(', 'useWithoutItem('],
-              'net.minecraft.world.level.block.BonemealableBlock': ['public '],
-              'net.minecraft.server.level.ServerPlayerGameMode': None,
-              'net.minecraft.world.item.component.ItemContainerContents': None,
-              'net.neoforged.neoforge.common.extensions.IItemExtension': ['damageItem(', 'getDamage(', 'getMaxDamage(', 'isDamageable(', 'setDamage('],
-              'net.minecraft.world.item.alchemy.PotionBrewing$Mix': None,
-              'net.neoforged.neoforge.event.brewing.RegisterBrewingRecipesEvent': None,
-              'net.minecraft.core.cauldron.CauldronInteraction$InteractionMap': None,
-              'com.mojang.blaze3d.vertex.Tesselator': ['public '],
-              'com.mojang.blaze3d.vertex.BufferBuilder': ['public '],
-              'net.minecraft.client.renderer.texture.TextureAtlasSprite': None,
-              'net.minecraft.client.gui.screens.inventory.AbstractContainerScreen': ['imageWidth', 'imageHeight', 'leftPos', 'topPos'],
-              'net.minecraft.client.renderer.block.model.BlockElementFace': ['public '],
-              'net.neoforged.neoforge.common.brewing.BrewingRecipe': ['public '],
-              'net.neoforged.neoforge.event.level.BlockDropsEvent': ['public '],
-              'net.minecraft.core.dispenser.BlockSource': ['public '],
-              'net.minecraft.world.item.crafting.ShapedRecipePattern': None,
-              'net.minecraft.world.item.crafting.ShapedRecipePattern$Data': ['public '],
-              'net.minecraft.world.item.crafting.ShapedRecipe$Serializer': ['public '],
-              'net.minecraft.world.level.block.BeehiveBlock': ['hiveContainsBees('],
-              'net.minecraft.world.item.crafting.ShapedRecipe': ['pattern', 'public '],
-              'net.minecraft.world.item.crafting.ShapelessRecipe$Serializer': ['public '],
-              'net.minecraft.world.item.ArrowItem': None,
-              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['public '],
-              'net.minecraft.world.item.enchantment.Enchantments': ['public '],
-              'net.minecraft.world.entity.projectile.AbstractHurtingProjectile': None,
-              'net.minecraft.world.entity.projectile.AbstractArrow': None,
-              'net.minecraft.world.entity.projectile.ThrownTrident': None,
-              'net.minecraft.world.item.crafting.CraftingInput': None,
-              'net.minecraft.world.item.crafting.CraftingInput$Positioned': ['public '],
-              'net.minecraft.world.inventory.CraftingContainer': None,
-              'net.neoforged.neoforge.common.CommonHooks': ['CraftingPlayer(', 'BlockBreak', 'BlockDrops'],
-              'net.minecraft.client.renderer.LevelRenderer': ['renderLineBox(', 'renderShape('],
-              'net.minecraft.client.renderer.blockentity.BlockEntityRenderer': ['public '],
-              'net.neoforged.neoforge.client.extensions.IBlockEntityRendererExtension': ['public '],
-              'net.minecraft.world.phys.AABB': ['public '],
-              'net.minecraft.nbt.NbtUtils': ['readBlockPos(', 'writeBlockPos('],
-              'net.neoforged.neoforge.fluids.capability.templates.FluidTank': ['readFromNBT(', 'writeToNBT('],
-              'net.minecraft.world.item.crafting.RecipeManager': None,
-              'net.minecraft.network.FriendlyByteBuf': ['readNbt(', 'writeNbt('],
-              'net.minecraft.nbt.NbtIo': ['readCompressed('],
-              'net.minecraft.world.item.crafting.RecipeHolder': ['public '],
-              'net.minecraft.world.item.component.CustomData': ['public '],
-              'net.minecraft.world.item.Item$TooltipContext': ['public '],
-              'net.minecraft.network.syncher.SynchedEntityData$Builder': ['public '],
-              'net.neoforged.neoforge.common.loot.LootModifier': ['public ', 'protected '],
-              'net.neoforged.neoforge.common.loot.IGlobalLootModifier': ['public '],
-              'net.minecraft.world.level.storage.loot.parameters.LootContextParams': ['public '],
-              'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
-              'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight(', 'remove(', 'setRemoved(', 'onRemovedFromLevel(', 'getCapability('],
-              'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers(', 'verifyComponentsAfterLoad(', 'appendHoverText('],
-              'net.minecraft.world.item.ArmorItem': None,
-              'net.minecraft.world.entity.EquipmentSlotGroup': None,
-              'net.minecraft.world.item.component.ItemAttributeModifiers': ['public '],
-              'net.minecraft.world.item.component.ItemAttributeModifiers$Builder': ['public '],
-              'net.neoforged.fml.ModLoader': ['public '],
-              'net.neoforged.neoforge.event.AddReloadListenerEvent': ['public '],
-              'net.minecraft.advancements.critereon.EntityPredicate': ['public '],
-              'net.minecraft.advancements.critereon.EntityPredicate$Builder': ['public '],
-              'net.minecraft.advancements.critereon.ItemCustomDataPredicate': ['public '],
-              'net.minecraft.advancements.critereon.ItemSubPredicates': ['public '],
-              'net.minecraft.world.entity.SpawnPlacementTypes': ['public '],
-              'net.minecraft.world.level.block.ComposterBlock': ['COMPOSTABLES', 'add('],
-              'net.minecraft.world.entity.EntityType': ['create('],
-              'net.minecraft.advancements.critereon.PlayerTrigger$TriggerInstance': ['public '],
-              'net.minecraft.advancements.critereon.PlayerInteractTrigger$TriggerInstance': ['public '],
-              'net.minecraft.advancements.critereon.ItemPredicate$Builder': ['public '],
-              'net.minecraft.advancements.critereon.EntityEquipmentPredicate$Builder': ['public '],
-              'net.minecraft.advancements.critereon.LocationPredicate$Builder': ['public '],
-              'com.mojang.blaze3d.vertex.VertexConsumer': None,
-              'net.minecraft.network.syncher.EntityDataSerializer': ['public '],
-              'net.minecraft.network.codec.StreamCodec': ['public '],
-              'net.minecraft.world.entity.LivingEntity': ['onEquippedItemBroken(', 'broadcastBreakEvent(', 'lastPos', 'onEffectRemoved(', 'onEffectAdded(', 'getAttributeValue(', 'jumpFromGround(', 'isSuppressingSlidingDownLadder('],
-              'net.minecraft.world.food.FoodProperties$Builder': ['public '],
-              'net.minecraft.world.food.FoodProperties': ['public '],
-              'net.minecraft.world.effect.MobEffects': ['public '],
-              'net.minecraft.world.level.storage.loot.entries.LootPoolEntries': ['public '],
-              'net.minecraft.world.effect.MobEffect': ['public ', 'protected '],
-              'net.minecraft.world.entity.ai.attributes.Attributes': ['public '],
-              'net.minecraft.world.entity.ai.attributes.AttributeModifier$Operation': ['public '],
-              'net.minecraft.world.entity.ai.attributes.AttributeInstance': ['public '],
-              'net.minecraft.world.item.alchemy.PotionBrewing$Builder': None,
-              'net.minecraft.world.item.alchemy.PotionBrewing': None,
-              'net.minecraft.world.item.ItemStack': ['addToTooltip(', 'getTooltipLines(', 'getEnchantments(', 'getComponentsPatch(', 'isSameItemSameComponents('],
-              'net.minecraft.world.item.enchantment.ItemEnchantments': ['public '],
-              'net.minecraft.world.item.enchantment.ItemEnchantments$Mutable': ['public '],
-              'net.minecraft.data.registries.VanillaRegistries': ['public '],
-              'net.minecraft.world.item.ItemStack': ['parse(', 'parseOptional(', 'saveOptional(', 'getTagEnchantments(', 'getComponentsPatch('],
-              'net.minecraft.world.item.enchantment.Enchantment': ['public '],
-              'net.minecraft.world.level.storage.loot.LootContext': ['getParam(', 'getParamOrNull(', 'hasParam('],
-              'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': None,
-              'net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition': None,
-              'net.minecraft.world.item.enchantment.EnchantmentHelper': None,
-              'net.minecraft.world.entity.Mob': ['finalizeSpawn(', 'populateDefaultEquipment', 'enchantSpawnedArmor(', 'dropCustomDeathLoot(', 'getEquipmentDropChance(', 'doHurtTarget('],
-              'net.minecraft.world.entity.monster.Slime': None,
-              'net.minecraft.world.entity.projectile.Fireball': None,
-              'net.minecraft.world.item.ProjectileWeaponItem': None,
-              'net.minecraft.world.item.BowItem': None,
-              'net.minecraft.world.item.CrossbowItem': None,
-              'net.minecraft.nbt.NbtAccounter': ['unlimitedHeap('],
-              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_EQUIPMENT_DROP', 'EQUIPMENT_DROPS'],
-              'net.minecraft.world.item.trading.ItemCost': ['public '],
-              'net.minecraft.world.level.block.LiquidBlockContainer': ['public ']
+              'net.minecraft.world.damagesource.DamageSource': None,
+              'net.minecraft.world.damagesource.CombatRules': None,
+              'net.minecraft.world.entity.ai.attributes.Attributes': ['SUBMERGED_MINING_SPEED'],
+              'net.minecraft.world.entity.player.Player': {'methods': ['getDestroySpeed(']},
+              'net.minecraft.world.item.ItemStack': {'methods': ['canPlaceOnBlockInAdventureMode(']},
+              'net.minecraft.world.item.crafting.Recipe': ['public '],
+              'net.minecraft.world.item.crafting.RecipeHolder': None,
+              'net.minecraft.data.loot.EntityLootSubProvider': ['public ', 'protected '],
+              'net.minecraft.advancements.critereon.EntityFlagsPredicate$Builder': ['public '],
+              'net.minecraft.world.item.enchantment.Enchantment': ['Definition', 'matchingSlot(', 'getSlotItems(', 'slots('],
+              'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -194,7 +55,7 @@ jobs:
                   if cls.replace('.', '/') + '.class' not in names:
                       continue
                   command = ['javap', '-classpath', str(jar), '-p']
-                  if wanted is None:
+                  if wanted is None or isinstance(wanted, dict):
                       command.append('-c')
                   command.append(cls)
                   result = subprocess.run(command, capture_output=True, text=True, check=True)
@@ -206,9 +67,17 @@ jobs:
                           raise RuntimeError('Native permission/harvest injection boundary changed')
                       print('Native harvest permission/cancellation/pre-destruction order verified')
                   print('Native tooltip/loot API:', cls)
-                  for line in result.stdout.splitlines():
-                      if wanted is None or any(token in line for token in wanted):
-                          print(line)
+                  if isinstance(wanted, dict):
+                      printing = False
+                      for line in result.stdout.splitlines():
+                          if line.startswith(('  public ', '  protected ', '  private ', '  static ')):
+                              printing = any(token in line for token in wanted['methods'])
+                          if printing:
+                              print(line)
+                  else:
+                      for line in result.stdout.splitlines():
+                          if wanted is None or any(token in line for token in wanted):
+                              print(line)
                   del targets[cls]
           if targets:
               raise RuntimeError('API classes not found: ' + ', '.join(targets))
@@ -244,7 +113,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO'
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\('
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):

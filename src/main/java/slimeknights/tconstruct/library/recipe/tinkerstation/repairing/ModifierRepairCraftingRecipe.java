@@ -4,7 +4,7 @@ import lombok.Getter;
 import net.minecraft.core.NonNullList;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CustomRecipe;
@@ -54,7 +54,7 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   }
 
   @Override
-  public boolean matches(CraftingContainer inv, Level world) {
+  public boolean matches(CraftingInput inv, Level world) {
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     if (inputs == null) {
       return false;
@@ -65,7 +65,7 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   }
 
   @Override
-  public ItemStack assemble(CraftingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(CraftingInput inv, net.minecraft.core.HolderLookup.Provider access) {
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     if (inputs == null) {
       TConstruct.LOG.error("Recipe repair on {} failed to find items after matching", getId());
@@ -90,7 +90,7 @@ public class ModifierRepairCraftingRecipe extends CustomRecipe implements IModif
   }
 
   @Override
-  public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
+  public NonNullList<ItemStack> getRemainingItems(CraftingInput inv) {
     // step 1: find out how much we need to repair
     ToolFound inputs = OverslimeCraftingTableRecipe.findTool(inv, TOOLS, ingredient);
     int repairPerItem = 0;

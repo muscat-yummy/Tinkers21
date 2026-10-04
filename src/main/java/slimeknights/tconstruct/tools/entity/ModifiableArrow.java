@@ -15,6 +15,7 @@ import net.minecraft.world.phys.Vec3;
 import slimeknights.tconstruct.library.modifiers.ModifierEntry;
 import slimeknights.tconstruct.library.modifiers.ModifierHooks;
 import slimeknights.tconstruct.library.modifiers.entity.ReusableProjectile;
+import slimeknights.tconstruct.library.modifiers.entity.ProjectileWithKnockback;
 import slimeknights.tconstruct.library.modifiers.hook.build.ConditionalStatModifierHook;
 import slimeknights.tconstruct.library.modifiers.hook.ranged.ScheduledProjectileTaskModifierHook;
 import slimeknights.tconstruct.library.tools.IndestructibleItemEntity;
@@ -149,9 +150,10 @@ public class ModifiableArrow extends AbstractArrow implements ToolProjectile, Re
 
   // need to replace some setters with adders so vanilla bows work with our logic
 
-  @Override
+  /** Owned compatibility entry point; native arrows receive knockback through the projectile bridge. */
+  @Deprecated
   public void setKnockback(int knockback) {
-    super.setKnockback(getKnockback() + knockback);
+    ((ProjectileWithKnockback) (Object) this).addKnockback(knockback);
   }
 
   @Override
