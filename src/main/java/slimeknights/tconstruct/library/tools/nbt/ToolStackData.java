@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.tools.nbt;
 
 import net.minecraft.core.component.DataComponents;
+import net.minecraft.core.component.DataComponentPatch;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.Item;
@@ -24,15 +25,16 @@ public final class ToolStackData {
   private final ItemStack template;
   private final Map<ItemStack, State> attached = new IdentityHashMap<>();
 
-  private record State(CustomData customData, Integer damage, Unbreakable unbreakable) {
+  private record State(CustomData customData, Integer damage, Unbreakable unbreakable, DataComponentPatch components) {
     static State read(ItemStack stack) {
       return new State(stack.get(DataComponents.CUSTOM_DATA), stack.get(DataComponents.DAMAGE),
-        stack.get(DataComponents.UNBREAKABLE));
+        stack.get(DataComponents.UNBREAKABLE), stack.getComponentsPatch());
     }
     boolean matches(ItemStack stack) {
       return customData == stack.get(DataComponents.CUSTOM_DATA)
         && Objects.equals(damage, stack.get(DataComponents.DAMAGE))
-        && Objects.equals(unbreakable, stack.get(DataComponents.UNBREAKABLE));
+        && Objects.equals(unbreakable, stack.get(DataComponents.UNBREAKABLE))
+        && components.equals(stack.getComponentsPatch());
     }
   }
 
@@ -154,6 +156,7 @@ public final class ToolStackData {
     for (Map.Entry<ItemStack, State> entry : attached.entrySet()) {
       ItemStack stack = entry.getKey();
       if (stack.isEmpty()) continue;
+      boolean externallyChanged = !entry.getValue().matches(stack);
       if (!customChanged.isEmpty() || damageChanged || unbreakableChanged) {
         CustomData.update(DataComponents.CUSTOM_DATA, stack, tag -> {
           if (damageChanged) tag.remove(DAMAGE);
@@ -167,7 +170,8 @@ public final class ToolStackData {
       }
       if (damageChanged) writeDamage(stack);
       if (unbreakableChanged) writeUnbreakable(stack);
-      entry.setValue(State.read(stack));
+      // Our delta preserves outside edits, but the working view must still refresh on next lookup.
+      if (!externallyChanged) entry.setValue(State.read(stack));
     }
     committed = data.copy();
   }

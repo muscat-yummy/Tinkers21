@@ -63,7 +63,7 @@ public final class ToolStackDataSmoke {
     live.commit();
     check(custom(source).getString("external").equals("kept")
       && custom(source).getString("unrelated").equals("preserved"), "Delta commit lost unrelated metadata");
-    check(live.isSameStack(source), "Committed binding state was not refreshed");
+    check(!live.isSameStack(source), "Delta commit masked outside changes from the cached working view");
     live.data().putInt("Damage", 8);
     live.data().putBoolean("Unbreakable", true);
     live.data().putInt("HideFlags", 4);
@@ -83,6 +83,12 @@ public final class ToolStackDataSmoke {
       && custom(nativeCopy).getCompound("tic_persistent").getInt("counter") == 2,
       "Native ordinary copy was not isolated");
     check(alias.get(DataComponents.CUSTOM_NAME).equals(Component.literal("Native name")), "Native name lost");
+    source.set(DataComponents.CUSTOM_NAME, Component.literal("External name"));
+    check(!live.isSameStack(source), "External native component replacement did not invalidate tool cache");
+    ToolStackData refreshed = ToolStackData.from(source, false);
+    check(refreshed.createStack(1).get(DataComponents.CUSTOM_NAME).equals(Component.literal("External name")),
+      "Refreshed view discarded external native component metadata");
+
 
     ToolStackData detached = ToolStackData.from(source, false);
     detached.data().getCompound("tic_persistent").putInt("counter", 4);
