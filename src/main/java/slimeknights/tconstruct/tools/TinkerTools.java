@@ -180,6 +180,7 @@ public final class TinkerTools extends TinkerModule {
     DummyArmorMaterial.register(TConstruct.MOD_ID, TConstruct.getModEventBus());
     TConstruct.getModEventBus().addListener(ToolCapabilityProvider::registerCapabilities);
     INGREDIENT_TYPES.register(TConstruct.getModEventBus());
+    ToolStackItemPredicate.register(TConstruct.getModEventBus());
     SlotType.init();
     BlockSideHitListener.init();
     ModifierLootingHandler.init();
@@ -328,8 +329,6 @@ public final class TinkerTools extends TinkerModule {
   @SubscribeEvent
   void registerRecipeSerializers(RegisterEvent event) {
     if (event.getRegistryKey() == Registries.RECIPE_SERIALIZER) {
-      ItemPredicate.register(ToolStackItemPredicate.ID, ToolStackItemPredicate::deserialize);
-
       // register tool stats that are not defined directly in the class; safer than static init registration
       ToolStats.register(OverslimeModule.OVERSLIME_STAT);
       ToolStats.register(ToolTankHelper.CAPACITY_STAT);

@@ -1,4 +1,4 @@
-name: Port immutable material cosmetic data and native tank trim rendering
+name: Wire native tool predicates and data resource identities
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -43,6 +43,7 @@ jobs:
               'net.minecraft.tags.TagManager': ['public '],
               'net.minecraft.world.item.armortrim.TrimPattern': ['public '],
               'net.minecraft.client.renderer.Sheets': ['armorTrimsSheet('],
+              'net.minecraft.core.registries.Registries': ['tagsDirPath('],
               'net.minecraft.client.gui.Gui': ['renderSlot('],
               'net.minecraft.util.FastColor$ARGB32': ['colorFromFloat('],
               'net.minecraft.client.model.Model': ['renderToBuffer('],
