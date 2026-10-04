@@ -1,4 +1,4 @@
-name: Port verified native enchantment mapping keys
+name: Port native map identities frame render cancellation and attribute tooltip values
 on:
   push:
     branches: [port/1.21.1-neoforge]

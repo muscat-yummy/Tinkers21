@@ -13,6 +13,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.level.saveddata.maps.MapId;
+import net.minecraft.core.component.DataComponents;
 import slimeknights.mantle.client.TooltipKey;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.mantle.data.loadable.record.SingletonLoader;
@@ -104,11 +106,14 @@ public enum MinimapModule implements ModifierModule, EquipmentChangeModifierHook
           // hack: map logic requires the map to be in the selected slot to tick properly, so put it in the invnetory temporarily
           ItemStack held = holder.getOffhandItem();
           holder.setItemInHand(InteractionHand.OFF_HAND, map);
-          map.inventoryTick(world, holder, Inventory.SLOT_OFFHAND, true);
-          holder.setItemInHand(InteractionHand.OFF_HAND, held);
+          try {
+            map.inventoryTick(world, holder, Inventory.SLOT_OFFHAND, true);
+          } finally {
+            holder.setItemInHand(InteractionHand.OFF_HAND, held);
+          }
           if (holder instanceof ServerPlayer player) {
             MapItemSavedData mapData = MapItem.getSavedData(map, world);
-            Integer id = MapItem.getMapId(map);
+            MapId id = map.get(DataComponents.MAP_ID);
             if (mapData != null && id != null) {
               Packet<?> packet = mapData.getUpdatePacket(id, player);
               if (packet != null) {
@@ -128,7 +133,8 @@ public enum MinimapModule implements ModifierModule, EquipmentChangeModifierHook
 
   @Override
   public void onInventorySelect(IToolStackView tool, ModifierEntry modifier, Player player, int newIndex, ItemStack stack) {
-    player.displayClientMessage(Component.translatable(SELECTED, stack.getHoverName(), MapItem.getMapId(stack), newIndex + 1), true);
+    MapId id = stack.get(DataComponents.MAP_ID);
+    player.displayClientMessage(Component.translatable(SELECTED, stack.getHoverName(), id == null ? "?" : id.id(), newIndex + 1), true);
   }
 
   @Override

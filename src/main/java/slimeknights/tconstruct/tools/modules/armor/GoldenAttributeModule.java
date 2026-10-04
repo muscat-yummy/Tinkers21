@@ -166,7 +166,7 @@ public record GoldenAttributeModule(String unique, TinkerDataKey<TotalGold> data
       if (instance != null) {
         AttributeModifier modifier = instance.getModifier(AttributeIdUtil.fromUuid(uuid));
         if (modifier != null) {
-          amount = (float) modifier.getAmount();
+          amount = (float) modifier.amount();
         }
       }
     }
