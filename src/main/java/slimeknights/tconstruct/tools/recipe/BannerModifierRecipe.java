@@ -2,6 +2,10 @@ package slimeknights.tconstruct.tools.recipe;
 
 import lombok.Getter;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.Registries;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.level.block.entity.BannerPatternLayers;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -104,16 +108,8 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
   }
 
   /** Gets the list of patterns from the banner stack */
-  private static ListTag getBannerPatterns(ItemStack banner) {
-    // get the banner data
-    CompoundTag bannerData = BlockItem.getBlockEntityData(banner);
-    ListTag patterns;
-    if (bannerData != null) {
-      patterns = bannerData.getList("Patterns", Tag.TAG_COMPOUND);
-    } else {
-      patterns = new ListTag();
-    }
-    return patterns;
+  private static BannerPatternLayers getBannerPatterns(ItemStack banner) {
+    return banner.getOrDefault(DataComponents.BANNER_PATTERNS, BannerPatternLayers.EMPTY);
   }
 
   @Override
@@ -150,9 +146,9 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
     }
 
     // get the banner data
-    ListTag patterns = getBannerPatterns(banner);
+    BannerPatternLayers patterns = getBannerPatterns(banner);
     // disallow no patterns when going clear
-    if (dye == null && patterns.isEmpty()) {
+    if (dye == null && patterns.layers().isEmpty()) {
       return NO_PATTERNS;
     }
 
@@ -177,22 +173,6 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
   @Nullable
   private List<IDisplayModifierRecipe> displayRecipes;
 
-  /** Creates the tag for a single pattern with the given color */
-  private static CompoundTag createDisplayPatternTag(BannerPattern pattern, DyeColor color) {
-    ListTag singlePattern = new ListTag();
-    CompoundTag patternTag = new CompoundTag();
-    patternTag.putString("Pattern", pattern.getHashname());
-    patternTag.putInt("Color", color.getId());
-    singlePattern.add(patternTag);
-
-    // create NBT for the banner stacks
-    CompoundTag blockEntityData = new CompoundTag();
-    blockEntityData.put("Patterns", singlePattern);
-    BlockEntity.addEntityType(blockEntityData, BlockEntityType.BANNER);
-    CompoundTag stackTag = new CompoundTag();
-    stackTag.put("BlockEntityTag", blockEntityData);
-    return stackTag;
-  }
 
   @Override
   public List<IDisplayModifierRecipe> getRecipes(RegistryAccess access) {
@@ -224,19 +204,13 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
         if (clearInput != Ingredient.EMPTY) {
           // we want a pattern on it to make it more clear what it does
           // but put a white pattern on the black banner for visibility
-          CompoundTag stackTag, stackTagBlack;
-          BannerPattern cross = BuiltInRegistries.BANNER_PATTERN.get(BannerPatterns.CROSS);
-          if (cross != null) {
-            stackTag = createDisplayPatternTag(cross, DyeColor.BLACK);
-            stackTagBlack = createDisplayPatternTag(cross, DyeColor.WHITE);
-          } else {
-            stackTag = null;
-            stackTagBlack = null;
-          }
-          // add the recipe to the end of the stream
-          List<ItemStack> bannersWithPattern = banners.stream().map(stack -> {
-            stack = stack.copy();
-            stack.setTag(stack.getItem() == Items.BLACK_BANNER ? stackTagBlack : stackTag);
+          Holder<BannerPattern> cross = access.lookupOrThrow(Registries.BANNER_PATTERN).get(BannerPatterns.CROSS).orElse(null);
+          List<ItemStack> bannersWithPattern = banners.stream().map(original -> {
+            ItemStack stack = original.copy();
+            if (cross != null) {
+              DyeColor color = stack.getItem() == Items.BLACK_BANNER ? DyeColor.WHITE : DyeColor.BLACK;
+              stack.set(DataComponents.BANNER_PATTERNS, new BannerPatternLayers(List.of(new BannerPatternLayers.Layer(cross, color))));
+            }
             return stack;
           }).toList();
           recipes.add(new DisplayRecipe(id, toolInputs, bannersWithPattern, List.of(clearInput.getItems())));
@@ -277,7 +251,7 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
       ModifierId key = RESULT.getId();
       // apply a default pattern to the result tools for the sake of offbrand JEI. You will never see it in real JEI
       DyeColor defaultColor = clearInput.isEmpty() ? DyeColor.WHITE : null;
-      ListTag defaultPatterns = getBannerPatterns(banners.get(0));
+      BannerPatternLayers defaultPatterns = getBannerPatterns(banners.get(0));
       toolWithModifier = tools.stream().map(stack -> IDisplayModifierRecipe.withModifiers(stack, DEFAULT_TOOL_STACK_SIZE, results, data -> BannerModule.copyPatterns(data, key, defaultColor, defaultPatterns))).toList();
     }
 
@@ -307,7 +281,7 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
       // if focus input is a banner with patterns, use that
       if (slot == 0 && !focusOutput && !focus.isEmpty() && focus.getItem() instanceof BannerItem
           // skip using it if the example pattern lacks patterns, as that won't give a useful result
-          && (clearInput.isEmpty() || !getBannerPatterns(focus).isEmpty())) {
+          && (clearInput.isEmpty() || !getBannerPatterns(focus).layers().isEmpty())) {
         return List.of(focus.copyWithCount(1));
       }
       return getDisplayItems(slot);
@@ -353,7 +327,7 @@ public class BannerModifierRecipe implements ITinkerStationRecipe, IMultiRecipe<
       // apply banner to display tool
       ItemStack toolStack = toolSlot.get();
       if (!toolStack.isEmpty() && bannerStack.getItem() instanceof BannerItem banner) {
-        ListTag patterns = getBannerPatterns(bannerStack);
+        BannerPatternLayers patterns = getBannerPatterns(bannerStack);
         // if clear, skip the color. Still better that we have a BannerItem though
         DyeColor dye = clearInput.isEmpty() ? banner.getColor() : null;
         ToolStack tool = ToolStack.copyFrom(toolStack);

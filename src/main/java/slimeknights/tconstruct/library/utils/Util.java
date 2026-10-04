@@ -176,8 +176,7 @@ public class Util {
 
   /** Calculates the given color */
   private static int calcColor(DyeColor color) {
-    float[] diffuse = color.getTextureDiffuseColors();
-    return FastColor.ARGB32.color(255, Math.round(255 * diffuse[0]), Math.round(255 * diffuse[1]), Math.round(255 * diffuse[2]));
+    return color.getTextureDiffuseColor() | 0xFF000000;
   }
 
   /** Array of tints for each dye color */
