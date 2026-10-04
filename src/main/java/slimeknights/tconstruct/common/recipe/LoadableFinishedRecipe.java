@@ -15,10 +15,10 @@ import java.util.function.Consumer;
  * Simple recipe for serializing a recipe with a loadable.
  * TODO: move to Mantle
  */
-public record LoadableFinishedRecipe<T extends Recipe<?>>(RecordLoadable<T> loader, T recipe) implements FinishedRecipe {
+public record LoadableFinishedRecipe<T extends Recipe<?>>(ResourceLocation id, RecordLoadable<T> loader, T recipe) implements FinishedRecipe {
   @Override
   public ResourceLocation getId() {
-    return recipe.getId();
+    return id;
   }
 
   @Override
@@ -44,7 +44,7 @@ public record LoadableFinishedRecipe<T extends Recipe<?>>(RecordLoadable<T> load
   }
 
   /** One-liner to accept a new recipe */
-  public static <T extends Recipe<?>> void save(RecipeConsumer consumer, RecordLoadable<T> loader, T recipe) {
-    consumer.accept(new LoadableFinishedRecipe<>(loader, recipe));
+  public static <T extends Recipe<?>> void save(RecipeConsumer consumer, ResourceLocation id, RecordLoadable<T> loader, T recipe) {
+    consumer.accept(new LoadableFinishedRecipe<>(id, loader, recipe));
   }
 }

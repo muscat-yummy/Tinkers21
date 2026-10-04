@@ -61,7 +61,13 @@ public class LoadableRecipeSerializer<T extends Recipe<?>> implements LoggingRec
 
   /** Builds payload context. The enclosing RecipeHolder owns the ID. */
   protected TypedMapBuilder buildContext() {
-    return TypedMapBuilder.builder().put(ContextKey.DEBUG, "Recipe serializer " + BuiltInRegistries.RECIPE_SERIALIZER.getKey(this)).put(SERIALIZER, this);
+    TypedMapBuilder context = TypedMapBuilder.builder()
+      .put(ContextKey.DEBUG, "Recipe serializer " + BuiltInRegistries.RECIPE_SERIALIZER.getKey(this)).put(SERIALIZER, this);
+    ResourceLocation id = RecipeDecodeContext.currentId();
+    if (id != null) {
+      context.put(ContextKey.ID, id);
+    }
+    return context;
   }
 
   protected T readJson(JsonObject json) {

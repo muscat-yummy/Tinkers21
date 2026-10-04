@@ -27,6 +27,9 @@ import java.util.function.Predicate;
 /** Recipe for applying overslime in the crafting table */
 @Getter
 public class OverslimeCraftingTableRecipe extends CustomRecipe {
+  @lombok.Getter
+  private final ResourceLocation id;
+
   public static final RecordLoadable<OverslimeCraftingTableRecipe> LOADER = RecordLoadable.create(
     ContextKey.ID.requiredField(),
     IngredientLoadable.DISALLOW_EMPTY.defaultField("tools", Ingredient.of(TinkerTags.Items.DURABILITY), r -> r.tools),
@@ -39,7 +42,8 @@ public class OverslimeCraftingTableRecipe extends CustomRecipe {
   private final int restoreAmount;
 
   public OverslimeCraftingTableRecipe(ResourceLocation id, Ingredient tools, Ingredient ingredient, int restoreAmount) {
-    super(id, CraftingBookCategory.EQUIPMENT);
+    super(CraftingBookCategory.EQUIPMENT);
+    this.id = id;
     this.tools = tools;
     this.ingredient = ingredient;
     this.restoreAmount = restoreAmount;

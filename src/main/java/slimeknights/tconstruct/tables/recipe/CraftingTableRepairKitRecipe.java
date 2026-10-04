@@ -31,8 +31,12 @@ import javax.annotation.Nullable;
  * @see slimeknights.mantle.recipe.helper.SimpleFinishedRecipe
  */
 public class CraftingTableRepairKitRecipe extends CustomRecipe {
+  @lombok.Getter
+  private final ResourceLocation id;
+
   public CraftingTableRepairKitRecipe(ResourceLocation id) {
-    super(id, CraftingBookCategory.EQUIPMENT);
+    super(CraftingBookCategory.EQUIPMENT);
+    this.id = id;
   }
 
   /**

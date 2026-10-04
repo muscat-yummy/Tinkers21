@@ -9,7 +9,9 @@
     "EffectRemovalMixin",
     "ToolHarvestGameModeMixin",
     "CrossbowArrowMixin",
-    "ArrowKnockbackMixin"
+    "ArrowKnockbackMixin",
+    "RecipeManagerIdentityMixin",
+    "RecipeHolderIdentityMixin"
   ],
   "client": [
     "ToolTooltipMixin"
