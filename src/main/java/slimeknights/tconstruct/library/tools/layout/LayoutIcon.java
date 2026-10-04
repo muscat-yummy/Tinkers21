@@ -11,11 +11,12 @@ import com.google.gson.JsonSerializer;
 import com.google.gson.JsonSyntaxException;
 import io.netty.handler.codec.DecoderException;
 import lombok.RequiredArgsConstructor;
-import net.minecraft.nbt.CompoundTag;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
+import slimeknights.tconstruct.library.utils.RegistryBuffer;
+import slimeknights.mantle.util.typed.TypedMap;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.ItemStack;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
 import slimeknights.mantle.data.loadable.Loadables;
 import slimeknights.mantle.util.JsonHelper;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
@@ -66,7 +67,7 @@ public abstract class LayoutIcon {
     switch (type) {
       case EMPTY: return EMPTY;
       case ITEM: {
-        ItemStack stack = buffer.readItem();
+        ItemStack stack = ItemStack.OPTIONAL_STREAM_CODEC.decode(RegistryBuffer.require(buffer));
         return new ItemStackIcon(stack);
       }
       case PATTERN: {
@@ -100,17 +101,13 @@ public abstract class LayoutIcon {
     @Override
     public void write(FriendlyByteBuf buffer) {
       buffer.writeEnum(Type.ITEM);
-      buffer.writeItem(stack);
+      ItemStack.OPTIONAL_STREAM_CODEC.encode(RegistryBuffer.require(buffer), stack);
     }
 
     @Override
     public JsonObject toJson() {
       JsonObject json = new JsonObject();
-      json.add("item", Loadables.ITEM.serialize(stack.getItem()));
-      CompoundTag tag = stack.getTag();
-      if (tag != null) {
-        json.addProperty("nbt", tag.toString());
-      }
+      ItemStackLoadable.OPTIONAL_STACK_NBT.serialize(stack, json);
       return json;
     }
   }
@@ -160,7 +157,7 @@ public abstract class LayoutIcon {
         return new PatternIcon(pattern);
       }
       if (object.has("item")) {
-        ItemStack stack = CraftingHelper.getItemStack(object, true);
+        ItemStack stack = ItemStackLoadable.OPTIONAL_STACK_NBT.deserialize(object, TypedMap.EMPTY);
         return new ItemStackIcon(stack);
       }
       // not sure why this would be needed, but might as well

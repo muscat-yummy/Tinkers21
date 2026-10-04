@@ -140,14 +140,14 @@ public class FancyArmorStandEntity extends ArmorStand {
   }
 
   @Override
-  protected void brokenByPlayer(DamageSource source) {
+  protected void brokenByPlayer(net.minecraft.server.level.ServerLevel server, DamageSource source) {
     ItemStack stack = new ItemStack(getStandItem());
     if (this.hasCustomName()) {
-      stack.setHoverName(this.getCustomName());
+      stack.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, this.getCustomName());
     }
     Block.popResource(this.level(), this.blockPosition(), stack);
 
-    this.brokenByAnything(source);
+    this.brokenByAnything(server, source);
   }
 
 

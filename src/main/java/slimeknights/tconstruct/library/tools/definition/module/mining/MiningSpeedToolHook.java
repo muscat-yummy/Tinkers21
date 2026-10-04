@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.library.tools.definition.module.mining;
 
 import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.library.tools.nbt.ToolStackData;
 import net.minecraft.world.level.block.state.BlockState;
 import slimeknights.tconstruct.library.tools.definition.module.ToolHooks;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
@@ -16,7 +17,7 @@ public interface MiningSpeedToolHook {
 
   /** Gets the mining speed for the tool against the given state */
   static float getDestroySpeed(ItemStack tool, BlockState state) {
-    if (!tool.hasTag()) {
+    if (ToolStackData.read(tool) == null) {
       return 1;
     }
     return getDestroySpeed(ToolStack.from(tool), state);

@@ -1,4 +1,4 @@
-name: Port cancellable input and native client rendering access
+name: Port component-aware layouts and native armor stand drops
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,15 +35,15 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.core.dispenser.BlockSource': ['public '],
-              'net.minecraft.world.entity.decoration.ArmorStand': ['public ', 'protected ', 'private '],
-              'net.minecraft.server.network.ServerCommonPacketListenerImpl': ['getConnection('],
-              'net.minecraft.client.gui.Gui': ['renderSlot('],
-              'net.minecraft.client.renderer.texture.atlas.SpriteSources': ['register('],
-              'net.minecraft.client.renderer.texture.atlas.SpriteSourceType': ['public '],
+              'net.minecraft.world.entity.EntityType': ['appendDefaultStackConfig(', 'createDefaultStackConfig(', 'create(', 'spawn('],
+              'net.minecraft.world.entity.decoration.ArmorStand': ['brokenByPlayer(', 'brokenByAnything('],
+              'net.minecraft.world.item.Item': ['appendHoverText('],
+              'net.minecraft.world.item.Items': ['TURTLE_SCUTE'],
+              'net.minecraft.world.level.block.Blocks': ['SHORT_GRASS'],
+              'net.minecraft.world.item.crafting.Ingredient': ['CODEC', 'STREAM_CODEC'],
               'net.minecraft.world.item.component.ItemContainerContents': ['public '],
-              'net.neoforged.neoforge.fluids.FluidStack': ['public '],
-              'net.minecraft.data.registries.VanillaRegistries': ['public ']
+              'net.minecraft.core.component.DataComponentMap': ['public '],
+              'net.minecraft.core.component.DataComponentPatch': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -113,7 +113,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable'
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable'
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):

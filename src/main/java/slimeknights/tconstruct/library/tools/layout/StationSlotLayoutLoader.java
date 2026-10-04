@@ -19,7 +19,13 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.crafting.CraftingHelper;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.JsonOps;
+import net.neoforged.neoforge.common.conditions.ConditionalOps;
+import slimeknights.mantle.data.loadable.LoadableOps;
+import slimeknights.mantle.data.loadable.common.IngredientLoadable;
+import slimeknights.tconstruct.library.utils.JsonConditionHelper;
 import net.neoforged.neoforge.common.conditions.ICondition.IContext;
 import net.neoforged.neoforge.event.AddReloadListenerEvent;
 import net.neoforged.neoforge.event.OnDatapackSyncEvent;
@@ -63,6 +69,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
 
   /** Context for parsing conditions */
   private IContext conditionContext = IContext.EMPTY;
+  private RegistryAccess reloadRegistries;
 
   private StationSlotLayoutLoader() {
     super(GSON, FOLDER);
@@ -92,9 +99,10 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
       try {
         // skip empty objects, allows disabling a slot at a lower datapack
         JsonObject object = GsonHelper.convertToJsonObject(value, "station_layout");
-        if (!object.entrySet().isEmpty() && CraftingHelper.processConditions(object, "conditions", conditionContext)) {
+        var ops = new ConditionalOps<>(RegistryOps.create(JsonOps.INSTANCE, java.util.Objects.requireNonNull(reloadRegistries, "Layout reload registry context")), conditionContext);
+        if (!object.entrySet().isEmpty() && JsonConditionHelper.matches(object, ops, conditionContext)) {
           // just need a valid slot information
-          StationSlotLayout layout = GSON.fromJson(object, StationSlotLayout.class);
+          StationSlotLayout layout = LoadableOps.with(ops, () -> GSON.fromJson(object, StationSlotLayout.class));
           int size = layout.getInputSlots().size() + (layout.getToolSlot().isHidden() ? 0 : 1);
           if (size < 2) {
             throw new JsonParseException("Too few slots for layout " + key + ", must have at least 2");
@@ -137,6 +145,7 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
   private void addDataPackListeners(final AddReloadListenerEvent event) {
     event.addListener(this);
     conditionContext = event.getConditionContext();
+    reloadRegistries = event.getRegistryAccess();
   }
 
 
@@ -157,12 +166,12 @@ public class StationSlotLayoutLoader extends SimpleJsonResourceReloadListener {
   private static class IngredientSerializer implements JsonSerializer<Ingredient>, JsonDeserializer<Ingredient> {
     @Override
     public Ingredient deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-      return Ingredient.fromJson(json);
+      return IngredientLoadable.ALLOW_EMPTY.convert(json, "filter");
     }
 
     @Override
     public JsonElement serialize(Ingredient ingredient, Type typeOfSrc, JsonSerializationContext context) {
-      return ingredient.toJson();
+      return IngredientLoadable.ALLOW_EMPTY.serialize(ingredient);
     }
   }
 }
