@@ -1,4 +1,4 @@
-name: Synchronize tool display rarity to native components
+name: Port verified native enchantment mapping keys
 on:
   push:
     branches: [port/1.21.1-neoforge]
