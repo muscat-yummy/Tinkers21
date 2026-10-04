@@ -1,14 +1,15 @@
 package slimeknights.tconstruct.plugin.jei.material;
 
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.library.recipe.material.ShapelessMaterialsRecipe;
 
 import java.util.List;
 
 /** Logic to show {@link ShapelessMaterialsRecipe} in JEI */
 public class ShapelessMaterialsExtension extends MaterialsCraftingExtension<ShapelessMaterialsRecipe> {
-  ShapelessMaterialsExtension(ShapelessMaterialsRecipe recipe) {
-    super(recipe);
+  ShapelessMaterialsExtension(RecipeHolder<ShapelessMaterialsRecipe> holder) {
+    super(holder);
   }
 
   /** Gets the material slots for the given recipe */

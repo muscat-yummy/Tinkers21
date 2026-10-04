@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.plugin.jei.material;
 
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.library.recipe.material.ShapedMaterialsRecipe;
 
 import javax.annotation.Nullable;
@@ -9,19 +10,20 @@ import java.util.stream.IntStream;
 
 /** Logic to show {@link ShapedMaterialsRecipe} in JEI */
 public class ShapedMaterialsExtension extends MaterialsCraftingExtension<ShapedMaterialsRecipe> {
-  private ShapedMaterialsExtension(ShapedMaterialsRecipe recipe) {
-    super(recipe);
+  private ShapedMaterialsExtension(RecipeHolder<ShapedMaterialsRecipe> holder) {
+    super(holder);
   }
 
   /** {@return Instance of the shaped extension, or null if the recipe is invalid for display} */
   @Nullable
-  public static ShapedMaterialsExtension create(ShapedMaterialsRecipe recipe) {
+  public static ShapedMaterialsExtension create(RecipeHolder<ShapedMaterialsRecipe> holder) {
+    ShapedMaterialsRecipe recipe = holder.value();
     for (Ingredient ingredient : recipe.getParts()) {
       if (ingredient.getItems().length == 0) {
         return null;
       }
     }
-    return new ShapedMaterialsExtension(recipe);
+    return new ShapedMaterialsExtension(holder);
   }
 
   @Override

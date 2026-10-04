@@ -7,6 +7,7 @@ import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategor
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.tconstruct.library.recipe.ingredient.MaterialValueIngredient;
 import slimeknights.tconstruct.library.recipe.material.MaterialRecipeCache;
@@ -23,13 +24,16 @@ import java.util.stream.IntStream;
  * @deprecated use {@link ShapedMaterialsExtension}
  */
 @Deprecated
-public class ShapedMaterialExtension implements ICraftingCategoryExtension {
+public class ShapedMaterialExtension implements ICraftingCategoryExtension<ShapedMaterialRecipe> {
   private final ShapedMaterialRecipe recipe;
+  private final RecipeHolder<ShapedMaterialRecipe> holder;
   private final ItemStack plainResult;
   private final List<ItemStack> result;
   private final int[] materialSlots;
-  public ShapedMaterialExtension(ShapedMaterialRecipe recipe) {
-    this.recipe = recipe;
+  public ShapedMaterialExtension(RecipeHolder<ShapedMaterialRecipe> holder) {
+    this.holder = holder;
+    this.recipe = holder.value();
+    ShapedMaterialRecipe recipe = holder.value();
     MaterialValueIngredient materials = recipe.getMaterial();
     plainResult = recipe.getResultItem(Objects.requireNonNull(SafeClientAccess.getRegistryAccess()));
     if (materials != null) {
@@ -43,7 +47,7 @@ public class ShapedMaterialExtension implements ICraftingCategoryExtension {
       this.result = List.of(plainResult);
     }
     List<Ingredient> inputs = recipe.getIngredients();
-    this.materialSlots = IntStream.range(0, inputs.size()).filter(i -> inputs.get(i) instanceof MaterialValueIngredient).toArray();
+    this.materialSlots = IntStream.range(0, inputs.size()).filter(i -> inputs.get(i).getCustomIngredient() instanceof MaterialValueIngredient).toArray();
   }
 
   @Override
@@ -58,11 +62,11 @@ public class ShapedMaterialExtension implements ICraftingCategoryExtension {
 
   @Override
   public ResourceLocation getRegistryName() {
-    return recipe.getId();
+    return holder.id();
   }
 
   @Override
   public void setRecipe(IRecipeLayoutBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focusGroup) {
-    MaterialsCraftingExtension.setRecipe(this, builder, craftingGridHelper, recipe, result, plainResult, materialSlots);
+    MaterialsCraftingExtension.setRecipe(this, builder, craftingGridHelper, holder, result, plainResult, materialSlots);
   }
 }

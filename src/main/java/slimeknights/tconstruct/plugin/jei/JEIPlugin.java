@@ -9,8 +9,8 @@ import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
 import mezz.jei.api.ingredients.subtypes.UidContext;
-import mezz.jei.api.recipe.category.extensions.IExtendableRecipeCategory;
-import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension;
+import mezz.jei.api.recipe.category.extensions.vanilla.crafting.IExtendableCraftingRecipeCategory;
+import slimeknights.tconstruct.plugin.jei.util.CraftingExtensionFactory;
 import mezz.jei.api.recipe.transfer.IRecipeTransferHandlerHelper;
 import mezz.jei.api.registration.IAdvancedRegistration;
 import mezz.jei.api.registration.IGuiHandlerRegistration;
@@ -31,7 +31,6 @@ import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.Container;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
@@ -225,12 +224,12 @@ public class JEIPlugin implements IModPlugin {
   @SuppressWarnings("deprecation")
   @Override
   public void registerVanillaCategoryExtensions(IVanillaCategoryExtensionRegistration registry) {
-    IExtendableRecipeCategory<CraftingRecipe, ICraftingCategoryExtension> craftingCategory = registry.getCraftingCategory();
-    craftingCategory.addCategoryExtension(ShapedMaterialRecipe.class, ShapedMaterialExtension::new);
-    craftingCategory.addCategoryExtension(ShapedMaterialsRecipe.class, ShapedMaterialsExtension::create);
-    craftingCategory.addCategoryExtension(ShapelessMaterialsRecipe.class, ShapelessMaterialsExtension::shapeless);
-    craftingCategory.addCategoryExtension(OverslimeCraftingTableRecipe.class, OverslimeRecipeExtension::new);
-    craftingCategory.addCategoryExtension(IDisplayCraftingTinkering.class, ToolTinkeringExtension::new);
+    IExtendableCraftingRecipeCategory craftingCategory = registry.getCraftingCategory();
+    craftingCategory.addExtension(ShapedMaterialRecipe.class, new CraftingExtensionFactory<>(ShapedMaterialExtension::new));
+    craftingCategory.addExtension(ShapedMaterialsRecipe.class, new CraftingExtensionFactory<>(ShapedMaterialsExtension::create));
+    craftingCategory.addExtension(ShapelessMaterialsRecipe.class, new CraftingExtensionFactory<>(ShapelessMaterialsExtension::shapeless));
+    craftingCategory.addExtension(OverslimeCraftingTableRecipe.class, new CraftingExtensionFactory<>(OverslimeRecipeExtension::new));
+    craftingCategory.addExtension(IDisplayCraftingTinkering.class, new CraftingExtensionFactory<>(holder -> new ToolTinkeringExtension(holder.value())));
   }
 
   /** Gets a list of unfiltered casting recipes to give to JEI. */

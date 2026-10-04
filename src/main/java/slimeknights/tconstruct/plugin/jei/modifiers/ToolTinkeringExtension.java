@@ -14,6 +14,8 @@ import mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategor
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import org.jetbrains.annotations.ApiStatus.Internal;
 import org.jetbrains.annotations.Nullable;
 import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayCraftingTinkering;
@@ -34,7 +36,7 @@ import static slimeknights.tconstruct.plugin.jei.modifiers.AbstractTinkerStation
 
 /** Crafting extension to display tinkers anvil recipes in the crafting table. Used for some recipes that work in both the tinker station and crafting table. */
 @RequiredArgsConstructor
-public class ToolTinkeringExtension implements ICraftingCategoryExtension {
+public class ToolTinkeringExtension implements ICraftingCategoryExtension<IDisplayCraftingTinkering> {
   @Nullable
   private static IDrawable information, errorArrow;
 
@@ -102,7 +104,7 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
   }
 
   @Override
-  public void onDisplayedIngredientsUpdate(List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
+  public void onDisplayedIngredientsUpdate(RecipeHolder<IDisplayCraftingTinkering> holder, List<IRecipeSlotDrawable> recipeSlots, IFocusGroup focuses) {
     // handle dynamic hook
     if (recipe.isSlotsDynamic()) {
       List<IRecipeSlotDrawable> inputs = new ArrayList<>(5);
@@ -120,10 +122,10 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension {
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+  public void createRecipeExtras(RecipeHolder<IDisplayCraftingTinkering> holder, IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
     // add title and tooltip via an icon
     if (information != null) {
-      builder.addDrawableWidget(information).setPosition(56, 0).setTooltip(recipe.getInformation());
+      DrawableTooltipWidget.add(builder, information).setPosition(56, 0).setTooltip(recipe.getInformation());
     }
     Component variantText = recipe.getVariant();
     if (variantText != null) {

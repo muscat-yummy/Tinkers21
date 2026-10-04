@@ -12,6 +12,8 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeHolder;
+import slimeknights.tconstruct.plugin.jei.util.DrawableTooltipWidget;
 import slimeknights.mantle.plugin.jei.MantleJEIConstants;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
@@ -31,11 +33,12 @@ import java.util.List;
 import static slimeknights.tconstruct.library.recipe.modifiers.adding.IDisplayModifierRecipe.withModifiers;
 
 /** Logic for showing the overslime recipe in the crafting table tab */
-public class OverslimeRecipeExtension implements ICraftingCategoryExtension {
+public class OverslimeRecipeExtension implements ICraftingCategoryExtension<OverslimeCraftingTableRecipe> {
   private static final String KEY_AMOUNT = TConstruct.makeTranslationKey("recipe", "modifier.amount");
   private static final String KEY_TOOLTIP = TConstruct.makeTranslationKey("recipe", "overslime.tooltip");
 
   private final OverslimeCraftingTableRecipe recipe;
+  private final ResourceLocation recipeId;
   /** List of all inputs */
   private final List<List<ItemStack>> inputs;
   /** The ingredient that applies overslime, used on focusing */
@@ -43,7 +46,9 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension {
   /** Result for the recipe */
   private final List<ItemStack> result;
 
-  public OverslimeRecipeExtension(OverslimeCraftingTableRecipe recipe) {
+  public OverslimeRecipeExtension(RecipeHolder<OverslimeCraftingTableRecipe> holder) {
+    OverslimeCraftingTableRecipe recipe = holder.value();
+    this.recipeId = holder.id();
     List<ModifierEntry> result = List.of(OverslimeModifierRecipe.RESULT);
 
     this.recipe = recipe;
@@ -64,7 +69,7 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension {
 
   @Override
   public ResourceLocation getRegistryName() {
-    return recipe.getId();
+    return recipeId;
   }
 
   @Override
@@ -92,17 +97,17 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension {
     List<IRecipeSlotBuilder> inputs = craftingGridHelper.createAndSetInputs(builder, inputStacks, 2, 2);
     IRecipeSlotBuilder output = builder.addSlot(RecipeIngredientRole.RENDER_ONLY, 95, 19).setOutputSlotBackground().addItemStacks(resultStacks);
     if (inputs.size() < 9) {
-      TConstruct.LOG.error("Failed to create focus link for {} as the layout {} is not 3x3", recipe.getId(), builder.getClass().getName());
+      TConstruct.LOG.error("Failed to create focus link for {} as the layout {} is not 3x3", recipeId, builder.getClass().getName());
     } else {
       builder.createFocusLink(inputs.get(MantleJEIConstants.getCraftingIndex(0, 2, 2)), output);
     }
   }
 
   @Override
-  public void createRecipeExtras(IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
+  public void createRecipeExtras(RecipeHolder<OverslimeCraftingTableRecipe> holder, IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
     int restoreAmount = recipe.getRestoreAmount();
     builder.addText(Component.translatable(KEY_AMOUNT, restoreAmount), 57, 9)
-      .setPosition(60, 44).setColor(Color.GRAY.getRGB())
-      .setTooltip(Component.translatable(KEY_TOOLTIP, restoreAmount));
+      .setPosition(60, 44).setColor(Color.GRAY.getRGB());
+    DrawableTooltipWidget.area(builder, 60, 44, 57, 9).setTooltip(Component.translatable(KEY_TOOLTIP, restoreAmount));
   }
 }
