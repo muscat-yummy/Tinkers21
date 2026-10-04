@@ -234,6 +234,12 @@ public class ModifierModelMapManager extends MergingJsonDataLoader<Builder> {
   /** Gets a map of modifier models for the given tool, considering the legacy model system */
   @SuppressWarnings("deprecation")
   public ModifierModelMap getModelsForTool(Function<Material, TextureAtlasSprite> spriteGetter, List<ResourceLocation> options, List<ResourceLocation> smallRoots, List<ResourceLocation> largeRoots, ResourceLocation modelLocation) {
+    return getModelsForTool(spriteGetter, options, smallRoots, largeRoots, modelLocation.toString());
+  }
+
+  /** Native baking contexts expose a diagnostic model name rather than a separate bake location. */
+  @SuppressWarnings("deprecation")
+  public ModifierModelMap getModelsForTool(Function<Material, TextureAtlasSprite> spriteGetter, List<ResourceLocation> options, List<ResourceLocation> smallRoots, List<ResourceLocation> largeRoots, String modelLocation) {
     Set<ModifierId> seenModifiers = new HashSet<>();
     ModifierModelMap models = getModelsForTool(spriteGetter, options, seenModifiers::addAll);
     // if not using the legacy system, we are done

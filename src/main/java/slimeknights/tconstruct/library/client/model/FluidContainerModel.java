@@ -90,12 +90,20 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
         JsonObject fluidObject = fluidElement.getAsJsonObject();
         fluid = Loadables.FLUID.getIfPresent(fluidObject, "name");
         if (fluidObject.has("nbt")) {
-          tag = CraftingHelper.getNBT(fluidObject.get("nbt"));
+          JsonElement metadata = fluidObject.get("nbt");
+          try {
+            tag = net.minecraft.nbt.TagParser.parseTag(metadata.isJsonPrimitive() ? metadata.getAsString() : metadata.toString());
+          } catch (com.mojang.brigadier.exceptions.CommandSyntaxException ex) {
+            throw new com.google.gson.JsonSyntaxException("Invalid fluid model NBT", ex);
+          }
         }
       } else {
         fluid = Loadables.FLUID.convert(fluidElement, "fluid");
       }
-      fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME, tag);
+      fluidStack = new FluidStack(fluid, FluidType.BUCKET_VOLUME);
+      if (tag != null && !tag.isEmpty()) {
+        fluidStack.set(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.of(tag));
+      }
     }
     boolean flipGas = GsonHelper.getAsBoolean(json, "flip_gas", true);
     return new FluidContainerModel(fluidStack, flipGas);
@@ -110,7 +118,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     return null;
   }
 
-  private static BakedModel bakeInternal(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation, FluidStack fluid, boolean flipGas) {
+  private static BakedModel bakeInternal(IGeometryBakingContext context, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, FluidStack fluid, boolean flipGas) {
     // get basic sprites
     IClientFluidTypeExtensions clientFluid = IClientFluidTypeExtensions.of(fluid.getFluid());
     TextureAtlasSprite baseSprite = getSprite(context, spriteGetter, "base");
@@ -137,18 +145,17 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
     // add in the base
     if (baseSprite != null) {
       modelBuilder.addQuads(renderTypes, UnbakedGeometryHelper.bakeElements(
-        UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite.contents()),
-        $ -> baseSprite, modelState, modelLocation
+        UnbakedGeometryHelper.createUnbakedItemElements(0, baseSprite),
+        $ -> baseSprite, modelState
       ));
     }
 
     // add in fluid
     if (fluidSprite != null) {
       List<BakedQuad> quads = UnbakedGeometryHelper.bakeElements(
-        UnbakedGeometryHelper.createUnbakedItemMaskElements(1, spriteGetter.apply(context.getMaterial("fluid")).contents()),
+        UnbakedGeometryHelper.createUnbakedItemMaskElements(1, spriteGetter.apply(context.getMaterial("fluid"))),
         $ -> fluidSprite,
-        new SimpleModelState(modelState.getRotation().compose(FLUID_TRANSFORM), modelState.isUvLocked()),
-        modelLocation
+        new SimpleModelState(modelState.getRotation().compose(FLUID_TRANSFORM), modelState.isUvLocked())
       );
 
       // apply light
@@ -169,14 +176,14 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
   }
 
   @Override
-  public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides, ResourceLocation modelLocation) {
+  public BakedModel bake(IGeometryBakingContext context, ModelBaker bakery, Function<Material,TextureAtlasSprite> spriteGetter, ModelState modelState, ItemOverrides overrides) {
     // We need to disable GUI 3D and block lighting for this to render properly
-    context = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(modelLocation);
+    context = StandaloneGeometryBakingContext.builder(context).withGui3d(false).withUseBlockLight(false).build(TConstruct.getResource("copper_can_dynamic"));
     // only do contained fluid if we did not set the fluid in the model properties
     if (fluid.isEmpty()) {
       overrides = new ContainedFluidOverrideHandler(context, overrides, modelState, flipGas);
     }
-    return bakeInternal(context, spriteGetter, modelState, overrides, modelLocation, fluid, flipGas);
+    return bakeInternal(context, spriteGetter, modelState, overrides, fluid, flipGas);
   }
 
   /** Handles swapping the model based on the contained fluid */
@@ -194,7 +201,7 @@ public record FluidContainerModel(FluidStack fluid, boolean flipGas) implements 
 
     /** Gets the model directly, for creating the cached models */
     private BakedModel getUncahcedModel(FluidStack fluid) {
-      return bakeInternal(context, Material::sprite, modelState, ItemOverrides.EMPTY, BAKE_LOCATION, fluid, flipGas);
+      return bakeInternal(context, Material::sprite, modelState, ItemOverrides.EMPTY, fluid, flipGas);
     }
 
     @Override

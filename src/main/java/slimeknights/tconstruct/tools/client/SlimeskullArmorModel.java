@@ -106,10 +106,14 @@ public class SlimeskullArmorModel extends MultilayerArmorModel {
   }
 
   @Override
-  public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer vertexBuilder, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+  public void renderToBuffer(PoseStack matrixStackIn, VertexConsumer vertexBuilder, int packedLightIn, int packedOverlayIn, int packedColor) {
+    float alpha = (packedColor >>> 24) / 255.0F;
+    float red = (packedColor >> 16 & 255) / 255.0F;
+    float green = (packedColor >> 8 & 255) / 255.0F;
+    float blue = (packedColor & 255) / 255.0F;
     if (base != null && buffer != null) {
       if (headModel != null && headTexture != null) {
-        VertexConsumer heaadBuffer = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.entityCutoutNoCullZOffset(headTexture), false, hasGlint);
+        VertexConsumer heaadBuffer = ItemRenderer.getArmorFoilBuffer(buffer, RenderType.entityCutoutNoCullZOffset(headTexture), hasGlint);
         matrixStackIn.pushPose();
         if (base.crouching) {
           matrixStackIn.translate(0, base.head.y / 16.0F, 0);
@@ -133,7 +137,7 @@ public class SlimeskullArmorModel extends MultilayerArmorModel {
         // offset and resize helmet to be around head
         matrixStackIn.translate(0.0D, base.young ? -0.09D : -0.025D, 0.0D);
         matrixStackIn.scale(1.1f, 1.1f, 1.1f);
-        super.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+        super.renderToBuffer(matrixStackIn, vertexBuilder, packedLightIn, packedOverlayIn, packedColor);
         matrixStackIn.popPose();
       }
     }

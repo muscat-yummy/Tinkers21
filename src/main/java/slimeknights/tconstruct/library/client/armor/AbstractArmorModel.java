@@ -64,7 +64,7 @@ public abstract class AbstractArmorModel extends Model {
       green *= (float)(color >> 8 & 255) / 255.0F;
       blue *= (float)(color & 255) / 255.0F;
     }
-    model.renderToBuffer(matrices, buffer, packedLightIn, packedOverlayIn, red, green, blue, alpha);
+    model.renderToBuffer(matrices, buffer, packedLightIn, packedOverlayIn, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
   }
 
   /** Renders the wings layer */

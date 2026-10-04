@@ -1,4 +1,4 @@
-name: Port native banner components and resource pack pattern assets
+name: Port native geometry baking and packed armor skull rendering
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -34,6 +34,11 @@ jobs:
           import pathlib, subprocess, zipfile
           targets = {
               'net.minecraft.client.gui.Gui': ['renderSlot('],
+              'net.minecraft.util.FastColor$ARGB32': ['colorFromFloat('],
+              'net.minecraft.client.model.Model': ['renderToBuffer('],
+              'net.minecraft.advancements.AdvancementRequirements': ['public '],
+              'net.minecraft.advancements.AdvancementRequirements$Strategy': ['public '],
+              'net.minecraft.client.renderer.entity.ItemRenderer': ['getArmorFoilBuffer('],
               'net.minecraft.world.item.DyeColor': ['getTextureDiffuseColor('],
               'net.minecraft.world.level.block.FungusBlock': ['public '],
               'net.minecraft.client.renderer.texture.SpriteContents': ['public '],

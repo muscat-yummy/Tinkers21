@@ -37,7 +37,11 @@ public class MultilayerArmorModel extends AbstractArmorModel {
   }
 
   @Override
-  public void renderToBuffer(PoseStack matrices, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, float red, float green, float blue, float alpha) {
+  public void renderToBuffer(PoseStack matrices, VertexConsumer bufferIn, int packedLightIn, int packedOverlayIn, int packedColor) {
+    float alpha = (packedColor >>> 24) / 255.0F;
+    float red = (packedColor >> 16 & 255) / 255.0F;
+    float green = (packedColor >> 8 & 255) / 255.0F;
+    float blue = (packedColor & 255) / 255.0F;
     if (this.base != null && buffer != null) {
       boolean armorGlint = hasGlint;
       boolean wingGlint = hasGlint;
