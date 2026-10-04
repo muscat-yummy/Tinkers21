@@ -1,4 +1,4 @@
-name: Port registry-aware recipe consumers and generated melting outputs
+name: Port native bucket shearing and effect interactions
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -127,7 +127,7 @@ jobs:
               'net.neoforged.neoforge.common.loot.IGlobalLootModifier': ['public '],
               'net.minecraft.world.level.storage.loot.parameters.LootContextParams': ['public '],
               'net.minecraft.world.level.block.LiquidBlock': ['public ', 'protected '],
-              'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight('],
+              'net.minecraft.world.entity.Entity': ['igniteForSeconds(', 'getFluidTypeHeight(', 'remove(', 'setRemoved(', 'onRemovedFromLevel(', 'getCapability('],
               'net.minecraft.world.item.Item': ['BASE_ATTACK', 'getDefaultAttributeModifiers(', 'verifyComponentsAfterLoad(', 'appendHoverText('],
               'net.minecraft.world.item.ArmorItem': None,
               'net.minecraft.world.entity.EquipmentSlotGroup': None,
@@ -170,7 +170,13 @@ jobs:
               'net.minecraft.world.level.storage.loot.LootContext': ['getParam(', 'getParamOrNull(', 'hasParam('],
               'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': None,
               'net.minecraft.world.level.storage.loot.predicates.LootItemRandomChanceWithEnchantedBonusCondition': None,
-              'net.minecraft.world.item.enchantment.EnchantmentHelper': None
+              'net.minecraft.world.item.enchantment.EnchantmentHelper': None,
+              'net.minecraft.world.entity.Mob': ['finalizeSpawn(', 'populateDefaultEquipment', 'enchantSpawnedArmor(', 'dropCustomDeathLoot(', 'getEquipmentDropChance(', 'doHurtTarget('],
+              'net.minecraft.world.entity.monster.Slime': ['protected ', 'public '],
+              'net.minecraft.world.entity.projectile.Fireball': ['public ', 'protected '],
+              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_EQUIPMENT_DROP', 'EQUIPMENT_DROPS'],
+              'net.minecraft.world.item.trading.ItemCost': ['public '],
+              'net.minecraft.world.level.block.LiquidBlockContainer': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)

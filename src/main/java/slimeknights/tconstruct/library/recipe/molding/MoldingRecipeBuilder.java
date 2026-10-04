@@ -105,9 +105,9 @@ public class MoldingRecipeBuilder extends AbstractRecipeBuilder<MoldingRecipeBui
 
     @Override
     public void serializeRecipeData(JsonObject json) {
-      json.add("material", material.toJson());
+      json.add("material", slimeknights.mantle.data.loadable.common.IngredientLoadable.DISALLOW_EMPTY.serialize(material));
       if (pattern != Ingredient.EMPTY) {
-        json.add("pattern", pattern.toJson());
+        json.add("pattern", slimeknights.mantle.data.loadable.common.IngredientLoadable.DISALLOW_EMPTY.serialize(pattern));
         if (patternConsumed) {
           json.addProperty("pattern_consumed", true);
         }
