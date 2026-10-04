@@ -65,7 +65,7 @@ public class ExchangingModifier extends NoLevelsModifier implements RemoveBlockM
     if (blockItem == null) {
       item = entity.getMainHandItem();
       // skip forges cap system and go to the tinkers hook because we know this is a tinkers tool
-      blockProvider = new BlockItemProviderModifierHook.CapabilityImpl(tool);
+      blockProvider = new BlockItemProviderModifierHook.CapabilityImpl(() -> tool);
       backingStack = blockProvider.getBlockItemStack(item, entity);
       blockItem = BlockItemProviderCapability.verifyBlockItem(backingStack, blockProvider);
 
@@ -80,16 +80,13 @@ public class ExchangingModifier extends NoLevelsModifier implements RemoveBlockM
     // Note that we check the mined position as the block we are placing 'against', which could be considered variance against vanilla but it is the block that make the most sense here.
     Level world = context.getWorld();
     BlockPos pos = context.getPos();
-    if (entity instanceof Player player && !player.mayBuild() && !fakeStack.hasAdventureModePlaceTagForBlock(BuiltInRegistries.BLOCK, new BlockInWorld(world, pos, false))) {
+    if (entity instanceof Player player && !player.mayBuild() && !fakeStack.canPlaceOnBlockInAdventureMode(new BlockInWorld(world, pos, false))) {
       return null;
     }
 
-    // from this point on, we are in charge of breaking the block, start by harvesting it so piglins get mad and stuff
+    // Native harvesting has already run playerWillDestroy and supplied its returned block state.
     Player player = context.getPlayer();
     BlockState state = context.getState();
-    if (player != null) {
-      state.getBlock().playerWillDestroy(world, pos, state, player);
-    }
 
     // block is unchanged? stuck setting it to a temporary block before replacing, as otherwise we risk duplication with the TE and tryPlace will likely fail
     BlockState fluidState = world.getFluidState(pos).createLegacyBlock();
