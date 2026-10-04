@@ -151,7 +151,7 @@ public final class GuiUtil {
     do {
       int renderHeight = Math.min(spriteHeight, height);
       height -= renderHeight;
-      float v2 = sprite.getV((16f * renderHeight) / spriteHeight);
+      float v2 = sprite.getV((float) renderHeight / spriteHeight);
 
       // we need to draw the quads per width too
       int x2 = startX;
@@ -162,7 +162,7 @@ public final class GuiUtil {
         int renderWidth = Math.min(spriteWidth, widthLeft);
         widthLeft -= renderWidth;
 
-        float u2 = sprite.getU((16f * renderWidth) / spriteWidth);
+        float u2 = sprite.getU((float) renderWidth / spriteWidth);
         if(upsideDown) {
           // FIXME: I think this causes tiling errors, look into it
           buildSquare(matrix, builder, x2, x2 + renderWidth, startY, startY + renderHeight, depth, u1, u2, v2, v1);
