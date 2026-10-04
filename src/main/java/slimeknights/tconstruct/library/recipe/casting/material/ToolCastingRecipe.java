@@ -154,7 +154,7 @@ public class ToolCastingRecipe extends PartSwapCastingRecipe implements IMultiRe
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, net.minecraft.core.HolderLookup.Provider access) {
     // if the cast is the result, we are part swapping, replace the last material
     ItemStack cast = inv.getStack();
     if (fluidSwapping && cast.getItem() == result) {

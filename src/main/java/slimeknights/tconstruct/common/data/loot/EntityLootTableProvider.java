@@ -63,7 +63,7 @@ public class EntityLootTableProvider extends EntityLootSubProvider {
                                                                    .add(LootItem.lootTableItem(Items.CLAY_BALL)
                                                                                           .apply(SetItemCountFunction.setCount(UniformGenerator.between(-2.0F, 1.0F)))
                                                                                           .apply(EnchantedCountIncreaseFunction.lootingMultiplier(registries, UniformGenerator.between(0.0F, 1.0F)))
-                                                                                          .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE))))));
+                                                                                          .apply(SmeltItemFunction.smelted().when(shouldSmeltLoot())))));
 
     LootItemCondition.Builder killedByFrog = killedByFrog();
     this.add(TinkerWorld.terracubeEntity.get(),
@@ -78,7 +78,7 @@ public class EntityLootTableProvider extends EntityLootSubProvider {
                                         .add(LootItem.lootTableItem(TinkerSmeltery.searedLamp)
                                                      .apply(SetItemCountFunction.setCount(ConstantValue.exactly(1.0F)))
                                                      .when(killedByFrog))
-                                        .apply(SmeltItemFunction.smelted().when(LootItemEntityPropertyCondition.hasProperties(LootContext.EntityTarget.THIS, ENTITY_ON_FIRE)))));
+                                        .apply(SmeltItemFunction.smelted().when(shouldSmeltLoot()))));
     // not really sure why armor stands have a loot table, but vanilla does it
     this.add(TinkerGadgets.armorStandEntity.get(), LootTable.lootTable());
   }

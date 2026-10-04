@@ -1,4 +1,4 @@
-name: Port native arrow knockback and inspect remaining damage contexts
+name: Port damage and loot contexts and inspect recipe identity boundaries
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -36,9 +36,12 @@ jobs:
               'net.minecraft.world.damagesource.DamageSource': None,
               'net.minecraft.world.damagesource.CombatRules': None,
               'net.minecraft.world.entity.ai.attributes.Attributes': ['SUBMERGED_MINING_SPEED'],
-              'net.minecraft.world.entity.player.Player': {'methods': ['getDestroySpeed(']},
+              'net.minecraft.world.entity.player.Player': {'methods': ['getDigSpeed(']},
               'net.minecraft.world.item.ItemStack': {'methods': ['canPlaceOnBlockInAdventureMode(']},
               'net.minecraft.world.item.crafting.Recipe': ['public '],
+              'com.llamalad7.mixinextras.injector.wrapoperation.WrapOperation': ['public '],
+              'com.llamalad7.mixinextras.injector.wrapoperation.Operation': ['public '],
+              'com.llamalad7.mixinextras.sugar.Local': ['public '],
               'net.minecraft.world.item.crafting.RecipeHolder': None,
               'net.minecraft.data.loot.EntityLootSubProvider': ['public ', 'protected '],
               'net.minecraft.advancements.critereon.EntityFlagsPredicate$Builder': ['public '],
@@ -113,7 +116,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\('
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer'
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):
