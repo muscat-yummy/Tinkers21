@@ -21,7 +21,11 @@ public interface FinishedRecipe {
     serializeRecipeData(json);
     return json;
   }
-  default JsonObject serializeRecipe(HolderLookup.Provider registries) { return serializeRecipe(); }
+  default JsonObject serializeRecipe(HolderLookup.Provider registries) {
+    return slimeknights.mantle.data.loadable.LoadableOps.with(
+      net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, registries),
+      this::serializeRecipe);
+  }
 
   @Nullable
   default JsonObject serializeAdvancement() {

@@ -13,7 +13,7 @@ import slimeknights.tconstruct.tables.TinkerTables;
 import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
+import net.minecraft.core.HolderLookup;
 
 /** Special variant of {@link ConsumerWrapperBuilder} for {@link ShapedMaterialRecipe} */
 @Deprecated
@@ -29,7 +29,7 @@ public class ShapedMaterialConsumerBuilder {
 
   /** Builds the wrapped consumer */
   public RecipeConsumer build(RecipeConsumer consumer) {
-    return (recipe) -> consumer.accept(new Wrapped(recipe, materials));
+    return RecipeConsumer.wrap(consumer, recipe -> consumer.accept(new Wrapped(recipe, List.copyOf(materials))));
   }
 
   private record Wrapped(FinishedRecipe original, List<MaterialVariantId> materials) implements FinishedRecipe {
@@ -53,8 +53,8 @@ public class ShapedMaterialConsumerBuilder {
 
     @Nullable
     @Override
-    public JsonObject serializeAdvancement() {
-      return original.serializeAdvancement();
+    public JsonObject serializeAdvancement(HolderLookup.Provider lookup) {
+      return original.serializeAdvancement(lookup);
     }
 
     @Nullable

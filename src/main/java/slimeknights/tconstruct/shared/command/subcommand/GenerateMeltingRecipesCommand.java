@@ -22,7 +22,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.resources.Resource;
 import net.minecraft.tags.TagKey;
-import net.minecraft.world.Container;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.world.item.crafting.RecipeInput;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
@@ -95,7 +97,7 @@ public class GenerateMeltingRecipesCommand {
 
   /** Runs the command */
   @SuppressWarnings({"unchecked", "removal"})  // not like we are using the generics at all
-  private static <C extends Container, T extends Recipe<C>> int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
+  private static <C extends RecipeInput, T extends Recipe<C>> int run(CommandContext<CommandSourceStack> context) throws CommandSyntaxException {
     long startTime = System.nanoTime();
     Holder<RecipeType<?>> recipeType = ResourceArgument.getResource(context, "recipe_type", Registries.RECIPE_TYPE);
 
@@ -134,11 +136,19 @@ public class GenerateMeltingRecipesCommand {
     Comparator<MeltingResult> nameComparator = Comparator.<MeltingResult,ResourceLocation>comparing(r -> Loadables.FLUID.getKey(r.fluid.getFluid())).reversed();
     MutableInt successes = new MutableInt(0);
     Path data = pack.resolve(PackType.SERVER_DATA.getDirectory());
-    RecipeConsumer consumer = recipe -> {
-      ResourceLocation id = recipe.getId();
-      Path path = data.resolve(id.getNamespace() + "/recipes/" + id.getPath() + ".json");
-      if (GeneratePackHelper.saveJson(recipe.serializeRecipe(), path)) {
-        successes.increment();
+    RecipeConsumer consumer = new RecipeConsumer() {
+      @Override
+      public HolderLookup.Provider registryLookup() {
+        return access;
+      }
+
+      @Override
+      public void accept(FinishedRecipe recipe) {
+        ResourceLocation id = recipe.getId();
+        Path path = data.resolve(id.getNamespace() + "/recipe/" + id.getPath() + ".json");
+        if (GeneratePackHelper.saveJson(recipe.serializeRecipe(access), path)) {
+          successes.increment();
+        }
       }
     };
 
@@ -148,16 +158,17 @@ public class GenerateMeltingRecipesCommand {
 
     // iterate all recipes and try adding a melting recipe
     MeltingCache cache = new MeltingCache();
-    for (Recipe<?> recipe : level.getRecipeManager().getAllRecipesFor((RecipeType<T>) recipeType.get())) {
+    for (RecipeHolder<T> holder : level.getRecipeManager().getAllRecipesFor((RecipeType<T>) recipeType.value())) {
+      T recipe = holder.value();
       // skip any recipes that are specifically blacklisted
-      if (skipRecipes.contains(recipe.getId())) {
+      if (skipRecipes.contains(holder.id())) {
         continue;
       }
       ItemStack resultStack = recipe.getResultItem(access);
-      // don't bother with results that have NBT unless its a damagable item, in which case we ignore NBT and hope for the best
+      // don't bother with results that have component overrides unless its a damagable item, in which case we ignore component overrides and hope for the best
       // also skip anything already meltable
       Item result = resultStack.getItem();
-      if (resultStack.isEmpty() || (resultStack.hasTag() && !result.canBeDepleted()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
+      if (resultStack.isEmpty() || (!resultStack.getComponentsPatch().isEmpty() && !resultStack.isDamageableItem()) || !melt.matches(result) || MeltingRecipeLookup.canMelt(result)) {
         continue;
       }
       List<MeltingResult> fluids = new ArrayList<>();
@@ -173,9 +184,9 @@ public class GenerateMeltingRecipesCommand {
           MeltingResult ingredientFluid = null;
           boolean didIgnore = false; // if true, we skipped something and are ineligible for a fluid next
           for (ItemStack stack : ingredient.getItems()) {
-            // if the ingredient has NBT, nothing we can do here
+            // if the ingredient has component overrides, nothing we can do here
             // also skip if the item is disallowed as an input
-            if (stack.isEmpty() || stack.hasTag() || !inputs.matches(stack.getItem())) {
+            if (stack.isEmpty() || !stack.getComponentsPatch().isEmpty() || !inputs.matches(stack.getItem())) {
               break ingredientSearch;
             }
             // first, try getting its fluid
@@ -267,7 +278,7 @@ public class GenerateMeltingRecipesCommand {
           builder.addByproduct(fluids.get(i).toOutput());
         }
         // mark it damagable if its true
-        if (result.canBeDepleted()) {
+        if (new ItemStack(result).isDamageableItem()) {
           // we don't know the proper unit size, but 10mb is pretty likely
           builder.setDamagable(10);
         }
@@ -318,7 +329,7 @@ public class GenerateMeltingRecipesCommand {
     /** Creates a fluid output for this object */
     public FluidOutput toOutput() {
       if (tag != null) {
-        return FluidOutput.fromTag(tag, fluid.getAmount(), fluid.getTag());
+        return FluidOutput.fromTagWithComponents(tag, fluid.getAmount(), fluid.getComponentsPatch());
       }
       return FluidOutput.fromStack(fluid);
     }
@@ -431,7 +442,7 @@ public class GenerateMeltingRecipesCommand {
       }
       // handle buckets directly as its faster
       if (item instanceof BucketItem bucket) {
-        Fluid fluid = bucket.getFluid();
+        Fluid fluid = bucket.content;
         if (fluid != Fluids.EMPTY) {
           return MeltingResult.from(new FluidStack(fluid, FluidType.BUCKET_VOLUME));
         }

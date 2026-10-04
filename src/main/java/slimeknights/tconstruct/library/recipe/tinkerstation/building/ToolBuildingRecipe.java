@@ -204,7 +204,7 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
     // if we have any parts set, run the count hook
     // no point running it if all materials are set through override/no materials, just set the recipe count in that case
     // note there is an edge case when you have a fixed material that adjusts count plus parts, not really a good solution for that case
-    int itemMax = item.getMaxStackSize();
+    int itemMax = tool.createStack().getMaxStackSize();
     if (parts > 0 && itemMax > 1) {
       count = CraftCountModifierHook.maxStackSize(tool, outputCount);
       if (count <= 0) {
@@ -312,7 +312,8 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
           } else {
             // not a full list? mark it for display with just the materials on the end
             result = new MaterialIdNBT(list).updateStack(new ItemStack(output, outputCount));
-            result.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
+            net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA,
+              result, tag -> tag.putBoolean(TooltipUtil.KEY_DISPLAY, true));
           }
         }
       }

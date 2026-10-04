@@ -1,4 +1,4 @@
-name: Port native cooking recipe inputs and preserve cached holder identity
+name: Port registry-aware recipe consumers and generated melting outputs
 on:
   push:
     branches: [port/1.21.1-neoforge]

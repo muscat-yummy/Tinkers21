@@ -10,7 +10,7 @@ import net.minecraft.world.item.crafting.RecipeSerializer;
 import slimeknights.mantle.data.loadable.common.NBTLoadable;
 
 import javax.annotation.Nullable;
-import java.util.function.Consumer;
+import net.minecraft.core.HolderLookup;
 
 /** Helper to add NBT to vanilla recipes. Forge adds support but not the builders */
 public record CraftingNBTWrapper(FinishedRecipe recipe, CompoundTag nbt) implements FinishedRecipe {
@@ -33,8 +33,8 @@ public record CraftingNBTWrapper(FinishedRecipe recipe, CompoundTag nbt) impleme
 
   @Nullable
   @Override
-  public JsonObject serializeAdvancement() {
-    return recipe.serializeAdvancement();
+  public JsonObject serializeAdvancement(HolderLookup.Provider lookup) {
+    return recipe.serializeAdvancement(lookup);
   }
 
   @Nullable
@@ -45,6 +45,7 @@ public record CraftingNBTWrapper(FinishedRecipe recipe, CompoundTag nbt) impleme
 
   /** Creates a wrapped consumer, adding the given NBT */
   public static RecipeConsumer wrap(RecipeConsumer base, CompoundTag nbt) {
-    return recipe -> base.accept(new CraftingNBTWrapper(recipe, nbt));
+    CompoundTag snapshot = nbt.copy();
+    return RecipeConsumer.wrap(base, recipe -> base.accept(new CraftingNBTWrapper(recipe, snapshot.copy())));
   }
 }

@@ -181,7 +181,7 @@ public class GadgetRecipeProvider extends BaseRecipeProvider {
                               .save(consumer, wrap(id(output), folder, "_campfire"));
     // furnace is 200 ticks
     ResourceLocation outputId = id(output);
-    InventoryChangeTrigger.TriggerInstance criteria = has(input);
+    net.minecraft.advancements.Criterion<InventoryChangeTrigger.TriggerInstance> criteria = has(input);
     SimpleCookingRecipeBuilder.smelting(Ingredient.of(input), RecipeCategory.FOOD, output, experience, 200)
                               .unlockedBy("has_item", criteria)
                               .save(consumer, wrap(outputId, folder, "_furnace"));
