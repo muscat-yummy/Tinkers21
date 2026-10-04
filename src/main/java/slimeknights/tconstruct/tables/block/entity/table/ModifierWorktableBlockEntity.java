@@ -223,7 +223,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
       if (tinkerable.getCount() <= shrinkToolSlot) {
         this.setItem(TINKER_SLOT, ItemStack.EMPTY);
       } else {
-        this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
+        this.setItem(TINKER_SLOT, (tinkerable).copyWithCount(tinkerable.getCount() - shrinkToolSlot));
       }
     }
     // screen should reset back to empty now that we crafted

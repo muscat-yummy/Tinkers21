@@ -175,7 +175,7 @@ public class ModifierRemovalRecipe extends AbstractWorktableRecipe {
       tools = sizedTool.getMatchingStacks().stream().map(stack -> {
         ItemStack tool = IModifiableDisplay.getDisplayStack(stack.getItem());
         if (stack.getCount() > 1) {
-          tool = ItemHandlerHelper.copyStackWithSize(tool, stack.getCount());
+          tool = (tool).copyWithCount(stack.getCount());
         }
         return tool;
       }).toList();

@@ -224,9 +224,9 @@ public class MeltingModuleInventory implements IItemHandlerModifiable {
     MeltingModule module = getModule(slot);
     boolean canInsert = module.getStack().isEmpty();
     if (!simulate && canInsert) {
-      setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));
+      setStackInSlot(slot, (stack).copyWithCount(1));
     }
-    return canInsert ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - 1) : stack;
+    return canInsert ? (stack).copyWithCount(stack.getCount() - 1) : stack;
   }
 
   @Nonnull

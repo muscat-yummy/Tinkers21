@@ -141,7 +141,7 @@ public abstract class RandomItem {
           return ItemStack.EMPTY;
         }
       }
-      return ItemHandlerHelper.copyStackWithSize(result, newCount);
+      return (result).copyWithCount(newCount);
     }
 
     @Override

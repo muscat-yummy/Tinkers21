@@ -235,7 +235,7 @@ public class TinkerStationBlockEntity extends RetexturedTableBlockEntity impleme
       if (tinkerable.getCount() <= shrinkToolSlot) {
         this.setItem(TINKER_SLOT, ItemStack.EMPTY);
       } else {
-        this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));
+        this.setItem(TINKER_SLOT, (tinkerable).copyWithCount(tinkerable.getCount() - shrinkToolSlot));
       }
     }
     this.itemName = "";

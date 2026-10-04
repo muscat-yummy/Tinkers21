@@ -129,7 +129,7 @@ public class MaterialRecipe implements ICustomOutputRecipe<ISingleStackContainer
   public List<ItemStack> getDisplayItems() {
     if (displayItems == null) {
       if (needed > 1) {
-        displayItems = Arrays.stream(ingredient.getItems()).map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed)).toList();
+        displayItems = Arrays.stream(ingredient.getItems()).map(stack -> (stack).copyWithCount(needed)).toList();
       } else {
         displayItems = List.of(ingredient.getItems());
       }

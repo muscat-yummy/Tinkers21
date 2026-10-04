@@ -31,7 +31,7 @@ public record DropItemFluidEffect(ItemOutput item) implements FluidEffect<FluidE
     int count = (int)(level.value() * item.getCount());
     if (count > 0) {
       if (action.execute()) {
-        ModifierUtil.dropItem(context.getLevel(), context.getLocation(), ItemHandlerHelper.copyStackWithSize(item.get(), count * item.getCount()));
+        ModifierUtil.dropItem(context.getLevel(), context.getLocation(), (item.get()).copyWithCount(count * item.getCount()));
       }
       return (float) count / item.getCount();
     }
