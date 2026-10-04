@@ -18,6 +18,12 @@ public final class RegistryObject<T> implements Supplier<T> {
     this.holder = Objects.requireNonNull(holder);
   }
 
+  /** Wrap an actual NeoForge holder while retaining Mantle's single-type API. */
+  public static <R,T extends R> RegistryObject<T> from(DeferredHolder<R,T> holder) {
+    Objects.requireNonNull(holder);
+    return new RegistryObject<>(holder.getId(), holder);
+  }
+
   public ResourceLocation getId() {
     return id;
   }

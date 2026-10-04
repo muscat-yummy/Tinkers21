@@ -119,10 +119,10 @@ public final class TinkerCommons extends TinkerModule {
    * @deprecated Use {@link #glowBlock}
    */
   @Deprecated(forRemoval = true)
-  public static final RegistryObject<GlowBlock> glow = DeferredHolder.create(net.minecraft.core.registries.Registries.BLOCK, glowBlock.getId());
+  public static final RegistryObject<GlowBlock> glow = RegistryObject.from(DeferredHolder.<Block,GlowBlock>create(Registries.BLOCK, glowBlock.getId()));
   // glass
   public static final ItemObject<TransparentBlock> clearGlass = BLOCKS.register("clear_glass", () -> new TransparentBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
-  public static final ItemObject<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn((state, level, pos, type) -> false).isRedstoneConductor(Blocks::never).isSuffocating(Blocks::never).isViewBlocking(Blocks::never)), BLOCK_ITEM);
+  public static final ItemObject<TintedGlassBlock> clearTintedGlass = BLOCKS.register("clear_tinted_glass", () -> new TintedGlassBlock(glassBuilder(MapColor.COLOR_GRAY).noOcclusion().isValidSpawn((state, level, pos, type) -> false).isRedstoneConductor((state, level, pos) -> false).isSuffocating((state, level, pos) -> false).isViewBlocking((state, level, pos) -> false)), BLOCK_ITEM);
   public static final ItemObject<ClearGlassPaneBlock> clearGlassPane = BLOCKS.register("clear_glass_pane", () -> new ClearGlassPaneBlock(glassBuilder(MapColor.NONE)), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassBlock> clearStainedGlass = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass", (color) -> new ClearStainedGlassBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);
   public static final EnumObject<GlassColor,ClearStainedGlassPaneBlock> clearStainedGlassPane = BLOCKS.registerEnum(GlassColor.values(), "clear_stained_glass_pane", (color) -> new ClearStainedGlassPaneBlock(glassBuilder(color.getDye().getMapColor()), color), BLOCK_ITEM);

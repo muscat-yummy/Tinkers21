@@ -247,7 +247,7 @@ public final class TinkerTools extends TinkerModule {
     if (ModList.get().isLoaded("twilightforest")) {
       minotaurAxe = ITEMS.register("minotaur_axe", () -> new ModifiableItem(UNSTACKABLE_PROPS, ToolDefinitions.MINOTAUR_AXE));
     } else {
-      minotaurAxe = new ItemObject<>(DeferredHolder.create(net.minecraft.core.registries.Registries.ITEM, getResource("minotaur_axe")));
+      minotaurAxe = new ItemObject<>(RegistryObject.from(DeferredHolder.<Item,ModifiableItem>create(Registries.ITEM, getResource("minotaur_axe"))));
     }
   }
 

@@ -1,4 +1,4 @@
-name: Wire native tool predicates and data resource identities
+name: Inspect pinned JEI crafting and ingredient registration interfaces
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -44,6 +44,13 @@ jobs:
               'net.minecraft.world.item.armortrim.TrimPattern': ['public '],
               'net.minecraft.client.renderer.Sheets': ['armorTrimsSheet('],
               'net.minecraft.core.registries.Registries': ['tagsDirPath('],
+              'mezz.jei.api.runtime.IIngredientVisibility': ['public '],
+              'mezz.jei.api.registration.IRecipeCatalystRegistration': ['public '],
+              'mezz.jei.api.recipe.category.extensions.vanilla.crafting.IExtendableCraftingRecipeCategory': ['public '],
+              'mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension': ['public '],
+              'mezz.jei.api.recipe.RecipeType': ['public '],
+              'mezz.jei.api.registration.IRecipeTransferRegistration': ['public '],
+              'mezz.jei.api.recipe.transfer.IRecipeTransferInfo': ['public '],
               'net.minecraft.client.gui.Gui': ['renderSlot('],
               'net.minecraft.util.FastColor$ARGB32': ['colorFromFloat('],
               'net.minecraft.client.model.Model': ['renderToBuffer('],
