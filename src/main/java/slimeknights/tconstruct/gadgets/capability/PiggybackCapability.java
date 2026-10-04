@@ -34,10 +34,10 @@ public class PiggybackCapability {
   /** No serialization or death copying: the world owns passengers and logout dismounts them. */
   public static void register() {
     ATTACHMENTS.register(TConstruct.getModEventBus());
-    TConstruct.getModEventBus().addListener(PiggybackCapability::register);
+    TConstruct.getModEventBus().addListener(PiggybackCapability::registerCapabilities);
   }
 
-  private static void register(RegisterCapabilitiesEvent event) {
+  private static void registerCapabilities(RegisterCapabilitiesEvent event) {
     event.registerEntity(PIGGYBACK, EntityType.PLAYER, (player, context) -> player.getData(DATA));
   }
 

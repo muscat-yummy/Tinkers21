@@ -518,8 +518,7 @@ public class AdvancementsProvider extends GenericDataProvider {
     grantAdvancement(resource("internal/walk_on_powder_snow"), AdvancementIds.WALK_ON_POWDER_SNOW, builder ->
       builder.addCriterion("has_boots", PlayerTrigger.TriggerInstance.located(EntityPredicate.Builder.entity()
         .equipment(EntityEquipmentPredicate.Builder.equipment().feet(ToolStackItemPredicate.builderTool(new VolatileDataPredicate(ModifiableArmorItem.SNOW_BOOTS))).build())
-        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW)))
-        .build()))
+        .steppingOn(LocationPredicate.Builder.location().setBlock(BlockPredicate.Builder.block().of(Blocks.POWDER_SNOW)))))
     );
     // despite having multiple criteria, these use an any condition so easier to just bypass criteria
     // iron armor expects iron from armor plating's trait

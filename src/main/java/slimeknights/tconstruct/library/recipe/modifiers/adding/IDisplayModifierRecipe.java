@@ -2,6 +2,8 @@ package slimeknights.tconstruct.library.recipe.modifiers.adding;
 
 import com.google.common.collect.Streams;
 import net.minecraft.nbt.CompoundTag;
+import slimeknights.tconstruct.library.tools.nbt.ToolStackData;
+
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
@@ -215,7 +217,8 @@ public interface IDisplayModifierRecipe extends IModifierRecipe, IDisplayTinkerS
   /* Gets a copy of the stack with the given modifiers */
   static ItemStack withModifiers(ItemStack stack, int maxSize, List<ModifierEntry> modifierList, Consumer<ModDataNBT> persistentDataConsumer) {
     ItemStack output = stack.copyWithCount(Math.min(stack.getMaxStackSize(), maxSize));
-    CompoundTag nbt = output.getOrCreateTag();
+    ToolStackData data = ToolStackData.from(output, true);
+    CompoundTag nbt = data.data();
 
     // build modifiers list
     // go through the builder to ensure they are merged properly
@@ -238,6 +241,7 @@ public interface IDisplayModifierRecipe extends IModifierRecipe, IDisplayTinkerS
     nbt.put(ToolStack.TAG_VOLATILE_MOD_DATA, volatileNBT);
     nbt.put(ToolStack.TAG_PERSISTENT_MOD_DATA, persistentNBT);
 
+    data.commit();
     return output;
   }
 

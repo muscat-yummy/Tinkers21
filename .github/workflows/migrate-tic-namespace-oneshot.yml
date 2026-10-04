@@ -1,4 +1,4 @@
-name: Port native stand creation and remaining recipe signatures
+name: Port display stacks and registry-aware sprite data generation
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,15 +35,14 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.entity.EntityType': ['appendDefaultStackConfig(', 'createDefaultStackConfig(', 'create(', 'spawn('],
-              'net.minecraft.world.entity.decoration.ArmorStand': ['brokenByPlayer(', 'brokenByAnything('],
-              'net.minecraft.world.item.Item': ['appendHoverText('],
-              'net.minecraft.world.item.Items': ['TURTLE_SCUTE'],
-              'net.minecraft.world.level.block.Blocks': ['SHORT_GRASS'],
-              'net.minecraft.world.item.crafting.Ingredient': ['CODEC', 'STREAM_CODEC'],
-              'net.minecraft.world.item.component.ItemContainerContents': ['public '],
-              'net.minecraft.core.component.DataComponentMap': ['public '],
-              'net.minecraft.core.component.DataComponentPatch': ['public ']
+              'net.minecraft.world.item.ItemStack': {'methods': ['getRarity(']},
+              'net.neoforged.fml.ModLoader': ['postEvent(', 'runEventGenerator('],
+              'dev.gigaherz.jsonthings.things.builders.ItemBuilder': ['public '],
+              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType': ['public '],
+              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType$DefaultTypeProperties': ['public '],
+              'dev.gigaherz.jsonthings.things.blocks.FlexLiquidBlock': ['public ', 'protected '],
+              'com.mojang.blaze3d.vertex.SheetedDecalTextureGenerator': ['public '],
+              'net.minecraft.world.entity.Mob': ['finalizeSpawn(']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)

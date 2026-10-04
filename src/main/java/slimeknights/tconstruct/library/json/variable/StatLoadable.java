@@ -124,10 +124,19 @@ public enum StatLoadable implements Loadable<Stat<?>> {
   @SuppressWarnings("deprecation")
   private <T> void encodeGeneric(FriendlyByteBuf buffer, Stat<T> value) {
     StatType<T> type = value.getType();
-    buffer.writeId(BuiltInRegistries.STAT_TYPE, type);
-    buffer.writeId(type.getRegistry(), value.getValue());
+    encodeRegistry(buffer, BuiltInRegistries.STAT_TYPE, type);
+    encodeRegistry(buffer, type.getRegistry(), value.getValue());
   }
 
+
+  /** Retains the registry-varint protocol and rejects unregistered values. */
+  private static <T> void encodeRegistry(FriendlyByteBuf buffer, Registry<T> registry, T value) {
+    int id = registry.getId(value);
+    if (id < 0) {
+      throw new io.netty.handler.codec.EncoderException("Unregistered " + registry.key().location() + " value " + value);
+    }
+    buffer.writeVarInt(id);
+  }
 
   /* Tooltip */
 
@@ -169,8 +178,8 @@ public enum StatLoadable implements Loadable<Stat<?>> {
       name = ((Fluid) value).getFluidType().getDescription();
     } else if (registry == BuiltInRegistries.MOB_EFFECT) {
       name = ((MobEffect) value).getDisplayName();
-    } else if (registry == BuiltInRegistries.ENCHANTMENT) {
-      name = Component.translatable(((Enchantment) value).getDescriptionId());
+    } else if (registry.key().equals(net.minecraft.core.registries.Registries.ENCHANTMENT)) {
+      name = ((Enchantment) value).description();
     } else {
       // if it's not one of the above types we do not know how to translate it, so use the raw key
       name = Component.literal(getKey(stat));

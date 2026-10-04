@@ -36,13 +36,13 @@ public class TinkerSpriteSourceProvider extends SpriteSourceProvider {
   private static final String PALETTE_FOLDER = "trims/color_palettes/";
   private static final String TRIM_FOLDER = "trims/models/armor/";
 
-  public TinkerSpriteSourceProvider(PackOutput output, ExistingFileHelper fileHelper) {
-    super(output, fileHelper, TConstruct.MOD_ID);
+  public TinkerSpriteSourceProvider(PackOutput output, java.util.concurrent.CompletableFuture<net.minecraft.core.HolderLookup.Provider> lookupProvider, ExistingFileHelper fileHelper) {
+    super(output, lookupProvider, TConstruct.MOD_ID, fileHelper);
   }
 
   @SuppressWarnings("removal")
   @Override
-  protected void addSources() {
+  protected void gather() {
     ResourceLocation trimPalette = ResourceLocation.parse(PALETTE_FOLDER + "trim_palette");
     // map of material suffix to material paeltte for trims
     Map<String,ResourceLocation> tinkerMaterials = Arrays.stream(MaterialIds.TRIM_MATERIALS).collect(Collectors.toMap(id -> id.getNamespace() + "_" + id.getPath(), id -> id.withPrefix(PALETTE_FOLDER)));

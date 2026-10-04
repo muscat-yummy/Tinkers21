@@ -6,6 +6,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import slimeknights.tconstruct.library.tools.nbt.ToolStackData;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -174,11 +175,13 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
         .map(item -> {
           if (item instanceof IModifiableDisplay modifiable) {
             ItemStack stack = modifiable.getRenderTool().copy();
-            CompoundTag tag = stack.getOrCreateTag();
-            tag.put(ToolStack.TAG_STATS, stats);
-            tag.put(ToolStack.TAG_UPGRADES, modifiers);
-            tag.put(ToolStack.TAG_MODIFIERS, modifiers);
+            ToolStackData data = ToolStackData.from(stack, true);
+            CompoundTag tag = data.data();
+            tag.put(ToolStack.TAG_STATS, stats.copy());
+            tag.put(ToolStack.TAG_UPGRADES, modifiers.copy());
+            tag.put(ToolStack.TAG_MODIFIERS, modifiers.copy());
             tag.putInt(ToolStack.TAG_DAMAGE, 200); // mostly broken
+            data.commit();
             return stack;
           }
           return ItemStack.EMPTY;
@@ -187,7 +190,9 @@ public class ModifierRepairTinkerStationRecipe implements ITinkerStationRecipe, 
         .toList();
       toolWithModifier = toolWithoutModifier.stream().map(stack -> {
         stack = stack.copy();
-        stack.getOrCreateTag().putInt(ToolStack.TAG_DAMAGE, 200 - repairAmount);
+        ToolStackData data = ToolStackData.from(stack, true);
+        data.data().putInt(ToolStack.TAG_DAMAGE, 200 - repairAmount);
+        data.commit();
         return stack;
       }).toList();
     }

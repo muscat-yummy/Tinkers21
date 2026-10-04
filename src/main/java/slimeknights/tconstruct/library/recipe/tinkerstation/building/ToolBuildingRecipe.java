@@ -181,6 +181,11 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
 
   @Override
   public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, RegistryAccess access) {
+    return getValidatedResult(inv, (net.minecraft.core.HolderLookup.Provider) access);
+  }
+
+  /** Native recipe assembly receives the actual lookup provider. */
+  public RecipeResult<LazyToolStack> getValidatedResult(ITinkerStationContainer inv, net.minecraft.core.HolderLookup.Provider access) {
     int materialCount = ToolMaterialHook.stats(output.getToolDefinition()).size();
     // fill in materials
     List<MaterialVariant> materials = new ArrayList<>(materialCount);

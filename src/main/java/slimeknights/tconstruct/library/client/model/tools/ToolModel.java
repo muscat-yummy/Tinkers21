@@ -821,13 +821,11 @@ public class ToolModel implements IUnbakedGeometry<ToolModel> {
       // fetch ammo info from the stack
       ItemStack ammo;
       ModDataNBT persistentData = tool.getPersistentData();
-      if (ammoKey != null && persistentData.contains(ammoKey, Tag.TAG_COMPOUND)) {
-        ammo = ItemStack.of(persistentData.getCompound(ammoKey));
+      ClientLevel ammoLevel = world != null ? world : Minecraft.getInstance().level;
+      if (ammoKey != null && ammoLevel != null && persistentData.contains(ammoKey, Tag.TAG_COMPOUND)) {
+        ammo = ItemStack.parseOptional(ammoLevel.registryAccess(), persistentData.getCompound(ammoKey));
         builder.add(ammo.getItem());
-        CompoundTag tag = ammo.getTag();
-        if (tag != null) {
-          builder.add(tag);
-        }
+        builder.add(ammo.getComponentsPatch());
       } else {
         ammo = ItemStack.EMPTY;
       }

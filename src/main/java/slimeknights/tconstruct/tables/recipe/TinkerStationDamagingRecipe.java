@@ -4,6 +4,8 @@ import lombok.Getter;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
+import slimeknights.tconstruct.library.tools.nbt.ToolStackData;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
@@ -153,7 +155,9 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe, IDispl
         .map(item -> {
           if (item instanceof IModifiableDisplay modifiable) {
             ItemStack stack = modifiable.getRenderTool().copy();
-            stack.getOrCreateTag().put(ToolStack.TAG_STATS, stats);
+            ToolStackData data = ToolStackData.from(stack, true);
+            data.data().put(ToolStack.TAG_STATS, stats.copy());
+            data.commit();
             return stack;
           }
           return ItemStack.EMPTY;
@@ -170,7 +174,9 @@ public class TinkerStationDamagingRecipe implements ITinkerStationRecipe, IDispl
       toolWithModifier = getToolWithoutModifier().stream()
         .map(stack -> {
           stack = stack.copy();
-          stack.getOrCreateTag().putInt(ToolStack.TAG_DAMAGE, damageAmount);
+          ToolStackData data = ToolStackData.from(stack, true);
+          data.data().putInt(ToolStack.TAG_DAMAGE, damageAmount);
+          data.commit();
           return stack;
         }).toList();
     }

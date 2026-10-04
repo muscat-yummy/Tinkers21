@@ -263,7 +263,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
             List.of(IModifiableDisplay.getDisplayStack(stack)),
             parts.object2IntEntrySet().stream().map(pi -> {
               ItemStack part = pi.getKey().withMaterialForDisplay(ToolBuildHandler.getRenderMaterial(pi.getIntValue()));
-              part.getOrCreateTag().putBoolean(TooltipUtil.KEY_DISPLAY, true);
+              net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, part, data -> data.putBoolean(TooltipUtil.KEY_DISPLAY, true));
               return part;
             }).toList(),
             partItems.stream().flatMap(part -> MaterialItemCache.getAllMaterials(part).stream()).toList()
@@ -362,7 +362,7 @@ public class PartBuilderToolRecycle implements IPartBuilderRecipe, IMultiRecipe<
     @Override
     public void serializeRecipeData(JsonObject json) {
       json.add("tools", SizedIngredient.LOADABLE.serialize(tools));
-      json.add("pattern", pattern.toJson());
+      json.add("pattern", slimeknights.mantle.data.loadable.common.IngredientLoadable.ALLOW_EMPTY.serialize(pattern));
     }
 
     @Override
