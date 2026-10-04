@@ -2,6 +2,8 @@ package slimeknights.tconstruct.library.tools.item;
 
 import net.minecraft.tags.EnchantmentTags;
 import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup.RegistryLookup;
+import net.minecraft.world.item.enchantment.ItemEnchantments;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
@@ -137,13 +139,13 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   }
 
   @Override
-  public int getEnchantmentLevel(ItemStack stack, Enchantment enchantment) {
+  public int getEnchantmentLevel(ItemStack stack, Holder<Enchantment> enchantment) {
     return EnchantmentModifierHook.getEnchantmentLevel(stack, enchantment);
   }
 
   @Override
-  public Map<Enchantment,Integer> getAllEnchantments(ItemStack stack) {
-    return EnchantmentModifierHook.getAllEnchantments(stack);
+  public ItemEnchantments getAllEnchantments(ItemStack stack, RegistryLookup<Enchantment> lookup) {
+    return EnchantmentModifierHook.getAllEnchantments(stack, lookup);
   }
 
 
@@ -341,7 +343,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
     // main hand may wish to defer to the offhand if it has a tool
     return player == null || !volatileData.getBoolean(DEFER_OFFHAND) || player.getOffhandItem().isEmpty();
   }
-  
+
   @Override
   public InteractionResult onItemUseFirst(ItemStack stack, UseOnContext context) {
     if (stack.getCount() == 1) {
@@ -508,7 +510,7 @@ public class ModifiableItem extends TieredItem implements IModifiableDisplay {
   public int getDefaultTooltipHideFlags(ItemStack stack) {
     return TooltipUtil.getModifierHideFlags(getToolDefinition());
   }
-  
+
 
   /* Display */
 

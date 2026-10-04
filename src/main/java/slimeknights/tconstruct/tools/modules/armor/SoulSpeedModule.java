@@ -1,6 +1,8 @@
 package slimeknights.tconstruct.tools.modules.armor;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Holder;
+import net.minecraft.core.HolderLookup.RegistryLookup;
 import net.minecraft.network.chat.Component;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.util.Mth;
@@ -47,17 +49,17 @@ public record SoulSpeedModule(LevelingInt level, ModifierCondition<IToolStackVie
   }
 
   @Override
-  public int updateEnchantmentLevel(IToolStackView tool, ModifierEntry modifier, Enchantment enchantment, int level) {
-    if (enchantment == Enchantments.SOUL_SPEED && condition.matches(tool, modifier)) {
+  public int updateEnchantmentLevel(IToolStackView tool, ModifierEntry modifier, Holder<Enchantment> enchantment, int level) {
+    if (enchantment.is(Enchantments.SOUL_SPEED) && condition.matches(tool, modifier)) {
       level += this.level.compute(modifier);
     }
     return level;
   }
 
   @Override
-  public void updateEnchantments(IToolStackView tool, ModifierEntry modifier, Map<Enchantment, Integer> map) {
+  public void updateEnchantments(IToolStackView tool, ModifierEntry modifier, RegistryLookup<Enchantment> lookup, Map<Holder<Enchantment>, Integer> map) {
     if (condition.matches(tool, modifier)) {
-      EnchantmentModifierHook.addEnchantment(map, Enchantments.SOUL_SPEED, this.level.compute(modifier));
+      EnchantmentModifierHook.addEnchantment(map, lookup.getOrThrow(Enchantments.SOUL_SPEED), this.level.compute(modifier));
     }
   }
 

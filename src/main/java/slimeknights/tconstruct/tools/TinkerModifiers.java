@@ -1115,7 +1115,7 @@ public final class TinkerModifiers extends TinkerModule {
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
     boolean server = event.includeServer();
-    generator.addProvider(server, new ModifierProvider(packOutput));
+    generator.addProvider(server, new ModifierProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new ModifierRecipeProvider(packOutput, event.getLookupProvider()));
     generator.addProvider(server, new FluidEffectProvider(packOutput));
     generator.addProvider(server, new ModifierTagProvider(packOutput, event.getExistingFileHelper()));

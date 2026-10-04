@@ -286,36 +286,39 @@ public class ToolHarvestLogic {
     }
     // let armor change enchantments
     // TODO: should we have a hook for non-enchantment armor responses?
-    ListTag originalEnchantments = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(tool, stack, context);
-    // need to calculate the iterator before we break the block, as we need the reference hardness from the center
-    UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, Util.createTraceResult(pos, sideHit, false));
-    Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();
-
-    // actually break the block, run AOE if successful
+    var originalEnchantments = HarvestEnchantmentsModifierHook.updateHarvestEnchantments(tool, stack, context);
     int harvested = 0;
-    if (breakBlock(tool, stack, context, true)) {
-      harvested += 1;
-      for (BlockPos extraPos : extraBlocks) {
-        BlockState extraState = world.getBlockState(extraPos);
-        // prevent calling that stuff for air blocks, could lead to unexpected behaviour since it fires events
-        // this should never actually happen, but just in case some AOE is odd
-        if (!extraState.isAir()) {
-          // prevent mutable position leak, breakBlock has a few places wanting immutable
-          if (breakExtraBlock(tool, stack, context.forPosition(extraPos.immutable(), extraState))) {
-            harvested += 1;
+    try {
+      // need to calculate the iterator before we break the block, as we need the reference hardness from the center
+      UseOnContext useContext = new UseOnContext(world, player, InteractionHand.MAIN_HAND, stack, Util.createTraceResult(pos, sideHit, false));
+      Iterable<BlockPos> extraBlocks = context.isEffective() ? tool.getHook(ToolHooks.AOE_ITERATOR).getBlocks(tool, useContext, state, AOEMatchType.BREAKING) : Collections.emptyList();
+
+      // actually break the block, run AOE if successful
+      if (breakBlock(tool, stack, context, true)) {
+        harvested += 1;
+        for (BlockPos extraPos : extraBlocks) {
+          BlockState extraState = world.getBlockState(extraPos);
+          // prevent calling that stuff for air blocks, could lead to unexpected behaviour since it fires events
+          // this should never actually happen, but just in case some AOE is odd
+          if (!extraState.isAir()) {
+            // prevent mutable position leak, breakBlock has a few places wanting immutable
+            if (breakExtraBlock(tool, stack, context.forPosition(extraPos.immutable(), extraState))) {
+              harvested += 1;
+            }
           }
         }
       }
+      return harvested;
+    } finally {
+      // restore the enchantments harvest changed
+      if (originalEnchantments != null) {
+        HarvestEnchantmentsModifierHook.restoreEnchantments(stack, originalEnchantments);
+      }
+      // alert modifiers we finished harvesting. Always run even if we broke nothing as it's important for cleanup
+      for (ModifierEntry entry : tool.getModifierList()) {
+        entry.getHook(ModifierHooks.BLOCK_HARVEST).finishHarvest(tool, entry, context, harvested);
+      }
     }
-    // restore the enchantments harvest changed
-    if (originalEnchantments != null) {
-      HarvestEnchantmentsModifierHook.restoreEnchantments(stack, originalEnchantments);
-    }
-    // alert modifiers we finished harvesting. Always run even if we broke nothing as it's important for cleanup
-    for (ModifierEntry entry : tool.getModifierList()) {
-      entry.getHook(ModifierHooks.BLOCK_HARVEST).finishHarvest(tool, entry, context, harvested);
-    }
-    return harvested;
   }
 
   /** Handles {@link net.minecraft.world.item.Item#mineBlock(net.minecraft.world.item.ItemStack, net.minecraft.world.level.Level, net.minecraft.world.level.block.state.BlockState, net.minecraft.core.BlockPos, net.minecraft.world.entity.LivingEntity)} for modifiable items */

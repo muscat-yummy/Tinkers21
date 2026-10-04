@@ -3,6 +3,9 @@ package slimeknights.tconstruct.library.data.tinkering;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
+import net.minecraft.core.HolderLookup;
+import net.minecraft.resources.RegistryOps;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
 import slimeknights.mantle.data.loadable.LoadableOps;
@@ -23,9 +26,12 @@ import java.util.concurrent.CompletableFuture;
 @SuppressWarnings("SameParameterValue")
 public abstract class AbstractModifierProvider extends GenericDataProvider {
   private final Map<ModifierId,Composable> composableModifiers = new HashMap<>();
+  private final CompletableFuture<HolderLookup.Provider> lookupProvider;
+  protected HolderLookup.Provider registries;
 
-  public AbstractModifierProvider(PackOutput packOutput) {
+  public AbstractModifierProvider(PackOutput packOutput, CompletableFuture<HolderLookup.Provider> lookupProvider) {
     super(packOutput, Target.DATA_PACK, ModifierManager.FOLDER, ModifierManager.GSON);
+    this.lookupProvider = lookupProvider;
   }
 
   /**
@@ -90,14 +96,19 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
 
   @Override
   public CompletableFuture<?> run(CachedOutput cache) {
-    addModifiers();
-    return allOf(composableModifiers.entrySet().stream().map(entry -> {
-      try {
-        return saveJson(cache, entry.getKey(), entry.getValue().serialize());
-      } catch (RuntimeException e) {
-        throw new RuntimeException("Failed to serialize modifier " + entry.getKey(), e);
-      }
-    }));
+    return lookupProvider.thenCompose(lookup -> {
+      registries = lookup;
+      return LoadableOps.with(RegistryOps.create(JsonOps.INSTANCE, lookup), () -> {
+        addModifiers();
+        return allOf(composableModifiers.entrySet().stream().map(entry -> {
+          try {
+            return saveJson(cache, entry.getKey(), entry.getValue().serialize());
+          } catch (RuntimeException e) {
+            throw new RuntimeException("Failed to serialize modifier " + entry.getKey(), e);
+          }
+        }));
+      });
+    });
   }
 
   /** Result for composable too */
