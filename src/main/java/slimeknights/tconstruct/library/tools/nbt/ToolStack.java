@@ -816,6 +816,16 @@ public class ToolStack implements IToolStackView {
     ToolStack.from(stack).ensureHasData();
   }
 
+  /** Rebuild native component-backed tools after loading, preserving unrelated item components. */
+  public static void verifyComponents(ItemStack stack, ToolDefinition definition) {
+    if (stack.isEmpty()) {
+      return;
+    }
+    ToolStackData data = ToolStackData.from(stack, true);
+    verifyTag(stack.getItem(), data.data(), definition);
+    data.commit();
+  }
+
   /**
    * Rebuilds the item stack when loaded from NBT
    * stops things from being wrong if modifiers or materials change

@@ -1,4 +1,4 @@
-name: Port native item attribute modifiers and verify exact equipment slots
+name: Port native tool component post load verification
 on:
   push:
     branches: [port/1.21.1-neoforge]
