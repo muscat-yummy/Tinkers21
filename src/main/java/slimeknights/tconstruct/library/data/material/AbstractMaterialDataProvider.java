@@ -316,11 +316,11 @@ public abstract class AbstractMaterialDataProvider extends GenericDataProvider {
 
     /** Adds the compat material condition for a list of ingot options, alloy is enabled if any of them are enabled */
     public MaterialBuilder compatAlloy(String... ingotNames) {
-      ICondition[] conditions = Arrays.stream(ingotNames).map(name -> tagExistsCondition("ingots/" + name)).toList();
+      List<ICondition> conditions = Arrays.stream(ingotNames).map(name -> tagExistsCondition("ingots/" + name)).toList();
       if (conditions.length == 1) {
         return compatAlloy(conditions[0]);
       }
-      return compatAlloy(new OrCondition(List.of(conditions)));
+      return compatAlloy(new OrCondition(conditions));
     }
 
 

@@ -1,0 +1,77 @@
+[
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MeltingModuleInventory.java",
+    "line": 227,
+    "source": "setStackInSlot(slot, ItemHandlerHelper.copyStackWithSize(stack, 1));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/module/MeltingModuleInventory.java",
+    "line": 229,
+    "source": "return canInsert ? ItemHandlerHelper.copyStackWithSize(stack, stack.getCount() - 1) : stack;"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/smeltery/block/entity/CastingBlockEntity.java",
+    "line": 159,
+    "source": "setItem(OUTPUT, ItemHandlerHelper.copyStackWithSize(held, 1));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/modifiers/hook/ranged/BowAmmoModifierHook.java",
+    "line": 189,
+    "source": "return ItemHandlerHelper.copyStackWithSize(ammo, projectilesDesired);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/modifiers/hook/ranged/BowAmmoModifierHook.java",
+    "line": 193,
+    "source": "resultStack = ItemHandlerHelper.copyStackWithSize(ammo, Math.min(projectilesDesired, ammo.getCount()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/modifiers/hook/ranged/BowAmmoModifierHook.java",
+    "line": 208,
+    "source": "return ItemHandlerHelper.copyStackWithSize(standardAmmo, projectilesDesired);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/material/MaterialRecipe.java",
+    "line": 132,
+    "source": "displayItems = Arrays.stream(ingredient.getItems()).map(stack -> ItemHandlerHelper.copyStackWithSize(stack, needed)).toList();"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/tools/recipe/ModifierRemovalRecipe.java",
+    "line": 178,
+    "source": "tool = ItemHandlerHelper.copyStackWithSize(tool, stack.getCount());"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/modifiers/adding/IncrementalModifierRecipe.java",
+    "line": 188,
+    "source": "Lazy<List<ItemStack>> fullSize = Lazy.of(() -> items.stream().map(stack -> ItemHandlerHelper.copyStackWithSize(stack, maxStackSize)).collect(Collectors.toList()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/modifiers/adding/IncrementalModifierRecipe.java",
+    "line": 196,
+    "source": "builder.add(items.stream().map(stack -> ItemHandlerHelper.copyStackWithSize(stack, remaining)).collect(Collectors.toList()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/modifiers/adding/IncrementalModifierRecipe.java",
+    "line": 277,
+    "source": "inv.giveItem(ItemHandlerHelper.copyStackWithSize(leftover, (amountPerInput - leftoverAmount) * leftover.getCount()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/modifiers/fluid/general/DropItemFluidEffect.java",
+    "line": 34,
+    "source": "ModifierUtil.dropItem(context.getLevel(), context.getLocation(), ItemHandlerHelper.copyStackWithSize(item.get(), count * item.getCount()));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/library/recipe/RandomItem.java",
+    "line": 144,
+    "source": "return ItemHandlerHelper.copyStackWithSize(result, newCount);"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/tables/block/entity/table/TinkerStationBlockEntity.java",
+    "line": 238,
+    "source": "this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));"
+  },
+  {
+    "path": "src/main/java/slimeknights/tconstruct/tables/block/entity/table/ModifierWorktableBlockEntity.java",
+    "line": 226,
+    "source": "this.setItem(TINKER_SLOT, ItemHandlerHelper.copyStackWithSize(tinkerable, tinkerable.getCount() - shrinkToolSlot));"
+  }
+]

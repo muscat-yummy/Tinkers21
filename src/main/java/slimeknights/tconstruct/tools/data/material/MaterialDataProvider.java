@@ -166,7 +166,7 @@ public class MaterialDataProvider extends AbstractMaterialDataProvider {
     material("platinum").redirect(MaterialIds.searedStone);
     material("tungsten")
       .redirect(MaterialIds.lead, tagExistsCondition("ingots/lead"))
-      .redirect(MaterialIds.invar, new OrCondition(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel")))
+      .redirect(MaterialIds.invar, new OrCondition(java.util.List.of(tagExistsCondition("ingots/invar"), tagExistsCondition("ingots/nickel"))))
       .redirect(MaterialIds.iron);
   }
 

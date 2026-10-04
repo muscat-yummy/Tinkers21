@@ -108,7 +108,7 @@ public interface IMaterialRecipeHelper extends IRecipeHelper {
 
   /** Adds recipes to melt and cast a compat material of ingot size with a second tag allowed to make the material exist */
   default void compatMeltingCasting(RecipeConsumer consumer, MaterialId material, FluidObject<?> fluid, String altTag, String folder) {
-    materialMeltingCasting(withCondition(consumer, new OrCondition(tagCondition("ingots/" + material.getPath()), tagCondition("ingots/" + altTag))), material, fluid, folder);
+    materialMeltingCasting(withCondition(consumer, new OrCondition(java.util.List.of(tagCondition("ingots/" + material.getPath()), tagCondition("ingots/" + altTag)))), material, fluid, folder);
   }
 
   /** Adds recipes to melt and cast a material of ingot size */
