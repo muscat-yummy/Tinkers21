@@ -8,8 +8,10 @@ import mezz.jei.api.recipe.advanced.ISimpleRecipeManagerPlugin;
 import mezz.jei.api.runtime.IIngredientManager;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import slimeknights.tconstruct.library.recipe.display.FilteredItemRecipe;
 import slimeknights.tconstruct.library.recipe.display.FilteredRecipe;
+import slimeknights.tconstruct.library.recipe.tinkerstation.IDisplayCraftingTinkering;
 
 import java.util.List;
 
@@ -54,9 +56,38 @@ public class SimpleItemRecipeManager<T extends FilteredItemRecipe> implements IS
     return List.of();
   }
 
-  /** Creates an instance of the category for the crafting table. */
-  @SuppressWarnings({"unchecked", "rawtypes"})
-  public static <T extends CraftingRecipe & FilteredItemRecipe> ISimpleRecipeManagerPlugin<CraftingRecipe> createCrafting(IIngredientManager ingredientManager, List<T> recipes) {
-    return (ISimpleRecipeManagerPlugin<CraftingRecipe>) new SimpleItemRecipeManager(ingredientManager, recipes);
+  /** Adapt display variants using their actual source crafting IDs carried by native recipe holders. */
+  public static ISimpleRecipeManagerPlugin<RecipeHolder<CraftingRecipe>> createCrafting(
+      IIngredientManager ingredientManager, List<? extends IDisplayCraftingTinkering> recipes) {
+    var delegate = new SimpleItemRecipeManager<IDisplayCraftingTinkering>(
+      ingredientManager, List.copyOf(recipes));
+    return new ISimpleRecipeManagerPlugin<>() {
+      @Override
+      public boolean isHandledInput(ITypedIngredient<?> input) {
+        return delegate.isHandledInput(input);
+      }
+      @Override
+      public boolean isHandledOutput(ITypedIngredient<?> output) {
+        return delegate.isHandledOutput(output);
+      }
+      @Override
+      public List<RecipeHolder<CraftingRecipe>> getAllRecipes() {
+        return holders(delegate.getAllRecipes());
+      }
+      @Override
+      public List<RecipeHolder<CraftingRecipe>> getRecipesForInput(ITypedIngredient<?> input) {
+        return holders(delegate.getRecipesForInput(input));
+      }
+      @Override
+      public List<RecipeHolder<CraftingRecipe>> getRecipesForOutput(ITypedIngredient<?> output) {
+        return holders(delegate.getRecipesForOutput(output));
+      }
+    };
+  }
+
+  private static List<RecipeHolder<CraftingRecipe>> holders(
+      List<IDisplayCraftingTinkering> recipes) {
+    return recipes.stream().map(recipe -> new RecipeHolder<CraftingRecipe>(
+      recipe.getId(), recipe)).toList();
   }
 }

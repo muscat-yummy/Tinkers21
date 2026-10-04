@@ -1,4 +1,4 @@
-name: Inspect pinned JEI crafting and ingredient registration interfaces
+name: Port native JEI crafting holders and inspect display runtime interfaces
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -45,6 +45,9 @@ jobs:
               'net.minecraft.client.renderer.Sheets': ['armorTrimsSheet('],
               'net.minecraft.core.registries.Registries': ['tagsDirPath('],
               'mezz.jei.api.runtime.IIngredientVisibility': ['public '],
+              'mezz.jei.api.runtime.IIngredientFilter': ['public '],
+              'mezz.jei.api.runtime.IIngredientManager': ['public '],
+              'mezz.jei.api.recipe.category.extensions.IRecipeCategoryExtension': ['public '],
               'mezz.jei.api.registration.IRecipeCatalystRegistration': ['public '],
               'mezz.jei.api.recipe.category.extensions.vanilla.crafting.IExtendableCraftingRecipeCategory': ['public '],
               'mezz.jei.api.recipe.category.extensions.vanilla.crafting.ICraftingCategoryExtension': ['public '],

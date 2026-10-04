@@ -5,7 +5,6 @@ import mezz.jei.api.JeiPlugin;
 import mezz.jei.api.constants.RecipeTypes;
 import mezz.jei.api.constants.VanillaTypes;
 import mezz.jei.api.neoforge.NeoForgeTypes;
-import mezz.jei.api.gui.builder.IIngredientAcceptor;
 import mezz.jei.api.helpers.IGuiHelper;
 import mezz.jei.api.helpers.IModIdHelper;
 import mezz.jei.api.ingredients.subtypes.IIngredientSubtypeInterpreter;
@@ -38,6 +37,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.alchemy.Potion;
 import net.minecraft.world.item.alchemy.Potions;
 import net.minecraft.world.item.crafting.CraftingRecipe;
+import net.minecraft.world.item.crafting.RecipeHolder;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
@@ -240,8 +240,19 @@ public class JEIPlugin implements IModPlugin {
 
   /** Finds the first recipe of the given type */
   @Nullable
-  private static <T, C extends Container, R extends Recipe<C>> T findFirst(RecipeManager manager, RecipeType<R> type, Class<T> clazz) {
-    return manager.byType(type).values().stream().filter(clazz::isInstance).map(clazz::cast).findFirst().orElse(null);
+  private static <T, C extends net.minecraft.world.item.crafting.RecipeInput, R extends Recipe<C>> T findFirst(RecipeManager manager, RecipeType<R> type, Class<T> clazz) {
+    return manager.getAllRecipesFor(type).stream().map(net.minecraft.world.item.crafting.RecipeHolder::value).filter(clazz::isInstance).map(clazz::cast).findFirst().orElse(null);
+  }
+
+  /** Keep the actual crafting ID when selecting a recipe whose value has no ID in 1.21. */
+  @Nullable
+  private static <T extends CraftingRecipe> RecipeHolder<T> findFirstCraftingHolder(RecipeManager manager, Class<T> type) {
+    for (RecipeHolder<CraftingRecipe> holder : manager.getAllRecipesFor(RecipeType.CRAFTING)) {
+      if (type.isInstance(holder.value())) {
+        return new RecipeHolder<>(holder.id(), type.cast(holder.value()));
+      }
+    }
+    return null;
   }
 
   @Override
@@ -324,16 +335,16 @@ public class JEIPlugin implements IModPlugin {
       }).toList());
 
     // copy tinker station repair recipes to the crafting table
-    CraftingTableRepairKitRecipe craftingRepair = findFirst(manager, RecipeType.CRAFTING, CraftingTableRepairKitRecipe.class);
+    RecipeHolder<CraftingTableRepairKitRecipe> craftingRepair = findFirstCraftingHolder(manager, CraftingTableRepairKitRecipe.class);
     TinkerStationRepairRecipe tinkerRepair = findFirst(manager, TinkerRecipeTypes.TINKER_STATION.get(), TinkerStationRepairRecipe.class);
     if (craftingRepair != null && tinkerRepair != null) {
-      ResourceLocation id = craftingRepair.getId();
+      ResourceLocation id = craftingRepair.id();
       List<IDisplayCraftingTinkering> recipes = tinkerRepair.getRecipes(access);
-      List<CraftingRecipe> newRecipes = new ArrayList<>();
+      List<RecipeHolder<CraftingRecipe>> newRecipes = new ArrayList<>();
       TinkerStationRepairRecipe.setCraftingId(recipes, id);
       for (IDisplayCraftingTinkering recipe : recipes) {
         if (!recipe.isFiltered()) {
-          newRecipes.add(recipe);
+          newRecipes.add(new RecipeHolder<>(id, recipe));
         }
       }
       if (!recipes.isEmpty()) {
@@ -369,9 +380,11 @@ public class JEIPlugin implements IModPlugin {
     // copy tinker station repair recipes to the crafting table
     List<IDisplayCraftingTinkering> craftingRecipes = VanillaFilteredRecipe.getRecipes(access, manager, RecipeType.CRAFTING, IDisplayCraftingTinkering.class);
     // copy tinker repair recipes to the crafting table
+    RecipeHolder<CraftingTableRepairKitRecipe> craftingRepair = findFirstCraftingHolder(manager, CraftingTableRepairKitRecipe.class);
     TinkerStationRepairRecipe tinkerRepair = findFirst(manager, TinkerRecipeTypes.TINKER_STATION.get(), TinkerStationRepairRecipe.class);
-    if (tinkerRepair != null) {
+    if (craftingRepair != null && tinkerRepair != null) {
       List<IDisplayCraftingTinkering> recipes = tinkerRepair.getRecipes(access);
+      TinkerStationRepairRecipe.setCraftingId(recipes, craftingRepair.id());
       for (IDisplayCraftingTinkering recipe : recipes) {
         if (recipe.isFiltered()) {
           craftingRecipes.add(recipe);
@@ -393,9 +406,8 @@ public class JEIPlugin implements IModPlugin {
       list.add(stack);
       return false;
     }, table, tag);
-    Consumer<IIngredientAcceptor<?>> ingredientAdder = acceptor -> acceptor.addItemStacks(list);
     for (mezz.jei.api.recipe.RecipeType<?> type : types) {
-      registry.addRecipeCatalyst(type, ingredientAdder);
+      registry.addRecipeCatalysts(type, VanillaTypes.ITEM_STACK, list);
     }
   }
 
@@ -409,7 +421,7 @@ public class JEIPlugin implements IModPlugin {
   private static void addCastingCatalyst(IRecipeCatalystRegistration registry, ItemLike item, mezz.jei.api.recipe.RecipeType<IDisplayableCastingRecipe> ownCategory, RecipeType<MoldingRecipe> type) {
     registry.addRecipeCatalyst(item, ownCategory);
     assert Minecraft.getInstance().level != null;
-    if (!Minecraft.getInstance().level.getRecipeManager().byType(type).isEmpty()) {
+    if (!Minecraft.getInstance().level.getRecipeManager().getAllRecipesFor(type).isEmpty()) {
       registry.addRecipeCatalyst(item, TConstructJEIConstants.MOLDING);
     }
   }
@@ -451,7 +463,7 @@ public class JEIPlugin implements IModPlugin {
     addModifierCatalyst(registry, TinkerTags.Modifiers.MELTING, TConstructJEIConstants.MELTING, TConstructJEIConstants.ENTITY_MELTING);
     // add items containing these modifiers to start as catalysts as well
     for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.MODIFIABLE)) {
-      if (item.get() instanceof IModifiableDisplay modifiable) {
+      if (item.value() instanceof IModifiableDisplay modifiable) {
         // add any tools with a severing trait to severing
         ModifierNBT traits = ToolTraitHook.getTraits(modifiable.getToolDefinition(), MaterialNBT.EMPTY);
         if (traits.has(TinkerTags.Modifiers.CRAFTING)) {
@@ -466,7 +478,7 @@ public class JEIPlugin implements IModPlugin {
         // add any tools with a melting trait to melting
         if (traits.has(TinkerTags.Modifiers.MELTING)) {
           // only add to entity melting if its melee too
-          if (item.containsTag(TinkerTags.Items.MELEE)) {
+          if (item.is(TinkerTags.Items.MELEE)) {
             registry.addRecipeCatalyst(modifiable.getRenderTool(), TConstructJEIConstants.MELTING, TConstructJEIConstants.ENTITY_MELTING);
           } else {
             registry.addRecipeCatalyst(modifiable.getRenderTool(), TConstructJEIConstants.MELTING);
@@ -603,7 +615,7 @@ public class JEIPlugin implements IModPlugin {
     // if the creative is showing just 1, skip the client option
     if (!showOnlyTools.isEmpty()) {
       for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.MODIFIABLE)) {
-        if (item.get() instanceof IModifiable modifiable) {
+        if (item.value() instanceof IModifiable modifiable) {
           ToolBuildHandler.addVariants(hideItem, modifiable, "");
           ToolBuildHandler.addVariants(showItem, modifiable, showOnlyTools);
         }
@@ -613,7 +625,7 @@ public class JEIPlugin implements IModPlugin {
     String showOnlyParts = Config.CLIENT.showOnlyPartMaterial.get();
     if (!showOnlyParts.isEmpty()) {
       for (Holder<Item> item : BuiltInRegistries.ITEM.getTagOrEmpty(TinkerTags.Items.TOOL_PARTS)) {
-        if (item.get() instanceof IMaterialItem part) {
+        if (item.value() instanceof IMaterialItem part) {
           part.addVariants(hideItem, "");
           part.addVariants(showItem, showOnlyParts);
         }
@@ -675,10 +687,7 @@ public class JEIPlugin implements IModPlugin {
     // add potion fluids for each potion variant if requested
     if (Config.CLIENT.showPotionFluidInJEI.get()) {
       manager.addIngredientsAtRuntime(NeoForgeTypes.FLUID_STACK,
-                                      BuiltInRegistries.POTION.holders().filter(holder -> {
-                                        Potion potion = holder.get();
-                                        return potion != Potions.EMPTY && potion != Potions.WATER && !holder.is(TinkerTags.Potions.HIDDEN_FLUID);
-                                      }).map(holder -> PotionFluidType.potionFluid(holder.key(), FluidType.BUCKET_VOLUME)).toList());
+                                      BuiltInRegistries.POTION.holders().filter(holder -> !holder.is(Potions.WATER) && !holder.is(TinkerTags.Potions.HIDDEN_FLUID)).map(holder -> PotionFluidType.potionFluid(holder.key(), FluidType.BUCKET_VOLUME)).toList());
     }
     // remove variantless potion fluid
     removeFluid(removeFluids, TinkerFluids.potion.get());
@@ -703,10 +712,9 @@ public class JEIPlugin implements IModPlugin {
     Level level = SafeClientAccess.getLevel();
     if (level != null) {
       RecipeManager recipes = level.getRecipeManager();
-      List<CraftingRecipe> easterEggs = Arrays.stream(EASTER_EGG_RECIPES)
-        .flatMap(id -> recipes.byKey(id).stream())
-        .filter(recipe -> recipe instanceof CraftingRecipe)
-        .map(recipe -> (CraftingRecipe) recipe)
+      Set<ResourceLocation> hiddenIds = Set.of(EASTER_EGG_RECIPES);
+      List<net.minecraft.world.item.crafting.RecipeHolder<CraftingRecipe>> easterEggs = recipes.getAllRecipesFor(RecipeType.CRAFTING).stream()
+        .filter(holder -> hiddenIds.contains(holder.id()))
         .toList();
       if (!easterEggs.isEmpty()) {
         jeiRuntime.getRecipeManager().hideRecipes(RecipeTypes.CRAFTING, easterEggs);

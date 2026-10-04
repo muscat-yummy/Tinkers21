@@ -3,7 +3,7 @@ package slimeknights.tconstruct.library.recipe.tinkerstation;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.CraftingInput;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CraftingBookCategory;
 import net.minecraft.world.item.crafting.CraftingRecipe;
@@ -20,7 +20,6 @@ import java.util.List;
  */
 public interface IDisplayCraftingTinkering extends IDisplayToolTinkering, CraftingRecipe {
   /** Gets the ID for the crafting table tab. */
-  @Override
   ResourceLocation getId();
 
   /** Gets the ID for the tinker station tab. */
@@ -58,7 +57,7 @@ public interface IDisplayCraftingTinkering extends IDisplayToolTinkering, Crafti
   }
 
   @Override
-  default boolean matches(CraftingContainer container, Level pLevel) {
+  default boolean matches(CraftingInput container, Level pLevel) {
     return false;
   }
 
@@ -68,7 +67,7 @@ public interface IDisplayCraftingTinkering extends IDisplayToolTinkering, Crafti
   }
 
   @Override
-  default ItemStack assemble(CraftingContainer container, RegistryAccess access) {
+  default ItemStack assemble(CraftingInput container, net.minecraft.core.HolderLookup.Provider access) {
     return ItemStack.EMPTY;
   }
 
