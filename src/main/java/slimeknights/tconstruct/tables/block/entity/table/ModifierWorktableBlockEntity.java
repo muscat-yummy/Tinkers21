@@ -176,7 +176,7 @@ public class ModifierWorktableBlockEntity extends RetexturedTableBlockEntity imp
     ItemStack original = getItem(slot);
     super.setItem(slot, stack);
     // if the stack changed, clear everything
-    if (original.getCount() != stack.getCount() || !ItemStack.isSameItemSameTags(original, stack)) {
+    if (original.getCount() != stack.getCount() || !ItemStack.isSameItemSameComponents(original, stack)) {
       onSlotChanged(slot);
     }
   }
