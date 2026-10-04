@@ -5,6 +5,9 @@ import net.minecraft.core.Direction;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.library.utils.BlockInteractionUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.context.BlockPlaceContext;
 import net.minecraft.world.level.Level;
@@ -58,11 +61,22 @@ public abstract class TinyMultiblockControllerBlock extends ControllerBlock {
 
   @Deprecated
   @Override
+  public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    return BlockInteractionUtil.withItem(stack, () -> use(state, level, pos, player, hand, hit));
+  }
+
+  @Override
+  public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+  }
+
+  /** Owned interaction callback retained for subclasses; native entry points delegate here. */
+  @Deprecated
   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
     if (FluidTransferHelper.interactWithTank(world, pos, player, hand, hit)) {
       return InteractionResult.SUCCESS;
     }
-    return super.use(state, world, pos, player, hand, hit);
+    return super.useWithoutItem(state, world, pos, player, hit);
   }
 
   @Override

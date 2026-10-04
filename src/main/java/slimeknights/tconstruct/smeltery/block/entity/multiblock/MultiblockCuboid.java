@@ -439,18 +439,7 @@ public abstract class MultiblockCuboid<T extends MultiblockStructureData> {
    * @return  Set of positions
    */
   protected static Collection<BlockPos> readPosList(CompoundTag rootTag, String key, BlockPos offset) {
-    if (!rootTag.contains(key, Tag.TAG_LIST)) {
-      return Collections.emptyList();
-    }
-    ListTag list = rootTag.getList(key, Tag.TAG_COMPOUND);
-    List<BlockPos> collection = new ArrayList<>(list.size());
-    for (int i = 0; i < list.size(); i++) {
-      BlockPos pos = NbtUtils.readBlockPos(list.getCompound(i));
-      if (!pos.equals(BlockPos.ZERO)) {
-        collection.add(pos.offset(offset));
-      }
-    }
-    return collection;
+    return TagUtil.readPosList(rootTag, key, offset);
   }
 
   /**

@@ -3,8 +3,12 @@ package slimeknights.tconstruct.tables.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import slimeknights.tconstruct.library.utils.BlockInteractionUtil;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
@@ -58,12 +62,12 @@ public class ChestBlock extends TabbedTableBlock {
     super.setPlacedBy(worldIn, pos, state, placer, stack);
     // check if we also have an inventory
 
-    CompoundTag tag = stack.getTag();
+    CompoundTag tag = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (tag != null && tag.contains("TinkerData", Tag.TAG_COMPOUND)) {
       CompoundTag tinkerData = tag.getCompound("TinkerData");
       BlockEntity te = worldIn.getBlockEntity(pos);
       if (te instanceof AbstractChestBlockEntity chest) {
-        chest.readInventory(tinkerData);
+        chest.readInventory(tinkerData, worldIn.registryAccess());
       }
     }
   }
@@ -77,6 +81,16 @@ public class ChestBlock extends TabbedTableBlock {
 
   @SuppressWarnings("deprecation")
   @Override
+  public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    return BlockInteractionUtil.withItem(stack, () -> use(state, level, pos, player, hand, hit));
+  }
+
+  @Override
+  public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+  }
+
+  /** Owned interaction callback retained for subclasses; native entry points delegate here. */
   @Deprecated
   public InteractionResult use(BlockState state, Level worldIn, BlockPos pos, Player player, InteractionHand handIn, BlockHitResult hit) {
     BlockEntity te = worldIn.getBlockEntity(pos);
@@ -92,7 +106,7 @@ public class ChestBlock extends TabbedTableBlock {
       }
     }
 
-    return super.use(state, worldIn, pos, player, handIn, hit);
+    return super.useWithoutItem(state, worldIn, pos, player, hit);
   }
 
   @Override

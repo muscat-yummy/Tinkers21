@@ -5,6 +5,9 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.core.component.DataComponents;
 import net.minecraft.world.item.TooltipFlag;
 import net.minecraft.world.level.BlockGetter;
 import net.minecraft.world.level.Level;
@@ -56,7 +59,7 @@ public abstract class HeatingControllerBlock extends ControllerBlock {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable BlockGetter pLevel, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     RetexturedHelper.addTooltip(stack, tooltip, flag);
   }
 
@@ -65,7 +68,7 @@ public abstract class HeatingControllerBlock extends ControllerBlock {
     super.setPlacedBy(world, pos, state, placer, stack);
     if (world.getBlockEntity(pos) instanceof HeatingStructureBlockEntity te) {
       // update controller texture
-      if (stack.hasTag()) {
+      if (stack.has(DataComponents.CUSTOM_DATA)) {
         te.updateTexture(RetexturedHelper.getTextureName(stack));
       }
       // check structure
@@ -83,7 +86,7 @@ public abstract class HeatingControllerBlock extends ControllerBlock {
   }
 
   @Override
-  public ItemStack getCloneItemStack(BlockState state, HitResult target, BlockGetter world, BlockPos pos, Player player) {
+  public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader world, BlockPos pos, Player player) {
     return RetexturedBlock.getPickBlock(world, pos, state);
   }
 

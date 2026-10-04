@@ -3,6 +3,7 @@ package slimeknights.tconstruct.gadgets.client;
 import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.resources.model.ModelResourceLocation;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
@@ -60,7 +61,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
     RenderNameTagEvent renderNameplate = new RenderNameTagEvent(frame, frame.getDisplayName(), this, matrices, bufferIn, packedLight, partialTicks);
     NeoForge.EVENT_BUS.post(renderNameplate);
     if (renderNameplate.canRender() == TriState.TRUE || (renderNameplate.canRender() != TriState.FALSE && this.shouldShowName(frame))) {
-      this.renderNameTag(frame, renderNameplate.getContent(), matrices, bufferIn, packedLight);
+      this.renderNameTag(frame, renderNameplate.getContent(), matrices, bufferIn, packedLight, partialTicks);
     }
 
     // orient the renderer
@@ -81,7 +82,7 @@ public class FancyItemFrameRenderer<T extends FancyItemFrameEntity> extends Item
       matrices.translate(-0.5D, -0.5D, -0.5D);
       blockRenderer.getModelRenderer().renderModel(
         matrices.last(), bufferIn.getBuffer(Sheets.cutoutBlockSheet()), null,
-        blockRenderer.getBlockModelShaper().getModelManager().getModel(isMap ? LOCATIONS_MODEL_MAP.get(frameType) : LOCATIONS_MODEL.get(frameType)),
+        blockRenderer.getBlockModelShaper().getModelManager().getModel(ModelResourceLocation.standalone(isMap ? LOCATIONS_MODEL_MAP.get(frameType) : LOCATIONS_MODEL.get(frameType))),
         1.0F, 1.0F, 1.0F, packedLight, OverlayTexture.NO_OVERLAY);
       matrices.popPose();
     }

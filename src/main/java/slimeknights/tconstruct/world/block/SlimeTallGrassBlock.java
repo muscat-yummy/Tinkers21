@@ -53,7 +53,7 @@ public class SlimeTallGrassBlock extends BushBlock implements IShearable {
 
   @Nonnull
   @Override
-  public List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level world, BlockPos pos, int fortune) {
+  public List<ItemStack> onSheared(@Nullable Player player, ItemStack item, Level world, BlockPos pos) {
     return Lists.newArrayList(new ItemStack(this, 1));
   }
 

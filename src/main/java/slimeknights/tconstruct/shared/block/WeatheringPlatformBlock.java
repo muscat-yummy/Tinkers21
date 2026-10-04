@@ -8,6 +8,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import slimeknights.tconstruct.library.utils.BlockInteractionUtil;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -40,7 +42,7 @@ public class WeatheringPlatformBlock extends PlatformBlock implements Weathering
 
   @Override
   public void randomTick(BlockState pState, ServerLevel pLevel, BlockPos pPos, RandomSource pRandom) {
-    this.onRandomTick(pState, pLevel, pPos, pRandom);
+    this.changeOverTime(pState, pLevel, pPos, pRandom);
   }
 
   /** Gets the next state for weathering */
@@ -89,6 +91,17 @@ public class WeatheringPlatformBlock extends PlatformBlock implements Weathering
   }
 
   @Override
+  public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    return BlockInteractionUtil.withItem(stack, () -> use(state, level, pos, player, hand, hit));
+  }
+
+  @Override
+  public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+  }
+
+  /** Owned interaction callback retained for subclasses; native entry points delegate here. */
+  @Deprecated
   public InteractionResult use(BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
     ItemStack stack = player.getItemInHand(hand);
     if (stack.getItem() == Items.HONEYCOMB) {

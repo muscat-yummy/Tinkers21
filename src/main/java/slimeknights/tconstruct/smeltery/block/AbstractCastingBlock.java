@@ -6,6 +6,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.item.ItemStack;
+import slimeknights.tconstruct.library.utils.BlockInteractionUtil;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
@@ -47,6 +50,17 @@ public abstract class AbstractCastingBlock extends TableBlock {
 
   @Deprecated
   @Override
+  public ItemInteractionResult useItemOn(ItemStack stack, BlockState state, Level level, BlockPos pos, Player player, InteractionHand hand, BlockHitResult hit) {
+    return BlockInteractionUtil.withItem(stack, () -> use(state, level, pos, player, hand, hit));
+  }
+
+  @Override
+  public InteractionResult useWithoutItem(BlockState state, Level level, BlockPos pos, Player player, BlockHitResult hit) {
+    return use(state, level, pos, player, InteractionHand.MAIN_HAND, hit);
+  }
+
+  /** Owned interaction callback retained for subclasses; native entry points delegate here. */
+  @Deprecated
   public InteractionResult use(BlockState state, Level world, BlockPos pos, Player player, InteractionHand hand, BlockHitResult rayTraceResult) {
     if (player.isShiftKeyDown()) {
       return InteractionResult.PASS;
@@ -56,7 +70,7 @@ public abstract class AbstractCastingBlock extends TableBlock {
       ((CastingBlockEntity) te).interact(player, hand);
       return InteractionResult.SUCCESS;
     }
-    return super.use(state, world, pos, player, hand, rayTraceResult);
+    return super.useWithoutItem(state, world, pos, player, rayTraceResult);
   }
 
   @SuppressWarnings("deprecation")
