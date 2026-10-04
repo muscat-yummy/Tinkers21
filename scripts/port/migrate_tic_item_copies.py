@@ -36,7 +36,7 @@ def rewrite(line):
     comma = commas[0]
     fluid = line[tokens[start + 3][2]:tokens[comma][1]].strip()
     amount = line[tokens[comma][2]:tokens[close][1]].strip()
-    replacement = '(' + fluid + ').copyWithAmount(' + amount + ')'
+    replacement = '(' + fluid + ').copyWithCount(' + amount + ')'
     return line[:tokens[start][1]] + replacement + line[tokens[close][2]:]
 
 def check_parser():

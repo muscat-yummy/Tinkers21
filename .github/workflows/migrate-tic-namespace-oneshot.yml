@@ -1,4 +1,4 @@
-name: Port native condition lists and diagnosed item copies
+name: Verify native condition lists and component preserving item copy parser
 on:
   push:
     branches: [port/1.21.1-neoforge]
