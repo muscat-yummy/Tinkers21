@@ -1,4 +1,4 @@
-name: Port native tool tooltip component names enchantments and attribute identities
+name: Port registered melee attribute holders and stable replace remove identities
 on:
   push:
     branches: [port/1.21.1-neoforge]

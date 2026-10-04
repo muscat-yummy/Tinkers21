@@ -4,6 +4,9 @@ import lombok.AccessLevel;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.core.Holder;
+import net.minecraft.core.registries.BuiltInRegistries;
+import slimeknights.tconstruct.library.utils.AttributeIdUtil;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.attributes.Attribute;
@@ -73,11 +76,11 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
     if (condition.matches(tool, modifier)) {
       LivingEntity target = context.getLivingTarget();
       if (target != null) {
-        AttributeInstance instance = target.getAttribute(attribute);
+        AttributeInstance instance = target.getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
         if (instance != null) {
           // ensure we don't already have the modifier from someone misusing melee hooks or simultaneous attacks
-          instance.removeModifier(uuid);
-          instance.addTransientModifier(new AttributeModifier(uuid, unique, amount.compute(modifier.getEffectiveLevel()), operation));
+          instance.removeModifier(AttributeIdUtil.fromUuid(uuid));
+          instance.addTransientModifier(new AttributeModifier(AttributeIdUtil.fromUuid(uuid), amount.compute(modifier.getEffectiveLevel()), operation));
         }
       }
     }
@@ -86,9 +89,9 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
 
   private void removeAttribute(@Nullable LivingEntity target) {
     if (target != null) {
-      AttributeInstance instance = target.getAttribute(attribute);
+      AttributeInstance instance = target.getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
-        instance.removeModifier(uuid);
+        instance.removeModifier(AttributeIdUtil.fromUuid(uuid));
       }
     }
   }
@@ -112,6 +115,10 @@ public record MeleeAttributeModule(String unique, Attribute attribute, UUID uuid
   /** Creates a new builder instance */
   public static Builder builder(Attribute attribute, Operation operation) {
     return new Builder(attribute, operation);
+  }
+
+  public static Builder builder(Holder<Attribute> attribute, Operation operation) {
+    return new Builder(attribute.value(), operation);
   }
 
   public static Builder builder(Supplier<Attribute> attribute, Operation operation) {
