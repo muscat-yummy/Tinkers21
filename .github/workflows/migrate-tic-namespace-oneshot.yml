@@ -1,4 +1,4 @@
-name: Verify native condition lists and component preserving item copy parser
+name: Port native melee attack effects and verify temporary state restoration
 on:
   push:
     branches: [port/1.21.1-neoforge]
