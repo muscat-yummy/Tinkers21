@@ -3,6 +3,7 @@ package slimeknights.tconstruct.library.recipe.partbuilder;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.item.ItemStack;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeType;
 import slimeknights.mantle.recipe.ICommonRecipe;
@@ -19,6 +20,9 @@ import java.util.stream.Stream;
 
 /** Common interface for part builder recipes */
 public interface IPartBuilderRecipe extends ICommonRecipe<IPartBuilderContainer> {
+  /** Actual ID supplied by the native recipe-holder decode boundary. */
+  ResourceLocation getId();
+
   /** Default patterns in a part builder recipe, Forge has cache invalidation for vanilla, so this is fine as long as that persists */
   Ingredient DEFAULT_PATTERNS = Ingredient.of(TinkerTags.Items.DEFAULT_PATTERNS);
   /** Pattern to use for recipes that don't implement the standard pattern behavior */

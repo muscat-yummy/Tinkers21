@@ -19,7 +19,8 @@ import net.minecraft.world.item.ArmorItem;
 import net.minecraft.world.item.CreativeModeTab;
 import net.minecraft.world.item.CreativeModeTab.ItemDisplayParameters;
 import net.minecraft.world.item.CreativeModeTab.Output;
-import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.component.FireworkExplosion;
+import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Rarity;
@@ -378,7 +379,12 @@ public final class TinkerWorld extends TinkerModule {
       };
       TinkerWorld.heads.forEach(head -> DispenserBlock.registerBehavior(head, dispenseArmor));
       // heads in firework stars
-      TinkerWorld.heads.forEach(head -> FireworkStarRecipe.SHAPE_BY_ITEM.put(head.asItem(), FireworkRocketItem.Shape.CREEPER));
+      java.util.List<ItemStack> shapes = new java.util.ArrayList<>(java.util.Arrays.asList(FireworkStarRecipe.SHAPE_INGREDIENT.getItems()));
+      TinkerWorld.heads.forEach(head -> {
+        FireworkStarRecipe.SHAPE_BY_ITEM.put(head.asItem(), FireworkExplosion.Shape.CREEPER);
+        shapes.add(new ItemStack(head));
+      });
+      FireworkStarRecipe.SHAPE_INGREDIENT = Ingredient.of(shapes.stream());
       // inject heads into the tile entity type
       event.enqueueWork(() -> {
         ImmutableSet.Builder<Block> builder = ImmutableSet.builder();

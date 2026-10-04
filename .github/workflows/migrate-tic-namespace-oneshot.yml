@@ -1,4 +1,4 @@
-name: Port native brush particles and protection equipment slots
+name: Port recipe metadata and registry-aware conditional reloads
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,15 +33,16 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.entity.player.Player': {'methods': ['startAutoSpinAttack(', 'doAutoAttackOnTouch(']},
-              'net.minecraft.world.entity.LivingEntity': {'methods': ['checkAutoSpinAttack(', 'doAutoAttackOnTouch(']},
-              'net.minecraft.world.item.enchantment.EnchantmentHelper': ['doPostAttackEffects(', 'getEnchantmentLevel(', 'has(', 'getEnchantmentsForCrafting(', 'setEnchantments('],
-              'net.minecraft.world.item.crafting.FireworkStarRecipe': None,
-              'net.minecraft.world.item.component.FireworkExplosion$Shape': ['public '],
-              'net.minecraft.world.level.block.LevelEvent': ['DISPENSER', 'SHOOT'],
-              'net.minecraft.world.level.block.NetherPortalBlock': {'methods': ['entityInside(']},
-              'net.minecraft.world.level.block.EndGatewayBlock': {'methods': ['entityInside(']},
-              'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': {'methods': ['run(']}
+              'net.minecraft.world.entity.player.Player': {'methods': ['attack(']},
+              'net.minecraft.world.item.crafting.FireworkStarRecipe': ['SHAPE_'],
+              'net.minecraft.world.ItemInteractionResult': ['public '],
+              'net.minecraft.world.item.enchantment.Enchantment': ['STREAM_CODEC', 'DIRECT_CODEC'],
+              'net.minecraft.world.item.enchantment.ItemEnchantments': ['public '],
+              'net.minecraft.network.codec.ByteBufCodecs': ['holderRegistry('],
+              'net.minecraft.world.item.enchantment.EnchantmentEffectComponents': ['PREVENT_ARMOR_CHANGE'],
+              'net.minecraft.world.item.ItemStack': ['hurtAndBreak(', 'getAllEnchantments('],
+              'net.minecraft.world.level.block.state.BlockBehaviour$BlockStateBase': ['useItemOn(', 'useWithoutItem('],
+              'net.minecraft.world.level.block.Blocks': ['never(']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)

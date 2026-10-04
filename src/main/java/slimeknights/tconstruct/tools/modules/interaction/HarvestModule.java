@@ -5,6 +5,7 @@ import net.minecraft.core.Holder;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.InteractionResult;
+import net.minecraft.world.ItemInteractionResult;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -70,8 +71,10 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
    */
   private static boolean harvestInteract(UseOnContext context, ServerLevel world, BlockState state, BlockPos pos, Player player) {
     BlockHitResult trace = new BlockHitResult(context.getClickLocation(), context.getClickedFace(), pos, false);
-    InteractionResult result = state.use(world, player, context.getHand(), trace);
-    return result.consumesAction();
+    ItemInteractionResult result = state.useItemOn(context.getItemInHand(), world, player, context.getHand(), trace);
+    return result == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION
+      ? state.useWithoutItem(world, player, trace).consumesAction()
+      : result.consumesAction();
   }
 
   /**
@@ -262,7 +265,7 @@ public enum HarvestModule implements ModifierModule, BlockInteractionModifierHoo
             player.sweepAttack();
           }
           if (broken) {
-            player.broadcastBreakEvent(context.getHand());
+            player.onEquippedItemBroken(tool.getItem(), source.getSlot(context.getHand()));
           }
         }
       }

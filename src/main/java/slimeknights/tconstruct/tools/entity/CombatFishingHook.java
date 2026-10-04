@@ -9,6 +9,7 @@ import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.network.syncher.EntityDataSerializers;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
@@ -238,8 +239,8 @@ public class CombatFishingHook extends FishingHook implements ProjectileWithKnoc
         float oldHealth = targetLiving != null ? targetLiving.getHealth() : 0;
         if (target.hurt(source, damage)) {
           if (!this.level().isClientSide && owner instanceof LivingEntity ownerLiving) {
-            if (targetLiving != null) {
-              EnchantmentHelper.doPostHurtEffects(targetLiving, owner);
+            if (targetLiving != null && level() instanceof ServerLevel server) {
+              EnchantmentHelper.doPostAttackEffects(server, targetLiving, source);
             }
 
             // run modifier hook
