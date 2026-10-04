@@ -1,5 +1,7 @@
 package slimeknights.tconstruct.library.tools.item.ranged;
 
+import net.minecraft.tags.EnchantmentTags;
+import net.minecraft.core.Holder;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
 import lombok.Getter;
@@ -113,8 +115,8 @@ public abstract class ModifiableLauncherItem extends ProjectileWeaponItem implem
   }
 
   @Override
-  public boolean canApplyAtEnchantingTable(ItemStack stack, Enchantment enchantment) {
-    return enchantment.isCurse() && super.canApplyAtEnchantingTable(stack, enchantment);
+  public boolean isPrimaryItemFor(ItemStack stack, Holder<Enchantment> enchantment) {
+    return enchantment.is(EnchantmentTags.CURSE) && super.isPrimaryItemFor(stack, enchantment);
   }
 
   @Override

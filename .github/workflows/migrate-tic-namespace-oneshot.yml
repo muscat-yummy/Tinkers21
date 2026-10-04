@@ -1,4 +1,4 @@
-name: Verify native tool data save and commit smelting inventory snapshots
+name: Port native curse eligibility and durability display predicates
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -137,6 +137,16 @@ jobs:
                   del targets[cls]
           if targets:
               raise RuntimeError('API classes not found: ' + ', '.join(targets))
+      - name: Audit enchantment hook signatures and registry boundaries
+        shell: python
+        run: |
+          import pathlib, re
+          pattern = re.compile(r'updateEnchantmentLevel|updateEnchantments|updateHarvestEnchantments|Single(?:Harvest)?Enchantment|EnchantmentModule.builder|EnchantmentModifierHook.addEnchantment')
+          for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
+              lines = path.read_text().splitlines()
+              for number, line in enumerate(lines, 1):
+                  if pattern.search(line):
+                      print(f'{path}:{number}: {line.strip()}')
       - name: Audit mutable tool data view boundaries
         run: python3 scripts/port/audit_tic_tool_data_views.py
   migrate:
