@@ -24,3 +24,11 @@ side="BOTH"
 
 [[accessTransformers]]
 file="META-INF/accesstransformer.cfg"
+
+# Scoped ingredient visibility is required when optional JEI integration is enabled.
+[[dependencies.mantle]]
+modId="jei"
+type="optional"
+versionRange="[19.51.0,20)"
+ordering="AFTER"
+side="CLIENT"

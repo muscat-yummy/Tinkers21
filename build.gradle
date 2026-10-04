@@ -26,8 +26,8 @@ repositories {
 dependencies {
     compileOnly 'org.projectlombok:lombok:1.18.48'
     annotationProcessor 'org.projectlombok:lombok:1.18.48'
-    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.27.0.340'
-    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.27.0.340'
+    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.51.0.420'
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.51.0.420'
     // Published native jars provide optional API types without requiring these mods at runtime.
     compileOnly('maven.modrinth:DMu0oBKf:IhkQpEve') { transitive = false } // Crafting Tweaks 21.1.11
     compileOnly('maven.modrinth:tIm2nV03:uNRARSH2') { transitive = false } // IE 12.4.2-194

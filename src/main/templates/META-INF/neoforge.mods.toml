@@ -33,3 +33,11 @@ side="BOTH"
 
 [[mixins]]
 config="tconstruct.mixins.json"
+
+# Scoped ingredient visibility is required when optional JEI integration is enabled.
+[[dependencies.tconstruct]]
+modId="jei"
+type="optional"
+versionRange="[19.51.0,20)"
+ordering="AFTER"
+side="CLIENT"

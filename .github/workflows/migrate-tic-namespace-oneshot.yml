@@ -1,4 +1,4 @@
-name: Verify native crafting display bootstrap and effect holder modules
+name: Port native custom explosion synchronization and verify JEI 19.51 API compatibility
 on:
   push:
     branches: [port/1.21.1-neoforge]
