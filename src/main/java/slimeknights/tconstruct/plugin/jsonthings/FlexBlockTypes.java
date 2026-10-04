@@ -1,5 +1,6 @@
 package slimeknights.tconstruct.plugin.jsonthings;
 
+import net.minecraft.core.registries.BuiltInRegistries;
 import dev.gigaherz.jsonthings.things.IFlexBlock;
 import dev.gigaherz.jsonthings.things.serializers.FlexBlockType;
 import dev.gigaherz.jsonthings.things.serializers.IBlockSerializer;
