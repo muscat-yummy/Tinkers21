@@ -184,7 +184,6 @@ public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsM
       return data.getCompound(groupKey);
     } else if (createTag) {
       nbt = new CompoundTag();
-      data.put(groupKey, nbt);
       return nbt;
     } else {
       // if setting a value to 0 and no tag, nothing to do
@@ -222,6 +221,7 @@ public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsM
     String name = stat.getName().toString();
     if (value != neutralValue) {
       nbt.putFloat(name, value);
+      tool.getPersistentData().put(groupKey, nbt);
       return true;
     }
     // remove the value
@@ -230,6 +230,7 @@ public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsM
       tool.getPersistentData().remove(groupKey);
       return false;
     }
+    tool.getPersistentData().put(groupKey, nbt);
     return true;
   }
 
@@ -259,6 +260,7 @@ public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsM
       Tag tag = stat.write(value);
       if (tag != null) {
         nbt.put(name, tag);
+        data.put(KEY_BONUS, nbt);
         return true;
       }
     }
@@ -268,6 +270,7 @@ public class StatOverrideModifier extends NoLevelsModifier implements ToolStatsM
       data.remove(StatOverrideModifier.KEY_BONUS);
       return false;
     }
+    data.put(KEY_BONUS, nbt);
     return true;
   }
 

@@ -1,7 +1,8 @@
 package slimeknights.tconstruct.library.tools.nbt;
 
 import lombok.AccessLevel;
-import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
+import lombok.Setter;
 import lombok.EqualsAndHashCode;
 import lombok.Getter;
 import net.minecraft.nbt.CompoundTag;
@@ -17,11 +18,18 @@ import java.util.function.BiFunction;
  * Note unlike other NBT classes, the data inside this one is mutable as most of it is directly used by the tools.
  */
 @EqualsAndHashCode
-@AllArgsConstructor(access = AccessLevel.PROTECTED)
+@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
 public class ModDataNBT implements IModDataView {
   /** Compound representing modifier data */
   @Getter(AccessLevel.PROTECTED)
   private final CompoundTag data;
+  @EqualsAndHashCode.Exclude
+  @Setter(AccessLevel.PACKAGE)
+  private Runnable onChanged = () -> {};
+
+  protected void changed() {
+    onChanged.run();
+  }
 
   /**
    * Creates a new mod data containing empty data
@@ -32,13 +40,13 @@ public class ModDataNBT implements IModDataView {
 
   @Override
   public <T> T get(ResourceLocation name, BiFunction<CompoundTag,String,T> function) {
-    return function.apply(data, name.toString());
+    return function.apply(data.copy(), name.toString());
   }
 
   @Override
   public ListTag getList(ResourceLocation name, int type) {
     // save generation of the extra lambda object
-    return data.getList(name.toString(), type);
+    return data.getList(name.toString(), type).copy();
   }
 
   @Override
@@ -57,7 +65,8 @@ public class ModDataNBT implements IModDataView {
    * @param nbt   NBT value
    */
   public void put(ResourceLocation name, Tag nbt) {
-    data.put(name.toString(), nbt);
+    data.put(name.toString(), nbt.copy());
+    changed();
   }
 
   /**
@@ -67,6 +76,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putInt(ResourceLocation name, int value) {
     data.putInt(name.toString(), value);
+    changed();
   }
 
   /**
@@ -76,6 +86,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putBoolean(ResourceLocation name, boolean value) {
     data.putBoolean(name.toString(), value);
+    changed();
   }
 
   /**
@@ -85,6 +96,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putFloat(ResourceLocation name, float value) {
     data.putFloat(name.toString(), value);
+    changed();
   }
 
   /**
@@ -94,6 +106,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void putString(ResourceLocation name, String value) {
     data.putString(name.toString(), value);
+    changed();
   }
 
   /**
@@ -102,6 +115,7 @@ public class ModDataNBT implements IModDataView {
    */
   public void remove(ResourceLocation name) {
     data.remove(name.toString());
+    changed();
   }
 
 
@@ -117,8 +131,10 @@ public class ModDataNBT implements IModDataView {
    * @param data  data
    */
   public void copyFrom(CompoundTag data) {
+    CompoundTag snapshot = data.copy();
     this.data.getAllKeys().clear();
-    this.data.merge(data);
+    this.data.merge(snapshot);
+    changed();
   }
 
   /**

@@ -4,7 +4,7 @@ import re
 import subprocess
 import shutil
 
-declaration = r'\b(?:ModDataNBT|ToolDataNBT|IModDataView|RestrictedCompoundTag)\b'
+declaration = r'\b(?:ModDataNBT|ToolDataNBT|IModDataView|RestrictedCompoundTag)\b|getPersistentData|getRestrictedNBT'
 if shutil.which('rg'):
     files = subprocess.run(['rg', '-l', declaration, 'src/main/java'],
                            check=False, capture_output=True, text=True)
@@ -21,6 +21,11 @@ for filename in sorted(filenames):
     path = pathlib.Path(filename)
     source = path.read_text()
     aliases = set(re.findall(r'\b(?:ModDataNBT|ToolDataNBT|IModDataView|RestrictedCompoundTag)\s+(\w+)\b', source))
+    direct = re.compile(r'get(?:PersistentData|RestrictedNBT)\s*\(\s*\)\s*\.\s*(?:getCompound|getList|get)\s*\(')
+    for match in direct.finditer(source):
+        number = source.count('\n', 0, match.start()) + 1
+        total += 1
+        print(f'Direct tool data view: {path}:{number}: {source[match.start():source.find(chr(10), match.start())].strip()}')
     if not aliases:
         continue
     receiver = r'(?:' + '|'.join(re.escape(alias) for alias in sorted(aliases)) + r')'

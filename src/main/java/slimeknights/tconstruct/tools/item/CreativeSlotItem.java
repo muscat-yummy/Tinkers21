@@ -116,7 +116,6 @@ public class CreativeSlotItem extends Item {
             slots = persistentData.getCompound(CreativeSlotModifier.KEY_SLOTS);
           } else {
             slots = new CompoundTag();
-            persistentData.put(CreativeSlotModifier.KEY_SLOTS, slots);
           }
 
           // add the slot
@@ -127,6 +126,8 @@ public class CreativeSlotItem extends Item {
           } else {
             slots.putInt(name, updated);
           }
+
+          persistentData.put(CreativeSlotModifier.KEY_SLOTS, slots);
 
           // if no slot remain in the creative modifier, remove it
           ModifierId creative = TinkerModifiers.creativeSlot.getId();

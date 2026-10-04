@@ -89,9 +89,13 @@ public class ToggleInteractionWorktableRecipe extends AbstractWorktableRecipe {
     if (removed) {
       if (leftList.isEmpty()) {
         persistentData.remove(InteractionSource.LEFT_CLICK.getKey());
+      } else {
+        persistentData.put(InteractionSource.LEFT_CLICK.getKey(), leftList);
       }
       if (rightList.isEmpty()) {
         persistentData.remove(InteractionSource.RIGHT_CLICK.getKey());
+      } else {
+        persistentData.put(InteractionSource.RIGHT_CLICK.getKey(), rightList);
       }
     } else {
       // did not remove? means we want to add to a list

@@ -173,6 +173,7 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
               compound.getAllKeys().clear();
               writeStack(stack, slot, compound);
             }
+            modData.put(key, list);
             return;
           // try to keep the stacks in order by inserting after the last slot smaller than the target
           } else if (listSlot < slot) {
@@ -184,7 +185,6 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
         return;
       } else {
         list = new ListTag();
-        modData.put(key, list);
       }
 
       // list did not contain the slot, so add it
@@ -196,6 +196,7 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
         } else {
           list.add(insertIndex, compound);
         }
+        modData.put(key, list);
       }
     }
   }
@@ -208,7 +209,7 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
   public Component validate(IToolStackView tool, ModifierEntry modifier) {
     // don't validate if the module is not running
     if (condition.tool().matches(tool) && validationLevel.test(modifier.getLevel())) {
-      IModDataView persistentData = tool.getPersistentData();
+      ModDataNBT persistentData = tool.getPersistentData();
       ResourceLocation key = getKey(modifier.getModifier());
       int maxSlots = getSlots(tool, modifier);
       if (persistentData.contains(key, Tag.TAG_LIST)) {
@@ -235,6 +236,7 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
               }
             }
           }
+          persistentData.put(key, listNBT);
         }
       }
     }

@@ -129,6 +129,8 @@ public class ModifierSetWorktableRecipe extends AbstractWorktableRecipe {
     // if removing and removed the last entry, remove the list
     if (!addToSet && tagList.isEmpty()) {
       persistentData.remove(dataKey);
+    } else if (!addToSet && found) {
+      persistentData.put(dataKey, tagList);
     }
     // add to list if not in list
     if (!found && addToSet) {
