@@ -1,4 +1,4 @@
-name: Port native material crafting recipes and validate ingredient identity
+name: Verify material crafting JSON wire and repeated ingredient identity
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -439,7 +439,7 @@ jobs:
           ./gradlew :compileLeafPortChecks :runLootConditionSmoke :runTagConditionSmoke
           :runFluidContentsSmoke :runInstrumentIngredientSmoke :runLoadableIngredientScopeSmoke
           :runBonusFormulaSmoke :runForwardingCapabilitySmoke :runScalingChestSmoke
-          :runInventoryPacketSmoke :runMaterialItemDataSmoke :runCraftingGridMappingSmoke :runRecipeInputSmoke :runPotionContentsSmoke
+          :runInventoryPacketSmoke :runMaterialItemDataSmoke :runMaterialRecipePatternSmoke :runCraftingGridMappingSmoke :runRecipeInputSmoke :runPotionContentsSmoke
           :runCriticalHitSmoke :runRecipeWidgetSmoke :runAttributeOperationSmoke :runTintedVertexSmoke :runEffectFoundationSmoke :runToolTooltipPolicySmoke :runFirstMatchingRecipeSmoke :runHarvestTierSmoke :runDamageStageSmoke :runArmorRegistryCheck --continue
           --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
