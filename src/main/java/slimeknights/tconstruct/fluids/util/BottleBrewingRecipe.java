@@ -10,17 +10,19 @@ import net.neoforged.neoforge.common.brewing.BrewingRecipe;
 public class BottleBrewingRecipe extends BrewingRecipe {
   private final Item from;
   private final Item to;
-  public BottleBrewingRecipe(Ingredient input, Item from, Item to, ItemStack output) {
+  private final PotionBrewing.Builder brewing;
+  public BottleBrewingRecipe(Ingredient input, Item from, Item to, ItemStack output, PotionBrewing.Builder brewing) {
     super(input, Ingredient.EMPTY, output);
     this.from = from;
     this.to = to;
+    this.brewing = java.util.Objects.requireNonNull(brewing);
   }
 
   @Override
   public boolean isIngredient(ItemStack stack) {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient.test(stack);
+    for (PotionBrewing.Mix<Item> recipe : brewing.containerMixes) {
+      if (recipe.from().value() == from && recipe.to().value() == to) {
+        return recipe.ingredient().test(stack);
       }
     }
     return false;
@@ -28,9 +30,9 @@ public class BottleBrewingRecipe extends BrewingRecipe {
 
   @Override
   public Ingredient getIngredient() {
-    for (PotionBrewing.Mix<Item> recipe : PotionBrewing.CONTAINER_MIXES) {
-      if (recipe.from.get() == from && recipe.to.get() == to) {
-        return recipe.ingredient;
+    for (PotionBrewing.Mix<Item> recipe : brewing.containerMixes) {
+      if (recipe.from().value() == from && recipe.to().value() == to) {
+        return recipe.ingredient();
       }
     }
     return Ingredient.EMPTY;
