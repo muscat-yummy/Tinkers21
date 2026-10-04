@@ -9,6 +9,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.Style;
 import net.minecraft.network.chat.TextColor;
 import net.minecraft.util.Mth;
+import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.player.Player;
@@ -168,7 +169,7 @@ public class TooltipBuilder {
     float damage = (float) attribute.getDefaultValue();
     Player player = Minecraft.getInstance().player;
     if (player != null) {
-      AttributeInstance instance = player.getAttribute(attribute);
+      AttributeInstance instance = player.getAttribute(BuiltInRegistries.ATTRIBUTE.wrapAsHolder(attribute));
       if (instance != null) {
         damage = (float) instance.getBaseValue();
       }

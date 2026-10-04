@@ -3,6 +3,10 @@ package slimeknights.tconstruct.library.tools.helper;
 import com.google.common.collect.Multimap;
 import net.minecraft.ChatFormatting;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.component.CustomData;
+import net.minecraft.world.item.enchantment.Enchantment;
+import slimeknights.tconstruct.library.utils.AttributeIdUtil;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -69,9 +73,9 @@ public class TooltipUtil {
   /** Function to show all attributes in the tooltip */
   public static final BiPredicate<Attribute, Operation> SHOW_ALL_ATTRIBUTES = (att, op) -> true;
   /** Function to show all attributes in the tooltip */
-  public static final BiPredicate<Attribute, Operation> SHOW_MELEE_ATTRIBUTES = (att, op) -> op != Operation.ADD_VALUE || (att != Attributes.ATTACK_DAMAGE && att != Attributes.ATTACK_SPEED && att != Attributes.ARMOR && att != Attributes.ARMOR_TOUGHNESS && att != Attributes.KNOCKBACK_RESISTANCE);
+  public static final BiPredicate<Attribute, Operation> SHOW_MELEE_ATTRIBUTES = (att, op) -> op != Operation.ADD_VALUE || (att != Attributes.ATTACK_DAMAGE.value() && att != Attributes.ATTACK_SPEED.value() && att != Attributes.ARMOR.value() && att != Attributes.ARMOR_TOUGHNESS.value() && att != Attributes.KNOCKBACK_RESISTANCE.value());
   /** Function to show all attributes in the tooltip */
-  public static final BiPredicate<Attribute, Operation> SHOW_ARMOR_ATTRIBUTES = (att, op) -> op != Operation.ADD_VALUE || (att != Attributes.ARMOR && att != Attributes.ARMOR_TOUGHNESS && att != Attributes.KNOCKBACK_RESISTANCE);
+  public static final BiPredicate<Attribute, Operation> SHOW_ARMOR_ATTRIBUTES = (att, op) -> op != Operation.ADD_VALUE || (att != Attributes.ARMOR.value() && att != Attributes.ARMOR_TOUGHNESS.value() && att != Attributes.KNOCKBACK_RESISTANCE.value());
 
   /** Flags used when not holding control or shift */
   // Legacy HideFlags NBT bits, retained for callers importing old stacks.
@@ -98,26 +102,30 @@ public class TooltipUtil {
    * @return  True if marked display
    */
   public static boolean isDisplay(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     return nbt != null && nbt.getBoolean(KEY_DISPLAY);
   }
 
   /** Sets the tool name in a way that will not be italic */
   public static void setDisplayName(ItemStack tool, String name) {
-    if (name.isEmpty()) {
-      CompoundTag tag = tool.getTag();
-      if (tag != null) {
+    if (tool.isEmpty()) {
+      return;
+    }
+    CustomData.update(DataComponents.CUSTOM_DATA, tool, tag -> {
+      if (name.isEmpty()) {
         tag.remove(KEY_NAME);
+      } else {
+        tag.putString(KEY_NAME, name);
       }
-    } else {
-      tool.getOrCreateTag().putString(KEY_NAME, name);
-      tool.resetHoverName();
+    });
+    if (!name.isEmpty()) {
+      tool.remove(DataComponents.CUSTOM_NAME);
     }
   }
 
   /** Gets the display name from the given tool */
   public static String getDisplayName(ItemStack tool) {
-    CompoundTag tag = tool.getTag();
+    CompoundTag tag = tool.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     if (tag != null) {
       return tag.getString(KEY_NAME);
     }
@@ -171,7 +179,7 @@ public class TooltipUtil {
     } else if (!ToolStack.isInitialized(stack)) {
       tooltip.add(UNINITIALIZED);
       if (definition.hasMaterials()) {
-        CompoundTag nbt = stack.getTag();
+        CompoundTag nbt = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
         if (nbt == null || !nbt.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST)) {
           tooltip.add(RANDOM_MATERIALS);
         }
@@ -217,15 +225,8 @@ public class TooltipUtil {
       }
     }
     if (!stack.isEmpty()) {
-      CompoundTag tag = stack.getTag();
-      if (tag != null && tag.contains("Enchantments", Tag.TAG_LIST)) {
-        ListTag enchantments = tag.getList("Enchantments", Tag.TAG_COMPOUND);
-        for (int i = 0; i < enchantments.size(); ++i) {
-          CompoundTag enchantmentTag = enchantments.getCompound(i);
-          // TODO: is this the best place for this, or should we let vanilla run?
-          BuiltInRegistries.ENCHANTMENT.getOptional(ResourceLocation.tryParse(enchantmentTag.getString("id")))
-                                       .ifPresent(enchantment -> tooltips.add(enchantment.getFullname(enchantmentTag.getInt("lvl"))));
-        }
+      for (var entry : stack.getEnchantments().entrySet()) {
+        tooltips.add(Enchantment.getFullname(entry.getKey(), entry.getIntValue()));
       }
     }
   }
@@ -239,7 +240,7 @@ public class TooltipUtil {
    */
   public static void getDefaultInfo(ItemStack stack, IToolStackView tool, @Nullable Player player, List<Component> tooltips, TooltipFlag flag) {
     // shows as broken when broken, hold shift for proper durability
-    if (tool.getItem().canBeDepleted() && !tool.isUnbreakable() && tool.hasTag(TinkerTags.Items.DURABILITY)) {
+    if (tool.getItem().isDamageable(stack) && !tool.isUnbreakable() && tool.hasTag(TinkerTags.Items.DURABILITY)) {
       tooltips.add(TooltipBuilder.formatDurability(tool.getCurrentDurability(), tool.getStats().getInt(ToolStats.DURABILITY), true));
     }
     // modifier tooltip
@@ -267,7 +268,7 @@ public class TooltipUtil {
     boolean allowMelee = !EntityInteractionModifierHook.meleeDisabled(tool);
     boolean meleePrimary = allowMelee && tool.hasTag(TinkerTags.Items.MELEE_PRIMARY);
     if (meleePrimary) {
-      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE);
+      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE.value());
       builder.add(ToolStats.ATTACK_SPEED);
     }
     if (tool.hasTag(TinkerTags.Items.RANGED)) {
@@ -279,7 +280,7 @@ public class TooltipUtil {
       builder.add(ToolStats.ACCURACY);
     }
     if (allowMelee && !meleePrimary && tool.hasTag(TinkerTags.Items.MELEE_WEAPON)) {
-      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE);
+      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE.value());
       builder.add(ToolStats.ATTACK_SPEED);
     }
     if (tool.hasTag(TinkerTags.Items.HARVEST)) {
@@ -325,7 +326,7 @@ public class TooltipUtil {
       builder.addOptional(ToolStats.KNOCKBACK_RESISTANCE, 10f);
     }
     if (tool.hasTag(TinkerTags.Items.UNARMED)) {
-      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE);
+      builder.addWithAttribute(ToolStats.ATTACK_DAMAGE, Attributes.ATTACK_DAMAGE.value());
     }
 
     builder.addAllFreeSlots();
@@ -431,12 +432,12 @@ public class TooltipUtil {
         for (Entry<Attribute, AttributeModifier> entry : modifiers.entries()) {
           Attribute attribute = entry.getKey();
           AttributeModifier modifier = entry.getValue();
-          Operation operation = modifier.getOperation();
+          Operation operation = modifier.operation();
           // allow suppressing specific attributes
           if (!showAttribute.test(attribute, operation)) {
             continue;
           }
-          addAttribute(attribute, operation, modifier.getAmount(), modifier.getId(), player, tooltip);
+          addNativeAttribute(attribute, operation, modifier.amount(), modifier.id(), player, tooltip);
         }
       }
     }
@@ -452,13 +453,21 @@ public class TooltipUtil {
    * @param tooltip    Tooltip list
    */
   public static void addAttribute(Attribute attribute, Operation operation, double amount, @Nullable UUID uuid, @Nullable Player player, List<Component> tooltip) {
+    ResourceLocation id = uuid == null ? null :
+      uuid.equals(UUID.fromString("cb3f55d3-645c-4f38-a497-9c13a33db5cf")) ? Item.BASE_ATTACK_DAMAGE_ID :
+      uuid.equals(UUID.fromString("fa233e1c-4180-4865-b01b-bcce9785aca3")) ? Item.BASE_ATTACK_SPEED_ID : AttributeIdUtil.fromUuid(uuid);
+    addNativeAttribute(attribute, operation, amount, id, player, tooltip);
+  }
+
+  /** Native resource IDs retain vanilla base-damage/base-speed tooltip handling. */
+  public static void addNativeAttribute(Attribute attribute, Operation operation, double amount, @Nullable ResourceLocation id, @Nullable Player player, List<Component> tooltip) {
     // find value
     boolean showEquals = false;
     if (player != null) {
-      if (uuid == Item.BASE_ATTACK_DAMAGE_UUID) {
+      if (Item.BASE_ATTACK_DAMAGE_ID.equals(id)) {
         amount += player.getAttributeBaseValue(Attributes.ATTACK_DAMAGE);
         showEquals = true;
-      } else if (uuid == Item.BASE_ATTACK_SPEED_UUID) {
+      } else if (Item.BASE_ATTACK_SPEED_ID.equals(id)) {
         amount += player.getAttributeBaseValue(Attributes.ATTACK_SPEED);
         showEquals = true;
       }
@@ -467,7 +476,7 @@ public class TooltipUtil {
     double displayValue = amount;
     if (operation == Operation.ADD_VALUE) {
       // vanilla multiplies knockback resist by 10 for some odd reason
-      if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE)) {
+      if (attribute.equals(Attributes.KNOCKBACK_RESISTANCE.value())) {
         displayValue *= 10;
       }
     } else {
@@ -478,14 +487,14 @@ public class TooltipUtil {
     Component name = Component.translatable(attribute.getDescriptionId());
     if (showEquals) {
       tooltip.add(Component.literal(" ")
-                           .append(Component.translatable("attribute.modifier.equals." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+                           .append(Component.translatable("attribute.modifier.equals." + operation.id(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
                            .withStyle(ChatFormatting.DARK_GREEN));
     } else if (amount > 0.0D) {
-      tooltip.add((Component.translatable("attribute.modifier.plus." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+      tooltip.add((Component.translatable("attribute.modifier.plus." + operation.id(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
                     .withStyle(ChatFormatting.BLUE));
     } else if (amount < 0.0D) {
       displayValue *= -1;
-      tooltip.add((Component.translatable("attribute.modifier.take." + operation.toValue(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
+      tooltip.add((Component.translatable("attribute.modifier.take." + operation.id(), ItemStack.ATTRIBUTE_MODIFIER_FORMAT.format(displayValue), name))
                     .withStyle(ChatFormatting.RED));
     }
   }
