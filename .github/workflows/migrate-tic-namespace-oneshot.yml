@@ -1,4 +1,4 @@
-name: Port component-aware layouts and native armor stand drops
+name: Port native stand creation and remaining recipe signatures
 on:
   push:
     branches: [port/1.21.1-neoforge]

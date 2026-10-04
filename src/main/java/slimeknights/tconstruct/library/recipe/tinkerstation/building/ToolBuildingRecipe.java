@@ -341,7 +341,7 @@ public class ToolBuildingRecipe implements ITinkerStationRecipe {
 
   @Deprecated
   @Override
-  public ItemStack assemble(ITinkerStationContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ITinkerStationContainer inv, net.minecraft.core.HolderLookup.Provider access) {
     return getValidatedResult(inv, access).getResult().getStack();
   }
 }
