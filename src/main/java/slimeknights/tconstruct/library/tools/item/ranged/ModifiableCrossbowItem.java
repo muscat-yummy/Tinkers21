@@ -33,6 +33,7 @@ import net.neoforged.neoforge.common.ItemAbilities;
 import org.joml.Quaternionf;
 import org.joml.Vector3f;
 import slimeknights.mantle.client.TooltipKey;
+import slimeknights.mantle.client.SafeClientAccess;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.common.TinkerTags;
 import slimeknights.tconstruct.library.client.item.ModifiableCrossbowClientExtension;
@@ -86,6 +87,32 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
 
   public ModifiableCrossbowItem(Properties properties, ToolDefinition toolDefinition) {
     this(properties, toolDefinition, ARROW_OR_FIREWORK);
+  }
+
+  /** Native targeting adapter, including the vertical-target fallback used by 1.21 crossbows. */
+  @Override
+  protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index,
+      float velocity, float inaccuracy, float angle, @Nullable LivingEntity target) {
+    Vector3f direction;
+    if (target != null) {
+      double dx = target.getX() - shooter.getX();
+      double dz = target.getZ() - shooter.getZ();
+      double dy = target.getY(1.0 / 3.0) - projectile.getY() + Math.sqrt(dx * dx + dz * dz) * 0.2F;
+      Vector3f aim = new Vec3(dx, dy, dz).toVector3f().normalize();
+      Vector3f side = new Vector3f(aim).cross(new Vector3f(0, 1, 0));
+      if (side.lengthSquared() <= 1.0E-7D) {
+        side = new Vector3f(aim).cross(shooter.getUpVector(1).toVector3f());
+      }
+      Vector3f up = new Vector3f(aim).rotateAxis((float) (Math.PI / 2), side.x, side.y, side.z);
+      direction = new Vector3f(aim).rotateAxis(angle * ((float) Math.PI / 180), up.x, up.y, up.z);
+    } else {
+      Vec3 up = shooter.getUpVector(1);
+      direction = shooter.getViewVector(1).toVector3f()
+        .rotate(new Quaternionf().setAngleAxis(angle * Math.PI / 180, up.x, up.y, up.z));
+    }
+    projectile.shoot(direction.x, direction.y, direction.z, velocity, inaccuracy);
+    shooter.level().playSound(null, shooter.getX(), shooter.getY(), shooter.getZ(),
+      SoundEvents.CROSSBOW_SHOOT, shooter.getSoundSource(), 1, getRandomShotPitch(angle, shooter.getRandom()));
   }
 
   /* Properties */
@@ -154,7 +181,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
         GeneralInteractionModifierHook.startDrawing(tool, player, 1);
         if (!ammo.isEmpty()) {
           if (storeDrawingItem) {
-            persistentData.put(KEY_DRAWBACK_AMMO, ammo.save(new CompoundTag()));
+            persistentData.put(KEY_DRAWBACK_AMMO, ammo.save(level.registryAccess()));
           } else {
             // boolean is enough to get detected by the property override, but won't bother the model
             persistentData.putBoolean(KEY_DRAWBACK_AMMO, true);
@@ -226,7 +253,7 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
 
       // the ammo has a stack size that may be greater than 1 (meaning multishot)
       // when creating the ammo stacks, we use split, so its getting smaller each time
-      ItemStack ammo = ItemStack.of(heldAmmo);
+      ItemStack ammo = ItemStack.parseOptional(level.registryAccess(), heldAmmo);
       float startAngle = getAngleStart(ammo.getCount());
       int primaryIndex = ammo.getCount() / 2;
       for (int arrowIndex = 0; arrowIndex < ammo.getCount(); arrowIndex++) {
@@ -241,11 +268,11 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
           damage += 3;
         } else {
           ArrowItem arrowItem = ammo.getItem() instanceof ArrowItem a ? a : (ArrowItem)Items.ARROW;
-          arrow = arrowItem.createArrow(level, ammo, living);
+          arrow = arrowItem.createArrow(level, ammo, living, living.getItemInHand(hand));
           projectile = arrow;
           arrow.setCritArrow(true);
           arrow.setSoundEvent(SoundEvents.CROSSBOW_HIT);
-          arrow.setShotFromCrossbow(true);
+          // Native arrows retain the actual firing weapon; the crossbow mixin recognizes TiC launchers.
           speed = 3f;
           damage += 1;
 
@@ -335,8 +362,9 @@ public class ModifiableCrossbowItem extends ModifiableLauncherItem {
 
     // if we have ammo, render that in the tooltip
     CompoundTag heldAmmo = tool.getPersistentData().getCompound(KEY_CROSSBOW_AMMO);
-    if (!heldAmmo.isEmpty()) {
-      ItemStack heldStack = ItemStack.of(heldAmmo);
+    Level tooltipLevel = player != null ? player.level() : SafeClientAccess.getLevel();
+    if (!heldAmmo.isEmpty() && tooltipLevel != null) {
+      ItemStack heldStack = ItemStack.parseOptional(tooltipLevel.registryAccess(), heldAmmo);
       if (!heldStack.isEmpty()) {
         // basic info: item and count
         MutableComponent component = Component.translatable(PROJECTILE_KEY);

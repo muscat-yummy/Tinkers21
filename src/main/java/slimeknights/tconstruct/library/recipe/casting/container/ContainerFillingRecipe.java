@@ -95,7 +95,7 @@ public class ContainerFillingRecipe implements ICastingRecipe, IMultiRecipe<IDis
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, net.minecraft.core.HolderLookup.Provider access) {
     ItemStack stack = inv.getStack().copy();
     var handler = stack.getCapability(Capabilities.FluidHandler.ITEM);
     if (handler == null) {

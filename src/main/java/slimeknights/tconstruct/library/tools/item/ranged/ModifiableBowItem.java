@@ -12,6 +12,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.AbstractArrow;
+import net.minecraft.world.entity.projectile.Projectile;
 import net.minecraft.world.item.ArrowItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -91,6 +92,13 @@ public class ModifiableBowItem extends ModifiableLauncherItem {
     return ModifierUtil.blockWhileCharging(ToolStack.from(stack), UseAnim.BOW);
   }
 
+
+  /** Native projectile adapter; TiC's release path retains its own modifier and multishot hooks. */
+  @Override
+  protected void shootProjectile(LivingEntity shooter, Projectile projectile, int index,
+      float velocity, float inaccuracy, float angle, LivingEntity target) {
+    projectile.shootFromRotation(shooter, shooter.getXRot(), shooter.getYRot() + angle, 0, velocity, inaccuracy);
+  }
 
   /* Arrow launching */
 

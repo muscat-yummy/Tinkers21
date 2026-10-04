@@ -26,7 +26,7 @@ public class RetexturedCastingRecipe extends ItemCastingRecipe {
   }
 
   @Override
-  public ItemStack assemble(ICastingContainer inv, RegistryAccess access) {
+  public ItemStack assemble(ICastingContainer inv, net.minecraft.core.HolderLookup.Provider access) {
     ItemStack result = getResultItem(access).copy();
     if (inv.getStack().getItem() instanceof BlockItem blockItem ) {
       return RetexturedHelper.setTexture(result, blockItem.getBlock());

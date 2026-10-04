@@ -1,4 +1,4 @@
-name: Port launcher snapshots and native NBT readers
+name: Port crossbow firing and casting assembly contexts
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -263,6 +263,7 @@ jobs:
       - uses: actions/checkout@v4
         with:
           ref: port/1.21.1-neoforge
+          fetch-depth: 2
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -607,9 +608,23 @@ jobs:
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile Mantle
         run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Select independent production checks affected by this source batch
+        id: port_checks
+        shell: python
+        run: |
+          import os, pathlib, re, subprocess
+          workflow = pathlib.Path('.github/workflows/migrate-tic-namespace-oneshot.yml').read_text()
+          checked_sources = set(re.findall(r"'([^']+\.java)'", workflow))
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', os.environ['GITHUB_SHA'] + '^', 'HEAD'], text=True).splitlines())
+          affected = any(path in checked_sources or path.startswith(('mantle-port/', 'src/portTest/', 'scripts/port/', 'gradle/')) or path in ('build.gradle', 'settings.gradle', 'gradle.properties') for path in changed)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('changed=' + str(affected).lower() + '\n')
+          print('Independent checks affected:', affected)
       - name: Verify typed resource ID behavior independently of the remaining TiC port
+        if: steps.port_checks.outputs.changed == 'true'
         run: ./gradlew :runResourceIdSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile and verify production port checks with independent task failures
+        if: steps.port_checks.outputs.changed == 'true'
         continue-on-error: true
         run: >-
           ./gradlew :compileLeafPortChecks :runLootConditionSmoke :runTagConditionSmoke

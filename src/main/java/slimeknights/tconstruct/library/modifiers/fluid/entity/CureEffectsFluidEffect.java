@@ -6,6 +6,7 @@ import net.minecraft.world.level.ItemLike;
 import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler.FluidAction;
 import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
+import slimeknights.tconstruct.library.utils.EffectCureUtil;
 import slimeknights.mantle.data.loadable.record.RecordLoadable;
 import slimeknights.tconstruct.library.modifiers.fluid.EffectLevel;
 import slimeknights.tconstruct.library.modifiers.fluid.FluidEffect;
@@ -30,9 +31,9 @@ public record CureEffectsFluidEffect(ItemStack stack) implements FluidEffect<Flu
       // when simulating, search the effects list directly for curative effects
       // may still be wrong if the event cancels things though, no way to safely simulate it
       if (action.simulate()) {
-        return target.getActiveEffects().stream().anyMatch(effect -> effect.isCurativeItem(stack)) ? 1 : 0;
+        return target.getActiveEffects().stream().anyMatch(effect -> !stack.isEmpty() && effect.getCures().contains(EffectCureUtil.forItem(stack.getItem()))) ? 1 : 0;
       }
-      return target.curePotionEffects(stack) ? 1 : 0;
+      return EffectCureUtil.cure(target, stack) ? 1 : 0;
     }
     return 0;
   }
