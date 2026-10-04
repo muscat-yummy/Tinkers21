@@ -1,4 +1,4 @@
-name: Port native singleton crafting display extensions and verify holder lifecycle
+name: Port item tooltip and armor hooks; inspect native explosion and published JEI APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,6 +33,10 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
+              'net.minecraft.world.level.Explosion': ['public ', 'private ', 'protected '],
+              'net.minecraft.network.protocol.game.ClientboundExplodePacket': ['public '],
+              'net.minecraft.sounds.SoundEvents': ['GENERIC_EXPLODE'],
+              'net.minecraft.world.entity.Entity': ['ignoreExplosion'],
               'net.minecraft.client.gui.screens.inventory.InventoryScreen': None,
               'net.minecraft.client.gui.screens.inventory.SmithingScreen': None,
               'net.minecraft.client.gui.components.EditBox': None,
@@ -196,6 +200,15 @@ jobs:
                   del targets[cls]
           if targets:
               raise RuntimeError('API classes not found: ' + ', '.join(targets))
+      - name: Inspect published JEI 1.21.1 API versions
+        shell: python
+        run: |
+          import urllib.request, xml.etree.ElementTree as ET
+          url = 'https://maven.blamejared.com/mezz/jei/jei-1.21.1-common-api/maven-metadata.xml'
+          with urllib.request.urlopen(url, timeout=30) as response:
+              metadata = ET.fromstring(response.read())
+          versions = [element.text for element in metadata.findall('./versioning/versions/version')]
+          print('Published JEI versions with scoped visibility and widget APIs:', [version for version in versions if version.startswith('19.51.') or version.startswith('19.52.')])
       - name: Audit enchantment hook signatures and registry boundaries
         shell: python
         run: |

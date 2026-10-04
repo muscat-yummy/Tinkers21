@@ -23,7 +23,7 @@ public class ToolPartBlockItem extends MaterialBlockItem implements IToolPart {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     ToolPartItem.appendHoverText(this, stack, tooltip, flag);
   }
 }

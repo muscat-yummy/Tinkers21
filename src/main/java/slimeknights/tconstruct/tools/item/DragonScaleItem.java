@@ -1,6 +1,7 @@
 package slimeknights.tconstruct.tools.item;
 
 import net.minecraft.tags.DamageTypeTags;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.damagesource.DamageSource;
 import slimeknights.mantle.item.TooltipItem;
 
@@ -11,7 +12,7 @@ public class DragonScaleItem extends TooltipItem {
   }
 
   @Override
-  public boolean canBeHurtBy(DamageSource damageSource) {
+  public boolean canBeHurtBy(ItemStack stack, DamageSource damageSource) {
     return !damageSource.is(DamageTypeTags.IS_EXPLOSION);
   }
 }

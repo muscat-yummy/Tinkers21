@@ -24,7 +24,7 @@ public class PartCastItem extends Item {
   }
 
   @Override
-  public void appendHoverText(ItemStack stack, @Nullable Level level, List<Component> tooltip, TooltipFlag flag) {
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
     int cost = MaterialCastingLookup.getItemCost(part.get());
     if (cost > 0) {
       tooltip.add(Component.translatable(COST_KEY, cost).withStyle(ChatFormatting.GRAY));
