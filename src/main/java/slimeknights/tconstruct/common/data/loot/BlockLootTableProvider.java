@@ -333,7 +333,7 @@ public class BlockLootTableProvider extends BlockLootSubProvider {
     return registries.lookupOrThrow(Registries.ENCHANTMENT).getOrThrow(Enchantments.FORTUNE);
   }
 
-  private static final LootItemCondition.Builder SHEARS = CanItemPerformAbility.canToolPerformAction(ItemAbilities.SHEARS_DIG);
+  private static final LootItemCondition.Builder SHEARS = CanItemPerformAbility.canItemPerformAbility(ItemAbilities.SHEARS_DIG);
   private final LootItemCondition.Builder SILK_TOUCH_OR_SHEARS = SHEARS.or(hasSilkTouch());
 
   protected static LootTable.Builder onlyShears(ItemLike item) {

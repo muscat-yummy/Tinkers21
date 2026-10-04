@@ -199,7 +199,7 @@ public class ItemTagProvider extends ItemTagsProvider {
     // glass
     copy(Tags.Blocks.GLASS_BLOCKS, Tags.Items.GLASS_BLOCKS);
     copy(Tags.Blocks.GLASS_PANES, Tags.Items.GLASS_PANES);
-    copy(Tags.Blocks.GLASS_SILICA, Tags.Items.GLASS_SILICA);
+    copy(Tags.Blocks.GLASS_BLOCKS_CHEAP, Tags.Items.GLASS_BLOCKS_CHEAP);
     copy(Tags.Blocks.GLASS_BLOCKS_TINTED, Tags.Items.GLASS_BLOCKS_TINTED);
     copy(TinkerTags.Blocks.GLASS_PANES_SILICA, TinkerTags.Items.GLASS_PANES_SILICA);
     copy(Tags.Blocks.GLASS_BLOCKS_COLORLESS, Tags.Items.GLASS_BLOCKS_COLORLESS);

@@ -111,7 +111,7 @@ public class BlockTagProvider extends BlockTagsProvider {
 
     // impermeable for all glass
     IntrinsicTagAppender<Block> impermeable = tag(BlockTags.IMPERMEABLE);
-    IntrinsicTagAppender<Block> silicaGlass = tag(Tags.Blocks.GLASS_SILICA);
+    IntrinsicTagAppender<Block> silicaGlass = tag(Tags.Blocks.GLASS_BLOCKS_CHEAP);
     impermeable.add(TinkerCommons.clearGlass.get(), TinkerCommons.soulGlass.get(), TinkerCommons.clearTintedGlass.get(),
                     TinkerSmeltery.searedGlass.get(), TinkerSmeltery.searedSoulGlass.get(), TinkerSmeltery.searedTintedGlass.get(),
                     TinkerSmeltery.scorchedGlass.get(), TinkerSmeltery.scorchedSoulGlass.get(), TinkerSmeltery.scorchedTintedGlass.get());
@@ -459,13 +459,9 @@ public class BlockTagProvider extends BlockTagsProvider {
       for (FoliageType grass : FoliageType.values()) {
         Tiers dirtTier = dirt.getHarvestTier();
         Tiers grassTier = grass.getHarvestTier();
-        // cannot use tier sorting registry as it's not init during datagen, stuck comparing levels and falling back to ordinal for gold
-        Tiers tier;
-        if (dirtTier.getLevel() == grassTier.getLevel()) {
-          tier = dirtTier.ordinal() > grassTier.ordinal() ? dirtTier : grassTier;
-        } else {
-          tier = dirtTier.getLevel() > grassTier.getLevel() ? dirtTier : grassTier;
-        }
+        // The owned tier registry initializes vanilla ordering independently of mod setup, including gold below stone.
+        var tiers = slimeknights.tconstruct.library.utils.HarvestTierRegistry.getSortedTiers();
+        Tiers tier = tiers.indexOf(dirtTier) > tiers.indexOf(grassTier) ? dirtTier : grassTier;
         this.tag(Objects.requireNonNull(tier.getTag())).add(TinkerWorld.slimeGrass.get(dirt).get(grass));
       }
     }
