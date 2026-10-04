@@ -71,7 +71,7 @@ public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation pat
         texture = ArmorTexture.EMPTY;
         if (pattern != null && material != null) {
           ResourceLocation patternAsset = pattern.assetId();
-          texture = TrimArmorTexture.create(patternAsset.withPath("trims/models/armor/" + patternAsset.getPath() + (textureType == TextureType.LEGGINGS ? "_leggings" : "")), material);
+          texture = TrimArmorTexture.create(patternAsset.withPath("trims/models/armor/" + patternAsset.getPath() + (textureType == TextureType.LEGGINGS ? "_leggings" : "")), material, pattern.decal());
         }
         cache.put(key, texture);
         return texture;
@@ -90,6 +90,11 @@ public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation pat
   public static class TrimArmorTexture implements ArmorTexture {
     private static TextureAtlas armorTrimAtlas = null;
     private final TextureAtlasSprite trimSprite;
+    private final boolean decal;
+
+    public TrimArmorTexture(TextureAtlasSprite trimSprite) {
+      this(trimSprite, false);
+    }
 
     /** Gets the texture atlas for trim */
     private static TextureAtlas getTrimAtlas() {
@@ -100,12 +105,12 @@ public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation pat
     }
 
     /** Creates the trim texture for the given root texture and material */
-    private static ArmorTexture create(ResourceLocation root, TrimMaterial material) {
+    private static ArmorTexture create(ResourceLocation root, TrimMaterial material, boolean decal) {
       // start by trying and finding the material specific sprite
       ResourceLocation withMaterial = root.withSuffix('_' + material.assetName());
       TextureAtlasSprite sprite = getTrimAtlas().getSprite(withMaterial);
       if (!MissingTextureAtlasSprite.getLocation().equals(sprite.contents().name())) {
-        return new TrimArmorTexture(sprite);
+        return new TrimArmorTexture(sprite, decal);
       }
       // failed to find the unique sprite, go for tinting the base
       int color = -1;
@@ -120,7 +125,7 @@ public record TrimArmorTextureSupplier(ModifierId modifier, ResourceLocation pat
     @Override
     public void renderTexture(Model model, PoseStack matrices, MultiBufferSource bufferSource, int packedLight, int packedOverlay, float red, float green, float blue, float alpha, boolean hasGlint) {
       // ignoring glint as odds are very low trim texture is the first one
-      VertexConsumer buffer = trimSprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet()));
+      VertexConsumer buffer = trimSprite.wrap(bufferSource.getBuffer(Sheets.armorTrimsSheet(decal)));
       model.renderToBuffer(matrices, buffer, packedLight, packedOverlay, net.minecraft.util.FastColor.ARGB32.colorFromFloat(alpha, red, green, blue));
     }
   }

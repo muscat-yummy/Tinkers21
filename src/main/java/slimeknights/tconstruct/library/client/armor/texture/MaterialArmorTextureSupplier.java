@@ -147,7 +147,7 @@ public abstract class MaterialArmorTextureSupplier implements ArmorTextureSuppli
 
     @Override
     protected String getMaterial(ItemStack stack) {
-      CompoundTag tag = stack.getTag();
+      CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
       if (tag != null && tag.contains(ToolStack.TAG_MATERIALS, Tag.TAG_LIST)) {
         return tag.getList(ToolStack.TAG_MATERIALS, Tag.TAG_STRING).getString(index);
       }

@@ -44,7 +44,7 @@ public class CreativeSlotItem extends Item {
   /** Gets the value of the slot tag from the given stack */
   @Nullable
   public static SlotType getSlot(ItemStack stack) {
-    CompoundTag nbt = stack.getTag();
+    CompoundTag nbt = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
     if (nbt != null && nbt.contains(NBT_KEY, Tag.TAG_STRING)) {
       return SlotType.getIfPresent(nbt.getString(NBT_KEY));
     }
@@ -53,7 +53,7 @@ public class CreativeSlotItem extends Item {
 
   /** Makes an item stack with the given slot type */
   public static ItemStack withSlot(ItemStack stack, SlotType type) {
-    stack.getOrCreateTag().putString(NBT_KEY, type.getName());
+    net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(NBT_KEY, type.getName()));
     return stack;
   }
 

@@ -97,7 +97,7 @@ public abstract class ToolTableScreen<T extends BlockEntity, C extends TabbedCon
     if (this.armorStandPreview != null) {
       Quaternionf pose = new Quaternionf();
       SmithingScreen.ARMOR_STAND_ANGLE.rotateY(this.armorStandAngle, pose);
-      InventoryScreen.renderEntityInInventory(graphics, this.armorStandX, this.armorStandY, this.armorStandScale, pose, null, this.armorStandPreview);
+      InventoryScreen.renderEntityInInventory(graphics, this.armorStandX, this.armorStandY, this.armorStandScale, new org.joml.Vector3f(), pose, null, this.armorStandPreview);
 
       graphics.blit(ICON_TEXTURE, armorStandX - 16, armorStandY - 16, 0, 184, 32, 32);
     }

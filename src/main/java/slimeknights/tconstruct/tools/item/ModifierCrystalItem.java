@@ -181,7 +181,7 @@ public class ModifierCrystalItem extends Item {
   /** Creates a stack with the given modifier */
   public static ItemStack withModifier(ModifierId modifier, int count) {
     ItemStack stack = new ItemStack(TinkerModifiers.modifierCrystal.get(), count);
-    stack.getOrCreateTag().putString(TAG_MODIFIER, modifier.toString());
+    net.minecraft.world.item.component.CustomData.update(net.minecraft.core.component.DataComponents.CUSTOM_DATA, stack, tag -> tag.putString(TAG_MODIFIER, modifier.toString()));
     return stack;
   }
 
@@ -193,7 +193,7 @@ public class ModifierCrystalItem extends Item {
   /** Gets the modifier stored on this stack */
   @Nullable
   public static ModifierId getModifier(ItemStack stack) {
-    CompoundTag tag = stack.getTag();
+    CompoundTag tag = stack.getOrDefault(net.minecraft.core.component.DataComponents.CUSTOM_DATA, net.minecraft.world.item.component.CustomData.EMPTY).copyTag();
     if (tag != null) {
       return ModifierId.tryParse(tag.getString(TAG_MODIFIER));
     }

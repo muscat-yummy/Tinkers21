@@ -218,7 +218,7 @@ public class TankModel implements IUnbakedGeometry<TankModel> {
       @Override
       public BakedModel resolve(BakedModel model, ItemStack stack, @Nullable ClientLevel world, @Nullable LivingEntity entity, int seed) {
         // ensure we have a fluid
-        if (stack.isEmpty() || !stack.hasTag()) {
+        if (stack.isEmpty()) {
           return model;
         }
         // determine fluid
