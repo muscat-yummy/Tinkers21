@@ -35,13 +35,15 @@ public final class BottleBrewingSmoke {
       Items.SPLASH_POTION, output, builder);
     builder.addRecipe(recipe);
     var gunpowder = new ItemStack(Items.GUNPOWDER, 4);
-    var input = new ItemStack(Items.GLASS_BOTTLE, 3);
+    var input = new ItemStack(Items.GLASS_BOTTLE);
     check(recipe.isIngredient(gunpowder) && recipe.getIngredient().test(gunpowder),
       "Native vanilla container ingredient missing");
     check(!recipe.isIngredient(new ItemStack(Items.DIAMOND)), "Unrelated ingredient accepted");
     var built = builder.build();
-    check(built.getRecipes().contains(recipe) && built.hasMix(input, gunpowder),
-      "Recipe was not registered on the native builder");
+    check(built.getRecipes().contains(recipe), "Recipe was not registered on the native builder");
+    check(built.hasMix(input, gunpowder), "Valid single bottle input was rejected");
+    check(!built.hasMix(new ItemStack(Items.GLASS_BOTTLE, 3), gunpowder),
+      "Native single item brewing slot policy changed");
     ItemStack first = built.mix(gunpowder, input);
     check(first.getCount() == 2 && first.getItem() == Items.GLASS_BOTTLE
       && first.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag()
@@ -51,7 +53,7 @@ public final class BottleBrewingSmoke {
     ItemStack second = built.mix(gunpowder, input);
     check(second.getCount() == 2 && second.has(DataComponents.CUSTOM_DATA),
       "Brewing outputs shared mutable state");
-    check(input.getCount() == 3 && gunpowder.getCount() == 4, "Recipe lookup consumed input");
+    check(input.getCount() == 1 && gunpowder.getCount() == 4, "Recipe lookup consumed input");
 
     // An addon can register its mix after our custom recipe's listener runs.
     var addonRecipe = new BottleBrewingRecipe(Ingredient.of(Items.GLASS_BOTTLE),

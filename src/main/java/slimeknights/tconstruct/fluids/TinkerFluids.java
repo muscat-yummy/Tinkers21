@@ -315,7 +315,7 @@ public final class TinkerFluids extends TinkerModule {
       @Override
       public ItemStack execute(BlockSource source, ItemStack stack) {
         DispensibleContainerItem container = (DispensibleContainerItem)stack.getItem();
-        BlockPos blockpos = source.getPos().relative(source.state().getValue(DispenserBlock.FACING));
+        BlockPos blockpos = source.pos().relative(source.state().getValue(DispenserBlock.FACING));
         Level level = source.level();
         if (container.emptyContents(null, level, blockpos, null, stack)) {
           container.checkExtraContent(null, level, stack, blockpos);
