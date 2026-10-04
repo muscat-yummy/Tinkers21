@@ -1,4 +1,4 @@
-name: Port ammunition loading and smeltery interaction callbacks
+name: Port native brush particles and protection equipment slots
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -33,17 +33,15 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.level.block.WeatheringCopper': ['public '],
-              'net.minecraft.world.level.storage.loot.parameters.LootContextParams': ['ATTACKING_ENTITY'],
-              'net.minecraft.world.level.block.ChangeOverTimeBlock': ['public '],
-              'net.minecraft.world.entity.Entity': {'methods': ['handlePortal(', 'canChangeDimensions(', 'canUsePortal(', 'getPortalCooldown(']},
-              'net.minecraft.world.entity.player.Player': ['startAutoSpinAttack('],
-              'net.minecraft.world.item.BrushItem': {'methods': ['spawnDustParticles(']},
-              'net.minecraft.world.item.enchantment.Enchantment': {'methods': ['getSlotItems(', 'matchingSlot(']},
-              'net.minecraft.world.item.enchantment.EnchantmentHelper': {'methods': ['runIterationOnEquipment(', 'runIterationOnItem(', 'runIterationOnInventory(']},
-              'net.minecraft.world.entity.projectile.ThrowableProjectile': {'methods': ['tick(']},
-              'net.minecraft.world.level.block.FireBlock': ['canBurn(', 'canBePlacedAt('],
-              'net.minecraft.world.entity.LivingEntity': ['onEquippedItemBroken(']
+              'net.minecraft.world.entity.player.Player': {'methods': ['startAutoSpinAttack(', 'doAutoAttackOnTouch(']},
+              'net.minecraft.world.entity.LivingEntity': {'methods': ['checkAutoSpinAttack(', 'doAutoAttackOnTouch(']},
+              'net.minecraft.world.item.enchantment.EnchantmentHelper': ['doPostAttackEffects(', 'getEnchantmentLevel(', 'has(', 'getEnchantmentsForCrafting(', 'setEnchantments('],
+              'net.minecraft.world.item.crafting.FireworkStarRecipe': None,
+              'net.minecraft.world.item.component.FireworkExplosion$Shape': ['public '],
+              'net.minecraft.world.level.block.LevelEvent': ['DISPENSER', 'SHOOT'],
+              'net.minecraft.world.level.block.NetherPortalBlock': {'methods': ['entityInside(']},
+              'net.minecraft.world.level.block.EndGatewayBlock': {'methods': ['entityInside(']},
+              'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': {'methods': ['run(']}
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)

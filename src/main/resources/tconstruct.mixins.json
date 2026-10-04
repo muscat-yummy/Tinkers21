@@ -11,7 +11,10 @@
     "CrossbowArrowMixin",
     "ArrowKnockbackMixin",
     "RecipeManagerIdentityMixin",
-    "RecipeHolderIdentityMixin"
+    "RecipeHolderIdentityMixin",
+    "BrushItemInvoker",
+    "ProtectionEquipmentSlotMixin",
+    "ProtectionEnchantmentSlotMixin"
   ],
   "client": [
     "ToolTooltipMixin"

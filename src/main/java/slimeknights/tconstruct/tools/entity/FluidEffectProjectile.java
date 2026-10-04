@@ -317,7 +317,7 @@ public class FluidEffectProjectile extends Projectile implements ProjectileWithK
   @Override
   protected void defineSynchedData(SynchedEntityData.Builder builder) {
     builder.define(FLUID, FluidStack.EMPTY);
-    this.entityData.define(WATER_INERTIA, 0.6f);
+    builder.define(WATER_INERTIA, 0.6f);
   }
 
   @Override
