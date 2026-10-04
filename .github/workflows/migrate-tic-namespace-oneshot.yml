@@ -1,4 +1,4 @@
-name: Port native block interactions and compatible multiblock positions
+name: Port overlay buffers and frame interaction model identities
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -34,6 +34,15 @@ jobs:
           import pathlib, subprocess, zipfile
           targets = {
               'net.minecraft.client.gui.Gui': ['renderSlot('],
+              'net.minecraft.world.item.DyeColor': ['getTextureDiffuseColor('],
+              'net.minecraft.world.level.block.FungusBlock': ['public '],
+              'net.minecraft.client.renderer.texture.SpriteContents': ['public '],
+              'net.minecraft.client.renderer.texture.SpriteResourceLoader': ['public '],
+              'net.minecraft.client.renderer.texture.atlas.SpriteSource$SpriteSupplier': ['public '],
+              'net.minecraft.world.level.block.entity.BannerPattern': ['public '],
+              'net.minecraft.world.level.block.entity.BannerPatternLayers': ['public '],
+              'net.minecraft.world.level.block.entity.BannerPatternLayers$Layer': ['public '],
+              'com.mojang.serialization.MapCodec': ['flatXmap(', 'validate('],
               'net.minecraft.world.ItemInteractionResult': ['public '],
               'net.minecraft.world.level.block.ChangeOverTimeBlock': None,
               'net.minecraft.world.food.FoodProperties$PossibleEffect': ['public '],

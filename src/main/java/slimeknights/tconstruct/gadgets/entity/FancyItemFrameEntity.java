@@ -18,6 +18,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.ItemInteractionResult;
+import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.HitResult;
@@ -62,7 +65,12 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityWithComple
       Level level = level();
       BlockState state = level.getBlockState(behind);
       if (!state.isAir()) {
-        InteractionResult result = state.use(level, player, hand, Util.createTraceResult(behind, direction, false));
+        BlockHitResult hit = Util.createTraceResult(behind, direction, false);
+        ItemInteractionResult itemResult = state.useItemOn(player.getItemInHand(hand), level, player, hand, hit);
+        InteractionResult result = itemResult.result();
+        if (itemResult == ItemInteractionResult.PASS_TO_DEFAULT_BLOCK_INTERACTION && hand == InteractionHand.MAIN_HAND) {
+          result = state.useWithoutItem(level, player, hit);
+        }
         if (result.consumesAction()) {
           return result;
         }
@@ -196,8 +204,8 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityWithComple
   }
 
   @Override
-  public boolean ignoreExplosion() {
-    return super.ignoreExplosion() || getFrameId() == FrameType.NETHERITE.getId();
+  public boolean ignoreExplosion(Explosion explosion) {
+    return super.ignoreExplosion(explosion) || getFrameId() == FrameType.NETHERITE.getId();
   }
 
   @Override
