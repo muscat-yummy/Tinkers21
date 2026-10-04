@@ -1,4 +1,4 @@
-name: Port effect consumers and vertex chains then audit tool data boundaries
+name: Verify native transformed vertex normals and effect consumer integration
 on:
   push:
     branches: [port/1.21.1-neoforge]

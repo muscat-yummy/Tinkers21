@@ -18,6 +18,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.ItemAbilities;
 import org.joml.Matrix3f;
+import org.joml.Vector3f;
 import org.joml.Matrix4f;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.armor.texture.ArmorTextureSupplier;
@@ -190,12 +191,13 @@ public class CombatFishingHookRenderer extends EntityRenderer<CombatFishingHook>
 
     /** Draws a vertex using this texture. */
     public void vertex(VertexConsumer consumer, Matrix4f pose, Matrix3f normal, int lightmap, float pX, int pY, int pU, int pV) {
+      Vector3f transformedNormal = normal.transform(new Vector3f(0.0F, 1.0F, 0.0F));
       consumer.addVertex(pose, pX - 0.5f, pY - 0.5f, 0f)
         .setColor(red, green, blue, alpha)
         .setUv(pU, pV)
         .setOverlay(OverlayTexture.NO_OVERLAY)
         .setLight(lightmap)
-        .setNormal(normal, 0.0F, 1.0F, 0.0F);
+        .setNormal(transformedNormal.x(), transformedNormal.y(), transformedNormal.z());
     }
   }
 }
