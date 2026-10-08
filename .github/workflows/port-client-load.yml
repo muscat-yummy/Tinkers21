@@ -1,4 +1,4 @@
-name: Verify namespaced sprite registration and actual client reload
+name: Verify native models atlas shaders and graphical bootstrap
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,6 +23,10 @@ jobs:
           java-version: '21'
           cache: gradle
           cache-dependency-path: '**/*.gradle*'
+      - name: Install the native narrator library
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flite1-dev
       - name: Run the actual graphical Minecraft client
         run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true --no-daemon --console=plain
       - name: Require graphical client verification

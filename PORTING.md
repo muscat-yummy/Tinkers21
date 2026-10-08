@@ -807,3 +807,10 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - The first actual graphical client run 37823478332 fails during RegisterClientReloadListenersEvent: vanilla SpriteSources.register(String, ...) forces a minecraft namespace and rejects the namespaced shield-banner type.
 - Give the sprite source a stable actual SpriteSourceType identity and register it through NeoForge's official RegisterSpriteSourceTypesEvent using the original tconstruct:shield_banner_to_modifier ID. Remove the late reload-listener registration, retaining the existing crop/resource-pack/HD sprite generation and datagen type identity. Actual client verification awaits CI.
+
+### Native client resource migration (2026-10-08)
+
+- Run 37824348458 gets past the sprite type lifecycle, then fails real resource reload: old Forge composite/parent models, nested shield sprite fields and Mantle's obsolete fog_distance vertex call. Its timeout is a failure, not a client pass.
+- Move the three composite block loaders and 97 generated bucket/material-part model parents plus hand-authored tool parents to the real NeoForge IDs. Update the part datagen parent too. Flatten the existing shield atlas source to the native MapCodec structure, preserving all crop/placement values.
+- Use native camera-relative Position for fluid fog distance and remove the obsolete view-rotation uniform. Restrict human plating/dummy plating registrations and creative iteration to the existing four human armor types; the new animal BODY was inadvertently included and had no human resource or definition.
+- Install the actual narrator native library in CI, complete the real first-run accessibility onboarding in the test fixture, and bound title-screen waiting with an explicit failure. Native graphical reload verification is pending.
