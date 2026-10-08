@@ -94,6 +94,7 @@ neoForge {
             programArgument '--nogui'
         }
         data {
+            gameDirectory = project.file('run-port-data-check')
             data()
             programArguments.addAll '--mod', mod_id, '--all',
                     '--output', file('src/generated/resources').absolutePath,

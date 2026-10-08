@@ -1,4 +1,4 @@
-name: Verify complete native data generation
+name: Verify complete native data generation in isolated working directory
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -26,7 +26,7 @@ jobs:
         shell: python
         run: |
           import pathlib
-          log = pathlib.Path('run/logs/latest.log')
+          log = pathlib.Path('run-port-data-check/logs/latest.log')
           text = log.read_text() if log.is_file() else ''
           errors = [line for line in text.splitlines() if '/ERROR]' in line]
           if not text or errors:
@@ -37,8 +37,8 @@ jobs:
         shell: python
         run: |
           import pathlib
-          log = pathlib.Path('run/logs/latest.log')
+          log = pathlib.Path('run-port-data-check/logs/latest.log')
           if log.is_file():
               print(log.read_text()[-50000:])
-          for crash in sorted(pathlib.Path('run/crash-reports').glob('*.txt')):
+          for crash in sorted(pathlib.Path('run-port-data-check/crash-reports').glob('*.txt')):
               print(crash.read_text()[-50000:])
