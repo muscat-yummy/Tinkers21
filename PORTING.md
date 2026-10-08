@@ -137,10 +137,10 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 
 ## Current checkpoint (2026-10-08)
 
-**Phase 1 (build environment): complete. Phase 2 (bootstrap): complete. Phase 3 (core tool system): in progress.** Run 37785258311 on commit 887c6f687dc9917dc77a18b52a12b06eedcc42fc compiles all TiC/Mantle production sources, assembles both jars and passes the actual native Minecraft world test on NeoForge 21.1.251 / Java 21. Native reload has no ERROR entries except first-run missing server.properties. It loads 3330 recipes, 297 dynamic modifiers and 23 station layouts.
+**Phase 1 (build environment): complete. Phase 2 (bootstrap): complete. Phase 3 (core tool system): complete (2026-10-08). Phase 4 (tool construction): in progress.** Run 37785258311 on commit 887c6f687dc9917dc77a18b52a12b06eedcc42fc compiles all TiC/Mantle production sources, assembles both jars and passes the actual native Minecraft world test on NeoForge 21.1.251 / Java 21. Native reload has no ERROR entries except first-run missing server.properties. It loads 3330 recipes, 297 dynamic modifiers and 23 station layouts.
 
 - The in-world gate checks both native item codec Mixins, native component persistence, full tool inventory contents, sparse slot migration and atomic rejection, cooking metadata and actual vanilla recipe output. It additionally creates a real three-material iron pickaxe, verifies haste changes mining speed, retains materials/name/damage/modifier stats through native save/load, breaks an independent copy, retains breakage through loading, and rebuilds stats after repair/modifier removal.
-- Phase 3 still needs deeper material/modifier behavior and legacy-world checks. Native contributor bridges and actual iron/string ingredient matching pass in run 37786031222; client rendering, construction menus, fluid machinery and later gameplay phases remain unverified. The imported Forge JUnit fixtures remain unported. This is a successful server bootstrap gate, not a gameplay-ready release.
+- Phase 3's actual core server gate passes in run 37823184986: material/trait/modifier stats, broken/repair/native callbacks, full native and representative legacy tool persistence, native inventory/cooking, player attachments, canceled/approved harvest and melee, construction menu transactions, actual station repair and incremental modifier continuation across save/load. Client visuals, complete old-world migration, fluid machinery and remaining gameplay phases are still open. The imported Forge JUnit fixtures remain unported; no gameplay-ready release is claimed.
 
 - The cooking/JEI cache checkpoint passes the new crafting extension test, including a same-ID recipe reload with a new recipe instance. The production cache now uses weak reference identity because native RecipeHolder equality compares only IDs. Native cooking inputs, actual holder IDs and component-sensitive autosmelt inputs are implemented; the broader tool inventory serialization and game-load checks remain pending.
 - Verified recipe consumer wrappers retain the original registry provider, copy their mutable input data and forward registry-aware advancement serialization. Generated melting recipes use native holders, world registry context, the singular 1.21 recipe directory and fluid component patches. The registry-aware recipe batch passes Mantle and independent checks and reports 303 full-source errors. The subsequent bucket/shearing/effect batch passes the same checks and reports 289.
@@ -250,12 +250,12 @@ Move Gradle/build configuration to Minecraft 1.21.1, NeoForge, and Java 21. Reso
 ### Phase 2 — Bootstrap (complete: 2026-10-08)
 Full TiC/Mantle production compilation, both jar assemblies, native mod construction, data reload and the actual in-world gate pass in run 37785258311. Resource schemas, module registration, native conditional recipes/outputs, modifier attributes and station SNBT load without data errors. No source exclusion or fake registry fallback is used.
 
-### Phase 3 — Core tool system (in progress)
+### Phase 3 — Core tool system (complete: 2026-10-08)
 Port and preserve the core material/tool/modifier systems, including MaterialId and material managers, ToolDefinition/ToolModule/ToolStack, IModifiable, Modifier/ModifierId/ModifierManager, modifier hooks/modules, and related serialization.
 
 Pay particular attention to ItemStack data changes introduced since 1.20.1. Prefer adapters or compatibility layers where they allow existing TiC concepts and addon APIs to remain intact.
 
-### Phase 4 — Tool construction
+### Phase 4 — Tool construction (in progress)
 Port tool parts, recipes, menus/screens, Part Builder, Tinkers' Station, and the complete loop from materials to usable modified tools.
 
 ### Phase 5 — Rendering
@@ -796,3 +796,9 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Add an isolated test-source-only native client run under Xvfb with software OpenGL and a null audio device. It uses the complete production mod/client/resource setup, requires the actual title screen after initial reload and verifies the real registered pickaxe, renderer, model manager and nonzero window. The test then requests normal native shutdown; CI requires its logged marker and zero client ERROR entries.
 - This first client gate does not claim joined-world rendering, menu visuals, material compositing or complete Phase 4/5 coverage. Production jars do not include the check class.
 - Correct the public API inspector's ItemRenderer target to the actual entity package. Its previous multi-class javap invocation returned success despite the invalid class; that item's API was not verified.
+
+### Phase 3 complete; Phase 4 continues (2026-10-08)
+
+- Run 37823184986 on c71ef1bb08ccc825ef0fdfe8e6d1e31c4e85e453 passes full production TiC/Mantle assembly and the strict actual world gate after the common-tag cycle fix. Native reload loads 3336 recipes and 23 station layouts, with no ERROR except first-run server.properties.
+- Actual menu construction, exact consumption, native repair and partial haste (9 redstone, native save/load, 36 redstone) all pass. Haste retains amount/level, rebuilds mining speed and consumes one upgrade slot across both transactions. This completes the core system/server gate for Phase 3.
+- Phase 4 now focuses on client screens, synchronized state and the full user-facing construction flow. The actual graphical client bootstrap is running separately; server-side menu success is not claimed as visual client success. Comprehensive old-world migration and later phases remain open.
