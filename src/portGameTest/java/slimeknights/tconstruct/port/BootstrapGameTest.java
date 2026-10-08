@@ -62,6 +62,7 @@ public final class BootstrapGameTest {
       "Native string contributors did not enter retained tool recipes");
     checkCoreToolPersistence(helper);
     checkInventoryAndCooking(helper);
+    checkNativeHarvest(helper);
     helper.succeed();
     slimeknights.tconstruct.TConstruct.LOG.info("TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS");
   }
@@ -168,6 +169,52 @@ public final class BootstrapGameTest {
       "Legacy storage migration lost cooking metadata or retained duplicate contents");
     ItemStack copied = loaded.copy();
     helper.assertTrue(ItemStack.matches(loaded, copied), "Actual legacy tool copying changed native components");
+  }
+
+
+  private static void checkNativeHarvest(GameTestHelper helper) {
+    var iron = slimeknights.tconstruct.library.materials.MaterialRegistry.getMaterial(
+      new slimeknights.tconstruct.library.materials.definition.MaterialId("tconstruct:iron"));
+    var item = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:pickaxe")).orElseThrow().value();
+    var definition = ((slimeknights.tconstruct.library.tools.item.IModifiable) item).getToolDefinition();
+    var tool = slimeknights.tconstruct.library.tools.nbt.ToolStack.createTool(item, definition,
+      slimeknights.tconstruct.library.tools.nbt.MaterialNBT.of(iron, iron, iron));
+    ItemStack stack = tool.createStack();
+    var player = helper.makeMockServerPlayerInLevel();
+    player.gameMode.changeGameModeForPlayer(net.minecraft.world.level.GameType.SURVIVAL);
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+    var relative = new net.minecraft.core.BlockPos(0, 1, 0);
+    var pos = helper.absolutePos(relative);
+    player.setPos(pos.getX() + 0.5, pos.getY() + 1, pos.getZ() + 0.5);
+    helper.setBlock(relative, net.minecraft.world.level.block.Blocks.STONE);
+    var events = new java.util.concurrent.atomic.AtomicInteger();
+    var cancel = new java.util.concurrent.atomic.AtomicBoolean(true);
+    java.util.function.Consumer<net.neoforged.neoforge.event.level.BlockEvent.BreakEvent> listener = event -> {
+      if (event.getPlayer() == player && event.getPos().equals(pos)) {
+        events.incrementAndGet();
+        if (cancel.get()) event.setCanceled(true);
+      }
+    };
+    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);
+    try {
+      int damage = stack.getDamageValue();
+      helper.assertTrue(!player.gameMode.destroyBlock(pos) &&
+        helper.getLevel().getBlockState(pos).is(net.minecraft.world.level.block.Blocks.STONE) &&
+        stack.getDamageValue() == damage && events.get() == 1,
+        "Canceled native harvest changed the block/tool or fired permission twice");
+      cancel.set(false);
+      events.set(0);
+      helper.assertTrue(player.gameMode.destroyBlock(pos) && helper.getLevel().getBlockState(pos).isAir() &&
+        events.get() == 1, "Actual harvest bridge did not destroy the block after one approved permission event");
+      helper.assertTrue(stack.getDamageValue() > damage,
+        "Actual native harvest did not commit tool durability consumption");
+      var stored = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(stack);
+      helper.assertTrue(stored.getDamage() == stack.getDamageValue() && !stored.isBroken(),
+        "Actual harvest left native and tool durability inconsistent");
+    } finally {
+      net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
+      player.discard();
+    }
   }
 
   private static void checkInventoryAndCooking(GameTestHelper helper) {

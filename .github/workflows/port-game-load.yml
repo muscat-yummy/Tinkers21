@@ -1,4 +1,4 @@
-name: Verify native NBT booleans during actual legacy material tool migration
+name: Verify actual native harvest permission and durability integration
 on:
   push:
     branches: [port/1.21.1-neoforge]

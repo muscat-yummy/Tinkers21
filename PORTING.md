@@ -126,7 +126,14 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 
 - Native item tool data previously read the presence of UNBREAKABLE but omitted its showInTooltip flag. Working snapshots and native post-load verification could therefore show an intentionally hidden tooltip. Reading native tool data now retains that bit while preserving other legacy hide flags.
 - The in-world fixture exercises the actual native durability and attribute callbacks of an iron material tool. It converts that real tool's old data through vanilla DFU, then uses the actual wrapped native ItemStack codec. It checks retained materials/modifier stats, damage, name, hidden unbreakable tooltip, full nested item name/count at slot 300, cooking metadata, fluid amount, removal of duplicate legacy contents and native-copy equality.
-- These changed checks and the tooltip preservation fix await CI. This is scoped old-tool migration validation; general old-world compatibility and later gameplay remain open.
+- Run 37787434802 passes the actual legacy material-tool, native durability/attribute and tooltip checks. Its prior run exposed an NBT-to-JSON conversion bug: vanilla-fixed boolean byte tags became JSON numbers. LegacyItemData now decodes vanilla-fixed components directly with native NBT ops and the original registry lookup. This is scoped old-tool migration validation; general old-world compatibility and later gameplay remain open.
+
+### Native harvest bridge — Phase 3 continuation (2026-10-08)
+
+- Actual legacy material tools, native item durability and equipment attribute callbacks, hidden unbreakable tooltip state, nested native inventory/fluid contents and metadata pass in run 37787434802.
+- Native GameTestHelper and ServerPlayerGameMode public signatures were inspected against the exact pinned Minecraft artifact in run 37787063570. The next test uses Minecraft's own in-level server player factory and calls the actual game-mode block destruction entry point.
+- A real NeoForge break-event listener cancels one stone break and then permits it. Assertions require cancellation to preserve block/tool state, one permission event per attempt, actual block removal after approval, committed native durability consumption and agreement with ToolStack data. Listener/player cleanup is scoped in finally.
+- The new actual harvest/Mixin check awaits CI. Unchanged independent production tests remain skipped; deeper modifiers, client rendering and later phases are not declared complete.
 
 ## Current checkpoint (2026-10-08)
 
