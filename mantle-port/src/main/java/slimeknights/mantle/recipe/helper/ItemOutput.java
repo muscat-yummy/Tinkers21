@@ -222,7 +222,7 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
     private final CompoundTag nbt;
     private final DataComponentPatch components;
     private final DynamicOps<JsonElement> ops;
-    private ItemStack cachedResult = null;
+    private volatile ItemStack cachedResult = null;
 
     @Override
     public ItemStack get() {
@@ -240,7 +240,8 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
         if (nbt != null) {
           resolved.applyComponents(LegacyItemData.convert(preference.orElseThrow(), nbt, ops));
         }
-        cachedResult.applyComponents(components);
+        resolved.applyComponents(components);
+        cachedResult = resolved;
       }
       return cachedResult;
     }

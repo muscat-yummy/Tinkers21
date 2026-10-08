@@ -1,12 +1,19 @@
 package slimeknights.tconstruct.port;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.serialization.NbtOps;
+import net.minecraft.resources.RegistryOps;
+import slimeknights.tconstruct.library.modifiers.ModifierId;
+import slimeknights.tconstruct.library.tools.SlotType;
+import slimeknights.tconstruct.library.tools.stat.ToolStats;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.screens.AccessibilityOnboardingScreen;
 import net.minecraft.client.gui.screens.TitleScreen;
+import net.minecraft.client.gui.screens.DisconnectedScreen;
+import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.resources.ResourceLocation;
@@ -54,6 +61,8 @@ public final class ClientBootstrapCheck {
   private static int step;
   private static int ticks;
   private static int totalTicks;
+  private static int screenTicks;
+  private static Screen lastScreen;
   private static int partIndex;
   private static int usedPlanks;
   private static volatile BlockPos builderPos;
@@ -61,6 +70,10 @@ public final class ClientBootstrapCheck {
   private static volatile List<Item> parts = List.of();
   private static volatile boolean serverReady;
   private static boolean serverValidationRequested;
+  private static volatile boolean stationOpenPending;
+  private static volatile int baseUpgradeSlots;
+  private static volatile float baseMiningSpeed;
+  private static final ModifierId HASTE = new ModifierId("tconstruct:haste");
   private static volatile RuntimeException serverFailure;
 
   private static void require(boolean condition, String message) {
@@ -104,16 +117,100 @@ public final class ClientBootstrapCheck {
     return signature;
   }
 
+  /** Wait for the actual close packet before opening the next station transaction. */
+  private static void reopenStation(Minecraft minecraft, int transaction) {
+    if (stationOpenPending || ticks % 10 != 0) return;
+    stationOpenPending = true;
+    var server = minecraft.getSingleplayerServer();
+    var uuid = minecraft.player.getUUID();
+    serverAction(() -> {
+      var player = server.getPlayerList().getPlayer(uuid);
+      if (player.containerMenu != player.inventoryMenu) {
+        stationOpenPending = false;
+        return;
+      }
+      var station = (TinkerStationBlockEntity) player.serverLevel().getBlockEntity(stationPos);
+      int inventorySlot = -1;
+      for (int i = 0; i < player.getInventory().items.size(); i++) {
+        if (player.getInventory().getItem(i).getItem() == TinkerTools.pickaxe.get()) {
+          require(inventorySlot == -1, "Actual construction duplicated a pickaxe");
+          inventorySlot = i;
+        }
+      }
+      require(inventorySlot >= 0, "Actual station transaction lost the player's tool");
+      ItemStack tool = player.getInventory().getItem(inventorySlot);
+      player.getInventory().setItem(inventorySlot, ItemStack.EMPTY);
+      if (transaction == 0) {
+        ToolStack.from(tool).setDamage(1);
+        station.setItem(0, tool);
+        station.setItem(1, new ItemStack(Items.OAK_PLANKS, 2));
+      } else if (transaction == 1) {
+        require(tool.getDamageValue() == 0 && station.getItem(1).getCount() == 1,
+          "Actual repair packets did not consume exactly one material and repair the tool");
+        var view = ToolStack.from(tool);
+        baseUpgradeSlots = view.getFreeSlots(SlotType.UPGRADE);
+        baseMiningSpeed = view.getStats().get(ToolStats.MINING_SPEED);
+        station.setItem(0, tool);
+        station.setItem(1, new ItemStack(Items.REDSTONE, 9));
+      } else {
+        var partial = ToolStack.from(tool);
+        require(station.getItem(0).isEmpty() && station.getItem(1).isEmpty() &&
+          partial.getUpgrades().getEntry(HASTE).getAmount(0) == 9 &&
+          partial.getFreeSlots(SlotType.UPGRADE) == baseUpgradeSlots - 1,
+          "Actual partial modifier packets lost their amount, slot or exact inputs");
+        var ops = RegistryOps.create(NbtOps.INSTANCE, player.serverLevel().registryAccess());
+        ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, tool).getOrThrow()).getOrThrow();
+        require(ItemStack.matches(tool, loaded), "Actual partial tool changed during native save/load");
+        station.setItem(0, loaded);
+        station.setItem(1, new ItemStack(Items.REDSTONE, 36));
+      }
+      player.openMenu(station, buffer -> buffer.writeBlockPos(stationPos));
+    });
+  }
+
+  private static ItemStack stationOutput(Minecraft minecraft) {
+    var station = (TinkerStationBlockEntity) minecraft.level.getBlockEntity(stationPos);
+    return minecraft.player.containerMenu.slots.get(station.getContainerSize()).getItem();
+  }
+
+  private static void takeStationOutput(Minecraft minecraft) {
+    var station = (TinkerStationBlockEntity) minecraft.level.getBlockEntity(stationPos);
+    minecraft.gameMode.handleInventoryMouseClick(minecraft.player.containerMenu.containerId,
+      station.getContainerSize(), 0, ClickType.QUICK_MOVE, minecraft.player);
+  }
+
+  private static ItemStack inventoryTool(Minecraft minecraft) {
+    return minecraft.player.getInventory().items.stream()
+      .filter(stack -> stack.getItem() == TinkerTools.pickaxe.get()).findFirst().orElse(null);
+  }
+
   @SubscribeEvent
   public static void clientTick(ClientTickEvent.Post event) {
-    if (step == 9) return;
+    if (step == 16) return;
     if (serverFailure != null) throw serverFailure;
     Minecraft minecraft = Minecraft.getInstance();
-    if (++totalTicks > 9000) {
+    if (step > 0 && minecraft.screen instanceof DisconnectedScreen) {
+      throw new IllegalStateException("Actual client disconnected during construction step " + step);
+    }
+    if (step == 1 && ticks > 60 && minecraft.screen instanceof TitleScreen) {
+      throw new IllegalStateException("Actual fresh-world loading returned to the title screen");
+    }
+    if (++totalTicks > 6000) {
       throw new IllegalStateException("Actual construction timed out at step " + step + ": " +
         (minecraft.screen == null ? "none" : minecraft.screen.getClass().getName()));
     }
     ticks++;
+    if (minecraft.screen != lastScreen) {
+      lastScreen = minecraft.screen;
+      screenTicks = 0;
+    } else if (minecraft.getOverlay() == null) {
+      screenTicks++;
+    }
+    if (totalTicks % 200 == 0) {
+      TConstruct.LOG.info("TiC client check waiting: step {}, screen {}, overlay {}", step,
+        minecraft.screen == null ? "none" : minecraft.screen.getClass().getName(),
+        minecraft.getOverlay() == null ? "none" : minecraft.getOverlay().getClass().getName());
+    }
     if (minecraft.screen instanceof AccessibilityOnboardingScreen && minecraft.getOverlay() == null) {
       minecraft.options.onboardingAccessibilityFinished();
       minecraft.screen.onClose();
@@ -129,7 +226,7 @@ public final class ClientBootstrapCheck {
         "Actual graphical client did not initialize");
       TConstruct.LOG.info("TiC actual graphical client and initial resource reload PASS");
       minecraft.options.renderDistance().set(2);
-      minecraft.options.simulationDistance().set(2);
+      minecraft.options.pauseOnLostFocus = false;
       advance(1);
       minecraft.createWorldOpenFlows().createFreshLevel("port-client-construction",
         new LevelSettings("Port client construction", GameType.SURVIVAL, false, Difficulty.PEACEFUL,
@@ -295,7 +392,78 @@ public final class ClientBootstrapCheck {
         return;
       }
       TConstruct.LOG.info("TiC actual rendered Part Builder and Station construction packets PASS");
+      minecraft.player.closeContainer();
+      serverReady = false;
+      stationOpenPending = false;
       advance(9);
+      return;
+    }
+    if (step == 9 || step == 11 || step == 13) {
+      if (!(minecraft.screen instanceof TinkerStationScreen)) {
+        reopenStation(minecraft, (step - 9) / 2);
+        return;
+      }
+      if (screenTicks < 20) return;
+      ItemStack output = stationOutput(minecraft);
+      if (output.isEmpty()) return;
+      var tool = ToolStack.from(output);
+      require(tool.getMaterials().size() == 3 && tool.getCurrentDurability() > 0,
+        "Actual station client result lost usable material tool data");
+      if (step == 9) {
+        require(output.getDamageValue() == 0, "Actual repair screen did not show a repaired tool");
+      } else if (step == 11) {
+        require(tool.getUpgrades().getEntry(HASTE).getAmount(0) == 9 &&
+          tool.getFreeSlots(SlotType.UPGRADE) == baseUpgradeSlots - 1,
+          "Actual partial modifier screen lost its amount or slot");
+      } else {
+        require(tool.getUpgrades().getEntry(HASTE).getLevel() == 1 &&
+          tool.getUpgrades().getEntry(HASTE).getAmount(45) == 45 &&
+          tool.getFreeSlots(SlotType.UPGRADE) == baseUpgradeSlots - 1 &&
+          tool.getStats().get(ToolStats.MINING_SPEED) > baseMiningSpeed,
+          "Actual resumed modifier screen lost native amount, stats or slots");
+      }
+      geometry(minecraft, output);
+      takeStationOutput(minecraft);
+      advance(step + 1);
+      return;
+    }
+    if (step == 10 || step == 12) {
+      if (ticks < 20 || inventoryTool(minecraft) == null) return;
+      minecraft.player.closeContainer();
+      stationOpenPending = false;
+      advance(step + 1);
+      return;
+    }
+    if (step == 14) {
+      if (ticks < 20 || inventoryTool(minecraft) == null) return;
+      var finalTool = ToolStack.from(inventoryTool(minecraft));
+      require(finalTool.getUpgrades().getEntry(HASTE).getLevel() == 1 &&
+        finalTool.getUpgrades().getEntry(HASTE).getAmount(45) == 45 &&
+        finalTool.getFreeSlots(SlotType.UPGRADE) == baseUpgradeSlots - 1,
+        "Actual final client inventory lost its completed modifier");
+      var server = minecraft.getSingleplayerServer();
+      var uuid = minecraft.player.getUUID();
+      advance(15);
+      serverAction(() -> {
+        var player = server.getPlayerList().getPlayer(uuid);
+        var station = (TinkerStationBlockEntity) player.serverLevel().getBlockEntity(stationPos);
+        require(station.getItem(0).isEmpty() && station.getItem(1).isEmpty(),
+          "Actual final modifier packets did not consume their remaining inputs");
+        ItemStack output = player.getInventory().items.stream()
+          .filter(stack -> stack.getItem() == TinkerTools.pickaxe.get()).findFirst().orElseThrow();
+        var completed = ToolStack.from(output);
+        require(completed.getUpgrades().getEntry(HASTE).getLevel() == 1 &&
+          completed.getUpgrades().getEntry(HASTE).getAmount(45) == 45 &&
+          completed.getFreeSlots(SlotType.UPGRADE) == baseUpgradeSlots - 1 &&
+          completed.getStats().get(ToolStats.MINING_SPEED) > baseMiningSpeed,
+          "Actual final server inventory lost its persisted incremental modifier");
+        serverReady = true;
+      });
+      return;
+    }
+    if (step == 15 && serverReady) {
+      TConstruct.LOG.info("TiC actual client construction repair and persisted modifier packets PASS");
+      advance(16);
       minecraft.player.closeContainer();
       minecraft.stop();
     }

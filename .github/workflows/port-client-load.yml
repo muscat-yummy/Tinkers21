@@ -1,4 +1,4 @@
-name: Verify actual client material models and construction screen packets
+name: Verify recipe login sync and actual client repair modification loop
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -37,7 +37,7 @@ jobs:
           text = log.read_text() if log.is_file() else ''
           errors = [line for line in text.splitlines() if '/ERROR]' in line]
           missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
-          if 'TiC actual rendered Part Builder and Station construction packets PASS' not in text or errors or missing:
+          if 'TiC actual client construction repair and persisted modifier packets PASS' not in text or errors or missing:
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
