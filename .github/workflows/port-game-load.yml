@@ -1,4 +1,4 @@
-name: Verify actual legacy material tools, native attributes and tooltip flags
+name: Verify native NBT booleans during actual legacy material tool migration
 on:
   push:
     branches: [port/1.21.1-neoforge]
