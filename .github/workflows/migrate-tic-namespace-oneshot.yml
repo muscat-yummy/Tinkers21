@@ -1,4 +1,4 @@
-name: Preserve tool fluid components and migrate legacy storage with actual registry ops
+name: Preserve native tool inventory and cooking state
 on:
   push:
     branches: [port/1.21.1-neoforge]

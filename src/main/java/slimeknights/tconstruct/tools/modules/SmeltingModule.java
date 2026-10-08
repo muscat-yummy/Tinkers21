@@ -169,7 +169,7 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
         // 0 means no recipe, time for a lookup
         if (time == 0) {
           time = NO_RECIPE;
-          stack = ItemStack.parseOptional(level.registryAccess(), entry);
+          stack = input.getStack(tool, modifier, entry.getInt(TAG_SLOT));
           recipe = findRecipe(recipeType, stack, level, modifier.getId());
           if (recipe != null) {
             time = recipe.value().getCookingTime();
@@ -198,7 +198,7 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
 
             // use the recipe we fetched earlier if present
             if (recipe == null) {
-              stack = ItemStack.parseOptional(level.registryAccess(), entry);
+              stack = input.getStack(tool, modifier, entry.getInt(TAG_SLOT));
               if (!stack.isEmpty()) {
                 recipe = findRecipe(recipeType, stack, level, modifier.getId());
               }
@@ -233,12 +233,11 @@ public record SmeltingModule(RecipeType<? extends AbstractCookingRecipe> recipeT
 
                 // shrink the input
                 stack.shrink(1);
+                input.setStackContents(tool, modifier, slot, stack);
                 if (stack.isEmpty()) {
                   list.remove(i);
                   i--;
                 } else {
-                  // shrink stack
-                  InventoryModule.writeStack(stack, slot, entry);
                   // update time to cook again
                   entry.putInt(TAG_TIME, recipe.value().getCookingTime());
                 }

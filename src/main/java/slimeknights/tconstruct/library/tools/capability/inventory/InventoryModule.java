@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.Accessors;
+import net.minecraft.core.HolderLookup;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.Tag;
@@ -39,7 +40,7 @@ import slimeknights.tconstruct.library.module.ModuleHook;
 import slimeknights.tconstruct.library.recipe.partbuilder.Pattern;
 import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability.InventoryModifierHook;
 import slimeknights.tconstruct.library.tools.capability.inventory.ToolInventoryCapability.StackMatch;
-import slimeknights.tconstruct.library.tools.nbt.IModDataView;
+import slimeknights.tconstruct.library.tools.nbt.ToolDataComponents;
 import slimeknights.tconstruct.library.tools.nbt.IToolContext;
 import slimeknights.tconstruct.library.tools.nbt.IToolStackView;
 import slimeknights.tconstruct.library.tools.nbt.ModDataNBT;
@@ -48,6 +49,9 @@ import slimeknights.tconstruct.library.tools.nbt.ToolDataNBT;
 import javax.annotation.Nullable;
 import java.util.BitSet;
 import java.util.List;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.TreeMap;
 import java.util.function.BiFunction;
 import java.util.function.Predicate;
 
@@ -138,105 +142,106 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
 
   @Override
   public ItemStack getStack(IToolStackView tool, ModifierEntry modifier, int slot) {
-    IModDataView modData = tool.getPersistentData();
-    ResourceLocation key = getKey(modifier.getModifier());
-    if (slot < getSlots(tool, modifier) && modData.contains(key, Tag.TAG_LIST)) {
-      ListTag list = tool.getPersistentData().get(key, GET_COMPOUND_LIST);
-      for (int i = 0; i < list.size(); i++) {
-        CompoundTag compound = list.getCompound(i);
-        if (compound.getInt(TAG_SLOT) == slot) {
-          return ItemStack.of(compound);
-        }
-      }
+    if (slot < 0 || slot >= getSlots(tool, modifier)) {
+      return ItemStack.EMPTY;
     }
-    return ItemStack.EMPTY;
+    return ToolDataComponents.storage(tool).inventory(getKey(modifier.getModifier())).getOrDefault(slot, ItemStack.EMPTY);
+  }
+
+  /** Updates only item contents; callers maintaining cooking metadata commit it separately. */
+  public void setStackContents(IToolStackView tool, ModifierEntry modifier, int slot, ItemStack stack) {
+    if (slot < 0 || slot >= getSlots(tool, modifier)) {
+      return;
+    }
+    ResourceLocation key = getKey(modifier.getModifier());
+    var storage = ToolDataComponents.storage(tool);
+    Map<Integer,ItemStack> inventory = storage.inventory(key);
+    if (stack.isEmpty()) {
+      inventory.remove(slot);
+    } else {
+      inventory.put(slot, stack);
+    }
+    ToolDataComponents.setStorage(tool, storage.withInventory(key, inventory));
   }
 
   @Override
   public void setStack(IToolStackView tool, ModifierEntry modifier, int slot, ItemStack stack) {
-    if (slot < getSlots(tool, modifier)) {
-      ListTag list;
-      ModDataNBT modData = tool.getPersistentData();
-      // if the tag exists, fetch it
-      ResourceLocation key = getKey(modifier.getModifier());
-      int insertIndex = 0;
-      if (modData.contains(key, Tag.TAG_LIST)) {
-        list = modData.get(key, GET_COMPOUND_LIST);
-        // first, try to find an existing stack in the slot
-        for (int i = 0; i < list.size(); i++) {
-          CompoundTag compound = list.getCompound(i);
-          int listSlot = compound.getInt(TAG_SLOT);
-          if (listSlot == slot) {
-            if (stack.isEmpty()) {
-              list.remove(i);
-            } else {
-              compound.getAllKeys().clear();
-              writeStack(stack, slot, compound);
-            }
-            modData.put(key, list);
-            return;
-          // try to keep the stacks in order by inserting after the last slot smaller than the target
-          } else if (listSlot < slot) {
-            insertIndex = i + 1;
-          }
-        }
-      } else if (stack.isEmpty()) {
-        // nothing to do if empty
-        return;
-      } else {
-        list = new ListTag();
+    if (slot < 0 || slot >= getSlots(tool, modifier)) {
+      return;
+    }
+    setStackContents(tool, modifier, slot, stack);
+    ModDataNBT data = tool.getPersistentData();
+    ResourceLocation key = getKey(modifier.getModifier());
+    ListTag list = data.get(key, GET_COMPOUND_LIST);
+    int insert = 0;
+    for (int i = 0; i < list.size(); i++) {
+      int storedSlot = list.getCompound(i).getInt(TAG_SLOT);
+      if (storedSlot == slot) {
+        list.remove(i);
+        break;
       }
-
-      // list did not contain the slot, so add it
-      if (!stack.isEmpty()) {
-        CompoundTag compound = writeStack(stack, slot, new CompoundTag());
-        // if out of bounds, just put at the end. Shouldn't happen
-        if (insertIndex > list.size()) {
-          list.add(compound);
-        } else {
-          list.add(insertIndex, compound);
-        }
-        modData.put(key, list);
+      if (storedSlot < slot) {
+        insert = i + 1;
       }
     }
+    if (!stack.isEmpty()) {
+      CompoundTag entry = new CompoundTag();
+      entry.putInt(TAG_SLOT, slot);
+      list.add(Math.min(insert, list.size()), entry);
+    }
+    if (list.isEmpty()) {
+      data.remove(key);
+    } else {
+      data.put(key, list);
+    }
   }
-
 
   /* Validation */
 
   @Nullable
   @Override
   public Component validate(IToolStackView tool, ModifierEntry modifier) {
-    // don't validate if the module is not running
     if (condition.tool().matches(tool) && validationLevel.test(modifier.getLevel())) {
-      ModDataNBT persistentData = tool.getPersistentData();
       ResourceLocation key = getKey(modifier.getModifier());
-      int maxSlots = getSlots(tool, modifier);
-      if (persistentData.contains(key, Tag.TAG_LIST)) {
-        ListTag listNBT = persistentData.get(key, GET_COMPOUND_LIST);
-        if (!listNBT.isEmpty()) {
-          if (maxSlots == 0) {
-            return HAS_ITEMS;
+      var storage = ToolDataComponents.storage(tool);
+      Map<Integer,ItemStack> inventory = storage.inventory(key);
+      if (!inventory.isEmpty()) {
+        int maxSlots = getSlots(tool, modifier);
+        if (inventory.size() > maxSlots) {
+          return HAS_ITEMS;
+        }
+        BitSet freeSlots = new BitSet(maxSlots);
+        freeSlots.set(0, maxSlots);
+        for (int slot : inventory.keySet()) {
+          if (slot < maxSlots) {
+            freeSlots.clear(slot);
           }
-          // first, see whether we have any available slots
-          BitSet freeSlots = new BitSet(maxSlots);
-          freeSlots.set(0, maxSlots, true);
-          for (int i = 0; i < listNBT.size(); i++) {
-            freeSlots.set(listNBT.getCompound(i).getInt(TAG_SLOT), false);
+        }
+        Map<Integer,Integer> moves = new HashMap<>();
+        for (int slot : new TreeMap<>(inventory).keySet()) {
+          if (slot >= maxSlots) {
+            int free = freeSlots.nextSetBit(0);
+            if (free < 0) {
+              return HAS_ITEMS;
+            }
+            freeSlots.clear(free);
+            moves.put(slot, free);
           }
-          for (int i = 0; i < listNBT.size(); i++) {
-            CompoundTag compoundNBT = listNBT.getCompound(i);
-            if (compoundNBT.getInt(TAG_SLOT) >= maxSlots) {
-              int free = freeSlots.stream().findFirst().orElse(-1);
-              if (free == -1) {
-                return HAS_ITEMS;
-              } else {
-                freeSlots.set(free, false);
-                compoundNBT.putInt(TAG_SLOT, free);
-              }
+        }
+        if (!moves.isEmpty()) {
+          Map<Integer,ItemStack> moved = new HashMap<>();
+          inventory.forEach((slot, stack) -> moved.put(moves.getOrDefault(slot, slot), stack));
+          ModDataNBT persistent = tool.getPersistentData();
+          ListTag metadata = persistent.get(key, GET_COMPOUND_LIST);
+          for (int i = 0; i < metadata.size(); i++) {
+            CompoundTag entry = metadata.getCompound(i);
+            int slot = entry.getInt(TAG_SLOT);
+            if (moves.containsKey(slot)) {
+              entry.putInt(TAG_SLOT, moves.get(slot));
             }
           }
-          persistentData.put(key, listNBT);
+          ToolDataComponents.setStorage(tool, storage.withInventory(key, moved));
+          persistent.put(key, metadata);
         }
       }
     }
@@ -246,17 +251,13 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
   @Nullable
   @Override
   public Component onRemoved(IToolStackView tool, Modifier modifier) {
-    // if we currently have item data, then return an error
-    ModDataNBT persistentData = tool.getPersistentData();
     ResourceLocation key = getKey(modifier);
-    if (persistentData.contains(key, Tag.TAG_LIST) && !persistentData.get(key, GET_COMPOUND_LIST).isEmpty()) {
+    if (!ToolDataComponents.storage(tool).inventory(key).isEmpty()) {
       return HAS_ITEMS;
     }
-    // remove the data key, should be empty
-    persistentData.remove(key);
+    tool.getPersistentData().remove(key);
     return null;
   }
-
 
   /* Helpers */
 
@@ -267,32 +268,20 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
    * @param compound  Tag to write to, use new for new tag
    * @return Tag written to, same as {@code compound}.
    */
-  public static CompoundTag writeStack(ItemStack stack, int slot, CompoundTag compound) {
-    stack.save(compound);
+  public static CompoundTag writeStack(ItemStack stack, int slot, CompoundTag compound, HolderLookup.Provider registries) {
+    stack.save(registries, compound);
     compound.putInt(TAG_SLOT, slot);
     return compound;
   }
 
   @Override
   public StackMatch findStack(IToolStackView tool, ModifierEntry modifier, Predicate<ItemStack> predicate) {
-    // can save a lot of effort if we have no slots
     int max = getSlots(tool, modifier);
     if (max > 0) {
-      IModDataView persistentData = tool.getPersistentData();
-      ResourceLocation key = getKey(modifier.getModifier());
-      ListTag slots = persistentData.get(key, GET_COMPOUND_LIST);
-      if (!slots.isEmpty()) {
-        // search all slots for the first match
-        for (int i = 0; i < slots.size(); i++) {
-          CompoundTag compound = slots.getCompound(i);
-          // slot must be valid
-          int slot = compound.getInt(TAG_SLOT);
-          if (slot < max) {
-            ItemStack stack = ItemStack.of(compound);
-            if (!stack.isEmpty() && predicate.test(stack)) {
-              return new StackMatch(stack, slot);
-            }
-          }
+      Map<Integer,ItemStack> inventory = ToolDataComponents.storage(tool).inventory(getKey(modifier.getModifier()));
+      for (var entry : new TreeMap<>(inventory).entrySet()) {
+        if (entry.getKey() < max && predicate.test(entry.getValue())) {
+          return new StackMatch(entry.getValue(), entry.getKey());
         }
       }
     }
@@ -301,35 +290,17 @@ public class InventoryModule implements ModifierModule, InventoryModifierHook, V
 
   @Override
   public List<ItemStack> getAllStacks(IToolStackView tool, ModifierEntry entry, List<ItemStack> stackList) {
-    // can save a lot of effort if we have no slots
     int max = getSlots(tool, entry);
     if (max > 0) {
-      IModDataView modData = tool.getPersistentData();
-      ResourceLocation key = getKey(entry.getModifier());
-      if (modData.contains(key, Tag.TAG_LIST)) {
-        ListTag list = modData.get(key, GET_COMPOUND_LIST);
-
-        // make sure the stacks are in order, NBT could store them in any order
-        ItemStack[] parsed = new ItemStack[max];
-        for (int i = 0; i < list.size(); i++) {
-          CompoundTag compound = list.getCompound(i);
-          // slot must be valid
-          int slot = compound.getInt(TAG_SLOT);
-          if (slot < max) {
-            parsed[slot] = ItemStack.of(compound);
-          }
-        }
-        // add stacks into the list
-        for (ItemStack stack : parsed) {
-          if (stack != null && !stack.isEmpty()) {
-            stackList.add(stack);
-          }
+      Map<Integer,ItemStack> inventory = ToolDataComponents.storage(tool).inventory(getKey(entry.getModifier()));
+      for (var stored : new TreeMap<>(inventory).entrySet()) {
+        if (stored.getKey() < max) {
+          stackList.add(stored.getValue());
         }
       }
     }
     return stackList;
   }
-
 
   /* Slot interaction */
 

@@ -94,6 +94,14 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - The focused storage check adds actual legacy potion/custom-data/count/slot/cooking metadata conversion. Runtime Mixin application and old-world compatibility beyond this boundary remain unverified.
 - These edits await CI; inventory-module behavior and the full Minecraft load gate remain open.
 
+### Native inventory contents and cooking metadata — checkpoint 42 (2026-10-08)
+
+- Checkpoint 41 is still being validated. This batch connects inventory reads, writes, searches and modifier removal validation to full native ItemStack snapshots in tool_storage. Sparse slots and complete component patches are retained; slot metadata remains in persistent tool data.
+- Capacity reductions plan every slot move before committing, retain each item and its cooking metadata, and reject insufficient space without partial moves. Normal slot replacement clears its old cooking timer.
+- Smelting reads actual component-backed input items and writes reduced counts back separately from remaining cooking time. Output component comparison, slot limits, recipes, sounds and experience remain intact.
+- CI is now read-only, checks the triggering commit and does not retain checkout credentials or push generated source. Necessary source changes are reviewed and committed directly as part of this authorized porting work.
+- Full compilation and the actual Minecraft load gate remain pending. No usable JAR or Phase 2 completion is claimed.
+
 ## Current checkpoint (2026-10-04)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.
