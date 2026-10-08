@@ -96,7 +96,7 @@ public final class BootstrapGameTest {
     ItemStack expected = recipe.value().assemble(new net.minecraft.world.item.crafting.SingleRecipeInput(raw),
       helper.getLevel().registryAccess());
     input.setStack(tool, modifier, 0, raw);
-    var player = helper.makeMockPlayer();
+    var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
     float halfHeat = recipe.value().getCookingTime() / 2f;
     smelting.afterSlingLaunch(tool, modifier, player, player, modifier, halfHeat, 2);
     helper.assertTrue(input.getStack(tool, modifier, 0).getCount() == 2 &&
