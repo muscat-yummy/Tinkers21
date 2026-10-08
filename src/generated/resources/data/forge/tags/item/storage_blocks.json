@@ -18,6 +18,8 @@
     {
       "id": "#c:storage_blocks",
       "required": false
-    }
+    },
+    "#forge:storage_blocks/amethyst",
+    "#forge:storage_blocks/quartz"
   ]
 }

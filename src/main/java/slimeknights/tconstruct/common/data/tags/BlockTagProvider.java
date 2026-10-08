@@ -95,8 +95,13 @@ public class BlockTagProvider extends BlockTagsProvider {
     addMetalTags(TinkerMaterials.knightmetal, true);
     addMetalTags(TinkerMaterials.knightslime, true);
 
-    tag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ).add(Blocks.QUARTZ_BLOCK);
-    tag(Tags.Blocks.STORAGE_BLOCKS).addTag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ);
+    TagKey<Block> amethystStorage = BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", "storage_blocks/amethyst"));
+    TagKey<Block> quartzStorage = BlockTags.create(ResourceLocation.fromNamespaceAndPath("c", "storage_blocks/quartz"));
+    tag(amethystStorage).add(Blocks.AMETHYST_BLOCK).addOptionalTag(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST.location());
+    tag(quartzStorage).add(Blocks.QUARTZ_BLOCK).addOptionalTag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ.location());
+    tag(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST).addOptionalTag(amethystStorage.location());
+    tag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ).addOptionalTag(quartzStorage.location());
+    tag(Tags.Blocks.STORAGE_BLOCKS).addTag(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST).addTag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ);
     for (DyeColor color : DyeColor.values()) {
       tag(TinkerTags.Blocks.STAINED_GLASS).add(BuiltInRegistries.BLOCK.get(ResourceLocation.withDefaultNamespace(color.getSerializedName() + "_stained_glass")));
       tag(TinkerTags.Blocks.STAINED_GLASS_PANES).add(BuiltInRegistries.BLOCK.get(ResourceLocation.withDefaultNamespace(color.getSerializedName() + "_stained_glass_pane")));

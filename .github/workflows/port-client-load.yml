@@ -1,4 +1,4 @@
-name: Diagnose the actual required casting output during native login sync
+name: Verify actual small-gem tags and native client gameplay transactions
 on:
   push:
     branches: [port/1.21.1-neoforge]

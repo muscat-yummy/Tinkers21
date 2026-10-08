@@ -196,8 +196,13 @@ public class ItemTagProvider extends ItemTagsProvider {
     addMetalTags(TinkerMaterials.knightslime);
     this.copy(Tags.Blocks.STORAGE_BLOCKS, Tags.Items.STORAGE_BLOCKS);
 
+    for (String material : new String[] {"amethyst", "quartz"}) {
+      ResourceLocation id = ResourceLocation.fromNamespaceAndPath("c", "storage_blocks/" + material);
+      copy(BlockTags.create(id), ItemTags.create(id));
+    }
+    copy(TinkerTags.Blocks.STORAGE_BLOCKS_AMETHYST, TinkerTags.Items.STORAGE_BLOCKS_AMETHYST);
     copy(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ, TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
-    tag(Tags.Items.STORAGE_BLOCKS).addTag(TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
+    tag(Tags.Items.STORAGE_BLOCKS).addTag(TinkerTags.Items.STORAGE_BLOCKS_AMETHYST).addTag(TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
 
     // glass
     copy(Tags.Blocks.GLASS_BLOCKS, Tags.Items.GLASS_BLOCKS);
