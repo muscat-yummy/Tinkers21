@@ -338,6 +338,52 @@ public final class BootstrapGameTest {
       var ops = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
       ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, output).getOrThrow()).getOrThrow();
       helper.assertTrue(ItemStack.matches(output, loaded), "Actual constructed tool changed during native persistence");
+      var loadedTool = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(loaded);
+      loadedTool.setDamage(1);
+      station.setItem(0, loaded);
+      station.setItem(1, new ItemStack(Items.OAK_PLANKS, 2));
+      ItemStack repaired = station.calcResult(player);
+      helper.assertTrue(!repaired.isEmpty() && repaired.getDamageValue() == 0 &&
+        slimeknights.tconstruct.library.tools.nbt.ToolStack.from(repaired).getMaterials().equals(built.getMaterials()),
+        "Actual station repair did not preserve materials or repair native damage");
+      ItemStack repairedCopy = repaired.copy();
+      station.onCraft(player, repaired, repaired.getCount());
+      helper.assertTrue(station.getItem(0).isEmpty() && station.getItem(1).getCount() == 1,
+        "Actual station repair did not consume one tool and one material");
+      station.setItem(1, ItemStack.EMPTY);
+      station.setItem(0, repairedCopy);
+      var haste = new slimeknights.tconstruct.library.modifiers.ModifierId("tconstruct:haste");
+      var upgradeSlot = slimeknights.tconstruct.library.tools.SlotType.UPGRADE;
+      int slots = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(repairedCopy).getFreeSlots(upgradeSlot);
+      float speed = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(repairedCopy).getStats()
+        .get(slimeknights.tconstruct.library.tools.stat.ToolStats.MINING_SPEED);
+      station.setItem(1, new ItemStack(Items.REDSTONE, 9));
+      ItemStack partial = station.calcResult(player);
+      helper.assertTrue(!partial.isEmpty(), "Actual station did not start an incremental modifier");
+      var partialTool = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(partial);
+      helper.assertTrue(partialTool.getUpgrades().getEntry(haste).getAmount(0) == 9 &&
+        partialTool.getFreeSlots(upgradeSlot) == slots - 1,
+        "Actual partial modifier lost its amount or consumed an incorrect upgrade slot count");
+      ItemStack partialCopy = partial.copy();
+      station.onCraft(player, partial, partial.getCount());
+      helper.assertTrue(station.getItem(0).isEmpty() && station.getItem(1).isEmpty(),
+        "Actual partial modifier did not consume its inputs exactly once");
+      ItemStack reloadedPartial = ItemStack.CODEC.parse(ops,
+        ItemStack.CODEC.encodeStart(ops, partialCopy).getOrThrow()).getOrThrow();
+      station.setItem(0, reloadedPartial);
+      station.setItem(1, new ItemStack(Items.REDSTONE, 36));
+      ItemStack complete = station.calcResult(player);
+      helper.assertTrue(!complete.isEmpty(), "Actual station did not continue a persisted partial modifier");
+      var completeTool = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(complete);
+      helper.assertTrue(completeTool.getUpgrades().getEntry(haste).getLevel() == 1 &&
+        completeTool.getUpgrades().getEntry(haste).getAmount(45) == 45 &&
+        completeTool.getFreeSlots(upgradeSlot) == slots - 1 &&
+        completeTool.getStats().get(slimeknights.tconstruct.library.tools.stat.ToolStats.MINING_SPEED) > speed,
+        "Actual resumed modifier lost its level/stats or consumed its upgrade slot twice");
+      station.onCraft(player, complete, complete.getCount());
+      helper.assertTrue(station.getItem(0).isEmpty() && station.getItem(1).isEmpty(),
+        "Actual completed modifier did not consume its remaining inputs exactly once");
+
     } finally {
       player.disconnectGameTest();
     }

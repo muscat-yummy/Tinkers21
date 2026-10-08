@@ -771,3 +771,10 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Run 37819921112 compiles the official pinned NeoForge GameTest framework and reaches actual player login. Login exposes an unbound persistent_data attachment: the three modifier-data attachment registers and piggyback register were subscribed during CommonSetup, after the native attachment registry event.
 - Move those subscriptions to their owning module constructors, retaining actual native providers, persistence/death-copy policy and login/dimension/respawn synchronization. No login event or payload synchronization is bypassed. The actual player test now requires persistent, transient modifier and piggyback capabilities.
 - Extend the native world gate to actual canceled/approved sword attacks and to the real Part Builder / Tinkers Station wood-to-parts-to-pickaxe loop, including input consumption and native constructed-tool persistence. These new changes await CI; Phase 3 remains in progress.
+
+### Actual native player and construction gate passed (2026-10-08)
+
+- Run 37820711260 passes full TiC/Mantle assembly and the strict actual Minecraft world gate. Native player login now succeeds with the real registered persistent, modifier and piggyback capabilities. No reload/runtime ERROR remains apart from first-run server.properties.
+- Actual native canceled and approved stone harvesting and sword attacks pass, including one permission event, durability synchronization, native equipped sword attributes, health changes and temporary knockback cleanup.
+- Actual placed Part Builder and Tinkers Station pass the oak-planks to material parts to usable pickaxe loop, exact material/pattern/part consumption and native constructed-tool persistence. Menu/client rendering and full later-phase coverage remain open.
+- Add actual station repair and incremental haste application in two transactions (9 redstone, native save/load, 36 redstone), checking modifier amounts, rebuilt speed, exact input consumption and one upgrade slot across both transactions. This extension awaits CI.
