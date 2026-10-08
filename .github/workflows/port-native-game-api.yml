@@ -1,0 +1,26 @@
+name: Inspect public pinned Minecraft game-test and harvest APIs
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/port-native-game-api.yml]
+permissions:
+  contents: read
+jobs:
+  native_api:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Resolve pinned public Minecraft artifacts
+        run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
+      - name: Inspect public native APIs only
+        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.gametest.framework.GameTestHelper net.minecraft.server.level.ServerPlayerGameMode
