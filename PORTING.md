@@ -86,6 +86,14 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - One focused native storage check covers item/fluid input and output aliasing, potion components, counts, sparse slots, native persistence/wire, immutable removal, component synchronization/copy and external-edit cache invalidation. It includes the existing changed ToolStackData behavior check once. Unchanged independent tests are skipped; the selector now isolates storage changes.
 - Storage foundations are not yet connected to all fluid/inventory behavior. Legacy-data migration, runtime Mixin application and actual Minecraft loading remain open. Source changes and the focused check await CI.
 
+### Component-preserving fluids and legacy decode boundary — checkpoint 41 (2026-10-08)
+
+- Checkpoint 40 (run 37772643802) reports **17 full-source errors**, all in fluid/inventory storage. Mantle/declarations, component foundations and fluid-source callers compile. The focused storage test compiled but failed in vanilla Bootstrap before assertions: the new JavaExec omitted native runtime resources. Its classpath now matches the existing native checks. This is not reported as a passing behavior test.
+- Tool tanks and smashing store full native fluid snapshots in the registered tool component. Filling, draining, fluid comparison, capacity scaling and tooltips preserve component patches. Projectile snapshots save/parse with the actual projectile level registry; legacy projectile potion/custom data is converted with the same actual context.
+- Both native lazy ItemStack codecs are wrapped at the source-confirmed initialization boundary, before strict/optional codecs capture them. Legacy nested fluid/items are migrated with the decoding RegistryOps, native codecs and Mantle's real vanilla data fixer. Metadata such as slot/cooking time and unrelated custom data is retained. Unknown IDs or missing context fail explicitly.
+- The focused storage check adds actual legacy potion/custom-data/count/slot/cooking metadata conversion. Runtime Mixin application and old-world compatibility beyond this boundary remain unverified.
+- These edits await CI; inventory-module behavior and the full Minecraft load gate remain open.
+
 ## Current checkpoint (2026-10-04)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.

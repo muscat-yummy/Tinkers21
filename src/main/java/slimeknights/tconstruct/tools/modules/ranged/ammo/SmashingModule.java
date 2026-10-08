@@ -120,13 +120,29 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
     return Fluids.EMPTY;
   }
 
-  /** Gets the current fluid NBT */
-  @Nullable
-  private static CompoundTag getFluidTag(IModDataView data) {
-    if (data.contains(KEY_FLUID_TAG, Tag.TAG_COMPOUND)) {
-      return data.getCompound(KEY_FLUID_TAG);
+  /** Native tool storage preserves the entire fluid component patch. */
+  private static FluidStack toolFluid(IToolStackView tool) {
+    return slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).fluid(KEY_FLUID);
+  }
+
+  private static void clearFluid(IToolStackView tool) {
+    clearFluid(tool.getPersistentData());
+    slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.setStorage(tool,
+      slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).withFluid(KEY_FLUID, FluidStack.EMPTY));
+  }
+
+  /** Entity effects always have the projectile's actual level registry context. */
+  private static FluidStack projectileFluid(ModDataNBT data, Projectile projectile, int amount) {
+    CompoundTag saved = data.getCompound(KEY_FLUID_TAG);
+    if (saved.contains("id", Tag.TAG_STRING)) {
+      return FluidStack.parseOptional(projectile.level().registryAccess(), saved).copyWithAmount(amount);
     }
-    return null;
+    CompoundTag legacy = new CompoundTag();
+    legacy.putString("FluidName", data.getString(KEY_FLUID));
+    legacy.putInt("Amount", amount);
+    if (!saved.isEmpty()) legacy.put("Tag", saved);
+    return slimeknights.tconstruct.library.tools.nbt.ToolStorageLegacy.readFluid(legacy,
+      net.minecraft.resources.RegistryOps.create(net.minecraft.nbt.NbtOps.INSTANCE, projectile.level().registryAccess()));
   }
 
   /** Removes the fluid from the tool */
@@ -169,10 +185,9 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
       data.putString(KEY_FLUID, Loadables.FLUID.getString(resource.getFluid()));
       // we want to store a fixed size, but its possible part swapping changes our capacity, so keep track of our capacity at the time of storing
       data.putFloat(KEY_VALIDATE, getValidationAmount(tool, modifier));
-      CompoundTag tag = resource.getTag();
-      if (tag != null) {
-        data.put(KEY_FLUID_TAG, tag.copy());
-      }
+      slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.setStorage(tool,
+        slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).withFluid(KEY_FLUID, resource.copyWithAmount(1)));
+      data.remove(KEY_FLUID_TAG);
     }
     return amount;
   }
@@ -181,17 +196,17 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   public FluidStack drain(IToolStackView tool, ModifierEntry modifier, int maxDrain, FluidAction action) {
     if (maxDrain > 0) {
       ModDataNBT data = tool.getPersistentData();
-      Fluid fluid = getFluid(data);
+      Fluid fluid = toolFluid(tool).getFluid();
       if (fluid != Fluids.EMPTY) {
         int amount = getAmount(modifier, fluid);
         if (amount <= 0) {
           // 0 amount with a fluid means datapacks changed, best we can do is delete what we have
-          clearFluid(data);
+          clearFluid(tool);
           // ensure we requested enough
         } else if (amount <= maxDrain) {
-          FluidStack result = new FluidStack(fluid, amount, getFluidTag(data));
+          FluidStack result = toolFluid(tool).copyWithAmount(amount);
           if (action.execute()) {
-            clearFluid(data);
+            clearFluid(tool);
           }
           return result;
         }
@@ -204,21 +219,20 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   public FluidStack drain(IToolStackView tool, ModifierEntry modifier, FluidStack resource, FluidAction action) {
     if (!resource.isEmpty()) {
       ModDataNBT data = tool.getPersistentData();
-      Fluid fluid = getFluid(data);
+      Fluid fluid = toolFluid(tool).getFluid();
       // ensure we have a valid fluid
       if (fluid != Fluids.EMPTY && resource.getFluid() == fluid) {
         int amount = getAmount(modifier, fluid);
         if (amount <= 0) {
           // 0 amount with a fluid means datapacks changed, best we can do is delete what we have
-          clearFluid(data);
+          clearFluid(tool);
           // ensure we requested enough
         } else if (amount <= resource.getAmount()) {
           // ensure the tag matches
-          CompoundTag storedTag = getFluidTag(data);
-          if (Objects.equals(storedTag, resource.getTag())) {
-            FluidStack result = new FluidStack(fluid, amount, storedTag);
+          if (FluidStack.isSameFluidSameComponents(toolFluid(tool), resource)) {
+            FluidStack result = toolFluid(tool).copyWithAmount(amount);
             if (action.execute()) {
-              clearFluid(data);
+              clearFluid(tool);
             }
             return result;
           }
@@ -234,14 +248,14 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   @Override
   public FluidStack getFluidInTank(IToolStackView tool, ModifierEntry modifier, int tank) {
     ModDataNBT data = tool.getPersistentData();
-    Fluid fluid = getFluid(data);
+    Fluid fluid = toolFluid(tool).getFluid();
     if (fluid != Fluids.EMPTY) {
       int amount = getAmount(modifier, fluid);
       if (amount > 0) {
-        return new FluidStack(fluid, amount, getFluidTag(data));
+        return toolFluid(tool).copyWithAmount(amount);
       } else {
         // invalid, nothing more to do
-        clearFluid(data);
+        clearFluid(tool);
       }
     }
     return FluidStack.EMPTY;
@@ -249,7 +263,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
 
   @Override
   public int getTankCapacity(IToolStackView tool, ModifierEntry modifier, int tank) {
-    Fluid fluid = getFluid(tool.getPersistentData());
+    Fluid fluid = toolFluid(tool).getFluid();
     if (fluid != Fluids.EMPTY) {
       return getAmount(modifier, fluid);
     }
@@ -290,7 +304,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   @Override
   public Component onRemoved(IToolStackView tool, Modifier modifier) {
     // delete fluid on swap, such a waste
-    clearFluid(tool.getPersistentData());
+    clearFluid(tool);
     return null;
   }
 
@@ -302,15 +316,13 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
     // if firing an arrow via multishot, don't fill the extra projectiles with fluid to prevent some dupes with effects
     if (arrow == null || arrow.pickup == Pickup.ALLOWED || shooter instanceof Player player && player.getAbilities().instabuild) {
       ModDataNBT toolData = tool.getPersistentData();
-      Fluid fluid = getFluid(toolData);
+      Fluid fluid = toolFluid(tool).getFluid();
       if (fluid != Fluids.EMPTY) {
         int amount = getAmount(modifier, fluid);
         if (amount > 0) {
           persistentData.putString(KEY_FLUID, toolData.getString(KEY_FLUID));
           persistentData.putInt(KEY_AMOUNT, amount);
-          if (toolData.contains(KEY_FLUID_TAG, Tag.TAG_COMPOUND)) {
-            persistentData.put(KEY_FLUID_TAG, toolData.getCompound(KEY_FLUID_TAG));
-          }
+          persistentData.put(KEY_FLUID_TAG, toolFluid(tool).copyWithAmount(amount).save(projectile.level().registryAccess()));
         }
       }
     }
@@ -327,7 +339,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
         if (effects.hasEntityEffects()) {
           // apply the effect
           int drained = effects.applyToEntity(
-            new FluidStack(fluid, amount, getFluidTag(persistentData)),
+            projectileFluid(persistentData, projectile, amount),
             modifier.getEffectiveLevel(),
             FluidEffectContext.builder(projectile.level()).user(attacker).projectile(projectile).location(hit.getLocation()).target(hit.getEntity(), target),
             FluidAction.EXECUTE
@@ -370,7 +382,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
         if (effects.hasBlockEffects()) {
           // apply the effect
           int drained = effects.applyToBlock(
-            new FluidStack(fluid, amount, getFluidTag(persistentData)),
+            projectileFluid(persistentData, projectile, amount),
             modifier.getEffectiveLevel(),
             FluidEffectContext.builder(projectile.level()).user(attacker).projectile(projectile).location(hit.getLocation()).block(hit),
             FluidAction.EXECUTE
@@ -411,7 +423,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
           // apply the effect at the location of the projectile
           Vec3 position = projectile.position();
           int drained = effects.applyToBlock(
-            new FluidStack(fluid, amount, getFluidTag(persistentData)),
+            projectileFluid(persistentData, projectile, amount),
             modifier.getEffectiveLevel(),
             FluidEffectContext.builder(projectile.level()).user(projectile.getOwner()).projectile(projectile).location(position)
               .block(new BlockHitResult(position, projectile.getDirection(), projectile.blockPosition(), false)),
@@ -445,11 +457,11 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   @Override
   public Component getDisplayName(IToolStackView tool, ModifierEntry entry, Component name, @Nullable RegistryAccess access) {
     IModDataView data = tool.getPersistentData();
-    Fluid fluid = getFluid(data);
+    Fluid fluid = toolFluid(tool).getFluid();
     if (fluid != Fluids.EMPTY) {
       // formats as <name> <level> (<fluid>)
       return Component.translatable(FORMAT, name,
-        new FluidStack(fluid, FluidValues.BOTTLE, getFluidTag(data)).getDisplayName()
+        toolFluid(tool).copyWithAmount(FluidValues.BOTTLE).getDisplayName()
       ).withStyle(name.getStyle());
     }
     return name;
@@ -458,12 +470,12 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
   @Override
   public void addTooltip(IToolStackView tool, ModifierEntry modifier, @Nullable Player player, List<Component> tooltip, TooltipKey tooltipKey, TooltipFlag tooltipFlag) {
     IModDataView data = tool.getPersistentData();
-    Fluid fluid = getFluid(data);
+    Fluid fluid = toolFluid(tool).getFluid();
     if (fluid != Fluids.EMPTY) {
       int amount = getAmount(modifier, fluid);
       if (amount > 0) {
         // formats as <fluid>: <amount> mb
-        tooltip.add(modifier.getModifier().applyStyle(new FluidStack(fluid, amount, getFluidTag(data)).getDisplayName().copy()
+        tooltip.add(modifier.getModifier().applyStyle(toolFluid(tool).copyWithAmount(amount).getDisplayName().copy()
           .append(": ").append(Component.translatable(ToolTankHelper.MB_FORMAT, TranslationHelper.COMMA_FORMAT.format(amount)))));
       }
     }
@@ -477,11 +489,11 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
     @Override
     public FluidStack getFluid(IToolStackView tool) {
       IModDataView data = tool.getPersistentData();
-      Fluid fluid = SmashingModule.getFluid(data);
+      Fluid fluid = toolFluid(tool).getFluid();
       if (fluid != Fluids.EMPTY) {
         int amount = getAmount(fluid);
         if (amount > 0) {
-          return new FluidStack(fluid, amount, getFluidTag(data));
+          return toolFluid(tool).copyWithAmount(amount);
         }
       }
       return FluidStack.EMPTY;
@@ -497,7 +509,7 @@ public enum SmashingModule implements ModifierModule, FluidModifierHook, Project
     @Override
     public int getCapacity(IToolStackView tool) {
       IModDataView data = tool.getPersistentData();
-      Fluid fluid = SmashingModule.getFluid(data);
+      Fluid fluid = toolFluid(tool).getFluid();
       if (fluid != Fluids.EMPTY) {
         return getAmount(fluid);
       }

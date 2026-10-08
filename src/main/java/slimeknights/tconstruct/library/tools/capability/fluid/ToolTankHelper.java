@@ -24,7 +24,9 @@ import java.util.function.BiFunction;
 @RequiredArgsConstructor
 public class ToolTankHelper {
   /** Helper function to parse a fluid from NBT */
-  public static final BiFunction<CompoundTag, String, FluidStack> PARSE_FLUID = (nbt, key) -> FluidStack.loadFluidStackFromNBT(nbt.getCompound(key));
+  public static FluidStack parseFluid(net.minecraft.core.HolderLookup.Provider registries, CompoundTag nbt, String key) {
+    return FluidStack.parseOptional(registries, nbt.getCompound(key));
+  }
 
   /** Format key for the stat */
   public static final String MB_FORMAT = Mantle.makeDescriptionId("gui", "fluid.millibucket");
@@ -53,13 +55,15 @@ public class ToolTankHelper {
 
   /** Gets the fluid in the tank */
   public FluidStack getFluid(IToolStackView tool) {
-    return tool.getPersistentData().get(getFluidKey(), PARSE_FLUID);
+    return slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).fluid(getFluidKey());
   }
 
   /** Sets the fluid in the tank */
   public FluidStack setFluid(IToolStackView tool, FluidStack fluid) {
     if (fluid.isEmpty()) {
       tool.getPersistentData().remove(fluidKey);
+      slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.setStorage(tool,
+        slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).withFluid(fluidKey, FluidStack.EMPTY));
       return FluidStack.EMPTY;
     }
     int capacity = getCapacity(tool);
@@ -68,7 +72,9 @@ public class ToolTankHelper {
     if (fluid.getAmount() > capacity) {
       fluid.setAmount(capacity);
     }
-    tool.getPersistentData().put(fluidKey, fluid.writeToNBT(new CompoundTag()));
+    tool.getPersistentData().remove(fluidKey);
+    slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.setStorage(tool,
+      slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.storage(tool).withFluid(fluidKey, fluid));
     return fluid;
   }
 }

@@ -15,7 +15,8 @@
     "BrushItemInvoker",
     "ProtectionEquipmentSlotMixin",
     "ProtectionEnchantmentSlotMixin",
-    "MaterialItemRarityMixin"
+    "MaterialItemRarityMixin",
+    "ItemStackStorageCodecMixin"
   ],
   "client": [
     "ToolTooltipMixin"

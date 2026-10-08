@@ -1,17 +1,18 @@
-name: Add native tool storage components and verify immutable persistence
+name: Preserve tool fluid components and migrate legacy storage with actual registry ops
 on:
   push:
     branches: [port/1.21.1-neoforge]
     paths: [.github/workflows/migrate-tic-namespace-oneshot.yml]
 permissions:
-  contents: write
+  contents: read
 jobs:
   inspect_native_next:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: port/1.21.1-neoforge
+          ref: ${{ github.sha }}
+          persist-credentials: false
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
@@ -127,7 +128,8 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          ref: port/1.21.1-neoforge
+          ref: ${{ github.sha }}
+          persist-credentials: false
           fetch-depth: 2
       - uses: actions/setup-java@v4
         with:
@@ -155,13 +157,14 @@ jobs:
                   mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
               }
               rootProject.tasks.register('compileToolStorageChecks', JavaCompile) {
-                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java')
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorageLegacy.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java')
                   classpath = rootProject.configurations.compileClasspath
                   destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/storage'))
               }
               rootProject.tasks.register('runToolStorageChecks', JavaExec) {
                   dependsOn 'compileToolStorageChecks'
-                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/storage')) + rootProject.configurations.compileClasspath
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/storage')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
                   mainClass.set('slimeknights.tconstruct.port.ToolStorageSmoke')
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
@@ -465,28 +468,6 @@ jobs:
           if changed:
               raise RuntimeError('Migration changed files on second pass: ' + ', '.join(changed))
           print('Namespace/resource/access migration idempotence: PASS')
-      - name: Persist the migration on the authorized port branch
-        run: |
-          git config user.name 'github-actions[bot]'
-          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
-          git add src/main/java src/main/resources/META-INF/accesstransformer.cfg
-          if ! git diff --cached --quiet; then
-            git commit -m "Port TiC references to resolved NeoForge 1.21.1 classes"
-            persisted=false
-            for attempt in 1 2 3; do
-              git fetch origin port/1.21.1-neoforge
-              # Rebase only the generated source commit; never overwrite concurrent port work.
-              git rebase origin/port/1.21.1-neoforge
-              if git push origin HEAD:port/1.21.1-neoforge; then
-                persisted=true
-                break
-              fi
-            done
-            if [ "$persisted" != true ]; then
-              echo "Concurrent updates prevented migration persistence after three attempts"
-              exit 1
-            fi
-          fi
       - name: Apply verified mapped access changes to Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Compile Mantle
@@ -502,6 +483,7 @@ jobs:
           storage_sources = {
               'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java',
               'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java',
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorageLegacy.java',
               'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java',
               'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java',
           }
