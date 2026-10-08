@@ -298,6 +298,22 @@ public final class BootstrapGameTest {
       var recipe = (slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe) holder.value();
       var parts = recipe.getToolParts();
       helper.assertTrue(parts.size() == 3, "Actual pickaxe building recipe lost its tool parts");
+      var builderMenu = (slimeknights.tconstruct.tables.menu.PartBuilderContainerMenu)
+        builder.createMenu(1, player.getInventory(), player);
+      var stationMenu = (slimeknights.tconstruct.tables.menu.TinkerStationContainerMenu)
+        station.createMenu(2, player.getInventory(), player);
+      helper.assertTrue(builderMenu != null && stationMenu != null, "Actual construction menus did not open");
+      var inventorySlots = new java.util.HashSet<Integer>();
+      for (var slot : stationMenu.slots) {
+        if (slot.container == player.getInventory()) {
+          helper.assertTrue(slot.getContainerSlot() >= 0 &&
+            slot.getContainerSlot() < player.getInventory().getContainerSize() &&
+            inventorySlots.add(slot.getContainerSlot()),
+            "Native station menu duplicated or misaddressed a player inventory slot");
+        }
+      }
+      helper.assertTrue(inventorySlots.size() == 41, "Actual station menu lost a player armor, offhand or inventory slot");
+
       builder.setItem(slimeknights.tconstruct.tables.block.entity.table.PartBuilderBlockEntity.MATERIAL_SLOT,
         new ItemStack(Items.OAK_PLANKS, 64));
       builder.setItem(slimeknights.tconstruct.tables.block.entity.table.PartBuilderBlockEntity.PATTERN_SLOT,
@@ -305,17 +321,25 @@ public final class BootstrapGameTest {
       int expectedMaterials = 64;
       int expectedPatterns = parts.size();
       for (int i = 0; i < parts.size(); i++) {
-        builder.selectRecipe(slimeknights.tconstruct.library.recipe.partbuilder.Pattern.fromItem(parts.get(i)));
+        int button = builder.getSortedButtons().indexOf(
+          slimeknights.tconstruct.library.recipe.partbuilder.Pattern.fromItem(parts.get(i)));
+        helper.assertTrue(button >= 0 && builderMenu.clickMenuButton(player, button),
+          "Actual part-builder menu did not select a required pattern");
         var selected = builder.getPartRecipe();
         helper.assertTrue(selected != null, "Actual part builder did not select a required pickaxe part");
         int used = selected.getItemsUsed(builder.getInventoryWrapper());
-        ItemStack part = builder.calcResult(player);
+        ItemStack part = builderMenu.getOutputSlot().getItem();
         helper.assertTrue(!part.isEmpty() && part.getItem() == parts.get(i).asItem() &&
           new slimeknights.tconstruct.library.materials.definition.MaterialId("tconstruct:wood").equals(
             slimeknights.tconstruct.library.tools.part.IMaterialItem.getMaterialFromStack(part)),
           "Actual part building lost its output or material");
-        ItemStack input = part.copy();
-        builder.onCraft(player, part, part.getCount());
+        ItemStack expectedPart = part.copy();
+        builderMenu.clicked(builderMenu.getOutputSlot().index, 0,
+          net.minecraft.world.inventory.ClickType.PICKUP, player);
+        ItemStack input = builderMenu.getCarried();
+        helper.assertTrue(ItemStack.matches(input, expectedPart),
+          "Actual part-builder menu did not give the crafted material part to the player");
+        builderMenu.setCarried(ItemStack.EMPTY);
         expectedMaterials -= used;
         expectedPatterns--;
         helper.assertTrue(builder.getItem(0).getCount() == expectedMaterials &&
@@ -331,7 +355,10 @@ public final class BootstrapGameTest {
       helper.assertTrue(built.getMaterials().size() == 3 && built.getCurrentDurability() > 0 && !built.isBroken(),
         "Actual construction produced an unusable material tool");
       ItemStack output = result.copy();
-      station.onCraft(player, result, result.getCount());
+      ItemStack taken = stationMenu.quickMoveStack(player, station.getContainerSize());
+      helper.assertTrue(ItemStack.matches(taken, output) &&
+        player.getInventory().items.stream().anyMatch(stack -> ItemStack.matches(stack, output)),
+        "Actual station menu did not transfer the constructed tool to the player");
       for (int i = 0; i < parts.size(); i++) {
         helper.assertTrue(station.getItem(i + 1).isEmpty(), "Actual station did not consume a building input");
       }
@@ -359,7 +386,11 @@ public final class BootstrapGameTest {
         .get(slimeknights.tconstruct.library.tools.stat.ToolStats.MINING_SPEED);
       station.setItem(1, new ItemStack(Items.REDSTONE, 9));
       ItemStack partial = station.calcResult(player);
-      helper.assertTrue(!partial.isEmpty(), "Actual station did not start an incremental modifier");
+      helper.assertTrue(!partial.isEmpty(), "Actual station did not start an incremental modifier: recipe=" +
+        station.getLastRecipe() + ", error=" + (station.getCurrentError() == null ? "none" : station.getCurrentError().getString()) +
+        ", free upgrade slots=" + slots + ", redstone tag=" + new ItemStack(Items.REDSTONE).is(
+          net.minecraft.tags.TagKey.create(net.minecraft.core.registries.Registries.ITEM,
+            ResourceLocation.parse("forge:dusts/redstone"))));
       var partialTool = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(partial);
       helper.assertTrue(partialTool.getUpgrades().getEntry(haste).getAmount(0) == 9 &&
         partialTool.getFreeSlots(upgradeSlot) == slots - 1,

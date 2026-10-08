@@ -1,4 +1,4 @@
-name: Verify native station repair and persisted incremental modifiers
+name: Verify native construction menus and diagnose incremental tool modifiers
 on:
   push:
     branches: [port/1.21.1-neoforge]

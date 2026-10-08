@@ -778,3 +778,9 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Actual native canceled and approved stone harvesting and sword attacks pass, including one permission event, durability synchronization, native equipped sword attributes, health changes and temporary knockback cleanup.
 - Actual placed Part Builder and Tinkers Station pass the oak-planks to material parts to usable pickaxe loop, exact material/pattern/part consumption and native constructed-tool persistence. Menu/client rendering and full later-phase coverage remain open.
 - Add actual station repair and incremental haste application in two transactions (9 redstone, native save/load, 36 redstone), checking modifier amounts, rebuilt speed, exact input consumption and one upgrade slot across both transactions. This extension awaits CI.
+
+### Human armor slots and native menu transactions (2026-10-08)
+
+- Run 37821406610 passes actual station repair and its exact input consumption, then fails at the first partial haste result. It is not marked as a modifier/gameplay gate pass. Preserve the failing behavior and report the actual selected recipe, error, free slots and contributor-tag membership in the assertion to diagnose it.
+- The native armor Type enum adds animal BODY. The station's old values() loop would insert a duplicate player boots slot. Restrict this player inventory menu to the four actual humanoid armor types, retaining the existing inventory indices and icons.
+- Exercise real Part Builder pattern button / native result-slot pickup and station quick-move result transfer instead of directly invoking their craft callbacks. Validate all 41 player inventory indices occur exactly once. This batch awaits CI; client screen rendering remains unverified.
