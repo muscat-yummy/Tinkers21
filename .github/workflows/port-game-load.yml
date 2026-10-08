@@ -1,4 +1,4 @@
-name: Verify a single native sub-predicate registration and actual world loading
+name: Verify explicit capability listeners and actual Minecraft loading
 on:
   push:
     branches: [port/1.21.1-neoforge]

@@ -97,7 +97,6 @@ import static slimeknights.tconstruct.fluids.block.MobEffectLiquidBlock.createEf
  */
 @SuppressWarnings("unused")
 public final class TinkerFluids extends TinkerModule {
-  @SubscribeEvent
   public static void registerCapabilities(RegisterCapabilitiesEvent event) {
     event.registerItem(Capabilities.FluidHandler.ITEM,
       (stack, context) -> new PotionBucketItem.PotionBucketWrapper(stack), potion.asItem());
