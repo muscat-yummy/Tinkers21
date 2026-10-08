@@ -141,6 +141,7 @@ public class TConstruct {
 
     // init deferred registers
     TinkerModule.initRegisters(bus);
+    slimeknights.tconstruct.library.tools.nbt.ToolDataComponents.register(bus);
     TinkerNetwork.setup();
     bus.addListener(TinkerNetwork.getInstance()::registerPayloads);
     TinkerTags.init();

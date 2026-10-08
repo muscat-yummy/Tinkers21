@@ -70,7 +70,7 @@ public record ExplosionFluidEffect(LevelingValue radius, LevelingValue damage, L
       Level world = context.getLevel();
       Entity cause = context.getEntity();
       DamageTypePair damageType = (cause != null ? TinkerDamageTypes.MOB_EXPLOSION : TinkerDamageTypes.EXPLOSION);
-      Projectile projectile = context.getProjectile();
+      net.minecraft.world.entity.Entity projectile = context.getProjectile();
       DamageSource damageSource;
       if (projectile != null) {
         damageSource = TinkerDamageTypes.source(world.registryAccess(), damageType.ranged(), projectile, cause);

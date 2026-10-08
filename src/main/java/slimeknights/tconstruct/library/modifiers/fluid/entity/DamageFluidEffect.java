@@ -46,7 +46,7 @@ public record DamageFluidEffect(float damage, @Nullable DamageTypePair damageTyp
     if (action.simulate()) {
       return value;
     }
-    Projectile projectile = context.getProjectile();
+    net.minecraft.world.entity.Entity projectile = context.getProjectile();
     LivingEntity entity = context.getEntity();
 
     // if provided a specific damage type, use that

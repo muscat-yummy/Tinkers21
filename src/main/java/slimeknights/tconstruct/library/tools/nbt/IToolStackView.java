@@ -23,6 +23,12 @@ public interface IToolStackView extends IToolContext {
     return false;
   }
 
+  /** Read an immutable native component from this tool's actual component storage. */
+  <T> T getComponent(net.minecraft.core.component.DataComponentType<T> type);
+
+  /** Replace/remove an immutable native component, preserving native save and synchronization. */
+  <T> void setComponent(net.minecraft.core.component.DataComponentType<T> type, T value);
+
   /* Stats */
 
   /** On built tools, contains the full tool stats. During tool rebuild, contains the base stats before considering modifiers. */

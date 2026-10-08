@@ -40,7 +40,7 @@ public record PushEntityFluidEffect(LevelingValue value) implements FluidEffect<
     Entity target = context.getTarget();
     // to compute the direction, we do one of three things
     Vec3 direction;
-    Projectile projectile = context.getProjectile();
+    net.minecraft.world.entity.Entity projectile = context.getProjectile();
     // projectile means use the projectile motion
     if (projectile != null) {
       direction = projectile.getDeltaMovement();

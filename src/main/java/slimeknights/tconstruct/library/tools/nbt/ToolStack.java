@@ -122,6 +122,16 @@ public class ToolStack implements IToolStackView {
   @Nullable
   private IModDataView volatileModData;
 
+  @Override
+  public <T> T getComponent(net.minecraft.core.component.DataComponentType<T> type) {
+    return componentData.getComponent(type);
+  }
+
+  @Override
+  public <T> void setComponent(net.minecraft.core.component.DataComponentType<T> type, T value) {
+    componentData.setComponent(type, value);
+  }
+
   /* Creating */
   private ToolStack(Item item, ToolDefinition definition, CompoundTag nbt) {
     this(item, definition, new ToolStackData(item, nbt));

@@ -1,4 +1,4 @@
-name: Preserve common recipe tags and native output components
+name: Add native tool storage components and verify immutable persistence
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,12 +35,11 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.minecraft.world.item.ItemStack': {'methods': ['static {};', 'parse(', 'parseOptional(']},
-              'net.minecraft.core.component.PatchedDataComponentMap': ['public '],
-              'net.minecraft.core.component.DataComponentMap$Builder': ['public '],
-              'net.minecraft.network.codec.StreamCodec': ['of(', 'composite(', 'map(', 'cast('],
-              'net.minecraft.resources.RegistryOps$RegistryInfoLookup': ['public '],
-              'net.neoforged.neoforge.registries.DeferredRegister$DataComponents': ['public ']
+              'net.minecraft.world.item.ItemStack': ['hashItemAndComponents(', 'matches('],
+              'net.minecraft.world.item.Item': ['components('],
+              'net.neoforged.neoforge.fluids.FluidStack': ['hashFluidAndComponents(', 'matches('],
+              'net.minecraft.core.component.DataComponentType$Builder': ['public '],
+              'net.minecraft.world.item.component.ItemContainerContents': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -154,6 +153,16 @@ jobs:
                   dependsOn 'compileResourceIdSmoke'
                   classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/resource-id')) + rootProject.configurations.compileClasspath
                   mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
+              }
+              rootProject.tasks.register('compileToolStorageChecks', JavaCompile) {
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java')
+                  classpath = rootProject.configurations.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/storage'))
+              }
+              rootProject.tasks.register('runToolStorageChecks', JavaExec) {
+                  dependsOn 'compileToolStorageChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/storage')) + rootProject.configurations.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ToolStorageSmoke')
               }
               rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
                   dependsOn ':mantle-port:compileJava'
@@ -490,9 +499,18 @@ jobs:
           workflow = pathlib.Path('.github/workflows/migrate-tic-namespace-oneshot.yml').read_text()
           checked_sources = set(re.findall(r"'([^']+\.java)'", workflow))
           changed = set(subprocess.check_output(['git', 'diff', '--name-only', os.environ['GITHUB_SHA'] + '^', 'HEAD'], text=True).splitlines())
-          affected = any(path in checked_sources or path.startswith(('mantle-port/', 'src/portTest/', 'scripts/port/', 'gradle/')) or path in ('build.gradle', 'settings.gradle', 'gradle.properties') for path in changed)
+          storage_sources = {
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java',
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java',
+              'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java',
+              'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java',
+          }
+          shared = any(path.startswith(('mantle-port/', 'scripts/port/', 'gradle/')) or path in ('build.gradle', 'settings.gradle', 'gradle.properties') for path in changed)
+          storage_changed = shared or bool(changed & storage_sources)
+          affected = shared or any(path in checked_sources - storage_sources or (path.startswith('src/portTest/') and path not in storage_sources) for path in changed)
           with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
               output.write('changed=' + str(affected).lower() + '\n')
+              output.write('storage_changed=' + str(storage_changed).lower() + '\n')
           print('Independent checks affected:', affected)
       - name: Verify typed resource ID behavior independently of the remaining TiC port
         if: steps.port_checks.outputs.changed == 'true'
@@ -504,9 +522,13 @@ jobs:
           ./gradlew :compileLeafPortChecks :runLootConditionSmoke :runTagConditionSmoke
           :runFluidContentsSmoke :runInstrumentIngredientSmoke :runLoadableIngredientScopeSmoke
           :runBonusFormulaSmoke :runForwardingCapabilitySmoke :runScalingChestSmoke
-          :runInventoryPacketSmoke :runMaterialItemDataSmoke :runToolStackDataSmoke :runEnchantmentDataSmoke :runItemAttributeDataSmoke :runBlockInteractionSmoke :runBlockPositionDataSmoke :runBannerPatternDataSmoke :runCountRequirementsSmoke :runBottleBrewingSmoke :runMaterialRecipePatternSmoke :runCraftingGridMappingSmoke :runRecipeInputSmoke :runPotionContentsSmoke
+          :runInventoryPacketSmoke :runMaterialItemDataSmoke :runEnchantmentDataSmoke :runItemAttributeDataSmoke :runBlockInteractionSmoke :runBlockPositionDataSmoke :runBannerPatternDataSmoke :runCountRequirementsSmoke :runBottleBrewingSmoke :runMaterialRecipePatternSmoke :runCraftingGridMappingSmoke :runRecipeInputSmoke :runPotionContentsSmoke
           :runCriticalHitSmoke :runCraftingExtensionSmoke :runRecipeWidgetSmoke :runAttributeOperationSmoke :runTintedVertexSmoke :runEffectFoundationSmoke :runToolTooltipPolicySmoke :runFirstMatchingRecipeSmoke :runRecipeIdentityScopeSmoke :runHarvestTierSmoke :runDamageStageSmoke :runArmorRegistryCheck --continue
           --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify changed native tool storage and component cache once
+        if: steps.port_checks.outputs.storage_changed == 'true'
+        continue-on-error: true
+        run: ./gradlew :runToolStorageChecks --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
       - name: Diagnose TiC declarations independently of method bodies
         continue-on-error: true
         run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

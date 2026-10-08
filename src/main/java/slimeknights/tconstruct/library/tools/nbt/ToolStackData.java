@@ -116,6 +116,26 @@ public final class ToolStackData {
     return stack;
   }
 
+  /** Native component values are already immutable snapshots owned by their type. */
+  public <T> T getComponent(net.minecraft.core.component.DataComponentType<T> type) {
+    return template.get(type);
+  }
+
+  /** Propagate an owned component without hiding edits made by other item users. */
+  public <T> void setComponent(net.minecraft.core.component.DataComponentType<T> type, T value) {
+    if (type == DataComponents.CUSTOM_DATA || type == DataComponents.DAMAGE || type == DataComponents.UNBREAKABLE || type == DataComponents.RARITY) {
+      throw new IllegalArgumentException("Use the owned tool data and durability/rarity APIs for " + type);
+    }
+    for (Map.Entry<ItemStack, State> entry : attached.entrySet()) {
+      ItemStack stack = entry.getKey();
+      if (stack.isEmpty()) continue;
+      boolean externallyChanged = !entry.getValue().matches(stack);
+      if (value == null) stack.remove(type);
+      else stack.set(type, value);
+      if (!externallyChanged) entry.setValue(State.read(stack));
+    }
+  }
+
   /** Owned tool display state is synchronized to every explicitly attached native item. */
   public void setRarity(Rarity rarity) {
     ownedRarity = rarity;

@@ -78,6 +78,14 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - Fluid effects accept the actual Entity source supplied by Immersive Engineering; native mobProjectile supports Entity. Source/owner attribution is retained without an unsafe cast.
 - Edits await CI. Full compilation and actual Minecraft loading remain Phase 2 requirements.
 
+### Native storage foundations — checkpoint 40 (2026-10-08)
+
+- Checkpoint 39 (run 37771638751) reports **20 full-source errors**, from 32. Three are fluid-effect callers of the intentionally widened Entity source API, corrected in this batch; the other seventeen are fluid/inventory persistence. Mantle/declarations and native inspection pass.
+- ToolStorage contains immutable, defensively copied full native FluidStack/ItemStack snapshots with registry-aware native codecs and stream codecs. Sparse inventories retain arbitrary nonnegative slot indices. Component registration uses the injected mod bus and actual DATA_COMPONENT_TYPE registry.
+- ToolStackView exposes owned native component access through ToolStackData; DummyToolStack retains actual item defaults in a native PatchedDataComponentMap. Existing tool-data/damage/rarity components remain managed by their dedicated APIs.
+- One focused native storage check covers item/fluid input and output aliasing, potion components, counts, sparse slots, native persistence/wire, immutable removal, component synchronization/copy and external-edit cache invalidation. It includes the existing changed ToolStackData behavior check once. Unchanged independent tests are skipped; the selector now isolates storage changes.
+- Storage foundations are not yet connected to all fluid/inventory behavior. Legacy-data migration, runtime Mixin application and actual Minecraft loading remain open. Source changes and the focused check await CI.
+
 ## Current checkpoint (2026-10-04)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.

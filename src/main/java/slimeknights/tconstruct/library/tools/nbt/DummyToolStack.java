@@ -7,11 +7,30 @@ import slimeknights.tconstruct.library.tools.definition.ToolDefinition;
 
 /** Tool stack instance in a context that does not have a proper tool, used for projectils */
 @SuppressWarnings("ClassCanBeRecord")
-@RequiredArgsConstructor @Getter
+@Getter
 public class DummyToolStack implements IToolStackView {
   private final Item item;
   private final ModifierNBT modifiers;
   private final ModDataNBT persistentData;
+  private final net.minecraft.core.component.PatchedDataComponentMap components;
+
+  public DummyToolStack(Item item, ModifierNBT modifiers, ModDataNBT persistentData) {
+    this.item = item;
+    this.modifiers = modifiers;
+    this.persistentData = persistentData;
+    this.components = new net.minecraft.core.component.PatchedDataComponentMap(item.components());
+  }
+
+  @Override
+  public <T> T getComponent(net.minecraft.core.component.DataComponentType<T> type) {
+    return components.get(type);
+  }
+
+  @Override
+  public <T> void setComponent(net.minecraft.core.component.DataComponentType<T> type, T value) {
+    if (value == null) components.remove(type);
+    else components.set(type, value);
+  }
 
   @Override
   public ToolDefinition getDefinition() {
