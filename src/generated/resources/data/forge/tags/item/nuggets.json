@@ -15,6 +15,10 @@
     "#forge:nuggets/hepatizon",
     "#forge:nuggets/soulsteel",
     "#forge:nuggets/knightmetal",
-    "#forge:nuggets/knightslime"
+    "#forge:nuggets/knightslime",
+    {
+      "id": "#c:nuggets",
+      "required": false
+    }
   ]
 }

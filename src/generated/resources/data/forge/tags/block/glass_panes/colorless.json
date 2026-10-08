@@ -1,5 +1,9 @@
 {
   "values": [
-    "tconstruct:clear_glass_pane"
+    "tconstruct:clear_glass_pane",
+    {
+      "id": "#c:glass_panes/colorless",
+      "required": false
+    }
   ]
 }

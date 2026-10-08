@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:ore_bearing_ground/deepslate",
+      "required": false
+    }
+  ]
+}

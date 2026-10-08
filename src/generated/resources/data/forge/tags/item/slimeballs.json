@@ -3,6 +3,10 @@
     "#forge:slimeball/earth",
     "#forge:slimeball/sky",
     "#forge:slimeball/ichor",
-    "#forge:slimeball/ender"
+    "#forge:slimeball/ender",
+    {
+      "id": "#c:slimeballs",
+      "required": false
+    }
   ]
 }

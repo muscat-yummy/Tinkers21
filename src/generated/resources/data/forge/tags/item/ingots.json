@@ -16,6 +16,10 @@
     "#forge:ingots/hepatizon",
     "#forge:ingots/soulsteel",
     "#forge:ingots/knightmetal",
-    "#forge:ingots/knightslime"
+    "#forge:ingots/knightslime",
+    {
+      "id": "#c:ingots",
+      "required": false
+    }
   ]
 }

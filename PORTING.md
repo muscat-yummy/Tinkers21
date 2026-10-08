@@ -116,11 +116,18 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - The next observed fault is native ItemStack construction recursively entering tool post-load verification through an internal working copy. Verification now reads and writes tool data directly. Only internal ToolStackData snapshot construction suppresses the native hook, with scoped thread-local cleanup; normal item construction, copying and codec loading still verify tool data.
 - The native world fixture adds actual TiC pickaxe copy and codec round trips with component equality. This fix is pending actual Minecraft validation in run 37783186877. No world-load success, Phase 2 completion or gameplay-ready build is claimed.
 
+### Native common contributors — Phase 3 continuation (2026-10-08)
+
+- The actual world gate passes in run 37785258311 with no resource reload errors. It verifies native material tools, modifier stat rebuilding, independent tool copies and native broken/damage persistence in addition to the initial storage/cooking checks.
+- Parsing alone does not prove retained ingredients work: the imported iron material recipe names forge:ingots/iron, while NeoForge supplies vanilla iron under c:ingots/iron. Contributor bridges are added for 172 block/item/fluid tags with mappings verified against the primary Forge/NeoForge common-tag declarations. Existing TiC memberships are retained; each old tag includes the corresponding real native common tag.
+- The in-world fixture now requires an actual vanilla iron ingot to match the retained iron material recipe and requires native string membership for old tool-construction inputs. These edits await CI; deeper gameplay and later phases remain open.
+
 ## Current checkpoint (2026-10-08)
 
-**Phase 1 (build environment): complete. Phase 2 (bootstrap): in progress.** Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 21.1.251 / Java 21, without production source exclusions. Actual Minecraft launch passes mod construction and worldgen/loot/tag loading. Native tool post-load verification is being corrected before the in-world gate can run. The in-world verification gate has not passed. The imported Forge JUnit fixtures are not yet ported; no claim is made that the legacy test suite or gameplay is ready.
+**Phase 1 (build environment): complete. Phase 2 (bootstrap): complete. Phase 3 (core tool system): in progress.** Run 37785258311 on commit 887c6f687dc9917dc77a18b52a12b06eedcc42fc compiles all TiC/Mantle production sources, assembles both jars and passes the actual native Minecraft world test on NeoForge 21.1.251 / Java 21. Native reload has no ERROR entries except first-run missing server.properties. It loads 3330 recipes, 297 dynamic modifiers and 23 station layouts.
 
-- Latest full-source production checkpoint: run 37777478355 compiles TiC/Mantle, assembles both jars and compiles the native GameTest. Minecraft mod construction exposes duplicate item sub-predicate registration from TinkerCommons and TinkerTools. TinkerCommons remains the single registration owner; the duplicate call is removed. Prior native storage checks pass, including immutable full-component item/fluid persistence, wire round trips and legacy potion/cooking metadata conversion. Unchanged independent checks are not rerun.
+- The in-world gate checks both native item codec Mixins, native component persistence, full tool inventory contents, sparse slot migration and atomic rejection, cooking metadata and actual vanilla recipe output. It additionally creates a real three-material iron pickaxe, verifies haste changes mining speed, retains materials/name/damage/modifier stats through native save/load, breaks an independent copy, retains breakage through loading, and rebuilds stats after repair/modifier removal.
+- Phase 3 still needs deeper material/modifier behavior and legacy-world checks. Native contributor bridges for retained Forge common tags are pending CI; client rendering, construction menus, fluid machinery and later gameplay phases remain unverified. The imported Forge JUnit fixtures remain unported. This is a successful server bootstrap gate, not a gameplay-ready release.
 
 - The cooking/JEI cache checkpoint passes the new crafting extension test, including a same-ID recipe reload with a new recipe instance. The production cache now uses weak reference identity because native RecipeHolder equality compares only IDs. Native cooking inputs, actual holder IDs and component-sensitive autosmelt inputs are implemented; the broader tool inventory serialization and game-load checks remain pending.
 - Verified recipe consumer wrappers retain the original registry provider, copy their mutable input data and forward registry-aware advancement serialization. Generated melting recipes use native holders, world registry context, the singular 1.21 recipe directory and fluid component patches. The registry-aware recipe batch passes Mantle and independent checks and reports 303 full-source errors. The subsequent bucket/shearing/effect batch passes the same checks and reports 289.
@@ -227,10 +234,10 @@ When investigating breakage, classify changes as:
 ### Phase 1 — Build environment (complete: 2026-09-28)
 Move Gradle/build configuration to Minecraft 1.21.1, NeoForge, and Java 21. Resolve dependencies and reach a useful compile state. The compiler now reports source-level port errors against the resolved core classpath. Compilation itself is not yet successful; optional integration APIs remain in the later-content audit.
 
-### Phase 2 — Bootstrap (in progress)
-Port mod initialization, registries, configuration, resource/data loading, and enough infrastructure for Minecraft to load the mod. Mantle and TiC's annotation-processing/declaration gate pass. Full production compilation and jar assembly now pass. Actual Minecraft launch reaches mod construction; the observed empty-listener registration failure is fixed in source and the in-world gate is being validated.
+### Phase 2 — Bootstrap (complete: 2026-10-08)
+Full TiC/Mantle production compilation, both jar assemblies, native mod construction, data reload and the actual in-world gate pass in run 37785258311. Resource schemas, module registration, native conditional recipes/outputs, modifier attributes and station SNBT load without data errors. No source exclusion or fake registry fallback is used.
 
-### Phase 3 — Core tool system
+### Phase 3 — Core tool system (in progress)
 Port and preserve the core material/tool/modifier systems, including MaterialId and material managers, ToolDefinition/ToolModule/ToolStack, IModifiable, Modifier/ModifierId/ModifierManager, modifier hooks/modules, and related serialization.
 
 Pay particular attention to ItemStack data changes introduced since 1.20.1. Prefer adapters or compatibility layers where they allow existing TiC concepts and addon APIs to remain intact.
@@ -272,7 +279,7 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 ## Known issues
 
 - Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
-- Actual game loading and runtime compatibility remain unresolved until the native in-world gate succeeds; client rendering and later gameplay phases are still unverified.
+- Actual server world loading and the initial core-tool checks pass. Deeper runtime compatibility, client rendering and later gameplay phases remain unverified.
 
 ## Upstream
 

@@ -52,6 +52,14 @@ public final class BootstrapGameTest {
     helper.assertTrue(slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader.getInstance()
       .get(ResourceLocation.parse("tconstruct:pickaxe")) != slimeknights.tconstruct.library.tools.layout.StationSlotLayout.EMPTY,
       "Legacy SNBT station icon did not load");
+    var ironRecipe = helper.getLevel().getRecipeManager()
+      .byKey(ResourceLocation.parse("tconstruct:tools/materials/iron/ingot")).orElseThrow().value();
+    helper.assertTrue(ironRecipe instanceof slimeknights.tconstruct.library.recipe.material.MaterialRecipe &&
+      ((slimeknights.tconstruct.library.recipe.material.MaterialRecipe) ironRecipe).getIngredient()
+        .test(new ItemStack(Items.IRON_INGOT)), "Native iron ingots did not enter the retained material recipe");
+    helper.assertTrue(new ItemStack(Items.STRING).is(net.minecraft.tags.TagKey.create(
+      net.minecraft.core.registries.Registries.ITEM, ResourceLocation.parse("forge:string"))),
+      "Native string contributors did not enter retained tool recipes");
     checkCoreToolPersistence(helper);
     checkInventoryAndCooking(helper);
     helper.succeed();

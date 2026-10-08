@@ -1,4 +1,4 @@
-name: Verify complete native data reload and material tool persistence
+name: Verify native common contributors in retained tool material recipes
 on:
   push:
     branches: [port/1.21.1-neoforge]

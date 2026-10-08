@@ -1,5 +1,9 @@
 {
   "values": [
-    "tconstruct:clear_glass"
+    "tconstruct:clear_glass",
+    {
+      "id": "#c:glass_blocks/colorless",
+      "required": false
+    }
   ]
 }

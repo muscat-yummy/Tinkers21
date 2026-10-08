@@ -1,5 +1,9 @@
 {
   "values": [
-    "tconstruct:fishing_rod"
+    "tconstruct:fishing_rod",
+    {
+      "id": "#c:tools/fishing_rod",
+      "required": false
+    }
   ]
 }

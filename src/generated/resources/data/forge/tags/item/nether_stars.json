@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:nether_stars",
+      "required": false
+    }
+  ]
+}

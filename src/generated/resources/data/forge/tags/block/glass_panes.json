@@ -1,5 +1,9 @@
 {
   "values": [
-    "tconstruct:soul_glass_pane"
+    "tconstruct:soul_glass_pane",
+    {
+      "id": "#c:glass_panes",
+      "required": false
+    }
   ]
 }

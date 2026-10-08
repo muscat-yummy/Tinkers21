@@ -1,0 +1,9 @@
+{
+  "replace": false,
+  "values": [
+    {
+      "id": "#c:ore_rates/sparse",
+      "required": false
+    }
+  ]
+}
