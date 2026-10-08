@@ -856,3 +856,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - Run 37835362108 passes the actual graphical client, fresh-world connection, wood/iron baked material geometry, rendered Part Builder/Station construction, exact material consumption, repair, and incremental haste across native component persistence and both actual client/server inventories. All native recipe synchronization and equipped-player ticking complete without ERROR or missing-model/texture diagnostics. This completes Phase 4.
 - Extend that same real client world through actual server equipment changes and third-person rendering of plate, travelers and slimesuit armor in all four human slots. Require native custom armor models, material preservation and actual resolved resource layers. This new rendering gate awaits CI; Phase 5 remains in progress.
+
+### Native machine persistence and real multiblock gate (2026-10-08)
+
+- Run 37836845584 compiles complete production sources and isolated native machine tests, but actual pre-heating Melter save/load loses its iron input. The native ItemStack encoder returns the merged compound; MeltingModule discarded that return value and persisted only cooking metadata. Capture its actual returned compound before appending time/temperature. Preserve existing flat Items data, counts/components and actual registry operations.
+- Add actual minimal Smeltery/Foundry structures, fuel-driven iron melting, native registered-controller reconstruction, retained drain forwarding, real wall removal/reformation and heated copper/gold alloying. No structure flags, recipe results, temperatures or fake capabilities are set. The expanded machine gate awaits CI; Phase 6 remains in progress.

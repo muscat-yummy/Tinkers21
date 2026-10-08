@@ -1,4 +1,4 @@
-name: Verify real melter fuel casting and persisted machine state
+name: Verify real Smeltery Foundry alloy reload and reformation
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -34,6 +34,8 @@ jobs:
           load_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]
           if (marker not in text or
               'TiC actual native melter fuel casting and machine persistence PASS' not in text or
+              'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
+              'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
               'Mod loading has failed' in text or load_errors):
               raise SystemExit('Actual TiC world-load verification did not complete successfully')
       - name: Show actual game diagnostics

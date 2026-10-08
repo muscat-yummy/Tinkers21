@@ -211,7 +211,7 @@ public class MeltingModule implements IMeltingContainer, ContainerData {
   public CompoundTag writeToTag(HolderLookup.Provider registries) {
     CompoundTag nbt = new CompoundTag();
     if (!stack.isEmpty()) {
-      stack.save(registries, nbt);
+      nbt = (CompoundTag) stack.save(registries, nbt);
       nbt.putInt(TAG_CURRENT_TIME, currentTime);
       nbt.putInt(TAG_REQUIRED_TIME, requiredTime);
       nbt.putInt(TAG_REQUIRED_TEMP, requiredTemp);
