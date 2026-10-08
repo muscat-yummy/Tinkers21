@@ -1,4 +1,4 @@
-name: Verify real Smeltery Foundry alloy reload and reformation
+name: Verify native heater melting item persistence and full multiblock lifecycle
 on:
   push:
     branches: [port/1.21.1-neoforge]

@@ -861,3 +861,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - Run 37836845584 compiles complete production sources and isolated native machine tests, but actual pre-heating Melter save/load loses its iron input. The native ItemStack encoder returns the merged compound; MeltingModule discarded that return value and persisted only cooking metadata. Capture its actual returned compound before appending time/temperature. Preserve existing flat Items data, counts/components and actual registry operations.
 - Add actual minimal Smeltery/Foundry structures, fuel-driven iron melting, native registered-controller reconstruction, retained drain forwarding, real wall removal/reformation and heated copper/gold alloying. No structure flags, recipe results, temperatures or fake capabilities are set. The expanded machine gate awaits CI; Phase 6 remains in progress.
+
+### Remaining native item-save callers (2026-10-08)
+
+- Pinned native ItemStack bytecode confirms both save overloads return encoded Tag data. The bounded Java-call audit finds two further actual persistence callers: Mantle SingleItemHandler and public InventoryModule.writeStack. The other three matches are recipe-builder save calls and require no item persistence change.
+- Capture the handler's encoded compound and merge actual encoded stack data into the inventory helper's supplied compound, preserving its documented object identity, slot and unrelated metadata. Extend the real placed-heater test to retain coal count/custom-name components through block persistence and verify the public inventory helper against the same actual world registry. These fixes await the expanded native machine gate.

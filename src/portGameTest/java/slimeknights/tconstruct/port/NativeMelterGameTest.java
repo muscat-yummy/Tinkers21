@@ -26,11 +26,28 @@ public final class NativeMelterGameTest {
     BlockPos melterPos = new BlockPos(1, 2, 1);
     BlockPos fuelPos = melterPos.below();
     BlockPos tablePos = new BlockPos(3, 1, 1);
+    BlockPos heaterPos = new BlockPos(4, 1, 3);
     // The lower block update forms the real controller; no structure flag is forced.
     helper.setBlock(melterPos, TinkerSmeltery.searedMelter.get());
     helper.setBlock(fuelPos, TinkerSmeltery.searedTank.get(TankType.FUEL_TANK));
     helper.setBlock(tablePos, TinkerSmeltery.searedTable.get());
+    helper.setBlock(heaterPos, TinkerSmeltery.searedHeater.get());
     var level = helper.getLevel();
+    ItemStack coal = new ItemStack(Items.COAL, 3);
+    coal.set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Persistent actual heater fuel"));
+    var heaterInput = level.getCapability(Capabilities.ItemHandler.BLOCK, helper.absolutePos(heaterPos), Direction.UP);
+    helper.assertTrue(heaterInput != null && heaterInput.insertItem(0, coal, false).isEmpty(),
+      "Actual placed heater rejected real coal");
+    var heater = level.getBlockEntity(helper.absolutePos(heaterPos));
+    heater.loadWithComponents(heater.saveWithFullMetadata(level.registryAccess()), level.registryAccess());
+    helper.assertTrue(ItemStack.matches(coal, heaterInput.getStackInSlot(0)),
+      "Actual native heater persistence lost fuel count or components");
+    var metadata = new net.minecraft.nbt.CompoundTag();
+    metadata.putInt("retained_metadata", 42);
+    var encoded = slimeknights.tconstruct.library.tools.capability.inventory.InventoryModule.writeStack(coal, 7, metadata, level.registryAccess());
+    helper.assertTrue(encoded == metadata && metadata.getInt("retained_metadata") == 42 &&
+      metadata.getInt("slot") == 7 && ItemStack.matches(coal, ItemStack.parseOptional(level.registryAccess(), metadata)),
+      "Actual native inventory helper lost its original compound, metadata, slot or stack components");
     var fuel = level.getCapability(Capabilities.FluidHandler.BLOCK, helper.absolutePos(fuelPos), Direction.UP);
     var input = level.getCapability(Capabilities.ItemHandler.BLOCK, helper.absolutePos(melterPos), Direction.UP);
     var molten = level.getCapability(Capabilities.FluidHandler.BLOCK, helper.absolutePos(melterPos), Direction.DOWN);
