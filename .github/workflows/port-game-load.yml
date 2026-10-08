@@ -1,4 +1,4 @@
-name: Verify native worldgen schemas and actual Minecraft loading
+name: Verify native command initialization and loot resource decoding
 on:
   push:
     branches: [port/1.21.1-neoforge]

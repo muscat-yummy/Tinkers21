@@ -2,11 +2,11 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "bonus_rolls": 0.0,
+      "bonus_rolls": 0,
       "conditions": [
         {
-          "action": "shears_dig",
-          "condition": "forge:can_tool_perform_action"
+          "condition": "neoforge:can_item_perform_ability",
+          "ability": "shears_dig"
         }
       ],
       "entries": [
@@ -15,7 +15,7 @@
           "name": "tconstruct:earth_slime_fern"
         }
       ],
-      "rolls": 1.0
+      "rolls": 1
     }
   ],
   "random_sequence": "tconstruct:blocks/earth_slime_fern"
