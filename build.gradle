@@ -43,9 +43,30 @@ sourceSets.main.resources {
     exclude('META-INF/mods.toml')
 }
 
+def portGameTests = providers.gradleProperty('portGameTests').map { it.toBoolean() }.orElse(false).get()
+if (portGameTests) {
+    sourceSets.create('portGameTest') {
+        java.srcDir('src/portGameTest/java')
+        resources.srcDir(layout.buildDirectory.dir('generated/portGameTestResources'))
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    configurations.portGameTestImplementation.extendsFrom(configurations.implementation)
+}
+
 neoForge {
+    if (portGameTests) {
+        addModdingDependenciesTo(sourceSets.portGameTest)
+    }
     version = neo_version
     runs {
+        if (portGameTests) {
+            portGameTestServer {
+                type = 'gameTestServer'
+                gameDirectory = project.file('run-port-game-test')
+                systemProperty 'neoforge.enabledGameTestNamespaces', 'tconstruct'
+            }
+        }
         client { client() }
         server {
             server()
@@ -61,6 +82,7 @@ neoForge {
     mods {
         tconstruct {
             sourceSet(sourceSets.main)
+            if (portGameTests) sourceSet(sourceSets.portGameTest)
         }
         mantle {
             sourceSet(project(':mantle-port').sourceSets.main)
