@@ -802,3 +802,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Run 37823184986 on c71ef1bb08ccc825ef0fdfe8e6d1e31c4e85e453 passes full production TiC/Mantle assembly and the strict actual world gate after the common-tag cycle fix. Native reload loads 3336 recipes and 23 station layouts, with no ERROR except first-run server.properties.
 - Actual menu construction, exact consumption, native repair and partial haste (9 redstone, native save/load, 36 redstone) all pass. Haste retains amount/level, rebuilds mining speed and consumes one upgrade slot across both transactions. This completes the core system/server gate for Phase 3.
 - Phase 4 now focuses on client screens, synchronized state and the full user-facing construction flow. The actual graphical client bootstrap is running separately; server-side menu success is not claimed as visual client success. Comprehensive old-world migration and later phases remain open.
+
+### Namespaced client sprite lifecycle (2026-10-08)
+
+- The first actual graphical client run 37823478332 fails during RegisterClientReloadListenersEvent: vanilla SpriteSources.register(String, ...) forces a minecraft namespace and rejects the namespaced shield-banner type.
+- Give the sprite source a stable actual SpriteSourceType identity and register it through NeoForge's official RegisterSpriteSourceTypesEvent using the original tconstruct:shield_banner_to_modifier ID. Remove the late reload-listener registration, retaining the existing crop/resource-pack/HD sprite generation and datagen type identity. Actual client verification awaits CI.

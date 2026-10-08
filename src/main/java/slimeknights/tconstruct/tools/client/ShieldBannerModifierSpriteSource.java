@@ -13,7 +13,7 @@ import net.minecraft.client.renderer.Sheets;
 import net.minecraft.client.renderer.texture.SpriteContents;
 import net.minecraft.client.renderer.texture.atlas.SpriteSource;
 import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
-import net.minecraft.client.renderer.texture.atlas.SpriteSources;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
 import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
 import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
 import net.minecraft.client.resources.metadata.animation.FrameSize;
@@ -54,15 +54,17 @@ public record ShieldBannerModifierSpriteSource(int cropX, int cropY, int cropWid
     }
     return DataResult.success(source);
   });
-  /** Registered type set on init */
-  private static SpriteSourceType TYPE = null;
+  /** Stable type identity; its namespaced registration belongs to the native mod event. */
+  private static final SpriteSourceType TYPE = new SpriteSourceType(CODEC);
 
-  /** Registers this sprite source */
+  @Internal
+  public static void register(RegisterSpriteSourceTypesEvent event) {
+    event.register(TConstruct.getResource("shield_banner_to_modifier"), TYPE);
+  }
+
+  /** Returns the same type used by registration and datagen. */
   @Internal
   public static SpriteSourceType register() {
-    if (TYPE == null) {
-      TYPE = SpriteSources.register(TConstruct.getResource("shield_banner_to_modifier").toString(), CODEC);
-    }
     return TYPE;
   }
 

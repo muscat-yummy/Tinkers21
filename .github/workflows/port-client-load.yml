@@ -1,4 +1,4 @@
-name: Verify actual graphical client bootstrap
+name: Verify namespaced sprite registration and actual client reload
 on:
   push:
     branches: [port/1.21.1-neoforge]
