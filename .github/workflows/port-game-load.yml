@@ -1,4 +1,4 @@
-name: Verify native command initialization and loot resource decoding
+name: Verify native fluid loot and common metal tags during Minecraft load
 on:
   push:
     branches: [port/1.21.1-neoforge]
