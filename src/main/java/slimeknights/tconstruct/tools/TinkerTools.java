@@ -49,7 +49,6 @@ import slimeknights.tconstruct.library.json.predicate.tool.StatInRangePredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.StatInSetPredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.ToolActionPredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.ToolContextPredicate;
-import slimeknights.tconstruct.library.json.predicate.tool.ToolStackItemPredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.ToolStackPredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.ToolVariableRangePredicate;
 import slimeknights.tconstruct.library.json.predicate.tool.VolatileDataPredicate;
@@ -180,7 +179,6 @@ public final class TinkerTools extends TinkerModule {
     DummyArmorMaterial.register(TConstruct.MOD_ID, TConstruct.getModEventBus());
     TConstruct.getModEventBus().addListener(ToolCapabilityProvider::registerCapabilities);
     INGREDIENT_TYPES.register(TConstruct.getModEventBus());
-    ToolStackItemPredicate.register(TConstruct.getModEventBus());
     SlotType.init();
     BlockSideHitListener.init();
     ModifierLootingHandler.init();

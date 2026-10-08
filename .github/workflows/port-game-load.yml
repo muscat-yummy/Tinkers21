@@ -1,4 +1,4 @@
-name: Verify live inventory and cooking with complete native hook arguments
+name: Verify a single native sub-predicate registration and actual world loading
 on:
   push:
     branches: [port/1.21.1-neoforge]
