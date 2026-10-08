@@ -87,7 +87,13 @@ public final class ToolStackData {
     CompoundTag data = stack.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
     Integer damage = stack.get(DataComponents.DAMAGE);
     if (damage != null) data.putInt(DAMAGE, damage);
-    if (stack.has(DataComponents.UNBREAKABLE)) data.putBoolean(UNBREAKABLE, true);
+    Unbreakable unbreakable = stack.get(DataComponents.UNBREAKABLE);
+    if (unbreakable != null) {
+      data.putBoolean(UNBREAKABLE, true);
+      int flags = data.getInt(HIDE_FLAGS);
+      if (!unbreakable.showInTooltip()) data.putInt(HIDE_FLAGS, flags | 4);
+      else if (data.contains(HIDE_FLAGS)) data.putInt(HIDE_FLAGS, flags & ~4);
+    }
     return data;
   }
 

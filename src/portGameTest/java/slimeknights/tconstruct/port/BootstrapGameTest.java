@@ -85,6 +85,13 @@ public final class BootstrapGameTest {
     tool.setDamage(1);
     ItemStack nativeTool = tool.createStack();
     nativeTool.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Material tool"));
+    helper.assertTrue(nativeTool.getMaxDamage() == durability && nativeTool.getDamageValue() == 1,
+      "Native item durability callbacks do not reflect material tool data");
+    helper.assertTrue(slimeknights.tconstruct.library.utils.ItemAttributeData.forSlot(
+      nativeTool.getAttributeModifiers(), net.minecraft.world.entity.EquipmentSlot.MAINHAND)
+        .containsKey(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE),
+      "Actual material tool attributes were not exposed to native equipment");
+    checkLegacyMaterialTool(helper, nativeTool, modifiedSpeed);
     var ops = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
     ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, nativeTool).getOrThrow()).getOrThrow();
     var restored = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(loaded);
@@ -106,6 +113,61 @@ public final class BootstrapGameTest {
     restoredBroken.removeModifier(haste, 1);
     helper.assertTrue(!restoredBroken.isBroken() && restoredBroken.getStats().get(miningSpeed) == initialSpeed,
       "Repair and modifier removal did not rebuild the actual core tool");
+  }
+
+
+  private static void checkLegacyMaterialTool(GameTestHelper helper, ItemStack tool, float miningSpeed) {
+    CompoundTag old = tool.getOrDefault(DataComponents.CUSTOM_DATA, CustomData.EMPTY).copyTag();
+    old.putInt("Damage", 1);
+    old.putBoolean("Unbreakable", true);
+    old.putInt("HideFlags", 4);
+    CompoundTag display = new CompoundTag();
+    display.putString("Name", "{\"text\":\"Legacy material tool\"}");
+    old.put("display", display);
+    ResourceLocation inventoryKey = ResourceLocation.parse("tconstruct:bootstrap_legacy_inventory");
+    ResourceLocation fluidKey = ResourceLocation.parse("tconstruct:bootstrap_legacy_fluid");
+    CompoundTag persistent = old.getCompound("tic_persistent");
+    CompoundTag entry = new CompoundTag();
+    entry.putInt("Slot", 300);
+    entry.putString("id", "minecraft:diamond");
+    entry.putByte("Count", (byte) 4);
+    entry.putInt("tic_remaining_time", 37);
+    CompoundTag itemTag = new CompoundTag();
+    CompoundTag itemDisplay = new CompoundTag();
+    itemDisplay.putString("Name", "{\"text\":\"Legacy diamond\"}");
+    itemTag.put("display", itemDisplay);
+    entry.put("tag", itemTag);
+    var inventory = new net.minecraft.nbt.ListTag();
+    inventory.add(entry);
+    persistent.put(inventoryKey.toString(), inventory);
+    CompoundTag fluid = new CompoundTag();
+    fluid.putString("FluidName", "minecraft:water");
+    fluid.putInt("Amount", 250);
+    persistent.put(fluidKey.toString(), fluid);
+    old.put("tic_persistent", persistent);
+    ItemStack fixed = new ItemStack(tool.getItem());
+    var jsonOps = RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, helper.getLevel().registryAccess());
+    fixed.applyComponents(slimeknights.mantle.data.loadable.common.LegacyItemData.convert(tool.getItem(), old, jsonOps));
+    var ops = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
+    ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, fixed).getOrThrow()).getOrThrow();
+    helper.assertTrue(loaded.getDamageValue() == 1 && loaded.has(DataComponents.UNBREAKABLE) &&
+      !loaded.get(DataComponents.UNBREAKABLE).showInTooltip(), "Legacy native durability or tooltip flags were lost");
+    helper.assertTrue("Legacy material tool".equals(loaded.get(DataComponents.CUSTOM_NAME).getString()),
+      "Legacy native tool name was lost");
+    var restored = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(loaded);
+    helper.assertTrue(restored.getStats().get(slimeknights.tconstruct.library.tools.stat.ToolStats.MINING_SPEED) == miningSpeed &&
+      restored.getMaterials().size() == 3, "Legacy tool materials or modifier stats were lost");
+    ToolStorage storage = loaded.get(ToolDataComponents.STORAGE.get());
+    ItemStack nested = storage.inventory(inventoryKey).get(300);
+    helper.assertTrue(nested.getCount() == 4 && "Legacy diamond".equals(nested.get(DataComponents.CUSTOM_NAME).getString()) &&
+      storage.fluid(fluidKey).getAmount() == 250, "Legacy material tool storage lost counts, names or fluids");
+    var metadata = restored.getPersistentData().get(inventoryKey,
+      slimeknights.tconstruct.library.tools.capability.inventory.InventoryModule.GET_COMPOUND_LIST);
+    helper.assertTrue(metadata.getCompound(0).getInt("Slot") == 300 &&
+      metadata.getCompound(0).getInt("tic_remaining_time") == 37 && !metadata.getCompound(0).contains("id"),
+      "Legacy storage migration lost cooking metadata or retained duplicate contents");
+    ItemStack copied = loaded.copy();
+    helper.assertTrue(ItemStack.matches(loaded, copied), "Actual legacy tool copying changed native components");
   }
 
   private static void checkInventoryAndCooking(GameTestHelper helper) {
