@@ -116,6 +116,7 @@ public final class TinkerFluids extends TinkerModule {
   }
 
   public TinkerFluids() {
+    TConstruct.getModEventBus().addListener(TinkerFluids::registerCapabilities);
     NeoForgeMod.enableMilkFluid();
     NeoForge.EVENT_BUS.addListener(TinkerFluids::registerBrewingRecipes);
   }

@@ -124,7 +124,7 @@ public class TConstruct {
     // base
     bus.register(new TinkerCommons());
     bus.register(new TinkerMaterials());
-    bus.register(new TinkerEffects());
+    new TinkerEffects();
     bus.register(new TinkerGadgets());
     bus.register(new TinkerAttributes());
     // world
@@ -133,7 +133,7 @@ public class TConstruct {
     // tools
     bus.register(new TinkerTables());
     bus.register(new TinkerModifiers());
-    bus.register(new TinkerToolParts());
+    new TinkerToolParts();
     bus.register(new TinkerTools());
     // smeltery
     bus.register(new TinkerSmeltery());
