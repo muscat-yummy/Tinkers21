@@ -98,14 +98,14 @@ public final class BootstrapGameTest {
     input.setStack(tool, modifier, 0, raw);
     var player = helper.makeMockPlayer(net.minecraft.world.level.GameType.SURVIVAL);
     float halfHeat = recipe.value().getCookingTime() / 2f;
-    smelting.afterSlingLaunch(tool, modifier, player, player, modifier, halfHeat, 2);
+    smelting.afterSlingLaunch(tool, modifier, player, player, modifier, halfHeat, 2, net.minecraft.world.phys.Vec3.ZERO);
     helper.assertTrue(input.getStack(tool, modifier, 0).getCount() == 2 &&
       smelting.output().getStack(tool, modifier, 0).isEmpty(), "Partial cooking consumed items");
     var timers = tool.getPersistentData().get(inputKey,
       slimeknights.tconstruct.library.tools.capability.inventory.InventoryModule.GET_COMPOUND_LIST);
     int remaining = timers.getCompound(0).getInt("tic_remaining_time");
     helper.assertTrue(remaining > 0 && remaining < recipe.value().getCookingTime(), "Partial cooking timer was not committed");
-    smelting.afterSlingLaunch(tool, modifier, player, player, modifier, halfHeat, 2);
+    smelting.afterSlingLaunch(tool, modifier, player, player, modifier, halfHeat, 2, net.minecraft.world.phys.Vec3.ZERO);
     helper.assertTrue(input.getStack(tool, modifier, 0).getCount() == 1 &&
       ItemStack.matches(smelting.output().getStack(tool, modifier, 0), expected), "Cooking did not update component-backed items");
   }

@@ -1,4 +1,4 @@
-name: Verify Minecraft world loading and cooking with the native player fixture
+name: Verify live inventory and cooking with complete native hook arguments
 on:
   push:
     branches: [port/1.21.1-neoforge]
