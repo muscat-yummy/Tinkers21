@@ -1,7 +1,7 @@
 package slimeknights.tconstruct.port;
 
 import com.mojang.blaze3d.vertex.PoseStack;
-import com.mojang.serialization.NbtOps;
+import net.minecraft.nbt.NbtOps;
 import net.minecraft.resources.RegistryOps;
 import slimeknights.tconstruct.library.modifiers.ModifierId;
 import slimeknights.tconstruct.library.tools.SlotType;

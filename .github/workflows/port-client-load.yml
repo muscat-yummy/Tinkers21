@@ -1,4 +1,4 @@
-name: Verify recipe login sync and actual client repair modification loop
+name: Verify native NBT persisted client construction transactions
 on:
   push:
     branches: [port/1.21.1-neoforge]
