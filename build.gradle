@@ -55,10 +55,10 @@ if (portGameTests) {
 }
 
 neoForge {
+    version = neo_version
     if (portGameTests) {
         addModdingDependenciesTo(sourceSets.portGameTest)
     }
-    version = neo_version
     runs {
         if (portGameTests) {
             portGameTestServer {

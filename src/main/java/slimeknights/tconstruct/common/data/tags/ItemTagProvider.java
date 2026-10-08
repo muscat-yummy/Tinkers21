@@ -784,6 +784,7 @@ public class ItemTagProvider extends ItemTagsProvider {
       case LEGGINGS -> LEGGINGS;
       case CHESTPLATE -> CHESTPLATES;
       case HELMET -> HELMETS;
+      case BODY -> throw new IllegalArgumentException("Animal body armor has no player armor tag");
     };
   }
 
@@ -793,6 +794,7 @@ public class ItemTagProvider extends ItemTagsProvider {
       case LEGGINGS -> net.minecraft.tags.ItemTags.LEG_ARMOR;
       case CHESTPLATE -> net.minecraft.tags.ItemTags.CHEST_ARMOR;
       case HELMET -> net.minecraft.tags.ItemTags.HEAD_ARMOR;
+      case BODY -> throw new IllegalArgumentException("Animal body armor has no player equipment-slot tag");
     };
   }
 

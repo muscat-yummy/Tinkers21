@@ -1,4 +1,4 @@
-name: Compile and load the actual TiC port in Minecraft
+name: Load Minecraft after exhaustive player armor tags and native setup
 on:
   push:
     branches: [port/1.21.1-neoforge]
