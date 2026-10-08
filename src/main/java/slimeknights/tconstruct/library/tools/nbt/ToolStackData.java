@@ -21,6 +21,24 @@ public final class ToolStackData {
   private static final String DAMAGE = "Damage";
   private static final String UNBREAKABLE = "Unbreakable";
   private static final String HIDE_FLAGS = "HideFlags";
+  /** Internal working snapshots are rebuilt explicitly, never through the native load hook. */
+  private static final ThreadLocal<Boolean> CREATING_SNAPSHOT = ThreadLocal.withInitial(() -> false);
+
+  public static boolean isCreatingSnapshot() {
+    return CREATING_SNAPSHOT.get();
+  }
+
+  private static ItemStack snapshot(java.util.function.Supplier<ItemStack> factory) {
+    boolean previous = CREATING_SNAPSHOT.get();
+    CREATING_SNAPSHOT.set(true);
+    try {
+      return factory.get();
+    } finally {
+      if (previous) CREATING_SNAPSHOT.set(true);
+      else CREATING_SNAPSHOT.remove();
+    }
+  }
+
   private final CompoundTag data;
   private CompoundTag committed;
   private final ItemStack template;
@@ -43,7 +61,7 @@ public final class ToolStackData {
   public ToolStackData(Item item, CompoundTag data) {
     this.data = data;
     this.committed = data.copy();
-    this.template = new ItemStack(item);
+    this.template = snapshot(() -> new ItemStack(item));
     this.ownedRarity = template.getOrDefault(DataComponents.RARITY, Rarity.COMMON);
     applyFull(template);
     attached.put(template, State.read(template));
@@ -52,7 +70,7 @@ public final class ToolStackData {
   private ToolStackData(ItemStack source, boolean attach) {
     this.data = read(source);
     this.committed = data.copy();
-    this.template = source.copy();
+    this.template = snapshot(source::copy);
     this.ownedRarity = source.getOrDefault(DataComponents.RARITY, Rarity.COMMON);
     applyFull(template);
     attached.put(template, State.read(template));
@@ -154,23 +172,36 @@ public final class ToolStackData {
 
   private void applyFull(ItemStack stack) {
     if (stack.isEmpty()) return;
+    writeData(stack, data);
+    if (ownedRarity != null) stack.set(DataComponents.RARITY, ownedRarity);
+  }
+
+  /** Commit verified tool data directly without constructing another native item stack. */
+  public static void writeData(ItemStack stack, CompoundTag data) {
     CompoundTag custom = data.copy();
     custom.remove(DAMAGE);
     custom.remove(UNBREAKABLE);
     if (custom.isEmpty()) stack.remove(DataComponents.CUSTOM_DATA);
     else stack.set(DataComponents.CUSTOM_DATA, CustomData.of(custom));
-    writeDamage(stack);
-    writeUnbreakable(stack);
-    if (ownedRarity != null) stack.set(DataComponents.RARITY, ownedRarity);
+    writeDamage(stack, data);
+    writeUnbreakable(stack, data);
   }
 
   private void writeDamage(ItemStack stack) {
+    writeDamage(stack, data);
+  }
+
+  private static void writeDamage(ItemStack stack, CompoundTag data) {
     if (data.contains(DAMAGE, Tag.TAG_ANY_NUMERIC)) {
       stack.set(DataComponents.DAMAGE, Math.max(0, data.getInt(DAMAGE)));
     }
   }
 
   private void writeUnbreakable(ItemStack stack) {
+    writeUnbreakable(stack, data);
+  }
+
+  private static void writeUnbreakable(ItemStack stack, CompoundTag data) {
     if (data.getBoolean(UNBREAKABLE)) {
       stack.set(DataComponents.UNBREAKABLE, new Unbreakable((data.getInt(HIDE_FLAGS) & 4) == 0));
     } else {

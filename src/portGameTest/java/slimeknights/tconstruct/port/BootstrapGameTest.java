@@ -50,6 +50,13 @@ public final class BootstrapGameTest {
   private static void checkInventoryAndCooking(GameTestHelper helper) {
     var pickaxe = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:pickaxe")).orElseThrow();
     ItemStack nativeTool = new ItemStack(pickaxe);
+    nativeTool.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Verified tool"));
+    ItemStack copiedTool = nativeTool.copy();
+    helper.assertTrue(ItemStack.matches(nativeTool, copiedTool), "Native tool copying changed its components");
+    var nativeOps = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
+    ItemStack loadedTool = ItemStack.CODEC.parse(nativeOps,
+      ItemStack.CODEC.encodeStart(nativeOps, nativeTool).getOrThrow()).getOrThrow();
+    helper.assertTrue(ItemStack.matches(nativeTool, loadedTool), "Native tool load verification changed its components");
     var tool = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(nativeTool);
     var modifier = slimeknights.tconstruct.library.modifiers.ModifierEntry.EMPTY.withLevel(1);
     ResourceLocation key = ResourceLocation.parse("tconstruct:bootstrap_inventory");

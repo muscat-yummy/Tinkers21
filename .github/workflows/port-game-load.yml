@@ -1,4 +1,4 @@
-name: Verify native fluid loot and common metal tags during Minecraft load
+name: Verify bounded native tool loading and component preservation
 on:
   push:
     branches: [port/1.21.1-neoforge]

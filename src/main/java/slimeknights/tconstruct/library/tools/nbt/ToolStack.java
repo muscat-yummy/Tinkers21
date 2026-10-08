@@ -834,14 +834,14 @@ public class ToolStack implements IToolStackView {
 
   /** Rebuild native component-backed tools after loading, preserving unrelated item components. */
   public static void verifyComponents(ItemStack stack, ToolDefinition definition) {
-    if (stack.isEmpty()) {
+    if (stack.isEmpty() || ToolStackData.isCreatingSnapshot()) {
       return;
     }
-    ToolStackData data = ToolStackData.from(stack, true);
-    verifyTag(stack.getItem(), data.data(), definition);
-    data.commit();
-    data.setRarity(RarityModule.getRarity(data.data().getCompound(TAG_VOLATILE_MOD_DATA)
-      .getInt(RarityModule.RARITY.toString())));
+    CompoundTag data = ToolStackData.read(stack);
+    verifyTag(stack.getItem(), data, definition);
+    ToolStackData.writeData(stack, data);
+    stack.set(net.minecraft.core.component.DataComponents.RARITY,
+      RarityModule.getRarity(data.getCompound(TAG_VOLATILE_MOD_DATA).getInt(RarityModule.RARITY.toString())));
   }
 
   /**
