@@ -1,4 +1,4 @@
-name: Verify cycle-free common contributors and persisted incremental modifiers
+name: Verify real melter fuel casting and persisted machine state
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -32,7 +32,9 @@ jobs:
           text = log.read_text() if log.is_file() else ''
           marker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'
           load_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]
-          if marker not in text or 'Mod loading has failed' in text or load_errors:
+          if (marker not in text or
+              'TiC actual native melter fuel casting and machine persistence PASS' not in text or
+              'Mod loading has failed' in text or load_errors):
               raise SystemExit('Actual TiC world-load verification did not complete successfully')
       - name: Show actual game diagnostics
         if: always()

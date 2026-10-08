@@ -20,3 +20,9 @@ path = pathlib.Path("build/generated/portGameTestResources/data/tconstruct/struc
 path.parent.mkdir(parents=True, exist_ok=True)
 path.write_bytes(gzip.compress(root, mtime=0))
 print("Generated actual empty bootstrap GameTest structure")
+
+# A separate bounded machine fixture isolates real ticking machines from bootstrap.
+machine_root = root.replace(struct.pack(">iii", 1, 1, 1), struct.pack(">iii", 5, 4, 5), 1)
+machine_path = path.with_name("smeltery.nbt")
+machine_path.write_bytes(gzip.compress(machine_root, mtime=0))
+print("Generated actual empty smeltery GameTest structure")
