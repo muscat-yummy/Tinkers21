@@ -255,10 +255,10 @@ Port and preserve the core material/tool/modifier systems, including MaterialId 
 
 Pay particular attention to ItemStack data changes introduced since 1.20.1. Prefer adapters or compatibility layers where they allow existing TiC concepts and addon APIs to remain intact.
 
-### Phase 4 — Tool construction (in progress)
+### Phase 4 — Tool construction (complete: 2026-10-08)
 Port tool parts, recipes, menus/screens, Part Builder, Tinkers' Station, and the complete loop from materials to usable modified tools.
 
-### Phase 5 — Rendering
+### Phase 5 — Rendering (in progress)
 Restore material-dependent tool and armor rendering. Do not replace TiC's composited/material rendering with fixed textures merely to simplify the port.
 
 ### Phase 6 — Smeltery and fluids
@@ -851,3 +851,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - Run 37834545810 passes real client world login and player ticking after the equipment attachment fix. Actual baked GUI pickaxe geometry differs for registered wood/iron materials, passing the joined-world material-composition check. No recipe synchronization or initial resource/model warning remains.
 - The test places tables then immediately opens a server menu; that menu reaches the actual client before the end-of-tick block update. Mantle correctly rejects its absent client tile, causing slot/data packets to fail. Change fixture sequencing to observe both actual client block entities before asking the real server player to open the Part Builder. No dummy tile, missing-tile menu or suppressed error is introduced. Full construction/repair/modifier verification remains pending.
+
+### Phase 4 complete; actual material armor rendering gate (2026-10-08)
+
+- Run 37835362108 passes the actual graphical client, fresh-world connection, wood/iron baked material geometry, rendered Part Builder/Station construction, exact material consumption, repair, and incremental haste across native component persistence and both actual client/server inventories. All native recipe synchronization and equipped-player ticking complete without ERROR or missing-model/texture diagnostics. This completes Phase 4.
+- Extend that same real client world through actual server equipment changes and third-person rendering of plate, travelers and slimesuit armor in all four human slots. Require native custom armor models, material preservation and actual resolved resource layers. This new rendering gate awaits CI; Phase 5 remains in progress.

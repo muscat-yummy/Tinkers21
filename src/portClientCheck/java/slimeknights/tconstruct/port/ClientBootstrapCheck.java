@@ -188,7 +188,7 @@ public final class ClientBootstrapCheck {
 
   @SubscribeEvent
   public static void clientTick(ClientTickEvent.Post event) {
-    if (step == 16) return;
+    if (step == 17) return;
     if (serverFailure != null) throw serverFailure;
     Minecraft minecraft = Minecraft.getInstance();
     if (step > 0 && minecraft.screen instanceof DisconnectedScreen) {
@@ -480,6 +480,10 @@ public final class ClientBootstrapCheck {
       TConstruct.LOG.info("TiC actual client construction repair and persisted modifier packets PASS");
       advance(16);
       minecraft.player.closeContainer();
+      return;
+    }
+    if (step == 16 && ArmorRenderingCheck.tick(minecraft)) {
+      advance(17);
       minecraft.stop();
     }
   }
