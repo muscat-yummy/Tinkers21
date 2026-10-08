@@ -1,4 +1,4 @@
-name: Inspect pinned native client onboarding and launch APIs
+name: Inspect native integrated world and rendering APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,4 +23,22 @@ jobs:
       - name: Resolve pinned public Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
       - name: Inspect public native APIs only
-        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.Options net.minecraft.client.gui.screens.AccessibilityOnboardingScreen net.minecraft.client.main.Main
+        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.gui.screens.worldselection.WorldOpenFlows net.minecraft.world.level.LevelSettings net.minecraft.world.level.levelgen.WorldOptions net.minecraft.world.level.levelgen.presets.WorldPresets net.minecraft.world.level.levelgen.WorldDimensions net.minecraft.client.resources.model.BakedModel net.minecraft.client.renderer.block.model.ItemOverrides net.minecraft.world.item.ItemDisplayContext
+      - name: Inspect native fluid shader and model parents
+        shell: python
+        run: |
+          import pathlib, zipfile
+          jar = pathlib.Path('build/moddev/artifacts/neoforge-21.1.251-client-extra-aka-minecraft-resources.jar')
+          with zipfile.ZipFile(jar) as assets:
+              for name in ['assets/minecraft/shaders/core/rendertype_entity_translucent.vsh', 'assets/minecraft/shaders/include/fog.glsl']:
+                  print(name)
+                  print(assets.read(name).decode())
+          neo = list(pathlib.Path.home().glob('.gradle/caches/modules-2/files-2.1/net.neoforged/neoforge/21.1.251/**/*.jar'))
+          parents = ['assets/neoforge/models/item/default.json', 'assets/neoforge/models/item/default-tool.json', 'assets/neoforge/models/item/bucket_drip.json']
+          found = set()
+          for path in neo:
+              with zipfile.ZipFile(path) as assets:
+                  found.update(name for name in parents if name in assets.namelist())
+          print('Native model parents:', sorted(found))
+          if found != set(parents):
+              raise SystemExit('Native model parent inspection incomplete')
