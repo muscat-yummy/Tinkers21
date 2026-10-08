@@ -80,7 +80,7 @@ public record AttributeModule(String unique, Attribute attribute, Operation oper
 
   /** Converts a list of slots to an array of UUIDs at each index */
   public static UUID[] slotsToUUIDs(String name, Collection<EquipmentSlot> slots) {
-    UUID[] slotUUIDs = new UUID[6];
+    UUID[] slotUUIDs = new UUID[EquipmentSlot.values().length];
     for (EquipmentSlot slot : slots) {
       slotUUIDs[slot.getFilterFlag()] = getUUID(name, slot);
     }

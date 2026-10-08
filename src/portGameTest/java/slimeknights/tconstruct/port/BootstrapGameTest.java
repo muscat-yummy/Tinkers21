@@ -43,9 +43,18 @@ public final class BootstrapGameTest {
     ItemStack strict = ItemStack.SINGLE_ITEM_CODEC.parse(ops,
       ItemStack.SINGLE_ITEM_CODEC.encodeStart(ops, original).getOrThrow()).getOrThrow();
     helper.assertTrue(strict.has(ToolDataComponents.STORAGE.get()), "Single-item native codec migration was not applied");
+    for (String recipeId : new String[] {
+        "tconstruct:tools/armor/travelers/boots", "tconstruct:common/materials/steel_ingot_from_block",
+        "tconstruct:common/materials/knightmetal_nugget_blasting", "tconstruct:smeltery/seared/duct_retextured"}) {
+      helper.assertTrue(helper.getLevel().getRecipeManager().byKey(ResourceLocation.parse(recipeId)).isPresent(),
+        "Retained native recipe did not load: " + recipeId);
+    }
+    helper.assertTrue(slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader.getInstance()
+      .get(ResourceLocation.parse("tconstruct:pickaxe")) != slimeknights.tconstruct.library.tools.layout.StationSlotLayout.EMPTY,
+      "Legacy SNBT station icon did not load");
     checkInventoryAndCooking(helper);
     helper.succeed();
-    System.out.println("TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS");
+    slimeknights.tconstruct.TConstruct.LOG.info("TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS");
   }
   private static void checkInventoryAndCooking(GameTestHelper helper) {
     var pickaxe = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:pickaxe")).orElseThrow();

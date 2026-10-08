@@ -1,4 +1,4 @@
-name: Verify bounded native tool loading and component preservation
+name: Verify native recipe conditions, modifiers and station data loading
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -31,7 +31,8 @@ jobs:
           log = pathlib.Path('run-port-game-test/logs/latest.log')
           text = log.read_text() if log.is_file() else ''
           marker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'
-          if marker not in text or 'Mod loading has failed' in text:
+          load_errors = [line for line in text.splitlines() if '[ERROR]' in line and 'server.properties' not in line]
+          if marker not in text or 'Mod loading has failed' in text or load_errors:
               raise SystemExit('Actual TiC world-load verification did not complete successfully')
       - name: Show actual game diagnostics
         if: always()
