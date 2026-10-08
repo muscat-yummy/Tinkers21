@@ -1,4 +1,4 @@
-name: Verify actual small-gem tags and native client gameplay transactions
+name: Verify early equipment attachment binding and actual client construction
 on:
   push:
     branches: [port/1.21.1-neoforge]

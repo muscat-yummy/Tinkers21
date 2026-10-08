@@ -175,6 +175,7 @@ public final class TinkerTools extends TinkerModule {
   }
 
   public TinkerTools() {
+    EquipmentChangeWatcher.register();
     ArmorDefinitions.init();
     DummyArmorMaterial.register(TConstruct.MOD_ID, TConstruct.getModEventBus());
     TConstruct.getModEventBus().addListener(ToolCapabilityProvider::registerCapabilities);
@@ -302,7 +303,6 @@ public final class TinkerTools extends TinkerModule {
 
   @SubscribeEvent
   void commonSetup(FMLCommonSetupEvent event) {
-    EquipmentChangeWatcher.register();
     ToolCapabilityProvider.register(ToolFluidCapability.Provider::new);
     ToolCapabilityProvider.register(ToolInventoryCapability.Provider::new);
     ToolCapabilityProvider.register((stack, tool) -> new ToolEnergyCapability.Provider(tool));
