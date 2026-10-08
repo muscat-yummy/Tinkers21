@@ -1,4 +1,4 @@
-name: Inspect native client container transaction APIs
+name: Inspect native world creation and armor render entry points
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,4 +23,6 @@ jobs:
       - name: Resolve pinned public Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
       - name: Inspect public native APIs only
-        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.multiplayer.MultiPlayerGameMode net.minecraft.client.player.LocalPlayer net.minecraft.server.level.ServerPlayer net.minecraft.world.level.WorldDataConfiguration net.minecraft.client.renderer.texture.TextureAtlasSprite net.minecraft.client.gui.screens.Screen
+        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.neoforged.neoforge.client.extensions.common.IClientItemExtensions net.minecraft.client.model.HumanoidModel net.minecraft.client.model.geom.ModelLayers net.minecraft.client.CameraType
+      - name: Inspect actual native fresh-world control flow
+        run: javap -c -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.gui.screens.worldselection.WorldOpenFlows
