@@ -790,3 +790,9 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Run 37821855891 passes native construction menu button/pickup/quick-move actions and all 41 unique player inventory slots, then diagnoses partial haste as no matching recipe: three upgrade slots remain, but the old redstone contributor tag is empty.
 - Official NeoForge's c:dusts/redstone contains actual vanilla redstone plus an optional forge:dusts/redstone compatibility import. The retained old tag imports c:dusts/redstone, forming a dependency cycle. Resolve this at the actual native TagLoader build boundary: replace only reciprocal optional common/legacy imports in canonical tags with the current reload's actual legacy entries, excluding their edge back to that canonical tag. Preserve entry order, pack source and native remove operations; leave the old tag's canonical import and all unrelated tags intact. No holders, item IDs or registry context are synthesized.
 - Actual reload, common contributor membership and the two-transaction persisted modifier gate await verification.
+
+### Actual graphical client bootstrap gate (2026-10-08)
+
+- Add an isolated test-source-only native client run under Xvfb with software OpenGL and a null audio device. It uses the complete production mod/client/resource setup, requires the actual title screen after initial reload and verifies the real registered pickaxe, renderer, model manager and nonzero window. The test then requests normal native shutdown; CI requires its logged marker and zero client ERROR entries.
+- This first client gate does not claim joined-world rendering, menu visuals, material compositing or complete Phase 4/5 coverage. Production jars do not include the check class.
+- Correct the public API inspector's ItemRenderer target to the actual entity package. Its previous multi-class javap invocation returned success despite the invalid class; that item's API was not verified.

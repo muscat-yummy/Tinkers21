@@ -55,12 +55,31 @@ if (portGameTests) {
     dependencies.add('portGameTestImplementation', "net.neoforged:testframework:${neo_version}")
 }
 
+
+def portClientChecks = providers.gradleProperty('portClientCheck').map { it.toBoolean() }.orElse(false).get()
+if (portClientChecks) {
+    sourceSets.create('portClientCheck') {
+        java.srcDir('src/portClientCheck/java')
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    configurations.portClientCheckImplementation.extendsFrom(configurations.implementation)
+}
+
 neoForge {
     version = neo_version
     if (portGameTests) {
         addModdingDependenciesTo(sourceSets.portGameTest)
     }
+    if (portClientChecks) addModdingDependenciesTo(sourceSets.portClientCheck)
     runs {
+        if (portClientChecks) {
+            portClientCheck {
+                type = 'client'
+                sourceSet = sourceSets.portClientCheck
+                gameDirectory = project.file('run-port-client-check')
+            }
+        }
         if (portGameTests) {
             portGameTestServer {
                 type = 'gameTestServer'
@@ -85,6 +104,7 @@ neoForge {
         tconstruct {
             sourceSet(sourceSets.main)
             if (portGameTests) sourceSet(sourceSets.portGameTest)
+            if (portClientChecks) sourceSet(sourceSets.portClientCheck)
         }
         mantle {
             sourceSet(project(':mantle-port').sourceSets.main)

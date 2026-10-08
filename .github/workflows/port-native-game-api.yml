@@ -1,4 +1,4 @@
-name: Inspect pinned native client connection and rendering APIs
+name: Inspect pinned native tag and item rendering APIs
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,4 +23,4 @@ jobs:
       - name: Resolve pinned public Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
       - name: Inspect public native APIs only
-        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.Minecraft net.minecraft.client.gui.screens.ConnectScreen net.minecraft.client.gui.screens.TitleScreen net.minecraft.client.multiplayer.ServerData net.minecraft.client.multiplayer.resolver.ServerAddress net.neoforged.neoforge.client.event.ClientTickEvent net.minecraft.client.renderer.ItemRenderer net.minecraft.client.resources.model.BakedModel
+        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.tags.TagLoader net.minecraft.tags.TagEntry net.minecraft.client.renderer.entity.ItemRenderer net.minecraft.client.multiplayer.ServerData\$Type
