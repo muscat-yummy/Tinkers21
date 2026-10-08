@@ -1,4 +1,4 @@
-name: Inspect native world creation and armor render entry points
+name: Inspect native container close ordering and game test assertions
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -22,7 +22,14 @@ jobs:
           cache-dependency-path: '**/*.gradle*'
       - name: Resolve pinned public Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
-      - name: Inspect public native APIs only
-        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.neoforged.neoforge.client.extensions.common.IClientItemExtensions net.minecraft.client.model.HumanoidModel net.minecraft.client.model.geom.ModelLayers net.minecraft.client.CameraType
-      - name: Inspect actual native fresh-world control flow
-        run: javap -c -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.client.gui.screens.worldselection.WorldOpenFlows
+      - name: Inspect actual close packet control flow
+        shell: python
+        run: |
+          import subprocess
+          result = subprocess.run(['javap', '-c', '-classpath', 'build/moddev/artifacts/neoforge-21.1.251.jar', 'net.minecraft.server.network.ServerGamePacketListenerImpl'], check=True, capture_output=True, text=True)
+          lines = result.stdout.splitlines()
+          start = next(i for i, line in enumerate(lines) if 'void handleContainerClose(' in line)
+          end = next(i for i in range(start + 1, len(lines)) if lines[i].startswith('  public '))
+          print('\n'.join(lines[start:end]))
+      - name: Inspect native world test and block persistence APIs
+        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar net.minecraft.gametest.framework.GameTestHelper net.minecraft.world.level.block.entity.BlockEntity
