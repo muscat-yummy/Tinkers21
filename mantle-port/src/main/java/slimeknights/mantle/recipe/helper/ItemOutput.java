@@ -351,7 +351,12 @@ public abstract class ItemOutput implements Supplier<ItemStack> {
 
     @Override
     public void encode(FriendlyByteBuf buffer, ItemOutput object) {
-      stack.encode(buffer, object.get());
+      ItemStack result = object.get();
+      if (nonEmpty && result.isEmpty() && object instanceof OfTagPreference preference) {
+        throw new io.netty.handler.codec.EncoderException(
+          "Required output tag has no actual items: " + preference.getTag().location());
+      }
+      stack.encode(buffer, result);
     }
 
 

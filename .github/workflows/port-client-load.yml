@@ -1,4 +1,4 @@
-name: Verify native NBT persisted client construction transactions
+name: Diagnose the actual required casting output during native login sync
 on:
   push:
     branches: [port/1.21.1-neoforge]

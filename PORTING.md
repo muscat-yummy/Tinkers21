@@ -830,3 +830,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Remove the test's invalid simulation-distance override, use the actual native focus-pause option for Xvfb, and fail promptly on a real disconnect or failed world load. Extend native construction packets through actual repair and two-transaction persisted haste, requiring each transaction screen to be rendered for 20 frames. The complete graphical gate remains pending; no Phase 4 completion is claimed.
 
 - Run 37830406218 compiles the production output fix but stops at a test-fixture import error: NbtOps belongs to net.minecraft.nbt, not com.mojang.serialization. Correct the fixture to the same actual native class already used by the passing server persistence checks. It does not claim client/runtime verification.
+
+### Required casting output diagnostic (2026-10-08)
+
+- Run 37830959532 now reaches real world login without the null cached stack or invalid option errors, but a required casting output resolves to an empty stack during native recipe synchronization. Native initial reload has no missing-model warnings. The complete client flow has not passed.
+- Retain the required-output failure and native wire format. Attach the actual failing RecipeHolder ID and empty required output tag to the existing encoder exception so the single failure can be diagnosed. Do not send empty placeholders, suppress recipes, rewrite recipe IDs or export the recipe catalog. Actual common-tag contents/lifecycle must be corrected from this evidence.

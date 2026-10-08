@@ -14,7 +14,11 @@ public final class RecipeHolderCodec {
       StreamCodec<RegistryFriendlyByteBuf,Recipe<?>> payloadCodec) {
     return StreamCodec.of((buffer, holder) -> {
       ResourceLocation.STREAM_CODEC.encode(buffer, holder.id());
-      payloadCodec.encode(buffer, holder.value());
+      try {
+        payloadCodec.encode(buffer, holder.value());
+      } catch (RuntimeException error) {
+        throw new io.netty.handler.codec.EncoderException("Failed to encode actual recipe " + holder.id(), error);
+      }
     }, buffer -> {
       ResourceLocation id = ResourceLocation.STREAM_CODEC.decode(buffer);
       return RecipeDecodeContext.withId(id, () -> new RecipeHolder<>(id, payloadCodec.decode(buffer)));
