@@ -110,9 +110,15 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - The isolated native GameTest now covers actual world/recipe load, both native item codec Mixins, full component-backed inventory writes, slot relocation and failed shrink atomicity, retained cooking timers, modifier removal and vanilla recipe-backed cooking. Its player and sling hook arguments match the native/current contracts.
 - A Gradle success exit alone is not accepted as Minecraft load success: the real mod-construction crash returned a successful Gradle result. CI now requires the marker emitted only after the in-world assertions succeed. Runtime validation is still pending; Phase 2 remains open and no usable gameplay build is claimed.
 
+### Native data loading and bounded tool verification (2026-10-08)
+
+- Actual Minecraft loading passes module registration, native worldgen codecs, loot/global loot modifiers, command construction and common tags through run 37782165601. Native resource schemas preserve their existing spawn settings, loot conditions/counts, fluid amounts and tag memberships. Owned metal tags are provided under the actual c: namespace, retaining legacy files.
+- The next observed fault is native ItemStack construction recursively entering tool post-load verification through an internal working copy. Verification now reads and writes tool data directly. Only internal ToolStackData snapshot construction suppresses the native hook, with scoped thread-local cleanup; normal item construction, copying and codec loading still verify tool data.
+- The native world fixture adds actual TiC pickaxe copy and codec round trips with component equality. This fix is pending actual Minecraft validation in run 37783186877. No world-load success, Phase 2 completion or gameplay-ready build is claimed.
+
 ## Current checkpoint (2026-10-08)
 
-**Phase 1 (build environment): complete. Phase 2 (bootstrap): in progress.** Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 21.1.251 / Java 21, without production source exclusions. Actual Minecraft launch reaches mod construction, where observed registration faults are being corrected. The in-world verification gate has not passed. The imported Forge JUnit fixtures are not yet ported; no claim is made that the legacy test suite or gameplay is ready.
+**Phase 1 (build environment): complete. Phase 2 (bootstrap): in progress.** Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 21.1.251 / Java 21, without production source exclusions. Actual Minecraft launch passes mod construction and worldgen/loot/tag loading. Native tool post-load verification is being corrected before the in-world gate can run. The in-world verification gate has not passed. The imported Forge JUnit fixtures are not yet ported; no claim is made that the legacy test suite or gameplay is ready.
 
 - Latest full-source production checkpoint: run 37777478355 compiles TiC/Mantle, assembles both jars and compiles the native GameTest. Minecraft mod construction exposes duplicate item sub-predicate registration from TinkerCommons and TinkerTools. TinkerCommons remains the single registration owner; the duplicate call is removed. Prior native storage checks pass, including immutable full-component item/fluid persistence, wire round trips and legacy potion/cooking metadata conversion. Unchanged independent checks are not rerun.
 
@@ -265,8 +271,8 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 
 ## Known issues
 
-- The imported 1.20.1 source still references Forge APIs and cannot compile against NeoForge 1.21.1.
-- Mantle compiles on NeoForge 1.21.1; TiC full compilation, game loading and runtime compatibility remain unresolved.
+- Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
+- Actual game loading and runtime compatibility remain unresolved until the native in-world gate succeeds; client rendering and later gameplay phases are still unverified.
 
 ## Upstream
 
