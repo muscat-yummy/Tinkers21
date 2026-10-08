@@ -5,6 +5,8 @@ import net.minecraft.core.HolderLookup.Provider;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.tags.TagsProvider;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.world.item.DyeColor;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.world.item.Tiers;
@@ -93,6 +95,13 @@ public class BlockTagProvider extends BlockTagsProvider {
     addMetalTags(TinkerMaterials.knightmetal, true);
     addMetalTags(TinkerMaterials.knightslime, true);
 
+    tag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ).add(Blocks.QUARTZ_BLOCK);
+    tag(Tags.Blocks.STORAGE_BLOCKS).addTag(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ);
+    for (DyeColor color : DyeColor.values()) {
+      tag(TinkerTags.Blocks.STAINED_GLASS).add(BuiltInRegistries.BLOCK.get(ResourceLocation.withDefaultNamespace(color.getSerializedName() + "_stained_glass")));
+      tag(TinkerTags.Blocks.STAINED_GLASS_PANES).add(BuiltInRegistries.BLOCK.get(ResourceLocation.withDefaultNamespace(color.getSerializedName() + "_stained_glass_pane")));
+    }
+
     // glass
     IntrinsicTagAppender<Block> silicaPanes = tag(TinkerTags.Blocks.GLASS_PANES_SILICA);
     this.tag(Tags.Blocks.GLASS_BLOCKS).add(TinkerCommons.soulGlass.get());
@@ -105,8 +114,8 @@ public class BlockTagProvider extends BlockTagsProvider {
       Blocks.PURPLE_STAINED_GLASS_PANE, Blocks.RED_STAINED_GLASS_PANE, Blocks.WHITE_STAINED_GLASS_PANE, Blocks.YELLOW_STAINED_GLASS_PANE);
     this.tag(Tags.Blocks.GLASS_BLOCKS_COLORLESS).add(TinkerCommons.clearGlass.get());
     this.tag(Tags.Blocks.GLASS_PANES_COLORLESS).add(TinkerCommons.clearGlassPane.get());
-    addGlass(TinkerCommons.clearStainedGlass, "glass/", tag(Tags.Blocks.STAINED_GLASS));
-    addGlass(TinkerCommons.clearStainedGlassPane, "glass_panes/", tag(Tags.Blocks.STAINED_GLASS_PANES));
+    addGlass(TinkerCommons.clearStainedGlass, "glass/", tag(TinkerTags.Blocks.STAINED_GLASS));
+    addGlass(TinkerCommons.clearStainedGlassPane, "glass_panes/", tag(TinkerTags.Blocks.STAINED_GLASS_PANES));
     TinkerCommons.clearStainedGlassPane.forEach(pane -> silicaPanes.add(pane));
 
     // impermeable for all glass

@@ -196,6 +196,9 @@ public class ItemTagProvider extends ItemTagsProvider {
     addMetalTags(TinkerMaterials.knightslime);
     this.copy(Tags.Blocks.STORAGE_BLOCKS, Tags.Items.STORAGE_BLOCKS);
 
+    copy(TinkerTags.Blocks.STORAGE_BLOCKS_QUARTZ, TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
+    tag(Tags.Items.STORAGE_BLOCKS).addTag(TinkerTags.Items.STORAGE_BLOCKS_QUARTZ);
+
     // glass
     copy(Tags.Blocks.GLASS_BLOCKS, Tags.Items.GLASS_BLOCKS);
     copy(Tags.Blocks.GLASS_PANES, Tags.Items.GLASS_PANES);
@@ -204,8 +207,8 @@ public class ItemTagProvider extends ItemTagsProvider {
     copy(TinkerTags.Blocks.GLASS_PANES_SILICA, TinkerTags.Items.GLASS_PANES_SILICA);
     copy(Tags.Blocks.GLASS_BLOCKS_COLORLESS, Tags.Items.GLASS_BLOCKS_COLORLESS);
     copy(Tags.Blocks.GLASS_PANES_COLORLESS, Tags.Items.GLASS_PANES_COLORLESS);
-    copy(Tags.Blocks.STAINED_GLASS, Tags.Items.STAINED_GLASS);
-    copy(Tags.Blocks.STAINED_GLASS_PANES, Tags.Items.STAINED_GLASS_PANES);
+    copy(TinkerTags.Blocks.STAINED_GLASS, TinkerTags.Items.STAINED_GLASS);
+    copy(TinkerTags.Blocks.STAINED_GLASS_PANES, TinkerTags.Items.STAINED_GLASS_PANES);
     for (DyeColor color : DyeColor.values()) {
       ResourceLocation name = commonResource("glass/" + color.getSerializedName());
       copy(TagKey.create(Registries.BLOCK, name), TagKey.create(Registries.ITEM, name));

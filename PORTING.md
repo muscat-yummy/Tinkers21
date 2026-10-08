@@ -69,6 +69,15 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 - Layout/equipment datagen receives the actual GatherDataEvent lookup future, scopes all loadable JSON to RegistryOps and uses ICondition.LIST_CODEC. Modifier model registration uses verified static ModLoader.postEvent. The native eye-in-water state retains mapped access.
 - These edits await CI. Internal tool fluid/inventory component storage and the actual Minecraft load gate remain open.
 
+### Retained common tags and native output components — checkpoint 39 (2026-10-08)
+
+- Checkpoint 38 (run 37225467934) reports **32 full-source errors**, from 42. Mantle/declarations and native API inspection pass; unchanged independent checks are skipped. Material/book/conditional datagen/JsonThings sources compile.
+- Subclass rarity overrides use the owned material rarity hook, preserving common rarity for ingots, storage blocks and anvils.
+- Removed common-tag constants become explicit owned compatibility TagKeys with existing c: paths. Datagen includes quartz blocks and all vanilla/TiC stained glass/panes and copies membership to item tags. Recipes still accept tag contributors. Music discs use the native NeoForge common tag.
+- The tool-forge output name uses CUSTOM_NAME. The wrapper emits native component patches within FinishedRecipe's actual registry-aware serialization scope.
+- Fluid effects accept the actual Entity source supplied by Immersive Engineering; native mobProjectile supports Entity. Source/owner attribution is retained without an unsafe cast.
+- Edits await CI. Full compilation and actual Minecraft loading remain Phase 2 requirements.
+
 ## Current checkpoint (2026-10-04)
 
 **Phase 1 (build environment): complete under its stated gate. Phase 2 (bootstrap): in progress.** The NeoForge 21.1.251 / Java 21 multi-project Gradle build now resolves the required Mantle and JEI compile dependencies and reaches javac with actionable 1.21 source diagnostics. This does **not** mean `compileJava`, a distributable JAR, or a Minecraft load succeeds. The remaining source migrations are Phase 2 onward. Mantle now compiles, and the standalone typed-ID behavioral test passes; TiC still does not compile or load.

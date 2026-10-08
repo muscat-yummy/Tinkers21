@@ -50,7 +50,7 @@ public class FakeIngotItem extends RepairKitItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
+  public Rarity getMaterialRarity(ItemStack stack) {
     // override rarity, since vanilla ingots don't use it
     return Rarity.COMMON;
   }

@@ -49,7 +49,7 @@ public class AnvilBlockItem extends MaterialBlockItem {
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
+  public Rarity getMaterialRarity(ItemStack stack) {
     // override rarity, since this is a block, not an item
     return Rarity.COMMON;
   }

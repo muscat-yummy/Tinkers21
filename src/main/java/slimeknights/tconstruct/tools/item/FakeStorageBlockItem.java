@@ -47,7 +47,7 @@ public class FakeStorageBlockItem extends MaterialBlockItem implements IRepairKi
   }
 
   @Override
-  public Rarity getRarity(ItemStack stack) {
+  public Rarity getMaterialRarity(ItemStack stack) {
     // override rarity, since vanilla ingots don't use it
     return Rarity.COMMON;
   }

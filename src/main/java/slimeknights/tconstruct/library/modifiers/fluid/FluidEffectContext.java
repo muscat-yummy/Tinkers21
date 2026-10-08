@@ -39,13 +39,13 @@ public abstract class FluidEffectContext {
   protected final Player player;
   /** Projectile that caused the fluid, null if no projectile is used (e.g. melee or interact effects) */
   @Nullable
-  protected final Projectile projectile;
+  protected final net.minecraft.world.entity.Entity projectile;
   /** Item stack fallback for when the entity is not set */
   protected final ItemStack stack;
 
   /** @deprecated use {@link #FluidEffectContext(Level,LivingEntity,Player,Projectile,ItemStack} */
   @Deprecated
-  public FluidEffectContext(Level level, @Nullable LivingEntity entity, @Nullable Player player, @Nullable Projectile projectile) {
+  public FluidEffectContext(Level level, @Nullable LivingEntity entity, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile) {
     this(level, entity, player, projectile, ItemStack.EMPTY);
   }
 
@@ -113,7 +113,7 @@ public abstract class FluidEffectContext {
     @Getter
     private final Vec3 location;
 
-    private Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, ItemStack stack, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget, @Nullable Vec3 location) {
+    private Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, ItemStack stack, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget, @Nullable Vec3 location) {
       super(level, holder, player, projectile, stack);
       this.target = target;
       this.livingTarget = livingTarget;
@@ -122,25 +122,25 @@ public abstract class FluidEffectContext {
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget, @Nullable Vec3 location) {
+    public Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget, @Nullable Vec3 location) {
       this(level, holder, player, projectile, ItemStack.EMPTY, target, livingTarget, location);
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget) {
+    public Entity(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, net.minecraft.world.entity.Entity target, @Nullable LivingEntity livingTarget) {
       this(level, holder, player, projectile, target, livingTarget, null);
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Entity(Level level, @Nullable LivingEntity holder, @Nullable Projectile projectile, net.minecraft.world.entity.Entity target, @Nullable Vec3 location) {
+    public Entity(Level level, @Nullable LivingEntity holder, @Nullable net.minecraft.world.entity.Entity projectile, net.minecraft.world.entity.Entity target, @Nullable Vec3 location) {
       this(level, holder, asPlayer(holder), projectile, target, asLiving(target), location);
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Entity(Level level, Player player, @Nullable Projectile projectile, LivingEntity target) {
+    public Entity(Level level, Player player, @Nullable net.minecraft.world.entity.Entity projectile, LivingEntity target) {
       this(level, player, player, projectile, target, target);
     }
 
@@ -156,26 +156,26 @@ public abstract class FluidEffectContext {
     private final BlockHitResult hitResult;
     private BlockState state;
 
-    private Block(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, ItemStack stack, BlockHitResult hitResult) {
+    private Block(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, ItemStack stack, BlockHitResult hitResult) {
       super(level, holder, player, projectile, stack);
       this.hitResult = hitResult;
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Block(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable Projectile projectile, BlockHitResult hitResult) {
+    public Block(Level level, @Nullable LivingEntity holder, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, BlockHitResult hitResult) {
       this(level, holder, player, projectile, ItemStack.EMPTY, hitResult);
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Block(Level level, @Nullable LivingEntity holder, @Nullable Projectile projectile, BlockHitResult hitResult) {
+    public Block(Level level, @Nullable LivingEntity holder, @Nullable net.minecraft.world.entity.Entity projectile, BlockHitResult hitResult) {
       this(level, holder, asPlayer(holder), projectile, hitResult);
     }
 
     /** @deprecated use {@link #builder(Level)} */
     @Deprecated(forRemoval = true)
-    public Block(Level level, @Nullable Player player, @Nullable Projectile projectile, BlockHitResult hitResult) {
+    public Block(Level level, @Nullable Player player, @Nullable net.minecraft.world.entity.Entity projectile, BlockHitResult hitResult) {
       this(level, player, player, projectile, hitResult);
     }
 
@@ -225,7 +225,7 @@ public abstract class FluidEffectContext {
     private Player player = null;
     /** Projectile using the fluid */
     @Setter
-    private Projectile projectile = null;
+    private net.minecraft.world.entity.Entity projectile = null;
     /** Item stack fallback for when the entity is not set */
     @Setter
     private ItemStack stack = ItemStack.EMPTY;

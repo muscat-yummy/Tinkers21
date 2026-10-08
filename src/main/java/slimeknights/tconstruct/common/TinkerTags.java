@@ -68,6 +68,10 @@ public class TinkerTags {
   }
 
   public static class Blocks {
+    /** Compatibility groups retained after NeoForge removed their constants. */
+    public static final TagKey<Block> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
+    public static final TagKey<Block> STAINED_GLASS = common("glass/stained");
+    public static final TagKey<Block> STAINED_GLASS_PANES = common("glass_panes/stained");
     private static void init() {}
     public static final TagKey<Block> WORKBENCHES = common("workbenches");
     public static final TagKey<Block> TABLES = local("tables");
@@ -230,6 +234,9 @@ public class TinkerTags {
   }
 
   public static class Items {
+    public static final TagKey<Item> STORAGE_BLOCKS_QUARTZ = common("storage_blocks/quartz");
+    public static final TagKey<Item> STAINED_GLASS = common("glass/stained");
+    public static final TagKey<Item> STAINED_GLASS_PANES = common("glass_panes/stained");
     private static void init() {}
     public static final TagKey<Item> WORKBENCHES = common("workbenches");
     public static final TagKey<Item> TABLES = local("tables");

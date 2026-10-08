@@ -1,4 +1,4 @@
-name: Preserve material rarity and native optional integration behavior
+name: Preserve common recipe tags and native output components
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -35,12 +35,12 @@ jobs:
         run: |
           import pathlib, subprocess, zipfile
           targets = {
-              'net.neoforged.neoforge.fluids.FluidStack': ['public '],
-              'net.minecraft.network.codec.ByteBufCodecs': ['map(', 'collection(', 'registry(', 'idMapper(', 'holderRegistry('],
-              'net.minecraft.core.component.DataComponentType$Builder': ['public '],
-              'net.minecraft.resources.RegistryOps': ['public '],
-              'net.minecraft.world.damagesource.DamageSources': ['mobProjectile('],
-              'net.minecraft.world.item.ItemStack': ['CODEC', 'STREAM_CODEC', 'parse(', 'save(']
+              'net.minecraft.world.item.ItemStack': {'methods': ['static {};', 'parse(', 'parseOptional(']},
+              'net.minecraft.core.component.PatchedDataComponentMap': ['public '],
+              'net.minecraft.core.component.DataComponentMap$Builder': ['public '],
+              'net.minecraft.network.codec.StreamCodec': ['of(', 'composite(', 'map(', 'cast('],
+              'net.minecraft.resources.RegistryOps$RegistryInfoLookup': ['public '],
+              'net.neoforged.neoforge.registries.DeferredRegister$DataComponents': ['public ']
           }
           for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
               jar = pathlib.Path(entry)
@@ -110,7 +110,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re, shutil, subprocess
-          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable|ToolTankHelper.PARSE_FLUID|InventoryModule.writeStack|new DummyToolStack|getProjectile\\(\\)'
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable|ToolTankHelper.PARSE_FLUID|InventoryModule.writeStack|new DummyToolStack|CraftingNBTWrapper|getProjectile\(\)'
           if shutil.which('rg'):
               result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
               if result.returncode not in (0, 1):

@@ -210,11 +210,9 @@ public class TableRecipeProvider extends BaseRecipeProvider {
     // tool forge - just a humor recipe
     RecipeConsumer toolForge;
     {
-      CompoundTag nbt = new CompoundTag();
-      CompoundTag display = new CompoundTag();
-      display.putString("Name", Serializer.toJson(Component.translatable("block.tconstruct.tool_forge")));
-      nbt.put("display", display);
-      toolForge = CraftingNBTWrapper.wrap(consumer, nbt);
+      net.minecraft.core.component.DataComponentPatch components = net.minecraft.core.component.DataComponentPatch.builder()
+        .set(net.minecraft.core.component.DataComponents.CUSTOM_NAME, Component.translatable("block.tconstruct.tool_forge")).build();
+      toolForge = CraftingNBTWrapper.wrap(consumer, components);
     }
     ShapedRetexturedRecipeBuilder.fromShaped(
       ShapedRecipeBuilder.shaped(RecipeCategory.DECORATIONS, TinkerTables.tinkersAnvil)
