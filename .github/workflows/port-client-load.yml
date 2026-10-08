@@ -1,4 +1,4 @@
-name: Verify early equipment attachment binding and actual client construction
+name: Verify actual construction after client table block synchronization
 on:
   push:
     branches: [port/1.21.1-neoforge]

@@ -846,3 +846,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - Run 37833432844 passes native initial reload without model warnings and passes the previously failing full recipe synchronization into actual world/player ticking. It then fails in the client equipment watcher: tconstruct:equipment_watcher is unbound because its deferred attachment register was subscribed during CommonSetup, after the attachment registry event.
 - Subscribe the existing EquipmentChangeWatcher registration from the TinkerTools module constructor, before registries run. Remove the late CommonSetup call. Preserve the actual player-only attachment factory, client capability/tick comparison, both-side equipment hooks, modifier events and attachment ID. No tick or data handling is skipped. Native construction/repair/modifier screen verification remains pending.
+
+### Joined-world material model pass and native table arrival (2026-10-08)
+
+- Run 37834545810 passes real client world login and player ticking after the equipment attachment fix. Actual baked GUI pickaxe geometry differs for registered wood/iron materials, passing the joined-world material-composition check. No recipe synchronization or initial resource/model warning remains.
+- The test places tables then immediately opens a server menu; that menu reaches the actual client before the end-of-tick block update. Mantle correctly rejects its absent client tile, causing slot/data packets to fail. Change fixture sequencing to observe both actual client block entities before asking the real server player to open the Part Builder. No dummy tile, missing-tile menu or suppressed error is introduced. Full construction/repair/modifier verification remains pending.

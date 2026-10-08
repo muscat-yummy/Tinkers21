@@ -70,6 +70,8 @@ public final class ClientBootstrapCheck {
   private static volatile List<Item> parts = List.of();
   private static volatile boolean serverReady;
   private static boolean serverValidationRequested;
+  private static volatile boolean tablesPlaced;
+  private static boolean builderOpenRequested;
   private static volatile boolean stationOpenPending;
   private static volatile int baseUpgradeSlots;
   private static volatile float baseMiningSpeed;
@@ -270,11 +272,24 @@ public final class ClientBootstrapCheck {
         require(parts.size() == 3, "Actual pickaxe recipe lost its parts");
         builder.setItem(PartBuilderBlockEntity.MATERIAL_SLOT, new ItemStack(Items.OAK_PLANKS, 64));
         builder.setItem(PartBuilderBlockEntity.PATTERN_SLOT, new ItemStack(TinkerTables.pattern.get(), 3));
-        player.openMenu(builder, buffer -> buffer.writeBlockPos(builderPos));
+        tablesPlaced = true;
       });
       return;
     }
     if (step == 2) {
+      if (!builderOpenRequested) {
+        if (!tablesPlaced || !(minecraft.level.getBlockEntity(builderPos) instanceof PartBuilderBlockEntity) ||
+            !(minecraft.level.getBlockEntity(stationPos) instanceof TinkerStationBlockEntity)) return;
+        builderOpenRequested = true;
+        var server = minecraft.getSingleplayerServer();
+        var uuid = minecraft.player.getUUID();
+        serverAction(() -> {
+          var player = server.getPlayerList().getPlayer(uuid);
+          var builder = (PartBuilderBlockEntity) player.serverLevel().getBlockEntity(builderPos);
+          player.openMenu(builder, buffer -> buffer.writeBlockPos(builderPos));
+        });
+        return;
+      }
       if (!(minecraft.screen instanceof PartBuilderScreen) ||
           !(minecraft.player.containerMenu instanceof PartBuilderContainerMenu menu) || ticks < 20) return;
       var builder = (PartBuilderBlockEntity) minecraft.level.getBlockEntity(builderPos);
