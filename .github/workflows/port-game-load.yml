@@ -1,4 +1,4 @@
-name: Verify native harvest with the complete GameTest runtime classpath
+name: Verify registered attachments and native core gameplay
 on:
   push:
     branches: [port/1.21.1-neoforge]

@@ -362,6 +362,10 @@ public final class TinkerModifiers extends TinkerModule {
     FluidEffectManager.INSTANCE.init();
     MODIFIERS.register(TConstruct.getModEventBus());
     TinkerDataKeys.init();
+    TinkerDataCapability.register();
+    PersistentDataCapability.register();
+    EntityModifierCapability.register();
+    BlockItemProviderCapability.register();
   }
 
   /*
@@ -1102,10 +1106,6 @@ public final class TinkerModifiers extends TinkerModule {
 
   @SubscribeEvent
   void commonSetup(final FMLCommonSetupEvent event) {
-    TinkerDataCapability.register();
-    PersistentDataCapability.register();
-    EntityModifierCapability.register();
-    BlockItemProviderCapability.register();
     // by default, we support modifying projectiles (arrows or fireworks mainly, but maybe other stuff). other entities may come in the future
     EntityModifierCapability.registerEntityPredicate(entity -> entity instanceof Projectile);
   }

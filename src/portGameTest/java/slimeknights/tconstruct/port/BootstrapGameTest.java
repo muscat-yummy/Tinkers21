@@ -63,6 +63,8 @@ public final class BootstrapGameTest {
     checkCoreToolPersistence(helper);
     checkInventoryAndCooking(helper);
     checkNativeHarvest(helper);
+    checkNativeMelee(helper);
+    checkNativeConstruction(helper);
     helper.succeed();
     slimeknights.tconstruct.TConstruct.LOG.info("TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS");
   }
@@ -182,6 +184,10 @@ public final class BootstrapGameTest {
     ItemStack stack = tool.createStack();
     var player = new net.neoforged.testframework.gametest.ExtendedGameTestHelper(helper.testInfo)
       .makeTickingMockServerPlayerInLevel(net.minecraft.world.level.GameType.SURVIVAL);
+    helper.assertTrue(slimeknights.tconstruct.library.tools.capability.PersistentDataCapability.getOptionalData(player).isPresent() &&
+      slimeknights.tconstruct.library.tools.capability.TinkerDataCapability.getOptionalData(player).isPresent() &&
+      slimeknights.tconstruct.gadgets.capability.PiggybackCapability.getOptionalData(player).isPresent(),
+      "Actual player attachment capabilities were not registered before login");
     player.gameMode.changeGameModeForPlayer(net.minecraft.world.level.GameType.SURVIVAL);
     player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
     var relative = new net.minecraft.core.BlockPos(0, 1, 0);
@@ -214,7 +220,126 @@ public final class BootstrapGameTest {
         "Actual harvest left native and tool durability inconsistent");
     } finally {
       net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
-      player.discard();
+      player.disconnectGameTest();
+    }
+  }
+
+
+  private static void checkNativeMelee(GameTestHelper helper) {
+    var iron = slimeknights.tconstruct.library.materials.MaterialRegistry.getMaterial(
+      new slimeknights.tconstruct.library.materials.definition.MaterialId("tconstruct:iron"));
+    var item = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:sword")).orElseThrow().value();
+    var definition = ((slimeknights.tconstruct.library.tools.item.IModifiable) item).getToolDefinition();
+    var tool = slimeknights.tconstruct.library.tools.nbt.ToolStack.createTool(item, definition,
+      slimeknights.tconstruct.library.tools.nbt.MaterialNBT.of(iron, iron, iron));
+    ItemStack stack = tool.createStack();
+    var player = new net.neoforged.testframework.gametest.ExtendedGameTestHelper(helper.testInfo)
+      .makeTickingMockServerPlayerInLevel(net.minecraft.world.level.GameType.SURVIVAL);
+    var target = new net.minecraft.world.entity.monster.Zombie(
+      net.minecraft.world.entity.EntityType.ZOMBIE, helper.getLevel());
+    target.setNoAi(true);
+    var pos = helper.absolutePos(new net.minecraft.core.BlockPos(0, 1, 0));
+    target.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 0.5);
+    helper.getLevel().addFreshEntity(target);
+    player.setPos(pos.getX() + 0.5, pos.getY(), pos.getZ() + 1.5);
+    player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
+    player.doTick();
+    var events = new java.util.concurrent.atomic.AtomicInteger();
+    var cancel = new java.util.concurrent.atomic.AtomicBoolean(true);
+    java.util.function.Consumer<net.neoforged.neoforge.event.entity.player.AttackEntityEvent> listener = event -> {
+      if (event.getEntity() == player && event.getTarget() == target) {
+        events.incrementAndGet();
+        if (cancel.get()) event.setCanceled(true);
+      }
+    };
+    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);
+    try {
+      helper.assertTrue(player.getAttributeValue(net.minecraft.world.entity.ai.attributes.Attributes.ATTACK_DAMAGE) > 1,
+        "Native equipped sword attributes did not reach the actual player");
+      float health = target.getHealth();
+      int damage = stack.getDamageValue();
+      player.attack(target);
+      helper.assertTrue(target.getHealth() == health && stack.getDamageValue() == damage && events.get() == 1,
+        "Canceled native melee changed target health or tool durability");
+      cancel.set(false);
+      events.set(0);
+      player.attack(target);
+      helper.assertTrue(target.getHealth() < health && events.get() == 1 && stack.getDamageValue() > damage,
+        "Actual native melee did not damage the target/tool after one approved attack event");
+      var stored = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(stack);
+      helper.assertTrue(stored.getDamage() == stack.getDamageValue() && !stored.isBroken(),
+        "Actual melee left native and tool durability inconsistent");
+      helper.assertTrue(!target.getAttribute(net.minecraft.world.entity.ai.attributes.Attributes.KNOCKBACK_RESISTANCE)
+        .hasModifier(ResourceLocation.parse("tconstruct:anti_knockback")),
+        "Actual melee leaked temporary knockback state");
+    } finally {
+      net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
+      target.discard();
+      player.disconnectGameTest();
+    }
+  }
+
+
+  private static void checkNativeConstruction(GameTestHelper helper) {
+    var builderPos = new net.minecraft.core.BlockPos(1, 1, 0);
+    var stationPos = new net.minecraft.core.BlockPos(2, 1, 0);
+    helper.setBlock(builderPos, slimeknights.tconstruct.tables.TinkerTables.partBuilder.get());
+    helper.setBlock(stationPos, slimeknights.tconstruct.tables.TinkerTables.tinkerStation.get());
+    var builder = (slimeknights.tconstruct.tables.block.entity.table.PartBuilderBlockEntity)
+      helper.getLevel().getBlockEntity(helper.absolutePos(builderPos));
+    var station = (slimeknights.tconstruct.tables.block.entity.table.TinkerStationBlockEntity)
+      helper.getLevel().getBlockEntity(helper.absolutePos(stationPos));
+    var player = new net.neoforged.testframework.gametest.ExtendedGameTestHelper(helper.testInfo)
+      .makeTickingMockServerPlayerInLevel(net.minecraft.world.level.GameType.SURVIVAL);
+    try {
+      helper.assertTrue(builder != null && station != null, "Actual construction tables did not create block entities");
+      var holder = helper.getLevel().getRecipeManager()
+        .byKey(ResourceLocation.parse("tconstruct:tools/building/pickaxe")).orElseThrow();
+      var recipe = (slimeknights.tconstruct.library.recipe.tinkerstation.building.ToolBuildingRecipe) holder.value();
+      var parts = recipe.getToolParts();
+      helper.assertTrue(parts.size() == 3, "Actual pickaxe building recipe lost its tool parts");
+      builder.setItem(slimeknights.tconstruct.tables.block.entity.table.PartBuilderBlockEntity.MATERIAL_SLOT,
+        new ItemStack(Items.OAK_PLANKS, 64));
+      builder.setItem(slimeknights.tconstruct.tables.block.entity.table.PartBuilderBlockEntity.PATTERN_SLOT,
+        new ItemStack(slimeknights.tconstruct.tables.TinkerTables.pattern.get(), parts.size()));
+      int expectedMaterials = 64;
+      int expectedPatterns = parts.size();
+      for (int i = 0; i < parts.size(); i++) {
+        builder.selectRecipe(slimeknights.tconstruct.library.recipe.partbuilder.Pattern.fromItem(parts.get(i)));
+        var selected = builder.getPartRecipe();
+        helper.assertTrue(selected != null, "Actual part builder did not select a required pickaxe part");
+        int used = selected.getItemsUsed(builder.getInventoryWrapper());
+        ItemStack part = builder.calcResult(player);
+        helper.assertTrue(!part.isEmpty() && part.getItem() == parts.get(i).asItem() &&
+          new slimeknights.tconstruct.library.materials.definition.MaterialId("tconstruct:wood").equals(
+            slimeknights.tconstruct.library.tools.part.IMaterialItem.getMaterialFromStack(part)),
+          "Actual part building lost its output or material");
+        ItemStack input = part.copy();
+        builder.onCraft(player, part, part.getCount());
+        expectedMaterials -= used;
+        expectedPatterns--;
+        helper.assertTrue(builder.getItem(0).getCount() == expectedMaterials &&
+          builder.getItem(1).getCount() == expectedPatterns,
+          "Actual part building did not consume its materials and pattern exactly once");
+        station.setItem(i + slimeknights.tconstruct.tables.block.entity.table.TinkerStationBlockEntity.INPUT_SLOT, input);
+      }
+      ItemStack result = station.calcResult(player);
+      helper.assertTrue(!result.isEmpty() &&
+        result.getItem() == slimeknights.tconstruct.tools.TinkerTools.pickaxe.get(),
+        "Actual station did not assemble the built pickaxe parts");
+      var built = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(result);
+      helper.assertTrue(built.getMaterials().size() == 3 && built.getCurrentDurability() > 0 && !built.isBroken(),
+        "Actual construction produced an unusable material tool");
+      ItemStack output = result.copy();
+      station.onCraft(player, result, result.getCount());
+      for (int i = 0; i < parts.size(); i++) {
+        helper.assertTrue(station.getItem(i + 1).isEmpty(), "Actual station did not consume a building input");
+      }
+      var ops = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
+      ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, output).getOrThrow()).getOrThrow();
+      helper.assertTrue(ItemStack.matches(output, loaded), "Actual constructed tool changed during native persistence");
+    } finally {
+      player.disconnectGameTest();
     }
   }
 
