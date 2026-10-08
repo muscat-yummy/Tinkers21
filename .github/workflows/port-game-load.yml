@@ -1,4 +1,4 @@
-name: Verify actual native harvest permission and durability integration
+name: Verify actual harvest with the supported NeoForge GameTest player
 on:
   push:
     branches: [port/1.21.1-neoforge]

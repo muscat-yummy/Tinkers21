@@ -180,7 +180,8 @@ public final class BootstrapGameTest {
     var tool = slimeknights.tconstruct.library.tools.nbt.ToolStack.createTool(item, definition,
       slimeknights.tconstruct.library.tools.nbt.MaterialNBT.of(iron, iron, iron));
     ItemStack stack = tool.createStack();
-    var player = helper.makeMockServerPlayerInLevel();
+    var player = new net.neoforged.testframework.gametest.ExtendedGameTestHelper(helper.testInfo)
+      .makeTickingMockServerPlayerInLevel(net.minecraft.world.level.GameType.SURVIVAL);
     player.gameMode.changeGameModeForPlayer(net.minecraft.world.level.GameType.SURVIVAL);
     player.setItemInHand(net.minecraft.world.InteractionHand.MAIN_HAND, stack);
     var relative = new net.minecraft.core.BlockPos(0, 1, 0);

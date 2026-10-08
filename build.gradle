@@ -52,6 +52,7 @@ if (portGameTests) {
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
     }
     configurations.portGameTestImplementation.extendsFrom(configurations.implementation)
+    dependencies.add('portGameTestImplementation', "net.neoforged:testframework:${neo_version}")
 }
 
 neoForge {
