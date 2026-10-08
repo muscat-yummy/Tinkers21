@@ -1,4 +1,4 @@
-name: Verify native construction menus and diagnose incremental tool modifiers
+name: Verify cycle-free common contributors and persisted incremental modifiers
 on:
   push:
     branches: [port/1.21.1-neoforge]

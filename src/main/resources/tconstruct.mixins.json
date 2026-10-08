@@ -16,7 +16,8 @@
     "ProtectionEquipmentSlotMixin",
     "ProtectionEnchantmentSlotMixin",
     "MaterialItemRarityMixin",
-    "ItemStackStorageCodecMixin"
+    "ItemStackStorageCodecMixin",
+    "CommonTagImportsMixin"
   ],
   "client": [
     "ToolTooltipMixin"
