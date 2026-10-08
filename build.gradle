@@ -64,6 +64,7 @@ neoForge {
         if (portGameTests) {
             portGameTestServer {
                 type = 'gameTestServer'
+                sourceSet = sourceSets.portGameTest
                 gameDirectory = project.file('run-port-game-test')
                 systemProperty 'neoforge.enabledGameTestNamespaces', 'tconstruct'
             }

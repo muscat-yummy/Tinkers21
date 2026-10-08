@@ -1,4 +1,4 @@
-name: Verify actual harvest with the supported NeoForge GameTest player
+name: Verify native harvest with the complete GameTest runtime classpath
 on:
   push:
     branches: [port/1.21.1-neoforge]
