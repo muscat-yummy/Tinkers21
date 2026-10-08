@@ -1,4 +1,4 @@
-name: Verify native models atlas shaders and graphical bootstrap
+name: Verify actual client material models and construction screen packets
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -36,7 +36,8 @@ jobs:
           log = pathlib.Path('run-port-client-check/logs/latest.log')
           text = log.read_text() if log.is_file() else ''
           errors = [line for line in text.splitlines() if '/ERROR]' in line]
-          if 'TiC actual graphical client and initial resource reload PASS' not in text or errors:
+          missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
+          if 'TiC actual rendered Part Builder and Station construction packets PASS' not in text or errors or missing:
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
