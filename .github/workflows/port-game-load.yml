@@ -1,4 +1,4 @@
-name: Load Minecraft after exhaustive player armor tags and native setup
+name: Assemble production mods and verify actual Minecraft loading
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,7 +23,7 @@ jobs:
       - name: Create the isolated native world fixture
         run: python3 scripts/port/create_game_load_template.py
       - name: Build full production sources and run the actual Minecraft GameTest server
-        run: timeout 600s ./gradlew :build :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain
+        run: timeout 600s ./gradlew :assemble :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain
       - name: Show actual game diagnostics
         if: always()
         shell: python
