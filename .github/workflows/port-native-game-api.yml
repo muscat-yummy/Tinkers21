@@ -1,4 +1,4 @@
-name: Inspect native stack persistence and discarded save results
+name: Verify native stack persistence and discarded result audit
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -36,7 +36,7 @@ jobs:
         shell: python
         run: |
           import pathlib, re
-          pattern = re.compile(r'^\\s*[A-Za-z_$][\\w.$()]*\\.save\\([^;\\n]+,\\s*\\w+\\s*\\);\\s*$')
+          pattern = re.compile(r'^\s*[A-Za-z_$][\w.$()]*\.save\([^;\n]+,\s*\w+\s*\);\s*$')
           matches = 0
           for root in ('src/main/java', 'mantle-port/src/main/java'):
               for path in pathlib.Path(root).rglob('*.java'):
