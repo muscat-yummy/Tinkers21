@@ -45,7 +45,28 @@ public final class LegacyRecipeJson {
         }
       }
       for (var entry : object.entrySet()) renameTypes(entry.getValue());
+      String type = object.has("type") && object.get("type").isJsonPrimitive() ? object.get("type").getAsString() : "";
+      if ((type.equals("neoforge:intersection") || type.equals("neoforge:compound")) && object.has("children")) {
+        JsonArray children = new JsonArray();
+        for (JsonElement child : object.getAsJsonArray("children")) children.add(compound(child));
+        object.add("children", children);
+      } else if (type.equals("neoforge:difference")) {
+        for (String key : new String[] {"base", "subtracted"}) {
+          if (object.has(key)) object.add(key, compound(object.get(key)));
+        }
+      }
     }
+  }
+
+  /** Nested alternatives are real compound ingredients; intersection remains an AND of children. */
+  private static JsonElement compound(JsonElement ingredient) {
+    if (!ingredient.isJsonArray()) return ingredient;
+    JsonObject compound = new JsonObject();
+    compound.addProperty("type", "neoforge:compound");
+    JsonArray children = new JsonArray();
+    for (JsonElement child : ingredient.getAsJsonArray()) children.add(compound(child));
+    compound.add("children", children);
+    return compound;
   }
 
   private static JsonArray conditions(JsonObject json) {

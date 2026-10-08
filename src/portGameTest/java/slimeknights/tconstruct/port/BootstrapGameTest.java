@@ -52,10 +52,54 @@ public final class BootstrapGameTest {
     helper.assertTrue(slimeknights.tconstruct.library.tools.layout.StationSlotLayoutLoader.getInstance()
       .get(ResourceLocation.parse("tconstruct:pickaxe")) != slimeknights.tconstruct.library.tools.layout.StationSlotLayout.EMPTY,
       "Legacy SNBT station icon did not load");
+    checkCoreToolPersistence(helper);
     checkInventoryAndCooking(helper);
     helper.succeed();
     slimeknights.tconstruct.TConstruct.LOG.info("TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS");
   }
+
+  private static void checkCoreToolPersistence(GameTestHelper helper) {
+    var ironId = new slimeknights.tconstruct.library.materials.definition.MaterialId("tconstruct:iron");
+    var iron = slimeknights.tconstruct.library.materials.MaterialRegistry.getMaterial(ironId);
+    helper.assertTrue(ironId.equals(iron.getIdentifier()), "Actual iron material was not loaded");
+    var item = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:pickaxe")).orElseThrow().value();
+    var definition = ((slimeknights.tconstruct.library.tools.item.IModifiable) item).getToolDefinition();
+    var materials = slimeknights.tconstruct.library.tools.nbt.MaterialNBT.of(iron, iron, iron);
+    var tool = slimeknights.tconstruct.library.tools.nbt.ToolStack.createTool(item, definition, materials);
+    var miningSpeed = slimeknights.tconstruct.library.tools.stat.ToolStats.MINING_SPEED;
+    int durability = tool.getStats().getInt(slimeknights.tconstruct.library.tools.stat.ToolStats.DURABILITY);
+    float initialSpeed = tool.getStats().get(miningSpeed);
+    helper.assertTrue(durability > 1 && initialSpeed > 0, "Actual material tool stats were not built");
+    var haste = new slimeknights.tconstruct.library.modifiers.ModifierId("tconstruct:haste");
+    tool.addModifier(haste, 1);
+    float modifiedSpeed = tool.getStats().get(miningSpeed);
+    helper.assertTrue(modifiedSpeed > initialSpeed, "Actual haste modifier did not rebuild mining speed");
+    tool.setDamage(1);
+    ItemStack nativeTool = tool.createStack();
+    nativeTool.set(DataComponents.CUSTOM_NAME, net.minecraft.network.chat.Component.literal("Material tool"));
+    var ops = RegistryOps.create(NbtOps.INSTANCE, helper.getLevel().registryAccess());
+    ItemStack loaded = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, nativeTool).getOrThrow()).getOrThrow();
+    var restored = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(loaded);
+    helper.assertTrue(restored.getMaterials().equals(materials) && restored.getDamage() == 1 && !restored.isBroken(),
+      "Native material tool loading lost materials or damage");
+    helper.assertTrue(restored.getStats().get(miningSpeed) == modifiedSpeed &&
+      "Material tool".equals(loaded.get(DataComponents.CUSTOM_NAME).getString()),
+      "Native tool load lost modifier stats or custom name");
+    var detached = restored.copy();
+    detached.setDamage(durability);
+    helper.assertTrue(detached.isBroken() && restored.getDamage() == 1 && !restored.isBroken(),
+      "Detached core tool data shared durability state");
+    ItemStack broken = detached.createStack();
+    ItemStack loadedBroken = ItemStack.CODEC.parse(ops, ItemStack.CODEC.encodeStart(ops, broken).getOrThrow()).getOrThrow();
+    var restoredBroken = slimeknights.tconstruct.library.tools.nbt.ToolStack.from(loadedBroken);
+    helper.assertTrue(restoredBroken.isBroken() && restoredBroken.getCurrentDurability() == 0,
+      "Native load did not retain the broken tool state");
+    restoredBroken.setDamage(0);
+    restoredBroken.removeModifier(haste, 1);
+    helper.assertTrue(!restoredBroken.isBroken() && restoredBroken.getStats().get(miningSpeed) == initialSpeed,
+      "Repair and modifier removal did not rebuild the actual core tool");
+  }
+
   private static void checkInventoryAndCooking(GameTestHelper helper) {
     var pickaxe = BuiltInRegistries.ITEM.getHolder(ResourceLocation.parse("tconstruct:pickaxe")).orElseThrow();
     ItemStack nativeTool = new ItemStack(pickaxe);
