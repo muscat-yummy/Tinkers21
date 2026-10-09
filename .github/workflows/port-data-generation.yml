@@ -1,4 +1,4 @@
-name: Verify native datagen with actual built-in item codec
+name: Diagnose actual datagen registry owner for registered recipe results
 on:
   push:
     branches: [port/1.21.1-neoforge]

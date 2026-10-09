@@ -5,6 +5,8 @@ import com.mojang.serialization.JsonOps;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementHolder;
 import net.minecraft.core.HolderLookup;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeOutput;
 import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
@@ -26,7 +28,20 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
   @Override
   default void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
     HolderLookup.Provider registries = registryLookup();
-    JsonObject json = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow().getAsJsonObject();
+    JsonObject json;
+    try {
+      json = Recipe.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), recipe).getOrThrow().getAsJsonObject();
+    } catch (RuntimeException failure) {
+      var output = recipe.getResultItem(registries);
+      var key = BuiltInRegistries.ITEM.getResourceKey(output.getItem()).orElseThrow();
+      var itemLookup = registries.lookup(Registries.ITEM);
+      boolean providerHasResult = itemLookup.flatMap(lookup -> lookup.get(key)).isPresent();
+      boolean providerOwnsResult = itemLookup.flatMap(lookup -> lookup.get(key))
+        .map(holder -> holder.value() == output.getItem()).orElse(false);
+      throw new IllegalStateException("Failed to encode actual recipe " + id + ": native item " + key.location() +
+        ", datagen item registry available=" + itemLookup.isPresent() +
+        ", result present=" + providerHasResult + ", same registered item=" + providerOwnsResult, failure);
+    }
     ICondition.writeConditions(registries, json, conditions);
     JsonObject advancementJson = advancement == null ? null
       : Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();
