@@ -267,7 +267,7 @@ Port Smeltery, Foundry, melting, casting, tanks, fluid handling, and related blo
 ### Phase 7 — Remaining content (in progress)
 Port slimes, entities, world generation, special modifiers, integrations, datagen, and remaining content.
 
-The native world gate in run 37959707720 passed five GameTests: registered sky/ender slimes and terracube enter a real normal-difficulty world and remain alive/tracked through 25 ticks; four slime configured features and four slime structures resolve from the actual server registries. This verifies entity ticking and world registry loading, not structure placement, biome spawning, all special modifiers, or generated data.
+The native world gate in run 37959707720 passed five GameTests: registered sky/ender slimes and terracube enter a real normal-difficulty world and remain alive/tracked through 25 ticks; four slime configured features and four slime structures resolve from the actual server registries. Run 37961959230 extends this to actual configured earth slime tree placement on registered slime soil, with the real greenheart trunk, and passes all six GameTests. Entity ticking can vary as mobs move between native ticking regions; the gate requires a tick and survival/tracking after 25 world ticks. This verifies bounded entity behavior and one feature placement, not island structure placement, biome spawning, all special modifiers, or generated data.
 
 ### Phase 8 — Addon compatibility
 Audit public/internal APIs commonly used by addons and document differences. The long-term goal is to make ports of addons such as TiCEX practical without complete rewrites.
@@ -300,7 +300,7 @@ Source compatibility does not imply binary compatibility. In particular, addons 
 ## Known issues
 
 - Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
-- Both production jars assemble; actual client construction/armor, native machine, and bounded world-entity/feature-registration gates pass. Complete regenerated data, placement/spawning, remaining content behavior and external addon compatibility remain under verification.
+- Both production jars assemble; actual client construction/armor, native machine, and bounded world-entity/feature-registration gates pass. Complete regenerated data, island placement/spawning, remaining content behavior and external addon compatibility remain under verification.
 
 ## Upstream
 
@@ -886,3 +886,8 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Run 37958070823 passes actual graphical client reload, wood/iron baked material tool geometry, real Part Builder and Station screens/packets, repair, saved incremental haste, and third-person plate/travelers/slimesuit armor. All four actual equipment slots retain their materials and resolve owned layered textures/custom armor models; no client ERROR, missing model, or missing texture is reported. Phase 5 is complete.
 - Run 37958070592 assembles complete production TiC and Mantle jars and passes all four native server GameTests. Real fuel heats Melter iron and casts the ingot; placed heater/melter/casting table preserve item/fluid inputs and casting progress on native save/load. Minimal actual Smeltery and Foundry form, melt fueled iron, reconstruct a registered controller with saved state, retain a live drain proxy, reject operations while the wall is broken and recover after reformation. Smeltery also alloys exact copper/gold inputs into rose gold. Phase 6 is complete.
 - Data generation run 37958070772 still fails at the first own registered item in CommonRecipeProvider despite using native JsonOps. Inspect the exact 21.1.251 registry lookup composition rather than inventing a registered item or suppressing recipe output. Phase 7 continues; legacy world migration and external addon compatibility remain separate open gates.
+
+### Native world placement and datagen registry ownership (2026-10-09)
+
+- Run 37961959230 assembles both production jars and passes all six real Minecraft GameTests: load/cooking/inventory, Melter casting/persistence, Smeltery alloy/structure/persistence, Foundry structure/persistence, actual slime entity survival/tracking plus feature/structure keys, and configured earth slime tree placement on registered slimy soil with its greenheart trunk.
+- Run 37960978362 reaches native recipe advancement generation after removing the duplicate Mantle package source from the TiC module. The event item lookup includes the registered blazewood output and resolves the same `Item` instance, but the advancement criterion's `Holder.Reference` cannot serialize in that lookup. Its owner/context needs a correct native resolution. Recipe JSON successfully encodes through the native recipe codec. Full datagen, generated-pack validation, island placement and addon runtime compatibility remain open.
