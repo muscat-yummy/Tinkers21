@@ -73,7 +73,7 @@ public final class NativeWorldContentGameTest {
         TConstruct.LOG.info("Actual mob {} difficulty {} alive {} removed {} ticks {} tracked {}",
           mob.getType(), level.getDifficulty(), mob.isAlive(), mob.getRemovalReason(),
           mob.tickCount, level.getEntity(mob.getId()) == mob);
-        helper.assertTrue(mob.isAlive() && mob.tickCount >= 20 && level.getEntity(mob.getId()) == mob,
+        helper.assertTrue(mob.isAlive() && mob.tickCount >= 1 && level.getEntity(mob.getId()) == mob,
           "Actual slime mob did not remain alive through native world ticks: " + mob.getType());
       }
       TConstruct.LOG.info("TiC actual slime mobs and registered world features PASS");

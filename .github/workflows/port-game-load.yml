@@ -1,4 +1,4 @@
-name: Verify actual slime tree feature placement in native world
+name: Verify native slime tree placement and tracked mob survival
 on:
   push:
     branches: [port/1.21.1-neoforge]
