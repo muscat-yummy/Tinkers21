@@ -5,6 +5,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.gametest.framework.GameTest;
 import net.minecraft.gametest.framework.GameTestHelper;
+import net.minecraft.util.RandomSource;
+import slimeknights.tconstruct.common.TinkerTags;
+import slimeknights.tconstruct.world.block.FoliageType;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Blocks;
@@ -17,6 +20,25 @@ import slimeknights.tconstruct.world.TinkerWorld;
 @GameTestHolder("tconstruct")
 @PrefixGameTestTemplate(false)
 public final class NativeWorldContentGameTest {
+  @GameTest(template = "bootstrap", timeoutTicks = 160)
+  public static void actualEarthSlimeTreePlacement(GameTestHelper helper) {
+    var level = helper.getLevel();
+    BlockPos origin = new BlockPos(0, 1, 0);
+    var soil = TinkerWorld.earthSlimeGrass.get(FoliageType.EARTH);
+    helper.setBlock(origin.below(), soil);
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin.below())).is(TinkerTags.Blocks.SLIMY_SOIL),
+      "Actual slime soil tag does not include the registered earth slime grass");
+    var configured = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE)
+      .getOrThrow(TinkerStructures.earthSlimeTree).value();
+    boolean placed = configured.place(level, level.getChunkSource().getGenerator(),
+      RandomSource.create(314159), helper.absolutePos(origin));
+    helper.assertTrue(placed, "Actual registered earth slime tree feature rejected valid slime soil");
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin)).is(TinkerWorld.greenheart.getLog()),
+      "Actual feature did not place its registered greenheart trunk");
+    TConstruct.LOG.info("TiC actual configured earth slime tree placement PASS");
+    helper.succeed();
+  }
+
   @GameTest(template = "bootstrap", timeoutTicks = 160)
   public static void actualSlimeEntitiesAndWorldFeatures(GameTestHelper helper) {
     var level = helper.getLevel();

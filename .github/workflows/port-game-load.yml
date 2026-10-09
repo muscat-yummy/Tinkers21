@@ -1,4 +1,4 @@
-name: Diagnose actual slime mob removal during native world ticks
+name: Verify actual slime tree feature placement in native world
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -53,6 +53,7 @@ jobs:
               'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
               'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
               'TiC actual slime mobs and registered world features PASS' not in text or
+              'TiC actual configured earth slime tree placement PASS' not in text or
               'Mod loading has failed' in text or load_errors):
               raise SystemExit('Actual TiC world-load verification did not complete successfully')
       - name: Show actual game diagnostics
