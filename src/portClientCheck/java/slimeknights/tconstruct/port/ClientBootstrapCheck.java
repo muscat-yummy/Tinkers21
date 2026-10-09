@@ -328,25 +328,36 @@ public final class ClientBootstrapCheck {
         return;
       }
       minecraft.player.closeContainer();
-      var server = minecraft.getSingleplayerServer();
-      var uuid = minecraft.player.getUUID();
+      stationOpenPending = false;
       advance(5);
-      serverAction(() -> {
-        var player = server.getPlayerList().getPlayer(uuid);
-        var builder = (PartBuilderBlockEntity) player.serverLevel().getBlockEntity(builderPos);
-        require(builder.getItem(0).getCount() == 64 - usedPlanks && builder.getItem(1).isEmpty(),
-          "Native part packets did not consume exact materials and patterns on the actual server");
-        for (Item part : parts) require(player.getInventory().items.stream().anyMatch(stack ->
-          stack.getItem() == part && new MaterialId("tconstruct:wood").equals(IMaterialItem.getMaterialFromStack(stack))),
-          "Actual server inventory did not retain a crafted material part");
-        var station = (TinkerStationBlockEntity) player.serverLevel().getBlockEntity(stationPos);
-        player.openMenu(station, buffer -> buffer.writeBlockPos(stationPos));
-      });
       return;
     }
     if (step == 5) {
       if (!(minecraft.screen instanceof TinkerStationScreen screen) ||
-          !(minecraft.player.containerMenu instanceof TinkerStationContainerMenu) || ticks < 20) return;
+          !(minecraft.player.containerMenu instanceof TinkerStationContainerMenu)) {
+        if (!stationOpenPending && ticks % 10 == 0) {
+          stationOpenPending = true;
+          var server = minecraft.getSingleplayerServer();
+          var uuid = minecraft.player.getUUID();
+          serverAction(() -> {
+            var player = server.getPlayerList().getPlayer(uuid);
+            if (player.containerMenu != player.inventoryMenu) {
+              stationOpenPending = false;
+              return;
+            }
+            var builder = (PartBuilderBlockEntity) player.serverLevel().getBlockEntity(builderPos);
+            require(builder.getItem(0).getCount() == 64 - usedPlanks && builder.getItem(1).isEmpty(),
+              "Native part packets did not consume exact materials and patterns on the actual server");
+            for (Item part : parts) require(player.getInventory().items.stream().anyMatch(stack ->
+              stack.getItem() == part && new MaterialId("tconstruct:wood").equals(IMaterialItem.getMaterialFromStack(stack))),
+              "Actual server inventory did not retain a crafted material part");
+            var station = (TinkerStationBlockEntity) player.serverLevel().getBlockEntity(stationPos);
+            player.openMenu(station, buffer -> buffer.writeBlockPos(stationPos));
+          });
+        }
+        return;
+      }
+      if (ticks < 20) return;
       screen.onToolSelection(StationSlotLayoutLoader.getInstance().get(ResourceLocation.parse("tconstruct:pickaxe")));
       advance(6);
       return;

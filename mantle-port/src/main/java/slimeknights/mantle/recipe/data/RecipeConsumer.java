@@ -26,7 +26,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
   @Override
   default void accept(ResourceLocation id, Recipe<?> recipe, @Nullable AdvancementHolder advancement, ICondition... conditions) {
     HolderLookup.Provider registries = registryLookup();
-    JsonObject json = Recipe.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), recipe).getOrThrow().getAsJsonObject();
+    JsonObject json = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow().getAsJsonObject();
     ICondition.writeConditions(registries, json, conditions);
     JsonObject advancementJson = advancement == null ? null
       : Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();

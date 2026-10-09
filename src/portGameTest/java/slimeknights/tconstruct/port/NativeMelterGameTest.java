@@ -46,7 +46,7 @@ public final class NativeMelterGameTest {
     metadata.putInt("retained_metadata", 42);
     var encoded = slimeknights.tconstruct.library.tools.capability.inventory.InventoryModule.writeStack(coal, 7, metadata, level.registryAccess());
     helper.assertTrue(encoded == metadata && metadata.getInt("retained_metadata") == 42 &&
-      metadata.getInt("slot") == 7 && ItemStack.matches(coal, ItemStack.parseOptional(level.registryAccess(), metadata)),
+      metadata.getInt(slimeknights.tconstruct.library.tools.capability.inventory.InventoryModule.TAG_SLOT) == 7 && ItemStack.matches(coal, ItemStack.parseOptional(level.registryAccess(), metadata)),
       "Actual native inventory helper lost its original compound, metadata, slot or stack components");
     var fuel = level.getCapability(Capabilities.FluidHandler.BLOCK, helper.absolutePos(fuelPos), Direction.UP);
     var input = level.getCapability(Capabilities.ItemHandler.BLOCK, helper.absolutePos(melterPos), Direction.UP);

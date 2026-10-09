@@ -1,4 +1,4 @@
-name: Verify complete native data generation in isolated working directory
+name: Verify native datagen with actual built-in item codec
 on:
   push:
     branches: [port/1.21.1-neoforge]

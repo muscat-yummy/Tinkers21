@@ -1,4 +1,4 @@
-name: Verify native heater melting item persistence and full multiblock lifecycle
+name: Diagnose actual machine test startup and validate persistence
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -23,7 +23,23 @@ jobs:
       - name: Create the isolated native world fixture
         run: python3 scripts/port/create_game_load_template.py
       - name: Build full production sources and run the actual Minecraft GameTest server
-        run: timeout 600s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain
+        shell: bash
+        run: |
+          timeout 540s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain &
+          build_pid=$!
+          (
+            sleep 180
+            if kill -0 "$build_pid" 2>/dev/null; then
+              jps -l
+              for java_pid in $(jps -l | awk '$2 ~ /devlaunch.Main/ {print $1}'); do
+                timeout 15s jcmd "$java_pid" Thread.print | python3 -c 'import sys; s=sys.stdin.read(); a=s.find("\"Server thread\""); print(s[a:a+9500] if a >= 0 else s[:2500])'
+              done
+            fi
+          ) &
+          monitor_pid=$!
+          if wait "$build_pid"; then result=0; else result=$?; fi
+          kill "$monitor_pid" 2>/dev/null || true
+          exit "$result"
       - name: Require the actual game-world verification marker
         shell: python
         run: |

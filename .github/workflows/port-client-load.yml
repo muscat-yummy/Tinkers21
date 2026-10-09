@@ -1,4 +1,4 @@
-name: Verify native material armor rendering after construction
+name: Verify acknowledged menu close and actual material armor rendering
 on:
   push:
     branches: [port/1.21.1-neoforge]
