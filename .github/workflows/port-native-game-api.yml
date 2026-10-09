@@ -1,4 +1,4 @@
-name: Inspect pinned item predicate holder construction
+name: Inspect native criterion immutable constructor contracts
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -32,7 +32,8 @@ jobs:
                       'net.minecraft.data.recipes.RecipeProvider', 'net.minecraft.data.recipes.RecipeProvider$1',
                       'net.minecraft.data.advancements.AdvancementProvider', 'net.minecraft.advancements.critereon.ItemPredicate$Builder',
                       'net.minecraft.advancements.critereon.InventoryChangeTrigger$TriggerInstance',
-                      'net.minecraft.advancements.Criterion', 'net.minecraft.advancements.Advancement'):
+                      'net.minecraft.advancements.Criterion', 'net.minecraft.advancements.Advancement',
+                      'net.minecraft.advancements.critereon.ItemPredicate', 'net.minecraft.core.HolderSet'):
               p = subprocess.run(['javap', '-c', '-p', '-classpath', jar, cls], capture_output=True, text=True, check=False)
               if p.returncode:
                   print('Unavailable native class', cls)
@@ -40,5 +41,5 @@ jobs:
               lines = p.stdout.splitlines()
               print('Class', cls)
               for i, line in enumerate(lines):
-                  if any(term in line for term in (' of(', 'hasItems(', ' item(', 'criteria(', 'public net.minecraft.advancements.Advancement(', 'public net.minecraft.advancements.Criterion(', 'triggerInstance(', 'getLookupProvider(')):
+                  if any(term in line for term in ('public net.minecraft.advancements.critereon.ItemPredicate(', 'public net.minecraft.advancements.critereon.InventoryChangeTrigger$TriggerInstance(', 'public static net.minecraft.core.HolderSet', 'public java.util.Optional<net.minecraft.core.HolderSet', 'public java.util.List<net.minecraft.advancements.critereon.ItemPredicate>', 'public net.minecraft.advancements.Advancement(', 'criteria(', 'triggerInstance(')):
                       print('\n'.join(lines[i:i+135]))
