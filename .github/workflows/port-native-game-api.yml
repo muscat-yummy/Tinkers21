@@ -1,4 +1,4 @@
-name: Inspect real datagen registry lookup composition APIs
+name: Inspect pinned NeoForge datagen provider construction
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -22,5 +22,16 @@ jobs:
           cache-dependency-path: '**/*.gradle*'
       - name: Resolve pinned public Minecraft artifacts
         run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain
-      - name: Inspect native registry lookup composition signatures
-        run: javap -classpath build/moddev/artifacts/neoforge-21.1.251.jar 'net.minecraft.core.HolderLookup$Provider' 'net.minecraft.core.HolderLookup$RegistryLookup' net.minecraft.core.RegistryAccess net.minecraft.core.registries.BuiltInRegistries net.minecraft.resources.RegistryOps net.minecraft.core.Registry
+      - name: Inspect native data generator registry provider creation
+        shell: python
+        run: |
+          import subprocess
+          jar = 'build/moddev/artifacts/neoforge-21.1.251.jar'
+          for cls in ('net.neoforged.neoforge.data.event.GatherDataEvent', 'net.neoforged.neoforge.data.event.GatherDataEvent$DataGeneratorConfig',
+                      'net.neoforged.neoforge.data.loading.DatagenModLoader', 'net.minecraft.data.registries.VanillaRegistries'):
+              p = subprocess.run(['javap', '-c', '-p', '-classpath', jar, cls], capture_output=True, text=True, check=True)
+              lines = p.stdout.splitlines()
+              print('Class', cls)
+              for i, line in enumerate(lines):
+                  if any(term in line for term in ('getLookupProvider(', 'runAll(', 'createLookup(', 'gatherData(', 'newDataGenerator(')):
+                      print('\n'.join(lines[i:i+65]))

@@ -43,8 +43,23 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
         ", result present=" + providerHasResult + ", same registered item=" + providerOwnsResult, failure);
     }
     ICondition.writeConditions(registries, json, conditions);
-    JsonObject advancementJson = advancement == null ? null
-      : Advancement.CODEC.encodeStart(JsonOps.INSTANCE, advancement.value()).getOrThrow().getAsJsonObject();
+    JsonObject advancementJson = null;
+    if (advancement != null) {
+      try {
+        advancementJson = Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries),
+          advancement.value()).getOrThrow().getAsJsonObject();
+      } catch (RuntimeException failure) {
+        var result = recipe.getResultItem(registries);
+        var key = BuiltInRegistries.ITEM.getResourceKey(result.getItem()).orElseThrow();
+        var lookup = registries.lookup(Registries.ITEM);
+        boolean included = lookup.flatMap(items -> items.get(key)).isPresent();
+        boolean sameItem = lookup.flatMap(items -> items.get(key))
+          .map(holder -> holder.value() == result.getItem()).orElse(false);
+        throw new IllegalStateException("Failed actual advancement " + advancement.id() + " for recipe " + id +
+          ": output " + key.location() + ", actual event item registry available=" + lookup.isPresent() +
+          ", result included=" + included + ", same item=" + sameItem, failure);
+      }
+    }
     if (advancementJson != null) { ICondition.writeConditions(registries, advancementJson, conditions); }
     accept(new FinishedRecipe() {
       @Override public ResourceLocation getId() { return id; }

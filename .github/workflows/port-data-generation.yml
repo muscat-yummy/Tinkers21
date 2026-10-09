@@ -1,4 +1,4 @@
-name: Verify native recipe and advancement encoding with real item IDs
+name: Diagnose actual advancement lookup owner and result item
 on:
   push:
     branches: [port/1.21.1-neoforge]
