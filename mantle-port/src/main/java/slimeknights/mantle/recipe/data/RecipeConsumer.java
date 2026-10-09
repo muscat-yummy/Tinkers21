@@ -63,6 +63,14 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
         boolean included = lookup.flatMap(items -> items.get(key)).isPresent();
         boolean sameItem = lookup.flatMap(items -> items.get(key))
           .map(holder -> holder.value() == result.getItem()).orElse(false);
+        var secondLookup = registries.lookup(Registries.ITEM);
+        boolean sameLookup = lookup.orElseThrow() == secondLookup.orElseThrow();
+        boolean sameHolder = lookup.flatMap(items -> items.get(key)).orElseThrow() ==
+          secondLookup.flatMap(items -> items.get(key)).orElseThrow();
+        boolean holderValidInLookup = lookup.flatMap(items -> items.get(key))
+          .map(holder -> holder.canSerializeIn(lookup.orElseThrow())).orElse(false);
+        boolean holderValidInSecondLookup = lookup.flatMap(items -> items.get(key))
+          .map(holder -> holder.canSerializeIn(secondLookup.orElseThrow())).orElse(false);
         var normalized = withEventItemHolders(advancement.value(), registries);
         String criteria = normalized.criteria().entrySet().stream()
           .map(entry -> entry.getKey() + "=" + entry.getValue().triggerInstance())
@@ -70,6 +78,8 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
         throw new IllegalStateException("Failed actual advancement " + advancement.id() + " for recipe " + id +
           ": output " + key.location() + ", actual event item registry available=" + lookup.isPresent() +
           ", result included=" + included + ", same item=" + sameItem +
+          ", same lookup=" + sameLookup + ", same holder=" + sameHolder +
+          ", valid in first=" + holderValidInLookup + ", valid in second=" + holderValidInSecondLookup +
           ", display=" + normalized.display() + ", criteria=" + criteria, failure);
       }
     }

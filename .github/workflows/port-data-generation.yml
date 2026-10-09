@@ -1,4 +1,4 @@
-name: Diagnose native advancement criterion ownership after rebinding
+name: Inspect actual event lookup identity for advancement encoding
 on:
   push:
     branches: [port/1.21.1-neoforge]
