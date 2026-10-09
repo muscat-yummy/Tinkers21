@@ -1,4 +1,4 @@
-name: Inspect pinned native advancement serialization context
+name: Inspect pinned item predicate holder construction
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -30,7 +30,9 @@ jobs:
           for cls in ('net.neoforged.neoforge.data.event.GatherDataEvent', 'net.neoforged.neoforge.data.event.GatherDataEvent$DataGeneratorConfig',
                       'net.neoforged.neoforge.data.loading.DatagenModLoader', 'net.minecraft.data.registries.VanillaRegistries',
                       'net.minecraft.data.recipes.RecipeProvider', 'net.minecraft.data.recipes.RecipeProvider$1',
-                      'net.minecraft.data.advancements.AdvancementProvider'):
+                      'net.minecraft.data.advancements.AdvancementProvider', 'net.minecraft.advancements.critereon.ItemPredicate$Builder',
+                      'net.minecraft.advancements.critereon.InventoryChangeTrigger$TriggerInstance',
+                      'net.minecraft.advancements.Criterion', 'net.minecraft.advancements.Advancement'):
               p = subprocess.run(['javap', '-c', '-p', '-classpath', jar, cls], capture_output=True, text=True, check=False)
               if p.returncode:
                   print('Unavailable native class', cls)
@@ -38,5 +40,5 @@ jobs:
               lines = p.stdout.splitlines()
               print('Class', cls)
               for i, line in enumerate(lines):
-                  if any(term in line for term in ('getLookupProvider(', 'runAll(', 'createLookup(', 'gatherData(', 'newDataGenerator(', ' run(', 'serializeAdvancement(', 'saveAdvancement(', 'saveRecipe(')):
+                  if any(term in line for term in (' of(', 'hasItems(', ' item(', 'criteria(', 'public net.minecraft.advancements.Advancement(', 'public net.minecraft.advancements.Criterion(', 'triggerInstance(', 'getLookupProvider(')):
                       print('\n'.join(lines[i:i+135]))
