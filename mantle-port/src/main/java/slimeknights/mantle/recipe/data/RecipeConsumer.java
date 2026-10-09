@@ -63,9 +63,14 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
         boolean included = lookup.flatMap(items -> items.get(key)).isPresent();
         boolean sameItem = lookup.flatMap(items -> items.get(key))
           .map(holder -> holder.value() == result.getItem()).orElse(false);
+        var normalized = withEventItemHolders(advancement.value(), registries);
+        String criteria = normalized.criteria().entrySet().stream()
+          .map(entry -> entry.getKey() + "=" + entry.getValue().triggerInstance())
+          .toList().toString();
         throw new IllegalStateException("Failed actual advancement " + advancement.id() + " for recipe " + id +
           ": output " + key.location() + ", actual event item registry available=" + lookup.isPresent() +
-          ", result included=" + included + ", same item=" + sameItem, failure);
+          ", result included=" + included + ", same item=" + sameItem +
+          ", display=" + normalized.display() + ", criteria=" + criteria, failure);
       }
     }
     else { advancementJson = null; }

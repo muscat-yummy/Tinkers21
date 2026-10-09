@@ -1,4 +1,4 @@
-name: Encode native recipe criteria with actual event item holders
+name: Diagnose native advancement criterion ownership after rebinding
 on:
   push:
     branches: [port/1.21.1-neoforge]
