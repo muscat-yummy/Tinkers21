@@ -267,6 +267,8 @@ Port Smeltery, Foundry, melting, casting, tanks, fluid handling, and related blo
 ### Phase 7 — Remaining content (in progress)
 Port slimes, entities, world generation, special modifiers, integrations, datagen, and remaining content.
 
+The native world gate in run 37959707720 passed five GameTests: registered sky/ender slimes and terracube enter a real normal-difficulty world and remain alive/tracked through 25 ticks; four slime configured features and four slime structures resolve from the actual server registries. This verifies entity ticking and world registry loading, not structure placement, biome spawning, all special modifiers, or generated data.
+
 ### Phase 8 — Addon compatibility
 Audit public/internal APIs commonly used by addons and document differences. The long-term goal is to make ports of addons such as TiCEX practical without complete rewrites.
 
@@ -298,7 +300,7 @@ Source compatibility does not imply binary compatibility. In particular, addons 
 ## Known issues
 
 - Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
-- Both production jars assemble; actual client construction/armor and native machine gates pass. Complete regenerated data, remaining content behavior and external addon compatibility remain under verification.
+- Both production jars assemble; actual client construction/armor, native machine, and bounded world-entity/feature-registration gates pass. Complete regenerated data, placement/spawning, remaining content behavior and external addon compatibility remain under verification.
 
 ## Upstream
 

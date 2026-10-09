@@ -1,4 +1,4 @@
-name: Diagnose actual advancement registry ownership with compiling source
+name: Verify mirrored Mantle advancement registry ownership
 on:
   push:
     branches: [port/1.21.1-neoforge]

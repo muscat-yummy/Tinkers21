@@ -43,7 +43,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
         ", result present=" + providerHasResult + ", same registered item=" + providerOwnsResult, failure);
     }
     ICondition.writeConditions(registries, json, conditions);
-    JsonObject advancementJson = null;
+    final JsonObject advancementJson;
     if (advancement != null) {
       try {
         advancementJson = Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries),
@@ -60,6 +60,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
           ", result included=" + included + ", same item=" + sameItem, failure);
       }
     }
+    else { advancementJson = null; }
     if (advancementJson != null) { ICondition.writeConditions(registries, advancementJson, conditions); }
     accept(new FinishedRecipe() {
       @Override public ResourceLocation getId() { return id; }
