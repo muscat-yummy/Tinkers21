@@ -35,7 +35,9 @@ public final class NativeWorldContentGameTest {
     java.util.List<Mob> spawned = new java.util.ArrayList<>();
     for (int i = 0; i < types.size(); i++) {
       BlockPos relative = new BlockPos(i * 3, 1, 0);
-      helper.setBlock(relative.below(), Blocks.STONE);
+      for (int dx = -1; dx <= 1; dx++) for (int dz = -1; dz <= 1; dz++) {
+        helper.setBlock(relative.below().offset(dx, 0, dz), Blocks.STONE);
+      }
       Mob mob = types.get(i).create(level);
       helper.assertTrue(mob != null && mob.getType() == types.get(i),
         "Actual registered slime entity type did not construct its mob");
@@ -46,6 +48,9 @@ public final class NativeWorldContentGameTest {
     }
     helper.runAfterDelay(25, () -> {
       for (Mob mob : spawned) {
+        TConstruct.LOG.info("Actual mob {} difficulty {} alive {} removed {} ticks {} tracked {}",
+          mob.getType(), level.getDifficulty(), mob.isAlive(), mob.getRemovalReason(),
+          mob.tickCount, level.getEntity(mob.getId()) == mob);
         helper.assertTrue(mob.isAlive() && mob.tickCount >= 20 && level.getEntity(mob.getId()) == mob,
           "Actual slime mob did not remain alive through native world ticks: " + mob.getType());
       }

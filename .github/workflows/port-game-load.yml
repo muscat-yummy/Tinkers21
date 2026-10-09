@@ -1,4 +1,4 @@
-name: Verify actual slime entities and world structure registrations
+name: Diagnose actual slime mob removal during native world ticks
 on:
   push:
     branches: [port/1.21.1-neoforge]
