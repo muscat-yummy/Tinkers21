@@ -280,19 +280,25 @@ Avoid repeatedly launching a full Minecraft instance after tiny changes. Prefer 
 
 ## Compatibility log
 
-| Area | Upstream 1.20.1 | 1.21.1 port | Compatibility notes |
+Addon authors must rebuild against Java 21, Minecraft 1.21.1, NeoForge 21.1.251 and this branch's Mantle/TiC artifacts. The following contracts are confirmed in the port sources; addon source and runtime compatibility still require independent verification.
+
+| Area | Forge 1.20.1 assumption | Current port contract | Verified scope |
 | --- | --- | --- | --- |
-| Item/tool data | TBD | TBD | TBD |
-| Networking | SimpleChannel and NetworkEvent.Context | NeoForge payload bridge with Mantle packet adapter | API calls migrated; compile checkpoint has no direct bridge diagnostic, full build and client/server behavior unverified |
-| Registries | TBD | TBD | TBD |
-| Rendering | TBD | TBD | TBD |
-| Fluids/capabilities | TBD | TBD | TBD |
-| Recipes | TBD | TBD | TBD |
+| Tool items and storage | ItemStack tag mutation | `ToolStack.from(stack)` with `ToolStackData` writes changes to native `CUSTOM_DATA`, `DAMAGE`, and owned storage components; use actual registry lookup for codecs | Full production compilation; actual client construction, repair and persisted haste |
+| Materials and modifiers | Static registry or synthetic global holder | Resolve material definitions and dynamic modifiers after the actual server/client reload using the connected level registry | Real world loading, material geometry and modifier transactions |
+| Registries | Forge deferred registers and setup timing | Register NeoForge attachments and capabilities during mod construction before registry events; retain the registered IDs | Real client player tick and server capability checks |
+| Networking and menus | Forge `SimpleChannel`/context and immediate menu changes | Mantle packet adapter over NeoForge payload registration; `TinkerNetwork` delivery and native menu IDs; wait for actual close packets before reopening | Actual Part Builder/Station client packets; external addon payloads not tested |
+| Client rendering | Legacy Forge sprite/model registration | `RegisterSpriteSourceTypesEvent`, geometry loader events and material-aware resource reload, with material IDs intact | Client resource/model reload and wood/iron tool geometry; full armor gate pending |
+| Recipes | Old JSON/wire ID and NBT output assumptions | Actual recipe holder IDs, `HolderLookup.Provider`, native components and conditional reload; tag preference uses loaded tag entries | 3336 recipes loaded and synchronized; regenerated datagen gate pending |
+| Fluids and machines | Forge `LazyOptional` capability access | NeoForge item/fluid block capabilities; existing drain/duct forwarding resolves live master and needs real placed structure | Isolated native capability checks; full Melter/Smeltery/Foundry gate pending |
+| World and remaining content | Old event names and bootstrap-only validation | NeoForge entity, loot, biome and data providers registered through native events | World load succeeds; full data generation and content behavior pending |
+
+Source compatibility does not imply binary compatibility. In particular, addons need to recompile packet, item persistence and fluid integration code; no TiCEX compatibility claim is made yet.
 
 ## Known issues
 
 - Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
-- Actual server world loading and the initial core-tool checks pass. Deeper runtime compatibility, client rendering and later gameplay phases remain unverified.
+- Actual server world loading and the complete core/tool construction client loop have passed in pinned runs. Material armor rendering, complete machine tests, regenerated data and addon behavior remain under verification.
 
 ## Upstream
 
