@@ -261,10 +261,10 @@ Port tool parts, recipes, menus/screens, Part Builder, Tinkers' Station, and the
 ### Phase 5 — Rendering (in progress)
 Restore material-dependent tool and armor rendering. Do not replace TiC's composited/material rendering with fixed textures merely to simplify the port.
 
-### Phase 6 — Smeltery and fluids
+### Phase 6 — Smeltery and fluids (complete: 2026-10-09)
 Port Smeltery, Foundry, melting, casting, tanks, fluid handling, and related block entities/recipes.
 
-### Phase 7 — Remaining content
+### Phase 7 — Remaining content (in progress)
 Port slimes, entities, world generation, special modifiers, integrations, datagen, and remaining content.
 
 ### Phase 8 — Addon compatibility
@@ -288,9 +288,9 @@ Addon authors must rebuild against Java 21, Minecraft 1.21.1, NeoForge 21.1.251 
 | Materials and modifiers | Static registry or synthetic global holder | Resolve material definitions and dynamic modifiers after the actual server/client reload using the connected level registry | Real world loading, material geometry and modifier transactions |
 | Registries | Forge deferred registers and setup timing | Register NeoForge attachments and capabilities during mod construction before registry events; retain the registered IDs | Real client player tick and server capability checks |
 | Networking and menus | Forge `SimpleChannel`/context and immediate menu changes | Mantle packet adapter over NeoForge payload registration; `TinkerNetwork` delivery and native menu IDs; wait for actual close packets before reopening | Actual Part Builder/Station client packets; external addon payloads not tested |
-| Client rendering | Legacy Forge sprite/model registration | `RegisterSpriteSourceTypesEvent`, geometry loader events and material-aware resource reload, with material IDs intact | Client resource/model reload and wood/iron tool geometry; full armor gate pending |
+| Client rendering | Legacy Forge sprite/model registration | `RegisterSpriteSourceTypesEvent`, geometry loader events and material-aware resource reload, with material IDs intact | Client resource/model reload, wood/iron tool geometry and actual three-family, four-slot material armor rendering |
 | Recipes | Old JSON/wire ID and NBT output assumptions | Actual recipe holder IDs, `HolderLookup.Provider`, native components and conditional reload; tag preference uses loaded tag entries | 3336 recipes loaded and synchronized; regenerated datagen gate pending |
-| Fluids and machines | Forge `LazyOptional` capability access | NeoForge item/fluid block capabilities; existing drain/duct forwarding resolves live master and needs real placed structure | Isolated native capability checks; full Melter/Smeltery/Foundry gate pending |
+| Fluids and machines | Forge `LazyOptional` capability access | NeoForge item/fluid block capabilities; existing drain/duct forwarding resolves live master and needs real placed structure | Real Melter fuel-to-casting and placed Smeltery/Foundry heating, alloy, reload, native drain forwarding and reformation |
 | World and remaining content | Old event names and bootstrap-only validation | NeoForge entity, loot, biome and data providers registered through native events | World load succeeds; full data generation and content behavior pending |
 
 Source compatibility does not imply binary compatibility. In particular, addons need to recompile packet, item persistence and fluid integration code; no TiCEX compatibility claim is made yet.
@@ -298,7 +298,7 @@ Source compatibility does not imply binary compatibility. In particular, addons 
 ## Known issues
 
 - Complete TiC and Mantle production sources compile and both jars assemble on NeoForge 1.21.1. The imported Forge JUnit fixtures remain unported.
-- Actual server world loading and the complete core/tool construction client loop have passed in pinned runs. Material armor rendering, complete machine tests, regenerated data and addon behavior remain under verification.
+- Both production jars assemble; actual client construction/armor and native machine gates pass. Complete regenerated data, remaining content behavior and external addon compatibility remain under verification.
 
 ## Upstream
 
@@ -878,3 +878,9 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 - Run 37836646341 joins an actual world and loads material geometry but occasionally opens the first Station before the real server has received the Part Builder close packet. Native container-close handling unconditionally closes the current menu. Wait for the server's actual inventory-menu state before opening Station, as the later repair transactions already do. Recheck all construction, repair, modifier, and third-person armor gates.
 - Run 37837436835 assembles both production jars and launches the GameTest server, loads 3336 recipes and material data, then hangs before announcing GameTests until the 600-second command limit. Capture a bounded actual server thread trace if it persists; the live machine gate remains unverified.
 - Run 37837882857 reaches CommonRecipeProvider but fails serializing the registered blazewood item through a data-generation registry snapshot. Serialize native built-in item recipe data with JsonOps and retain the actual provider for advancement and conditional data. Run full native data generation again; Phase 7 remains open.
+
+### Phase 5 and Phase 6 complete; remaining content continues (2026-10-09)
+
+- Run 37958070823 passes actual graphical client reload, wood/iron baked material tool geometry, real Part Builder and Station screens/packets, repair, saved incremental haste, and third-person plate/travelers/slimesuit armor. All four actual equipment slots retain their materials and resolve owned layered textures/custom armor models; no client ERROR, missing model, or missing texture is reported. Phase 5 is complete.
+- Run 37958070592 assembles complete production TiC and Mantle jars and passes all four native server GameTests. Real fuel heats Melter iron and casts the ingot; placed heater/melter/casting table preserve item/fluid inputs and casting progress on native save/load. Minimal actual Smeltery and Foundry form, melt fueled iron, reconstruct a registered controller with saved state, retain a live drain proxy, reject operations while the wall is broken and recover after reformation. Smeltery also alloys exact copper/gold inputs into rose gold. Phase 6 is complete.
+- Data generation run 37958070772 still fails at the first own registered item in CommonRecipeProvider despite using native JsonOps. Inspect the exact 21.1.251 registry lookup composition rather than inventing a registered item or suppressing recipe output. Phase 7 continues; legacy world migration and external addon compatibility remain separate open gates.
