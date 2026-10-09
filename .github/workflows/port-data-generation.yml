@@ -1,4 +1,4 @@
-name: Diagnose actual advancement lookup owner and result item
+name: Diagnose actual advancement registry ownership with compiling source
 on:
   push:
     branches: [port/1.21.1-neoforge]
