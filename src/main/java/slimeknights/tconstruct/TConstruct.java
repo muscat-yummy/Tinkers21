@@ -12,7 +12,6 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.api.distmarker.Dist;
 import net.neoforged.neoforge.common.NeoForge;
-import net.neoforged.neoforge.common.data.DatapackBuiltinEntriesProvider;
 import net.neoforged.neoforge.common.data.ExistingFileHelper;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.bus.api.IEventBus;
@@ -84,7 +83,6 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Random;
-import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
@@ -180,7 +178,6 @@ public class TConstruct {
     DataGenerator generator = event.getGenerator();
     PackOutput packOutput = generator.getPackOutput();
     ExistingFileHelper existingFileHelper = event.getExistingFileHelper();
-    CompletableFuture<Provider> lookupProvider = event.getLookupProvider();
     boolean server = event.includeServer();
 
     // its sometimes cleaner to splitup different registry sets to their own classes, combine them here into a single provider
@@ -188,8 +185,8 @@ public class TConstruct {
     DamageTypeProvider.register(registrySetBuilder);
     WorldgenProvider.register(registrySetBuilder);
     TrimMaterialProvider.register(registrySetBuilder);
-    DatapackBuiltinEntriesProvider datapackRegistryProvider = new DatapackBuiltinEntriesProvider(packOutput, lookupProvider, registrySetBuilder, Set.of(MOD_ID));
-    generator.addProvider(server, datapackRegistryProvider);
+    event.createDatapackRegistryObjects(registrySetBuilder);
+    CompletableFuture<Provider> lookupProvider = event.getLookupProvider();
 
     // tags
     BlockTagProvider blockTags = new BlockTagProvider(packOutput, lookupProvider, existingFileHelper);
@@ -204,7 +201,7 @@ public class TConstruct {
     generator.addProvider(server, new PotionTagProvider(packOutput, lookupProvider, existingFileHelper));
     generator.addProvider(server, new CreativeTabTagProvider(packOutput, lookupProvider, existingFileHelper));
     generator.addProvider(server, new InstrumentTagProvider(packOutput, lookupProvider, existingFileHelper));
-    generator.addProvider(server, new DamageTypeTagProvider(packOutput, datapackRegistryProvider.getRegistryProvider(), existingFileHelper));
+    generator.addProvider(server, new DamageTypeTagProvider(packOutput, lookupProvider, existingFileHelper));
 
     // other datagen
     generator.addProvider(server, new TConstructLootTableProvider(packOutput, lookupProvider));

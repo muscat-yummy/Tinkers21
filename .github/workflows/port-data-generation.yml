@@ -1,4 +1,4 @@
-name: Inspect actual event lookup identity for advancement encoding
+name: Verify event owned complete native data generation
 on:
   push:
     branches: [port/1.21.1-neoforge]
