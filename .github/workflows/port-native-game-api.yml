@@ -1,4 +1,4 @@
-name: Inspect pinned NeoForge datagen provider construction
+name: Inspect pinned native advancement serialization context
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -28,10 +28,15 @@ jobs:
           import subprocess
           jar = 'build/moddev/artifacts/neoforge-21.1.251.jar'
           for cls in ('net.neoforged.neoforge.data.event.GatherDataEvent', 'net.neoforged.neoforge.data.event.GatherDataEvent$DataGeneratorConfig',
-                      'net.neoforged.neoforge.data.loading.DatagenModLoader', 'net.minecraft.data.registries.VanillaRegistries'):
-              p = subprocess.run(['javap', '-c', '-p', '-classpath', jar, cls], capture_output=True, text=True, check=True)
+                      'net.neoforged.neoforge.data.loading.DatagenModLoader', 'net.minecraft.data.registries.VanillaRegistries',
+                      'net.minecraft.data.recipes.RecipeProvider', 'net.minecraft.data.recipes.RecipeProvider$1',
+                      'net.minecraft.data.advancements.AdvancementProvider'):
+              p = subprocess.run(['javap', '-c', '-p', '-classpath', jar, cls], capture_output=True, text=True, check=False)
+              if p.returncode:
+                  print('Unavailable native class', cls)
+                  continue
               lines = p.stdout.splitlines()
               print('Class', cls)
               for i, line in enumerate(lines):
-                  if any(term in line for term in ('getLookupProvider(', 'runAll(', 'createLookup(', 'gatherData(', 'newDataGenerator(')):
-                      print('\n'.join(lines[i:i+65]))
+                  if any(term in line for term in ('getLookupProvider(', 'runAll(', 'createLookup(', 'gatherData(', 'newDataGenerator(', ' run(', 'serializeAdvancement(', 'saveAdvancement(', 'saveRecipe(')):
+                      print('\n'.join(lines[i:i+135]))
