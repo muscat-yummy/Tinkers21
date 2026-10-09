@@ -1,4 +1,4 @@
-name: Diagnose actual datagen registry owner for registered recipe results
+name: Verify native recipe and advancement encoding with real item IDs
 on:
   push:
     branches: [port/1.21.1-neoforge]

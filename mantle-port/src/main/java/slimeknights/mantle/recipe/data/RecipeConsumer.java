@@ -30,7 +30,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
     HolderLookup.Provider registries = registryLookup();
     JsonObject json;
     try {
-      json = Recipe.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), recipe).getOrThrow().getAsJsonObject();
+      json = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow().getAsJsonObject();
     } catch (RuntimeException failure) {
       var output = recipe.getResultItem(registries);
       var key = BuiltInRegistries.ITEM.getResourceKey(output.getItem()).orElseThrow();
@@ -44,7 +44,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
     }
     ICondition.writeConditions(registries, json, conditions);
     JsonObject advancementJson = advancement == null ? null
-      : Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();
+      : Advancement.CODEC.encodeStart(JsonOps.INSTANCE, advancement.value()).getOrThrow().getAsJsonObject();
     if (advancementJson != null) { ICondition.writeConditions(registries, advancementJson, conditions); }
     accept(new FinishedRecipe() {
       @Override public ResourceLocation getId() { return id; }
