@@ -1,10 +1,5 @@
 {
-  "type": "tconstruct:casting_table",
-  "cast": {
-    "tag": "tconstruct:casts/single_use/plate"
-  },
-  "cast_consumed": true,
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:plates/dawnstone"
@@ -15,6 +10,11 @@
       "tag": "forge:molten_dawnstone"
     }
   ],
+  "type": "tconstruct:casting_table",
+  "cast": {
+    "tag": "tconstruct:casts/single_use/plate"
+  },
+  "cast_consumed": true,
   "cooling_time": 63,
   "fluid": {
     "amount": 90,

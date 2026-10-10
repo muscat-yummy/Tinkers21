@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:cobalt_ingot"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:cobalt_ingot"
+  }
 }

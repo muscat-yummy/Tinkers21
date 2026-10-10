@@ -1,14 +1,14 @@
 {
-  "type": "tconstruct:casting_table",
-  "cast": {
-    "tag": "tconstruct:casts/multi_use/plate"
-  },
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:plates/enderium"
     }
   ],
+  "type": "tconstruct:casting_table",
+  "cast": {
+    "tag": "tconstruct:casts/multi_use/plate"
+  },
   "cooling_time": 76,
   "fluid": {
     "amount": 90,

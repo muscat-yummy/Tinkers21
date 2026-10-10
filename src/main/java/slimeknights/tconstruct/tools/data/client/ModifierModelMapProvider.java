@@ -6,6 +6,7 @@ import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.library.client.modifiers.DyedModifierModel;
 import slimeknights.tconstruct.library.client.modifiers.model.MaterialHasFallbackModifierModel;
 import slimeknights.tconstruct.library.data.AbstractModifierModelMapProvider;
+import slimeknights.tconstruct.library.tools.definition.ModifiableArmorMaterial;
 import slimeknights.tconstruct.tools.TinkerModifiers;
 import slimeknights.tconstruct.tools.TinkerTools;
 import slimeknights.tconstruct.tools.client.SlimeskullModifierModel;
@@ -372,7 +373,7 @@ public class ModifierModelMapProvider extends AbstractModifierModelMapProvider {
       .luminosity(2, ModifierIds.unbreakable);
 
     // shared armor
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       String name = type.getName();
       tool("armor/" + name).smallFolder("armor/modifiers/" + name + '/').basic(
           ModifierIds.emerald, ModifierIds.thorns)
@@ -397,7 +398,7 @@ public class ModifierModelMapProvider extends AbstractModifierModelMapProvider {
       .basic(ModifierIds.featherFall, "tconstruct_feather_falling");
 
     // plate armor
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       String item = "plate/" + type.getName();
       String root = "armor/" + item + "/maille";
       tool(item).armor()
@@ -438,7 +439,7 @@ public class ModifierModelMapProvider extends AbstractModifierModelMapProvider {
     tool("travelers/shield").banner("armor/travelers/shield/banner/", null);
 
     // slimesuit
-    for (ArmorItem.Type type : ArmorItem.Type.values()) {
+    for (ArmorItem.Type type : ModifiableArmorMaterial.ARMOR_TYPES) {
       tool("slime/" + type.getName());
     }
     tool("slime/wings")

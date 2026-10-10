@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.neoforged.neoforge.common.conditions.AndCondition;
@@ -63,7 +62,7 @@ public final class FirstMatchingRecipeBuilder {
       JsonObject json = recipe.serializeRecipe(lookup).deepCopy();
       List<ICondition> conditions = new ArrayList<>(entry.conditions());
       if (json.has("neoforge:conditions")) {
-        conditions.addAll(ICondition.LIST_CODEC.parse(RegistryOps.create(JsonOps.INSTANCE, lookup),
+        conditions.addAll(ICondition.LIST_CODEC.parse(lookup.createSerializationContext(JsonOps.INSTANCE),
             json.get("neoforge:conditions")).getOrThrow());
       }
       ICondition.writeConditions(lookup, json, conditions);

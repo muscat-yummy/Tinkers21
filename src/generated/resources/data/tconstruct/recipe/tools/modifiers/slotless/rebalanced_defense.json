@@ -23,16 +23,19 @@
     "value": "defense"
   },
   "tools": {
-    "type": "forge:intersection",
+    "type": "neoforge:intersection",
     "children": [
-      [
-        {
-          "tag": "tconstruct:modifiable/armor"
-        },
-        {
-          "tag": "tconstruct:modifiable/held"
-        }
-      ],
+      {
+        "type": "neoforge:compound",
+        "children": [
+          {
+            "tag": "tconstruct:modifiable/armor"
+          },
+          {
+            "tag": "tconstruct:modifiable/held"
+          }
+        ]
+      },
       {
         "tag": "tconstruct:modifiable/bonus_slots"
       }

@@ -1,85 +1,103 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/lead"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_combination_filled",
       "match": [
         "forge:ores/silver",
-        "forge:ore_rates/sparse"
+        "c:ore_rates/sparse"
       ]
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/lead"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_lead"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:intersection",
-          "children": [
-            {
-              "tag": "forge:ores/silver"
-            },
-            {
-              "tag": "forge:ore_rates/sparse"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 90,
-          "tag": "forge:molten_silver"
-        },
-        "temperature": 790,
-        "time": 90
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_lead"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
+      "ingredient": {
+        "type": "neoforge:intersection",
+        "children": [
           {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_gold"
+            "tag": "forge:ores/silver"
+          },
+          {
+            "tag": "c:ore_rates/sparse"
           }
-        ],
-        "ingredient": {
-          "type": "forge:intersection",
-          "children": [
-            {
-              "tag": "forge:ores/silver"
-            },
-            {
-              "tag": "forge:ore_rates/sparse"
-            }
-          ]
-        },
-        "rate": "metal",
-        "result": {
+        ]
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_silver"
+      },
+      "temperature": 790,
+      "time": 90
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 90,
-          "tag": "forge:molten_silver"
-        },
-        "temperature": 790,
-        "time": 90
-      }
+          "rate": "metal",
+          "tag": "forge:molten_gold"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:intersection",
+        "children": [
+          {
+            "tag": "forge:ores/silver"
+          },
+          {
+            "tag": "c:ore_rates/sparse"
+          }
+        ]
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_silver"
+      },
+      "temperature": 790,
+      "time": 90
     }
   ]
 }

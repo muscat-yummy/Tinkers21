@@ -15,7 +15,7 @@
   ],
   "pools": [
     {
-      "bonus_rolls": 0,
+      "bonus_rolls": 0.0,
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
@@ -36,7 +36,7 @@
           "name": "tconstruct:scorched_anvil"
         }
       ],
-      "rolls": 1
+      "rolls": 1.0
     }
   ],
   "random_sequence": "tconstruct:blocks/scorched_anvil"

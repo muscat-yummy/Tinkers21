@@ -5,8 +5,11 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": "tconstruct:has_upgrades"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": "tconstruct:has_upgrades"
+              }
+            }
           }
         ]
       },
@@ -18,12 +21,10 @@
     "description": {
       "translate": "advancements.tconstruct.tools.modified.description"
     },
-    "frame": "task",
-    "hidden": false,
     "icon": {
-      "item": "minecraft:redstone"
+      "count": 1,
+      "id": "minecraft:redstone"
     },
-    "show_toast": true,
     "title": {
       "translate": "advancements.tconstruct.tools.modified.title"
     }
@@ -32,6 +33,5 @@
     [
       "crafted_tool"
     ]
-  ],
-  "sends_telemetry_event": false
+  ]
 }

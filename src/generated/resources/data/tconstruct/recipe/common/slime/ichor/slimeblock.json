@@ -13,7 +13,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:ichor_slime"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:ichor_slime"
+  }
 }

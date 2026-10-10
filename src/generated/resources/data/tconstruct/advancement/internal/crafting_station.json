@@ -4,9 +4,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "tconstruct:crafting_station"
-            ]
+            "items": "tconstruct:crafting_station"
           }
         ]
       },
@@ -20,6 +18,5 @@
   ],
   "rewards": {
     "function": "tconstruct:grant_advancement/story_root"
-  },
-  "sends_telemetry_event": false
+  }
 }

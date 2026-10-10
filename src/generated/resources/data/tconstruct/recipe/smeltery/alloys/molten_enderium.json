@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/enderium"
@@ -10,6 +9,7 @@
       "tag": "forge:ingots/lead"
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 270,

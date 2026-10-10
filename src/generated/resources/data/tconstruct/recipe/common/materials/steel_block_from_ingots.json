@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:steel_block"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:steel_block"
+  }
 }

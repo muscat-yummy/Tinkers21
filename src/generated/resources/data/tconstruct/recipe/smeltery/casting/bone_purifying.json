@@ -7,7 +7,7 @@
   "cooling_time": 50,
   "fluid": {
     "amount": 200,
-    "tag": "forge:milk"
+    "tag": "c:milk"
   },
   "result": "minecraft:bone"
 }

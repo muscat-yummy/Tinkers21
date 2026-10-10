@@ -4,7 +4,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import net.minecraft.data.CachedOutput;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.RegistryOps;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.data.PackOutput;
 import net.minecraft.data.PackOutput.Target;
@@ -98,7 +97,7 @@ public abstract class AbstractModifierProvider extends GenericDataProvider {
   public CompletableFuture<?> run(CachedOutput cache) {
     return lookupProvider.thenCompose(lookup -> {
       registries = lookup;
-      return LoadableOps.with(RegistryOps.create(JsonOps.INSTANCE, lookup), () -> {
+      return LoadableOps.with(lookup.createSerializationContext(JsonOps.INSTANCE), () -> {
         addModifiers();
         return allOf(composableModifiers.entrySet().stream().map(entry -> {
           try {

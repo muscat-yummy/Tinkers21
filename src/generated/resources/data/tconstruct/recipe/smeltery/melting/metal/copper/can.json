@@ -2,7 +2,9 @@
   "type": "tconstruct:melting",
   "ingredient": {
     "type": "tconstruct:no_container",
-    "item": "tconstruct:copper_can"
+    "match": {
+      "item": "tconstruct:copper_can"
+    }
   },
   "result": {
     "amount": 90,

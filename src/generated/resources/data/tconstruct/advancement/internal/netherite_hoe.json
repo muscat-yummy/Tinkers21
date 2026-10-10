@@ -4,23 +4,26 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "mantle:and",
-              "predicates": [
-                {
-                  "type": "mantle:tag",
-                  "tag": "tconstruct:modifiable/interactable/right"
-                },
-                {
-                  "type": "tconstruct:tool_action",
-                  "action": "till"
-                },
-                {
-                  "type": "tconstruct:has_volatile_key",
-                  "key": "tconstruct:netherite"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "mantle:and",
+                  "predicates": [
+                    {
+                      "type": "mantle:tag",
+                      "tag": "tconstruct:modifiable/interactable/right"
+                    },
+                    {
+                      "type": "tconstruct:tool_action",
+                      "action": "till"
+                    },
+                    {
+                      "type": "tconstruct:has_volatile_key",
+                      "key": "tconstruct:netherite"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           }
         ]
@@ -35,6 +38,5 @@
   ],
   "rewards": {
     "function": "tconstruct:grant_advancement/husbandry_obtain_netherite_hoe"
-  },
-  "sends_telemetry_event": false
+  }
 }

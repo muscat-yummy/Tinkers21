@@ -2,7 +2,7 @@
   "type": "minecraft:entity",
   "pools": [
     {
-      "bonus_rolls": 0,
+      "bonus_rolls": 0.0,
       "conditions": [
         {
           "condition": "minecraft:inverted",
@@ -20,7 +20,7 @@
           "entity": "this",
           "predicate": {
             "type_specific": {
-              "type": "slime",
+              "type": "minecraft:slime",
               "size": 1
             }
           }
@@ -46,19 +46,19 @@
               "add": false,
               "count": {
                 "type": "minecraft:uniform",
-                "max": 2,
-                "min": 0
+                "max": 2.0,
+                "min": 0.0
               },
               "function": "minecraft:set_count"
             },
             {
               "count": {
                 "type": "minecraft:uniform",
-                "max": 1,
-                "min": 0
+                "max": 1.0,
+                "min": 0.0
               },
-              "function": "minecraft:enchanted_count_increase",
-              "enchantment": "minecraft:looting"
+              "enchantment": "minecraft:looting",
+              "function": "minecraft:enchanted_count_increase"
             }
           ],
           "name": "tconstruct:sky_slime_ball"
@@ -79,28 +79,28 @@
               "add": false,
               "count": {
                 "type": "minecraft:uniform",
-                "max": 2,
-                "min": 0
+                "max": 2.0,
+                "min": 0.0
               },
               "function": "minecraft:set_count"
             },
             {
               "count": {
                 "type": "minecraft:uniform",
-                "max": 1,
-                "min": 0
+                "max": 1.0,
+                "min": 0.0
               },
-              "function": "minecraft:enchanted_count_increase",
-              "enchantment": "minecraft:looting"
+              "enchantment": "minecraft:looting",
+              "function": "minecraft:enchanted_count_increase"
             }
           ],
           "name": "tconstruct:steel_shard"
         }
       ],
-      "rolls": 1
+      "rolls": 1.0
     },
     {
-      "bonus_rolls": 0,
+      "bonus_rolls": 0.0,
       "conditions": [
         {
           "condition": "minecraft:damage_source_properties",
@@ -115,7 +115,7 @@
           "entity": "this",
           "predicate": {
             "type_specific": {
-              "type": "slime",
+              "type": "minecraft:slime",
               "size": 1
             }
           }
@@ -139,7 +139,7 @@
           "functions": [
             {
               "add": false,
-              "count": 1,
+              "count": 1.0,
               "function": "minecraft:set_count"
             }
           ],
@@ -159,14 +159,14 @@
           "functions": [
             {
               "add": false,
-              "count": 1,
+              "count": 1.0,
               "function": "minecraft:set_count"
             }
           ],
           "name": "tconstruct:steel_shard"
         }
       ],
-      "rolls": 1
+      "rolls": 1.0
     }
   ],
   "random_sequence": "tconstruct:entities/sky_slime"

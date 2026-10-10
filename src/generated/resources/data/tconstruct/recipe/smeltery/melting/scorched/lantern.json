@@ -12,7 +12,9 @@
   ],
   "ingredient": {
     "type": "tconstruct:no_container",
-    "item": "tconstruct:scorched_lantern"
+    "match": {
+      "item": "tconstruct:scorched_lantern"
+    }
   },
   "result": {
     "amount": 500,

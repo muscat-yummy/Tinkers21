@@ -1,10 +1,67 @@
 {
-  "type": "forge:conditional",
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:and",
+              "values": [
+                {
+                  "type": "mantle:tag_filled",
+                  "tag": "forge:ingots/chromium"
+                },
+                {
+                  "type": "mantle:tag_filled",
+                  "tag": "forge:ingots/nickel"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:and",
+              "values": [
+                {
+                  "type": "mantle:tag_filled",
+                  "tag": "forge:ingots/nickel"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/chromium"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/tin"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
-          "type": "forge:and",
+          "type": "neoforge:and",
           "values": [
             {
               "type": "mantle:tag_filled",
@@ -17,33 +74,31 @@
           ]
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 180,
-            "tag": "forge:molten_nickel"
-          },
-          {
-            "amount": 90,
-            "tag": "forge:molten_chromium"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_quartz"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_nicrosil"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 180,
+          "tag": "forge:molten_nickel"
         },
-        "temperature": 1100
-      }
+        {
+          "amount": 90,
+          "tag": "forge:molten_chromium"
+        },
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_quartz"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_nicrosil"
+      },
+      "temperature": 1100
     },
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
-          "type": "forge:and",
+          "type": "neoforge:and",
           "values": [
             {
               "type": "mantle:tag_filled",
@@ -52,88 +107,82 @@
           ]
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 180,
-            "tag": "forge:molten_nickel"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_emerald"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_quartz"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_nicrosil"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 180,
+          "tag": "forge:molten_nickel"
         },
-        "temperature": 1100
-      }
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_emerald"
+        },
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_quartz"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_nicrosil"
+      },
+      "temperature": 1100
     },
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/chromium"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 180,
-            "tag": "forge:molten_chromium"
-          },
-          {
-            "amount": 90,
-            "tag": "forge:molten_iron"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_quartz"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_nicrosil"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 180,
+          "tag": "forge:molten_chromium"
         },
-        "temperature": 1100
-      }
+        {
+          "amount": 90,
+          "tag": "forge:molten_iron"
+        },
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_quartz"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_nicrosil"
+      },
+      "temperature": 1100
     },
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/tin"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 180,
-            "tag": "forge:molten_tin"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_emerald"
-          },
-          {
-            "amount": 100,
-            "tag": "tconstruct:molten_quartz"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_nicrosil"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 180,
+          "tag": "forge:molten_tin"
         },
-        "temperature": 1100
-      }
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_emerald"
+        },
+        {
+          "amount": 100,
+          "tag": "tconstruct:molten_quartz"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_nicrosil"
+      },
+      "temperature": 1100
     }
   ]
 }

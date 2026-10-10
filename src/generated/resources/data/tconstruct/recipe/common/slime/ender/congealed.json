@@ -12,7 +12,7 @@
     "##"
   ],
   "result": {
-    "item": "tconstruct:ender_congealed_slime"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:ender_congealed_slime"
+  }
 }

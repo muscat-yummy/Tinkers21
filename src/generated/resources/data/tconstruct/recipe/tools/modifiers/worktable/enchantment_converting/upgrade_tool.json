@@ -6,7 +6,7 @@
     },
     {
       "amount_needed": 3,
-      "tag": "forge:gems/lapis"
+      "tag": "c:gems/lapis"
     }
   ],
   "match_book": false,

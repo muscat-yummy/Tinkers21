@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:cobalt_block"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:cobalt_block"
+  }
 }

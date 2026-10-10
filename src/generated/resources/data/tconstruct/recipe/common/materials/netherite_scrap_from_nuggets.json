@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "minecraft:netherite_scrap"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "minecraft:netherite_scrap"
+  }
 }

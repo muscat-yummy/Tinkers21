@@ -1,11 +1,11 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:armors/boots/silver"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "tag": "forge:armors/boots/silver"
   },

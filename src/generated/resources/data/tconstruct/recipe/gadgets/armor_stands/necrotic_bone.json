@@ -15,7 +15,7 @@
     "SBS"
   ],
   "result": {
-    "item": "tconstruct:necrotic_bone_armor_stand"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:necrotic_bone_armor_stand"
+  }
 }

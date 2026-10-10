@@ -1,16 +1,16 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:item_exists",
+      "item": "twilightforest:ironwood_helmet"
+    }
+  ],
   "type": "tconstruct:damagable_melting",
   "byproducts": [
     {
       "amount": 50,
       "tag": "forge:molten_gold",
       "unit_size": 10
-    }
-  ],
-  "conditions": [
-    {
-      "type": "forge:item_exists",
-      "item": "twilightforest:ironwood_helmet"
     }
   ],
   "ingredient": {

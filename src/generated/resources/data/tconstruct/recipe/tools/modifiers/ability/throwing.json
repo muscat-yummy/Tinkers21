@@ -5,14 +5,18 @@
   "inputs": [
     {
       "type": "tconstruct:material",
-      "item": "tconstruct:bow_limb"
+      "match": {
+        "item": "tconstruct:bow_limb"
+      }
     },
     {
       "tag": "forge:ingots/cinderslime"
     },
     {
       "type": "tconstruct:material",
-      "item": "tconstruct:bow_grip"
+      "match": {
+        "item": "tconstruct:bow_grip"
+      }
     }
   ],
   "level": 1,
@@ -21,7 +25,7 @@
     "abilities": 1
   },
   "tools": {
-    "type": "forge:intersection",
+    "type": "neoforge:intersection",
     "children": [
       {
         "tag": "tconstruct:modifiable/durability"
@@ -29,14 +33,17 @@
       {
         "tag": "tconstruct:modifiable/interactable/charge"
       },
-      [
-        {
-          "tag": "tconstruct:modifiable/melee/weapon"
-        },
-        {
-          "tag": "tconstruct:modifiable/harvest"
-        }
-      ]
+      {
+        "type": "neoforge:compound",
+        "children": [
+          {
+            "tag": "tconstruct:modifiable/melee/weapon"
+          },
+          {
+            "tag": "tconstruct:modifiable/harvest"
+          }
+        ]
+      }
     ]
   }
 }

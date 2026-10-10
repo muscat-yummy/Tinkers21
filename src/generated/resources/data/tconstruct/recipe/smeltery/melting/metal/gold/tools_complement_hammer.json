@@ -1,11 +1,11 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:item_exists",
+      "type": "neoforge:item_exists",
       "item": "tools_complement:gold_hammer"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "item": "tools_complement:gold_hammer"
   },

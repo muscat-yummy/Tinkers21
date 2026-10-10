@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/bendalloy"
@@ -18,6 +17,7 @@
       "tag": "forge:ingots/cadmium"
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 180,

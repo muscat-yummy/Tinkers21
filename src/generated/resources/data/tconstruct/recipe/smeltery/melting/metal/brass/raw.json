@@ -1,66 +1,84 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/zinc"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_filled",
       "tag": "forge:raw_materials/brass"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/zinc"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_zinc"
-          }
-        ],
-        "ingredient": {
-          "tag": "forge:raw_materials/brass"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 90,
-          "tag": "forge:molten_brass"
-        },
-        "temperature": 605,
-        "time": 80
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_zinc"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_copper"
-          }
-        ],
-        "ingredient": {
-          "tag": "forge:raw_materials/brass"
-        },
-        "rate": "metal",
-        "result": {
+      "ingredient": {
+        "tag": "forge:raw_materials/brass"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_brass"
+      },
+      "temperature": 605,
+      "time": 80
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 90,
-          "tag": "forge:molten_brass"
-        },
-        "temperature": 605,
-        "time": 80
-      }
+          "rate": "metal",
+          "tag": "forge:molten_copper"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:raw_materials/brass"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_brass"
+      },
+      "temperature": 605,
+      "time": 80
     }
   ]
 }

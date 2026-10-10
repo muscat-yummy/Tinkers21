@@ -1,11 +1,11 @@
 {
-  "type": "tconstruct:damagable_melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:item_exists",
+      "type": "neoforge:item_exists",
       "item": "twilightforest:block_and_chain"
     }
   ],
+  "type": "tconstruct:damagable_melting",
   "ingredient": {
     "item": "twilightforest:block_and_chain"
   },

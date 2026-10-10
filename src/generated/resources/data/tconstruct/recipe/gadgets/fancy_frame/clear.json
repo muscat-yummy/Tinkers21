@@ -16,7 +16,7 @@
     " e "
   ],
   "result": {
-    "item": "tconstruct:clear_item_frame"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:clear_item_frame"
+  }
 }

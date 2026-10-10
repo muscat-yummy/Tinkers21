@@ -229,42 +229,22 @@
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/helmet/plating",
-      "stat_type": "tconstruct:plating_helmet"
+      "path": "tconstruct:item/tool/armor/plate/boots/plating",
+      "stat_type": "tconstruct:plating_boots"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/helmet/plating_broken",
-      "stat_type": "tconstruct:plating_helmet"
+      "path": "tconstruct:item/tool/armor/plate/boots/plating_broken",
+      "stat_type": "tconstruct:plating_boots"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/helmet/maille",
+      "path": "tconstruct:item/tool/armor/plate/boots/maille",
       "stat_type": "tconstruct:maille"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/helmet/maille_broken",
-      "stat_type": "tconstruct:maille"
-    },
-    {
-      "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/chestplate/plating",
-      "stat_type": "tconstruct:plating_chestplate"
-    },
-    {
-      "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/chestplate/plating_broken",
-      "stat_type": "tconstruct:plating_chestplate"
-    },
-    {
-      "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/chestplate/maille",
-      "stat_type": "tconstruct:maille"
-    },
-    {
-      "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/chestplate/maille_broken",
+      "path": "tconstruct:item/tool/armor/plate/boots/maille_broken",
       "stat_type": "tconstruct:maille"
     },
     {
@@ -289,22 +269,42 @@
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/boots/plating",
-      "stat_type": "tconstruct:plating_boots"
+      "path": "tconstruct:item/tool/armor/plate/chestplate/plating",
+      "stat_type": "tconstruct:plating_chestplate"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/boots/plating_broken",
-      "stat_type": "tconstruct:plating_boots"
+      "path": "tconstruct:item/tool/armor/plate/chestplate/plating_broken",
+      "stat_type": "tconstruct:plating_chestplate"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/boots/maille",
+      "path": "tconstruct:item/tool/armor/plate/chestplate/maille",
       "stat_type": "tconstruct:maille"
     },
     {
       "allow_animated": false,
-      "path": "tconstruct:item/tool/armor/plate/boots/maille_broken",
+      "path": "tconstruct:item/tool/armor/plate/chestplate/maille_broken",
+      "stat_type": "tconstruct:maille"
+    },
+    {
+      "allow_animated": false,
+      "path": "tconstruct:item/tool/armor/plate/helmet/plating",
+      "stat_type": "tconstruct:plating_helmet"
+    },
+    {
+      "allow_animated": false,
+      "path": "tconstruct:item/tool/armor/plate/helmet/plating_broken",
+      "stat_type": "tconstruct:plating_helmet"
+    },
+    {
+      "allow_animated": false,
+      "path": "tconstruct:item/tool/armor/plate/helmet/maille",
+      "stat_type": "tconstruct:maille"
+    },
+    {
+      "allow_animated": false,
+      "path": "tconstruct:item/tool/armor/plate/helmet/maille_broken",
       "stat_type": "tconstruct:maille"
     },
     {

@@ -1,15 +1,15 @@
 {
-  "type": "tconstruct:casting_table",
-  "cast": {
-    "tag": "forge:coins"
-  },
-  "cast_consumed": true,
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:coins"
     }
   ],
+  "type": "tconstruct:casting_table",
+  "cast": {
+    "tag": "forge:coins"
+  },
+  "cast_consumed": true,
   "cooling_time": 57,
   "fluid": {
     "amount": 90,

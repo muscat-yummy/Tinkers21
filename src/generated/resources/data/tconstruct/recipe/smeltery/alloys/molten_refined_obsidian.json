@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/refined_obsidian"
@@ -10,6 +9,7 @@
       "tag": "forge:ingots/osmium"
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 250,

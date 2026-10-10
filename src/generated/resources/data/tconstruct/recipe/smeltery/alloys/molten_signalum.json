@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/signalum"
@@ -19,6 +18,7 @@
       "tag": "forge:redstone"
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 270,

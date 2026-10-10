@@ -2,7 +2,7 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "bonus_rolls": 0,
+      "bonus_rolls": 0.0,
       "conditions": [
         {
           "condition": "minecraft:survives_explosion"
@@ -18,16 +18,16 @@
             },
             {
               "function": "minecraft:copy_components",
-              "source": "block_entity",
               "include": [
                 "minecraft:dyed_color"
-              ]
+              ],
+              "source": "block_entity"
             }
           ],
           "name": "tconstruct:tinkers_chest"
         }
       ],
-      "rolls": 1
+      "rolls": 1.0
     }
   ],
   "random_sequence": "tconstruct:blocks/tinkers_chest"

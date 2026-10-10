@@ -1,59 +1,77 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/cadmium"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_filled",
       "tag": "forge:raw_materials/bendalloy"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/cadmium"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_cadmium"
-          }
-        ],
-        "ingredient": {
-          "tag": "forge:raw_materials/bendalloy"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 90,
-          "tag": "forge:molten_bendalloy"
-        },
-        "temperature": 100,
-        "time": 50
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_cadmium"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "ingredient": {
-          "tag": "forge:raw_materials/bendalloy"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 90,
-          "tag": "forge:molten_bendalloy"
-        },
-        "temperature": 100,
-        "time": 50
-      }
+      "ingredient": {
+        "tag": "forge:raw_materials/bendalloy"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_bendalloy"
+      },
+      "temperature": 100,
+      "time": 50
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "ingredient": {
+        "tag": "forge:raw_materials/bendalloy"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_bendalloy"
+      },
+      "temperature": 100,
+      "time": 50
     }
   ]
 }

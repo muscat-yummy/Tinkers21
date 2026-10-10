@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/lumium"
@@ -19,6 +18,7 @@
       "tag": "forge:glowstone"
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 270,

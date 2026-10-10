@@ -1,8 +1,7 @@
 {
-  "type": "tconstruct:material_fluid",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:or",
+      "type": "neoforge:or",
       "values": [
         {
           "type": "mantle:tag_filled",
@@ -15,6 +14,7 @@
       ]
     }
   ],
+  "type": "tconstruct:material_fluid",
   "fluid": {
     "amount": 90,
     "tag": "forge:molten_electrum"

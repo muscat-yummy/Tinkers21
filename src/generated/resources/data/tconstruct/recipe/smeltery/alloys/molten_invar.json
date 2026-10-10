@@ -1,12 +1,11 @@
 {
-  "type": "tconstruct:alloy",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:ingots/nickel"
     },
     {
-      "type": "forge:or",
+      "type": "neoforge:or",
       "values": [
         {
           "type": "tconstruct:config",
@@ -19,6 +18,7 @@
       ]
     }
   ],
+  "type": "tconstruct:alloy",
   "inputs": [
     {
       "amount": 180,

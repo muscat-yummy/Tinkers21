@@ -26,3 +26,10 @@ machine_root = root.replace(struct.pack(">iii", 1, 1, 1), struct.pack(">iii", 5,
 machine_path = path.with_name("smeltery.nbt")
 machine_path.write_bytes(gzip.compress(machine_root, mtime=0))
 print("Generated actual empty smeltery GameTest structure")
+
+# Island names describe shape variants, not dimensions: the largest retained
+# template is 32x13x32. Reserve its whole footprint plus foliage headroom so
+# placement and fluid ticks cannot spill into neighboring GameTests.
+island_root = root.replace(struct.pack(">iii", 1, 1, 1), struct.pack(">iii", 35, 32, 35), 1)
+path.with_name("island.nbt").write_bytes(gzip.compress(island_root, mtime=0))
+print("Generated actual empty island GameTest structure")

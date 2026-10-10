@@ -42,7 +42,7 @@ public abstract class AbstractMobEquipmentProvider extends GenericDataProvider {
   public CompletableFuture<?> run(CachedOutput cache) {
     addEquipment();
     return lookupProvider.thenCompose(registries -> slimeknights.mantle.data.loadable.LoadableOps.with(
-      net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, registries),
+      registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE),
       () -> allOf(equipment.entrySet().stream().map(entry -> saveJson(cache, ResourceLocation.fromNamespaceAndPath(modId, entry.getKey()), entry.getValue().serialize())))));
   }
 

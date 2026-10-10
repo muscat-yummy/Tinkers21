@@ -8,7 +8,6 @@ import net.minecraft.core.HolderLookup;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.data.recipes.RecipeOutput;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -30,7 +29,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
     HolderLookup.Provider registries = registryLookup();
     JsonObject json;
     try {
-      json = Recipe.CODEC.encodeStart(JsonOps.INSTANCE, recipe).getOrThrow().getAsJsonObject();
+      json = Recipe.CODEC.encodeStart(registries.createSerializationContext(JsonOps.INSTANCE), recipe).getOrThrow().getAsJsonObject();
     } catch (RuntimeException failure) {
       var output = recipe.getResultItem(registries);
       var key = BuiltInRegistries.ITEM.getResourceKey(output.getItem()).orElseThrow();
@@ -46,7 +45,7 @@ public interface RecipeConsumer extends Consumer<FinishedRecipe>, RecipeOutput {
     final JsonObject advancementJson;
     if (advancement != null) {
       try {
-        advancementJson = Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries),
+        advancementJson = Advancement.CODEC.encodeStart(registries.createSerializationContext(JsonOps.INSTANCE),
           advancement.value()).getOrThrow().getAsJsonObject();
       } catch (RuntimeException failure) {
         var result = recipe.getResultItem(registries);

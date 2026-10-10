@@ -5,9 +5,7 @@
       "conditions": {
         "items": [
           {
-            "items": [
-              "tconstruct:blazewood_slab"
-            ]
+            "items": "tconstruct:blazewood_slab"
           }
         ]
       },
@@ -22,14 +20,13 @@
   },
   "requirements": [
     [
-      "has_base",
-      "has_the_recipe"
+      "has_the_recipe",
+      "has_base"
     ]
   ],
   "rewards": {
     "recipes": [
       "tconstruct:gadgets/armor_stands/necrotic_bone"
     ]
-  },
-  "sends_telemetry_event": false
+  }
 }

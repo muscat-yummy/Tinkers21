@@ -92,7 +92,7 @@ public abstract class AbstractStationSlotLayoutProvider extends GenericDataProvi
   public CompletableFuture<?> run(CachedOutput cache) {
     addLayouts();
     return lookupProvider.thenCompose(registries -> slimeknights.mantle.data.loadable.LoadableOps.with(
-      net.minecraft.resources.RegistryOps.create(com.mojang.serialization.JsonOps.INSTANCE, registries),
+      registries.createSerializationContext(com.mojang.serialization.JsonOps.INSTANCE),
       () -> allOf(allLayouts.entrySet().stream().map(entry -> saveJson(cache, entry.getKey(), entry.getValue().serialize())))));
   }
 

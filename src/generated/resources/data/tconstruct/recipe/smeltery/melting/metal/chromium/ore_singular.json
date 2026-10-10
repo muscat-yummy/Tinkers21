@@ -1,79 +1,97 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/aluminum"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_combination_filled",
       "ignore": "tconstruct:non_singular_ore_rates",
       "match": "forge:ores/chromium"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/aluminum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_aluminum"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/chromium"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 180,
-          "tag": "forge:molten_chromium"
-        },
-        "temperature": 900,
-        "time": 158
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 180,
+          "rate": "metal",
+          "tag": "forge:molten_aluminum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_iron"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/chromium"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/chromium"
         },
-        "rate": "metal",
-        "result": {
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_chromium"
+      },
+      "temperature": 900,
+      "time": 158
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 180,
-          "tag": "forge:molten_chromium"
+          "rate": "metal",
+          "tag": "forge:molten_iron"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/chromium"
         },
-        "temperature": 900,
-        "time": 158
-      }
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_chromium"
+      },
+      "temperature": 900,
+      "time": 158
     }
   ]
 }

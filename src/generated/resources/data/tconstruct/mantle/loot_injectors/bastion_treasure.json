@@ -56,45 +56,7 @@
               ]
             }
           ],
-          "name": "tconstruct:plate_helmet",
-          "weight": 6
-        },
-        {
-          "type": "minecraft:item",
-          "functions": [
-            {
-              "function": "tconstruct:add_tool_data",
-              "materials": [
-                {
-                  "type": "tconstruct:random",
-                  "allow_hidden": true,
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 4,
-                    "min": 3
-                  }
-                },
-                {
-                  "type": "tconstruct:random",
-                  "allow_hidden": true,
-                  "material": {
-                    "type": "mantle:inverted",
-                    "inverted_type": "mantle:tag",
-                    "tag": "tconstruct:exclude_from_loot"
-                  },
-                  "tier": {
-                    "max": 4,
-                    "min": 3
-                  }
-                }
-              ]
-            }
-          ],
-          "name": "tconstruct:plate_chestplate",
+          "name": "tconstruct:plate_boots",
           "weight": 6
         },
         {
@@ -170,7 +132,45 @@
               ]
             }
           ],
-          "name": "tconstruct:plate_boots",
+          "name": "tconstruct:plate_chestplate",
+          "weight": 6
+        },
+        {
+          "type": "minecraft:item",
+          "functions": [
+            {
+              "function": "tconstruct:add_tool_data",
+              "materials": [
+                {
+                  "type": "tconstruct:random",
+                  "allow_hidden": true,
+                  "material": {
+                    "type": "mantle:inverted",
+                    "inverted_type": "mantle:tag",
+                    "tag": "tconstruct:exclude_from_loot"
+                  },
+                  "tier": {
+                    "max": 4,
+                    "min": 3
+                  }
+                },
+                {
+                  "type": "tconstruct:random",
+                  "allow_hidden": true,
+                  "material": {
+                    "type": "mantle:inverted",
+                    "inverted_type": "mantle:tag",
+                    "tag": "tconstruct:exclude_from_loot"
+                  },
+                  "tier": {
+                    "max": 4,
+                    "min": 3
+                  }
+                }
+              ]
+            }
+          ],
+          "name": "tconstruct:plate_helmet",
           "weight": 6
         }
       ],

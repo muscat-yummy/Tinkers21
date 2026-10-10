@@ -7,16 +7,16 @@
       "item": "minecraft:leather"
     },
     {
-      "tag": "forge:gems/diamond"
+      "tag": "c:gems/diamond"
     },
     {
       "item": "minecraft:leather"
     },
     {
-      "tag": "forge:string"
+      "tag": "c:strings"
     },
     {
-      "tag": "forge:string"
+      "tag": "c:strings"
     }
   ],
   "level": 1,

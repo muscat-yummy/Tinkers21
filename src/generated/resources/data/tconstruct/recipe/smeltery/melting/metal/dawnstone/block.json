@@ -1,6 +1,5 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:storage_blocks/dawnstone"
@@ -11,6 +10,7 @@
       "tag": "forge:molten_dawnstone"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "tag": "forge:storage_blocks/dawnstone"
   },

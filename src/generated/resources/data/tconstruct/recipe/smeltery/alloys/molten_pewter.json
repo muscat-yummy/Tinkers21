@@ -1,8 +1,48 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:or",
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:and",
+              "values": [
+                {
+                  "type": "mantle:tag_filled",
+                  "tag": "forge:ingots/lead"
+                },
+                {
+                  "type": "mantle:tag_filled",
+                  "tag": "forge:ingots/tin"
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/tin"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/lead"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "neoforge:or",
       "values": [
         {
           "type": "tconstruct:config",
@@ -15,11 +55,12 @@
       ]
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
-          "type": "forge:and",
+          "type": "neoforge:and",
           "values": [
             {
               "type": "mantle:tag_filled",
@@ -32,76 +73,70 @@
           ]
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 270,
-            "tag": "forge:molten_tin"
-          },
-          {
-            "amount": 90,
-            "tag": "forge:molten_lead"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_pewter"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 270,
+          "tag": "forge:molten_tin"
         },
-        "temperature": 400
-      }
+        {
+          "amount": 90,
+          "tag": "forge:molten_lead"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_pewter"
+      },
+      "temperature": 400
     },
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/tin"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 270,
-            "tag": "forge:molten_tin"
-          },
-          {
-            "amount": 90,
-            "tag": "forge:molten_iron"
-          }
-        ],
-        "result": {
-          "amount": 360,
-          "tag": "forge:molten_pewter"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 270,
+          "tag": "forge:molten_tin"
         },
-        "temperature": 400
-      }
+        {
+          "amount": 90,
+          "tag": "forge:molten_iron"
+        }
+      ],
+      "result": {
+        "amount": 360,
+        "tag": "forge:molten_pewter"
+      },
+      "temperature": 400
     },
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/lead"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:alloy",
-        "inputs": [
-          {
-            "amount": 90,
-            "tag": "forge:molten_iron"
-          },
-          {
-            "amount": 90,
-            "tag": "forge:molten_lead"
-          }
-        ],
-        "result": {
-          "amount": 180,
-          "tag": "forge:molten_pewter"
+      "type": "tconstruct:alloy",
+      "inputs": [
+        {
+          "amount": 90,
+          "tag": "forge:molten_iron"
         },
-        "temperature": 400
-      }
+        {
+          "amount": 90,
+          "tag": "forge:molten_lead"
+        }
+      ],
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_pewter"
+      },
+      "temperature": 400
     }
   ]
 }

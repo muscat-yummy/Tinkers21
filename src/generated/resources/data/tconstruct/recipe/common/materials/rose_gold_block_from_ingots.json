@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:rose_gold_block"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:rose_gold_block"
+  }
 }

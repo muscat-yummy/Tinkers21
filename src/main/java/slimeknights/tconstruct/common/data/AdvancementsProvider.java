@@ -6,7 +6,6 @@ import net.minecraft.advancements.AdvancementHolder;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.RegistryOps;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.Criterion;
@@ -617,7 +616,7 @@ public class AdvancementsProvider extends GenericDataProvider {
 
   /** Serializes native advancements with the same registry context used by datagen. */
   private CompletableFuture<?> saveAdvancement(CachedOutput cache, AdvancementHolder advancement, ICondition... conditions) {
-    JsonObject json = Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registryLookup),
+    JsonObject json = Advancement.CODEC.encodeStart(registryLookup.createSerializationContext(JsonOps.INSTANCE),
         advancement.value()).getOrThrow().getAsJsonObject();
     ICondition.writeConditions(registryLookup, json, conditions);
     return saveJson(cache, advancement.id(), json);

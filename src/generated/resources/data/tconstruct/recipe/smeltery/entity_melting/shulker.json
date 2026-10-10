@@ -6,8 +6,10 @@
   },
   "result": {
     "amount": 50,
-    "nbt": {
-      "Potion": "tconstruct:_levitation"
+    "components": {
+      "minecraft:potion_contents": {
+        "potion": "tconstruct:_levitation"
+      }
     },
     "tag": "forge:potion"
   }

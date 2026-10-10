@@ -15,7 +15,7 @@
     "SBS"
   ],
   "result": {
-    "item": "tconstruct:bone_armor_stand"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:bone_armor_stand"
+  }
 }

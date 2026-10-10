@@ -9,7 +9,7 @@
   "level": 1,
   "result": "tconstruct:worldbound",
   "tools": {
-    "type": "forge:difference",
+    "type": "neoforge:difference",
     "base": {
       "tag": "tconstruct:modifiable"
     },

@@ -1,66 +1,84 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/aluminum"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_filled",
       "tag": "forge:raw_materials/duralumin"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/aluminum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_aluminum"
-          }
-        ],
-        "ingredient": {
-          "tag": "forge:raw_materials/duralumin"
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 90,
-          "tag": "forge:molten_duralumin"
-        },
-        "temperature": 625,
-        "time": 82
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_aluminum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 90,
-            "rate": "metal",
-            "tag": "forge:molten_copper"
-          }
-        ],
-        "ingredient": {
-          "tag": "forge:raw_materials/duralumin"
-        },
-        "rate": "metal",
-        "result": {
+      "ingredient": {
+        "tag": "forge:raw_materials/duralumin"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_duralumin"
+      },
+      "temperature": 625,
+      "time": 82
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 90,
-          "tag": "forge:molten_duralumin"
-        },
-        "temperature": 625,
-        "time": 82
-      }
+          "rate": "metal",
+          "tag": "forge:molten_copper"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:raw_materials/duralumin"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_duralumin"
+      },
+      "temperature": 625,
+      "time": 82
     }
   ]
 }

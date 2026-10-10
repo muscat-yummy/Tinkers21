@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:queens_slime_ingot"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:queens_slime_ingot"
+  }
 }

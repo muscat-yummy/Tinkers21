@@ -1,31 +1,34 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:mod_loaded",
+      "type": "neoforge:mod_loaded",
       "modid": "ceramics"
     }
   ],
-  "ingredient": [
-    {
-      "item": "ceramics:dark_bricks"
-    },
-    {
-      "item": "ceramics:dark_bricks_stairs"
-    },
-    {
-      "item": "ceramics:dark_bricks_wall"
-    },
-    {
-      "item": "ceramics:dragon_bricks"
-    },
-    {
-      "item": "ceramics:dragon_bricks_stairs"
-    },
-    {
-      "item": "ceramics:dragon_bricks_wall"
-    }
-  ],
+  "type": "tconstruct:melting",
+  "ingredient": {
+    "type": "neoforge:compound",
+    "ingredients": [
+      {
+        "item": "ceramics:dark_bricks"
+      },
+      {
+        "item": "ceramics:dark_bricks_stairs"
+      },
+      {
+        "item": "ceramics:dark_bricks_wall"
+      },
+      {
+        "item": "ceramics:dragon_bricks"
+      },
+      {
+        "item": "ceramics:dragon_bricks_stairs"
+      },
+      {
+        "item": "ceramics:dragon_bricks_wall"
+      }
+    ]
+  },
   "result": {
     "amount": 1000,
     "fluid": "tconstruct:molten_clay"

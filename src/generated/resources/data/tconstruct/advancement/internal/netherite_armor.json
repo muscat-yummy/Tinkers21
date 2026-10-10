@@ -4,67 +4,79 @@
       "conditions": {
         "items": [
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "mantle:and",
-              "predicates": [
-                {
-                  "type": "mantle:tag",
-                  "tag": "tconstruct:modifiable/armor/helmets"
-                },
-                {
-                  "type": "tconstruct:has_volatile_key",
-                  "key": "tconstruct:netherite"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "mantle:and",
+                  "predicates": [
+                    {
+                      "type": "mantle:tag",
+                      "tag": "tconstruct:modifiable/armor/helmets"
+                    },
+                    {
+                      "type": "tconstruct:has_volatile_key",
+                      "key": "tconstruct:netherite"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           },
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "mantle:and",
-              "predicates": [
-                {
-                  "type": "mantle:tag",
-                  "tag": "tconstruct:modifiable/armor/chestplate"
-                },
-                {
-                  "type": "tconstruct:has_volatile_key",
-                  "key": "tconstruct:netherite"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "mantle:and",
+                  "predicates": [
+                    {
+                      "type": "mantle:tag",
+                      "tag": "tconstruct:modifiable/armor/chestplate"
+                    },
+                    {
+                      "type": "tconstruct:has_volatile_key",
+                      "key": "tconstruct:netherite"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           },
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "mantle:and",
-              "predicates": [
-                {
-                  "type": "mantle:tag",
-                  "tag": "tconstruct:modifiable/armor/leggings"
-                },
-                {
-                  "type": "tconstruct:has_volatile_key",
-                  "key": "tconstruct:netherite"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "mantle:and",
+                  "predicates": [
+                    {
+                      "type": "mantle:tag",
+                      "tag": "tconstruct:modifiable/armor/leggings"
+                    },
+                    {
+                      "type": "tconstruct:has_volatile_key",
+                      "key": "tconstruct:netherite"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           },
           {
-            "type": "tconstruct:tool_stack",
-            "predicate": {
-              "type": "mantle:and",
-              "predicates": [
-                {
-                  "type": "mantle:tag",
-                  "tag": "tconstruct:modifiable/armor/boots"
-                },
-                {
-                  "type": "tconstruct:has_volatile_key",
-                  "key": "tconstruct:netherite"
+            "predicates": {
+              "tconstruct:tool_stack": {
+                "predicate": {
+                  "type": "mantle:and",
+                  "predicates": [
+                    {
+                      "type": "mantle:tag",
+                      "tag": "tconstruct:modifiable/armor/boots"
+                    },
+                    {
+                      "type": "tconstruct:has_volatile_key",
+                      "key": "tconstruct:netherite"
+                    }
+                  ]
                 }
-              ]
+              }
             }
           }
         ]
@@ -79,6 +91,5 @@
   ],
   "rewards": {
     "function": "tconstruct:grant_advancement/nether_netherite_armor"
-  },
-  "sends_telemetry_event": false
+  }
 }

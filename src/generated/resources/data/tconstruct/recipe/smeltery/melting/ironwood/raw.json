@@ -1,15 +1,15 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "mantle:tag_filled",
+      "tag": "forge:raw_materials/ironwood"
+    }
+  ],
   "type": "tconstruct:melting",
   "byproducts": [
     {
       "amount": 10,
       "tag": "forge:molten_gold"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:raw_materials/ironwood"
     }
   ],
   "ingredient": {

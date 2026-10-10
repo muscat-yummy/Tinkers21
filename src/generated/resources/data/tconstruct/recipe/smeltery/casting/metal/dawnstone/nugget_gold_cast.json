@@ -1,9 +1,5 @@
 {
-  "type": "tconstruct:casting_table",
-  "cast": {
-    "tag": "tconstruct:casts/multi_use/nugget"
-  },
-  "conditions": [
+  "neoforge:conditions": [
     {
       "type": "mantle:tag_filled",
       "tag": "forge:nuggets/dawnstone"
@@ -14,6 +10,10 @@
       "tag": "forge:molten_dawnstone"
     }
   ],
+  "type": "tconstruct:casting_table",
+  "cast": {
+    "tag": "tconstruct:casts/multi_use/nugget"
+  },
   "cooling_time": 21,
   "fluid": {
     "amount": 10,

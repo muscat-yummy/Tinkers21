@@ -1,11 +1,11 @@
 {
-  "type": "tconstruct:melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:item_exists",
+      "type": "neoforge:item_exists",
       "item": "allomancy:lead_flakes"
     }
   ],
+  "type": "tconstruct:melting",
   "ingredient": {
     "item": "allomancy:lead_flakes"
   },

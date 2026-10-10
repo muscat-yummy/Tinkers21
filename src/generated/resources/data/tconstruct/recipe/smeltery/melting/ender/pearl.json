@@ -2,7 +2,7 @@
   "type": "tconstruct:melting",
   "ingredient": [
     {
-      "tag": "forge:ender_pearls"
+      "tag": "c:ender_pearls"
     },
     {
       "item": "minecraft:ender_eye"

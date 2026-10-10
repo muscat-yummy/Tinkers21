@@ -6,5 +6,8 @@
   "ingredient": {
     "tag": "forge:raw_nuggets/knightmetal"
   },
-  "result": "tconstruct:knightmetal_nugget"
+  "result": {
+    "count": 1,
+    "id": "tconstruct:knightmetal_nugget"
+  }
 }

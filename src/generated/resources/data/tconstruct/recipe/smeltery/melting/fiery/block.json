@@ -1,15 +1,15 @@
 {
+  "neoforge:conditions": [
+    {
+      "type": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/fiery"
+    }
+  ],
   "type": "tconstruct:melting",
   "byproducts": [
     {
       "amount": 810,
       "tag": "forge:molten_iron"
-    }
-  ],
-  "conditions": [
-    {
-      "type": "mantle:tag_filled",
-      "tag": "forge:storage_blocks/fiery"
     }
   ],
   "ingredient": {

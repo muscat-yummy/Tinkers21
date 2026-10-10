@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:knightmetal_block"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:knightmetal_block"
+  }
 }

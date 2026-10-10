@@ -1,4 +1,4 @@
-name: Diagnose actual slime island template dimensions and blocks
+name: Verify native world content and special modifiers
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -68,6 +68,15 @@ jobs:
               'TiC actual registered world features PASS' not in text or
               'TiC actual twenty slime island structure templates PASS' not in text or
               'TiC actual earth slime island template world placement PASS' not in text or
+              'TiC actual sky slime island template world placement PASS' not in text or
+              'TiC actual blood slime island template world placement PASS' not in text or
+              'TiC actual ender slime island template world placement PASS' not in text or
+              'TiC actual island generation biome rejection and structure persistence PASS' not in text or
+              'TiC actual reloaded four island pieces native world placement PASS' not in text or
+              'TiC actual applied slime natural biome spawn entries PASS' not in text or
+              'TiC actual native slime natural spawn habitat predicates PASS' not in text or
+              'TiC actual overslime absorption exhaustion and persistence PASS' not in text or
+              'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or
               'TiC actual sky slime entity world ticks PASS' not in text or
               'TiC actual ender slime entity world ticks PASS' not in text or
               'TiC actual terracube entity world ticks PASS' not in text or

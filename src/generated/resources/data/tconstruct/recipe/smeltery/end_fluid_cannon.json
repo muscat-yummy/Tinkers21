@@ -6,7 +6,7 @@
       "tag": "forge:ingots/knightmetal"
     },
     "R": {
-      "tag": "forge:dusts/redstone"
+      "tag": "c:dusts/redstone"
     },
     "T": {
       "item": "minecraft:shulker_shell"
@@ -18,7 +18,7 @@
     "CCC"
   ],
   "result": {
-    "item": "tconstruct:end_fluid_cannon"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:end_fluid_cannon"
+  }
 }

@@ -12,7 +12,9 @@
   ],
   "ingredient": {
     "type": "tconstruct:no_container",
-    "item": "tconstruct:seared_lantern"
+    "match": {
+      "item": "tconstruct:seared_lantern"
+    }
   },
   "result": {
     "amount": 500,

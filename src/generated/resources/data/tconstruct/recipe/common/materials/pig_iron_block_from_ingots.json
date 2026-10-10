@@ -16,7 +16,7 @@
     "###"
   ],
   "result": {
-    "item": "tconstruct:pig_iron_block"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:pig_iron_block"
+  }
 }

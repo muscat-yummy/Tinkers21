@@ -1,79 +1,97 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/silver"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_combination_filled",
       "ignore": "tconstruct:non_singular_ore_rates",
       "match": "forge:ores/lead"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/silver"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_silver"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/lead"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 180,
-          "tag": "forge:molten_lead"
-        },
-        "temperature": 330,
-        "time": 109
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 180,
+          "rate": "metal",
+          "tag": "forge:molten_silver"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_gold"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/lead"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/lead"
         },
-        "rate": "metal",
-        "result": {
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_lead"
+      },
+      "temperature": 330,
+      "time": 109
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 180,
-          "tag": "forge:molten_lead"
+          "rate": "metal",
+          "tag": "forge:molten_gold"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/lead"
         },
-        "temperature": 330,
-        "time": 109
-      }
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_lead"
+      },
+      "temperature": 330,
+      "time": 109
     }
   ]
 }

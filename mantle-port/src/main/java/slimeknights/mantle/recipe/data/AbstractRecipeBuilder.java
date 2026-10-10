@@ -7,7 +7,6 @@ import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.core.HolderLookup;
-import net.minecraft.resources.RegistryOps;
 import com.mojang.serialization.JsonOps;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -154,7 +153,7 @@ public abstract class AbstractRecipeBuilder<T extends AbstractRecipeBuilder<T>> 
       if (advancementId == null) {
         return null;
       }
-      return Advancement.CODEC.encodeStart(RegistryOps.create(JsonOps.INSTANCE, registries), advancement.value()).getOrThrow().getAsJsonObject();
+      return Advancement.CODEC.encodeStart(registries.createSerializationContext(JsonOps.INSTANCE), advancement.value()).getOrThrow().getAsJsonObject();
     }
   }
 

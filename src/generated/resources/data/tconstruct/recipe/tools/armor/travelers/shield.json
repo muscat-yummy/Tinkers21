@@ -8,7 +8,7 @@
         "type": "tconstruct:stat_type",
         "stat_type": "tconstruct:shield_core"
       },
-      "value": 1.0
+      "value": 1
     },
     "l": {
       "type": "tconstruct:material_value",
@@ -16,10 +16,10 @@
         "type": "tconstruct:stat_type",
         "stat_type": "tconstruct:cuirass"
       },
-      "value": 1.0
+      "value": 1
     },
     "s": {
-      "tag": "forge:rods/wooden"
+      "tag": "c:rods/wooden"
     }
   },
   "parts": "cl",
@@ -28,7 +28,7 @@
     "lcl"
   ],
   "result": {
-    "item": "tconstruct:travelers_shield"
-  },
-  "show_notification": true
+    "count": 1,
+    "id": "tconstruct:travelers_shield"
+  }
 }

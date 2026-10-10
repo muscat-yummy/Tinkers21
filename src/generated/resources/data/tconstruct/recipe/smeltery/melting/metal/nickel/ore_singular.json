@@ -1,79 +1,97 @@
 {
-  "type": "forge:conditional",
-  "conditions": [
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/platinum"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
     {
       "type": "mantle:tag_combination_filled",
       "ignore": "tconstruct:non_singular_ore_rates",
       "match": "forge:ores/nickel"
     }
   ],
+  "type": "mantle:conditional",
   "recipes": [
     {
-      "conditions": [
+      "neoforge:conditions": [
         {
           "type": "mantle:tag_filled",
           "tag": "forge:ingots/platinum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_platinum"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/nickel"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
-        },
-        "rate": "metal",
-        "result": {
-          "amount": 180,
-          "tag": "forge:molten_nickel"
-        },
-        "temperature": 950,
-        "time": 162
-      }
-    },
-    {
-      "conditions": [
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
         {
-          "type": "forge:true"
+          "amount": 180,
+          "rate": "metal",
+          "tag": "forge:molten_platinum"
         }
       ],
-      "recipe": {
-        "type": "tconstruct:ore_melting",
-        "byproducts": [
-          {
-            "amount": 180,
-            "rate": "metal",
-            "tag": "forge:molten_iron"
-          }
-        ],
-        "ingredient": {
-          "type": "forge:difference",
-          "base": {
-            "tag": "forge:ores/nickel"
-          },
-          "subtracted": {
-            "tag": "tconstruct:non_singular_ore_rates"
-          }
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/nickel"
         },
-        "rate": "metal",
-        "result": {
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_nickel"
+      },
+      "temperature": 950,
+      "time": 162
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
           "amount": 180,
-          "tag": "forge:molten_nickel"
+          "rate": "metal",
+          "tag": "forge:molten_iron"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:difference",
+        "base": {
+          "tag": "forge:ores/nickel"
         },
-        "temperature": 950,
-        "time": 162
-      }
+        "subtracted": {
+          "tag": "tconstruct:non_singular_ore_rates"
+        }
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 180,
+        "tag": "forge:molten_nickel"
+      },
+      "temperature": 950,
+      "time": 162
     }
   ]
 }

@@ -1,8 +1,7 @@
 {
-  "type": "tconstruct:material_melting",
-  "conditions": [
+  "neoforge:conditions": [
     {
-      "type": "forge:or",
+      "type": "neoforge:or",
       "values": [
         {
           "type": "mantle:tag_filled",
@@ -23,6 +22,7 @@
       ]
     }
   ],
+  "type": "tconstruct:material_melting",
   "input": "tconstruct:nicrosil",
   "result": {
     "amount": 90,

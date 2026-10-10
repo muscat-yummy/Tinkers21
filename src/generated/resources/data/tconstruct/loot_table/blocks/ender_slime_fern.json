@@ -2,11 +2,11 @@
   "type": "minecraft:block",
   "pools": [
     {
-      "bonus_rolls": 0,
+      "bonus_rolls": 0.0,
       "conditions": [
         {
-          "condition": "neoforge:can_item_perform_ability",
-          "ability": "shears_dig"
+          "ability": "shears_dig",
+          "condition": "neoforge:can_item_perform_ability"
         }
       ],
       "entries": [
@@ -15,7 +15,7 @@
           "name": "tconstruct:ender_slime_fern"
         }
       ],
-      "rolls": 1
+      "rolls": 1.0
     }
   ],
   "random_sequence": "tconstruct:blocks/ender_slime_fern"
