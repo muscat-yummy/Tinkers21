@@ -52,7 +52,10 @@ jobs:
               'TiC actual native melter fuel casting and machine persistence PASS' not in text or
               'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
               'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
-              'TiC actual slime mobs and registered world features PASS' not in text or
+              'TiC actual registered world features PASS' not in text or
+              'TiC actual sky slime entity world ticks PASS' not in text or
+              'TiC actual ender slime entity world ticks PASS' not in text or
+              'TiC actual terracube entity world ticks PASS' not in text or
               'TiC actual configured earth slime tree placement PASS' not in text or
               'TiC actual configured sky slime tree placement PASS' not in text or
               'TiC actual configured blood slime fungus placement PASS' not in text or
