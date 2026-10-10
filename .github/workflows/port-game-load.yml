@@ -79,6 +79,7 @@ jobs:
               'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or
               'TiC actual sky slime entity world ticks PASS' not in text or
               'TiC actual ender slime entity world ticks PASS' not in text or
+              'TiC actual ender slime damage canceled and approved native teleport PASS' not in text or
               'TiC actual terracube entity world ticks PASS' not in text or
               'TiC actual configured earth slime tree placement PASS' not in text or
               'TiC actual configured sky slime tree placement PASS' not in text or

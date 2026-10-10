@@ -337,4 +337,64 @@ public final class NativeWorldContentGameTest {
   public static void actualTerracubeEntity(GameTestHelper helper) {
     verifySlimeMob(helper, TinkerWorld.terracubeEntity.get(), "terracube");
   }
+
+  @GameTest(template = "island", timeoutTicks = 120)
+  public static void actualEnderSlimeDamageTeleportPermission(GameTestHelper helper) {
+    var level = helper.getLevel();
+    var start = new BlockPos(3, 4, 3);
+    var destination = new BlockPos(20, 4, 20);
+    for (var center : List.of(start, destination)) {
+      for (int x = -1; x <= 1; x++) for (int z = -1; z <= 1; z++) {
+        helper.setBlock(center.offset(x, -1, z), Blocks.STONE);
+      }
+    }
+    var slime = TinkerWorld.enderSlimeEntity.get().create(level);
+    helper.assertTrue(slime != null, "Registered ender slime could not be created");
+    slime.setSize(4, true);
+    slime.setNoAi(true);
+    var origin = helper.absolutePos(start).getBottomCenter();
+    var target = helper.absolutePos(destination).getBottomCenter();
+    slime.moveTo(origin.x, origin.y, origin.z, 0, 0);
+    helper.assertTrue(level.addFreshEntity(slime), "Actual server rejected the ender slime");
+    var cancel = new java.util.concurrent.atomic.AtomicBoolean(true);
+    var events = new java.util.concurrent.atomic.AtomicInteger();
+    java.util.function.Consumer<slimeknights.tconstruct.library.events.teleport.EnderSlimeTeleportEvent> listener = event -> {
+      if (event.getSlime() == slime && event.isTeleportingSelf()) {
+        events.incrementAndGet();
+        if (cancel.get()) event.setCanceled(true);
+        else {
+          event.setTargetX(target.x);
+          event.setTargetY(target.y);
+          event.setTargetZ(target.z);
+        }
+      }
+    };
+    net.neoforged.neoforge.common.NeoForge.EVENT_BUS.addListener(listener);
+    try {
+      float health = slime.getHealth();
+      helper.assertTrue(slime.hurt(level.damageSources().generic(), 1) && slime.getHealth() < health,
+        "Actual ender slime damage callback did not accept damage");
+      helper.assertTrue(events.get() == 16 && slime.position().distanceToSqr(origin) < 0.0001,
+        "Canceled native ender slime teleport changed position or skipped its permission event");
+    } catch (Throwable problem) {
+      net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
+      throw problem;
+    }
+    helper.runAfterDelay(22, () -> {
+      try {
+        cancel.set(false);
+        events.set(0);
+        float health = slime.getHealth();
+        helper.assertTrue(slime.hurt(level.damageSources().generic(), 1) && slime.getHealth() < health,
+          "Actual ender slime did not accept damage after its native invulnerability period");
+        helper.assertTrue(events.get() == 1 && slime.position().distanceToSqr(target) < 0.0001 && slime.isAlive(),
+          "Approved native ender slime teleport did not honor its actual event destination");
+        TConstruct.LOG.info("TiC actual ender slime damage canceled and approved native teleport PASS");
+        helper.succeed();
+      } finally {
+        net.neoforged.neoforge.common.NeoForge.EVENT_BUS.unregister(listener);
+      }
+    });
+  }
+
 }

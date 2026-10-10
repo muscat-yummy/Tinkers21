@@ -50,7 +50,8 @@ jobs:
           errors = [line for line in text.splitlines() if '/ERROR]' in line]
           missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
           if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
-              'TiC actual material armor equipment and native rendering PASS' not in text or errors or missing):
+              'TiC actual material armor equipment and native rendering PASS' not in text or
+              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()

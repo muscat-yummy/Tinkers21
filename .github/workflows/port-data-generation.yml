@@ -1,4 +1,4 @@
-name: Verify priority ordered native data registry generation
+name: Verify native registry-owned full data generation
 on:
   push:
     branches: [port/1.21.1-neoforge]
