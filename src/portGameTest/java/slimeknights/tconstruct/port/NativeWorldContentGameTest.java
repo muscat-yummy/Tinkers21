@@ -111,6 +111,28 @@ public final class NativeWorldContentGameTest {
     helper.succeed();
   }
 
+  @GameTest(template = "smeltery", timeoutTicks = 160)
+  public static void actualEarthIslandTemplatePlacement(GameTestHelper helper) {
+    var level = helper.getLevel();
+    var id = TConstruct.getResource("islands/earth/2x2x4");
+    var template = level.getServer().getStructureManager().get(id).orElseThrow();
+    BlockPos origin = helper.absolutePos(new BlockPos(1, 1, 1));
+    helper.assertTrue(template.placeInWorld(level, origin, origin,
+        new net.minecraft.world.level.levelgen.structure.templatesystem.StructurePlaceSettings()
+          .setIgnoreEntities(true), RandomSource.create(24711), 2),
+      "Actual earth slime island template failed native world placement");
+    int ownedBlocks = 0;
+    for (int x = 0; x < 2; x++) for (int y = 0; y < 2; y++) for (int z = 0; z < 4; z++) {
+      var block = level.getBlockState(origin.offset(x, y, z)).getBlock();
+      if (net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("tconstruct")) {
+        ownedBlocks++;
+      }
+    }
+    helper.assertTrue(ownedBlocks > 0, "Placed island template contains no registered TiC blocks");
+    TConstruct.LOG.info("TiC actual earth slime island template world placement PASS");
+    helper.succeed();
+  }
+
   @GameTest(template = "bootstrap", timeoutTicks = 160)
   public static void actualSlimeEntitiesAndWorldFeatures(GameTestHelper helper) {
     var level = helper.getLevel();
