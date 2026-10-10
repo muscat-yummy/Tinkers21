@@ -1,4 +1,4 @@
-name: Verify native slime biome spawn modifiers and world features
+name: Verify isolated native slime entities and biome modifiers
 on:
   push:
     branches: [port/1.21.1-neoforge]
