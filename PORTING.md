@@ -258,7 +258,7 @@ Pay particular attention to ItemStack data changes introduced since 1.20.1. Pref
 ### Phase 4 — Tool construction (complete: 2026-10-08)
 Port tool parts, recipes, menus/screens, Part Builder, Tinkers' Station, and the complete loop from materials to usable modified tools.
 
-### Phase 5 — Rendering (in progress)
+### Phase 5 — Rendering (complete: 2026-10-09)
 Restore material-dependent tool and armor rendering. Do not replace TiC's composited/material rendering with fixed textures merely to simplify the port.
 
 ### Phase 6 — Smeltery and fluids (complete: 2026-10-09)
@@ -908,3 +908,14 @@ Subsequent pending-CI edits commit material/cosmetic CUSTOM_DATA changes through
 
 - Run 38052043101 passes all 13 world tests and loads 20 island templates from the actual server resource manager. Run 38052291540 adds a fourteenth test: native `StructureTemplate.placeInWorld` returns success for the small earth island, but a scan based on the filename's presumed dimensions sees no registered TiC blocks. This test fails; island placement is not yet validated.
 - The pending diagnostic scans `StructureTemplate.getSize()` and logs the observed placed block IDs to distinguish a test-boundary mistake from empty/vanilla content. Its run 38052526152 failed before any job steps or logs on three attempts; this is a CI execution failure, not evidence of template behavior. Keep the strict placement assertion and retry when Actions executes steps. Full `runData` remains blocked by the previously recorded advancement holder-ownership failure.
+
+### Repository-based handoff and required CI triggers (2026-10-11 JST)
+
+- Handoff baseline is f33f9506109104addaedb86bc48db4bd11ef5aec. README, phase definitions, implementation records, native world tests, the latest commit diff and Actions job results were checked directly. Phase 7 is current; Phase 8 remains next. Correct the stale Phase 5 heading to match its already recorded graphical success in run 37958070823.
+- The latest successful native server gate is run 38052043101 at c6db0bcf7c24206907c82bc019a59d8f4317b482: full production assembly and 13 actual Minecraft tests. The subsequent 14-test run 38052291540 has exactly one required failure, actualEarthIslandTemplatePlacement; the other native world/machine tests pass. Its log confirms the strict no-owned-blocks assertion failed. Do not treat that run as an overall success.
+- The current source already scans StructureTemplate.getSize() and logs the placed palette; that diagnostic has not executed successfully. Runs 38052526152 and 38053003359 finish with failed jobs and zero steps. The latest datagen job 114215773197 has no retrievable log. No billing, quota or source-error cause can be established from those results alone.
+- All three actual validation workflows previously triggered only when their own workflow file changed. Add relevant production source, generated resources, Mantle, build and fixture paths plus workflow_dispatch so future source changes invoke the applicable complete gate. Preserve every strict runtime assertion, failure marker and command timeout.
+- This environment has no authenticated git clone credential for the private repository (clone failed before checkout) and its installed Java is 17, not the required 21. GitHub connector reads/writes are available, so coherent changes are committed through the Git data API and verification is delegated to the existing Java 21 Actions runners. This is not a local build or GameTest success.
+- Full native datagen still needs verification of the latest highest-priority registry initialization; if it executes and still fails, diagnose the actual first failing holder/advancement against the native complete registry context. Do not replace holders, suppress advancements, fabricate registry entries or relax validation.
+- Remaining Phase 7 gates include successful full datagen and regenerated-pack validation, native island placement/structure generation and biome/dimension behavior, and behavior coverage of remaining special modifiers/integrations. Retain the separate legacy migration and external addon limits. Phase 7 is not complete.
+- Next: inspect all three runs for this checkpoint. If runners execute, repair the concrete datagen and island diagnostic failures and rerun only affected gates after coherent fixes; validate the generated pack in Minecraft and continue the remaining Phase 7 behavior audit. If jobs again fail with zero steps, record the new run IDs and execution blocker rather than claiming verification.

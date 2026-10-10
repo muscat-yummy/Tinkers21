@@ -2,7 +2,20 @@ name: Diagnose actual slime island template dimensions and blocks
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/port-game-load.yml]
+    paths:
+      - '.github/workflows/port-game-load.yml'
+      - 'src/main/**'
+      - 'src/generated/**'
+      - 'mantle-port/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'src/portGameTest/**'
+      - 'scripts/port/create_game_load_template.py'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:

@@ -2,7 +2,19 @@ name: Verify acknowledged menu close and actual material armor rendering
 on:
   push:
     branches: [port/1.21.1-neoforge]
-    paths: [.github/workflows/port-client-load.yml]
+    paths:
+      - '.github/workflows/port-client-load.yml'
+      - 'src/main/**'
+      - 'src/generated/**'
+      - 'mantle-port/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'src/portClientCheck/**'
+  workflow_dispatch:
 permissions:
   contents: read
 jobs:
