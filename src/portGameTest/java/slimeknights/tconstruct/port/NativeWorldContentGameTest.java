@@ -98,6 +98,20 @@ public final class NativeWorldContentGameTest {
   }
 
   @GameTest(template = "bootstrap", timeoutTicks = 160)
+  public static void actualIslandTemplatesLoad(GameTestHelper helper) {
+    var manager = helper.getLevel().getServer().getStructureManager();
+    for (String island : List.of("earth", "sky", "blood", "ender")) {
+      for (String size : List.of("0x1x0", "2x2x4", "4x1x6", "8x1x11", "11x1x11")) {
+        var id = TConstruct.getResource("islands/" + island + "/" + size);
+        helper.assertTrue(manager.get(id).isPresent(),
+          "Actual structure template manager could not load island " + id);
+      }
+    }
+    TConstruct.LOG.info("TiC actual twenty slime island structure templates PASS");
+    helper.succeed();
+  }
+
+  @GameTest(template = "bootstrap", timeoutTicks = 160)
   public static void actualSlimeEntitiesAndWorldFeatures(GameTestHelper helper) {
     var level = helper.getLevel();
     var configured = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE);

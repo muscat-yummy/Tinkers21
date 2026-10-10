@@ -1,4 +1,4 @@
-name: Verify isolated native slime entities and biome modifiers
+name: Verify native slime island templates and world content
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -53,6 +53,7 @@ jobs:
               'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
               'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
               'TiC actual registered world features PASS' not in text or
+              'TiC actual twenty slime island structure templates PASS' not in text or
               'TiC actual sky slime entity world ticks PASS' not in text or
               'TiC actual ender slime entity world ticks PASS' not in text or
               'TiC actual terracube entity world ticks PASS' not in text or
