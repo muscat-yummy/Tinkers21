@@ -1,4 +1,4 @@
-name: Verify three configured slime feature placements in native world
+name: Verify native slime biome spawn modifiers and world features
 on:
   push:
     branches: [port/1.21.1-neoforge]
@@ -56,6 +56,7 @@ jobs:
               'TiC actual configured earth slime tree placement PASS' not in text or
               'TiC actual configured sky slime tree placement PASS' not in text or
               'TiC actual configured blood slime fungus placement PASS' not in text or
+              'TiC actual slime biome spawn modifiers PASS' not in text or
               'Mod loading has failed' in text or load_errors):
               raise SystemExit('Actual TiC world-load verification did not complete successfully')
       - name: Show actual game diagnostics

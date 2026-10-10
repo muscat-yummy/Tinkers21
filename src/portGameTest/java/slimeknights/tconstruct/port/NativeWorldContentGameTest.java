@@ -13,6 +13,8 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.Blocks;
 import net.neoforged.neoforge.gametest.GameTestHolder;
 import net.neoforged.neoforge.gametest.PrefixGameTestTemplate;
+import net.neoforged.neoforge.registries.NeoForgeRegistries;
+import net.neoforged.neoforge.common.world.BiomeModifiers.AddSpawnsBiomeModifier;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.world.TinkerStructures;
 import slimeknights.tconstruct.world.TinkerWorld;
@@ -72,6 +74,26 @@ public final class NativeWorldContentGameTest {
     helper.assertTrue(level.getBlockState(helper.absolutePos(origin)).is(TinkerWorld.bloodshroom.getLog()),
       "Actual blood slime fungus did not place its registered bloodshroom stem");
     TConstruct.LOG.info("TiC actual configured blood slime fungus placement PASS");
+    helper.succeed();
+  }
+
+  @GameTest(template = "bootstrap", timeoutTicks = 160)
+  public static void actualSlimeSpawnBiomeModifiers(GameTestHelper helper) {
+    var loaded = helper.getLevel().registryAccess().lookupOrThrow(NeoForgeRegistries.Keys.BIOME_MODIFIERS);
+    var keys = List.of(TinkerWorld.spawnOverworldSlime, TinkerWorld.spawnTerracube, TinkerWorld.spawnEndSlime);
+    var types = List.of(TinkerWorld.skySlimeEntity.get(), TinkerWorld.terracubeEntity.get(),
+      TinkerWorld.enderSlimeEntity.get());
+    for (int i = 0; i < keys.size(); i++) {
+      var modifier = loaded.getOrThrow(keys.get(i)).value();
+      helper.assertTrue(modifier instanceof AddSpawnsBiomeModifier,
+        "Actual spawn biome modifier is not a native AddSpawns modifier: " + keys.get(i).location());
+      var spawns = ((AddSpawnsBiomeModifier) modifier).spawners();
+      var expected = types.get(i);
+      helper.assertTrue(spawns.stream().anyMatch(spawn ->
+          spawn.type == expected && spawn.minCount == 2 && spawn.maxCount == 4),
+        "Actual biome modifier lost its configured slime spawn type and group: " + keys.get(i).location());
+    }
+    TConstruct.LOG.info("TiC actual slime biome spawn modifiers PASS");
     helper.succeed();
   }
 
