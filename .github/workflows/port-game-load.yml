@@ -1,4 +1,4 @@
-name: Verify actual slime island template placement
+name: Diagnose actual slime island template dimensions and blocks
 on:
   push:
     branches: [port/1.21.1-neoforge]

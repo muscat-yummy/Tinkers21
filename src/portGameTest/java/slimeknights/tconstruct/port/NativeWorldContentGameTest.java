@@ -122,13 +122,20 @@ public final class NativeWorldContentGameTest {
           .setIgnoreEntities(true), RandomSource.create(24711), 2),
       "Actual earth slime island template failed native world placement");
     int ownedBlocks = 0;
-    for (int x = 0; x < 2; x++) for (int y = 0; y < 2; y++) for (int z = 0; z < 4; z++) {
+    int nonAirBlocks = 0;
+    StringBuilder observed = new StringBuilder();
+    var size = template.getSize();
+    for (int x = 0; x < size.getX(); x++) for (int y = 0; y < size.getY(); y++) for (int z = 0; z < size.getZ(); z++) {
       var block = level.getBlockState(origin.offset(x, y, z)).getBlock();
-      if (net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block).getNamespace().equals("tconstruct")) {
-        ownedBlocks++;
+      if (block != Blocks.AIR) {
+        nonAirBlocks++;
+        var blockId = net.minecraft.core.registries.BuiltInRegistries.BLOCK.getKey(block);
+        if (observed.length() < 500) observed.append(blockId).append(' ');
+        if (blockId.getNamespace().equals("tconstruct")) ownedBlocks++;
       }
     }
-    helper.assertTrue(ownedBlocks > 0, "Placed island template contains no registered TiC blocks");
+    TConstruct.LOG.info("Actual earth island template size {} blocks {} owned {} sample {}", size, nonAirBlocks, ownedBlocks, observed);
+    helper.assertTrue(ownedBlocks > 0, "Placed island template contains no registered TiC blocks; size " + size + " sample " + observed);
     TConstruct.LOG.info("TiC actual earth slime island template world placement PASS");
     helper.succeed();
   }
