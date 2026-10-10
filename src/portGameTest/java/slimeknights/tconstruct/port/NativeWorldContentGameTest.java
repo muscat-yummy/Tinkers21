@@ -40,6 +40,42 @@ public final class NativeWorldContentGameTest {
   }
 
   @GameTest(template = "bootstrap", timeoutTicks = 160)
+  public static void actualSkySlimeTreePlacement(GameTestHelper helper) {
+    var level = helper.getLevel();
+    BlockPos origin = new BlockPos(0, 1, 0);
+    helper.setBlock(origin.below(), TinkerWorld.skySlimeGrass.get(FoliageType.SKY));
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin.below())).is(TinkerTags.Blocks.SLIMY_SOIL),
+      "Actual sky slime soil is not in the registered slimy soil tag");
+    var feature = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE)
+      .getOrThrow(TinkerStructures.skySlimeTree).value();
+    helper.assertTrue(feature.place(level, level.getChunkSource().getGenerator(),
+        RandomSource.create(265358), helper.absolutePos(origin)),
+      "Actual sky slime tree feature rejected registered slimy soil");
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin)).is(TinkerWorld.skyroot.getLog()),
+      "Actual sky slime tree did not place its registered skyroot trunk");
+    TConstruct.LOG.info("TiC actual configured sky slime tree placement PASS");
+    helper.succeed();
+  }
+
+  @GameTest(template = "bootstrap", timeoutTicks = 160)
+  public static void actualBloodSlimeFungusPlacement(GameTestHelper helper) {
+    var level = helper.getLevel();
+    BlockPos origin = new BlockPos(0, 1, 0);
+    helper.setBlock(origin.below(), TinkerWorld.earthSlimeGrass.get(FoliageType.EARTH));
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin.below())).is(TinkerTags.Blocks.SLIMY_SOIL),
+      "Actual fungus soil is not in the registered slimy soil tag");
+    var feature = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE)
+      .getOrThrow(TinkerStructures.bloodSlimeFungus).value();
+    helper.assertTrue(feature.place(level, level.getChunkSource().getGenerator(),
+        RandomSource.create(979323), helper.absolutePos(origin)),
+      "Actual blood slime fungus feature rejected registered slimy soil");
+    helper.assertTrue(level.getBlockState(helper.absolutePos(origin)).is(TinkerWorld.bloodshroom.getLog()),
+      "Actual blood slime fungus did not place its registered bloodshroom stem");
+    TConstruct.LOG.info("TiC actual configured blood slime fungus placement PASS");
+    helper.succeed();
+  }
+
+  @GameTest(template = "bootstrap", timeoutTicks = 160)
   public static void actualSlimeEntitiesAndWorldFeatures(GameTestHelper helper) {
     var level = helper.getLevel();
     var configured = level.registryAccess().lookupOrThrow(Registries.CONFIGURED_FEATURE);
