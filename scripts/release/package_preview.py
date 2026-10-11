@@ -94,19 +94,25 @@ def main() -> None:
              "scope": "unchanged server sources; includes accepted legacy smeltery fluid fix"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
-    (DIST / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
-    shutil.copyfile(ROOT / f"docs/releases/{VERSION}.md", DIST / "release-notes.md")
+    evidence = ROOT / "build/release-evidence"
+    evidence.mkdir(parents=True, exist_ok=True)
+    (evidence / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
+    notes_path = ROOT / f"docs/releases/{VERSION}.md"
+    notes = notes_path.read_text().split("\n### SHA256\n", 1)[0].rstrip() + "\n"
+    (evidence / "release-notes.md").write_text(notes)
+    for name in ("provenance.json", "release-notes.md", "SHA256SUMS.txt"):
+        (DIST / name).unlink(missing_ok=True)
     bundle = DIST / f"Tinkers21-1.21.1-neoforge-{VERSION}.zip"
     with zipfile.ZipFile(bundle, "w", zipfile.ZIP_DEFLATED) as archive:
         for jar in jars:
             archive.write(jar, f"mods/{jar.name}")
         archive.write(ROOT / "LICENSE", "LICENSE-Tinkers21.txt")
         archive.write(ROOT / "mantle-port/LICENSE", "LICENSE-Mantle.txt")
-        archive.write(DIST / "release-notes.md", "INSTALL.md")
-        archive.write(DIST / "provenance.json", "provenance.json")
+        archive.write(evidence / "release-notes.md", "INSTALL.md")
     assets = sorted(path for path in DIST.iterdir() if path.is_file() and path.name != "SHA256SUMS.txt")
     checksums = "".join(f"{hashlib.sha256(path.read_bytes()).hexdigest()}  {path.name}\n" for path in assets)
-    (DIST / "SHA256SUMS.txt").write_text(checksums)
+    (evidence / "SHA256SUMS.txt").write_text(checksums)
+    notes_path.write_text(notes + "\n### SHA256\n\n```text\n" + checksums + "```\n")
     print(checksums, end="")
     print("Tinkers21 native distribution metadata licenses fixture exclusion and packaging PASS")
 

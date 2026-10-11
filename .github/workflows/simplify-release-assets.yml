@@ -1,0 +1,56 @@
+name: Simplify Latest release attachments
+on:
+  push:
+    branches: [main]
+    paths: [.github/workflows/simplify-release-assets.yml]
+permissions:
+  contents: write
+jobs:
+  release_metadata:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Put checksums in notes and remove redundant attachments
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: python
+        run: |
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+          repo = os.environ['GH_REPO']
+          def fetch(endpoint):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{endpoint}']))
+          before = fetch('releases/tags/v3.12.1-port.6')
+          assert before['id'] == 409794753 and not before['draft']
+          assert fetch('releases/latest')['id'] == before['id']
+          retained = [a for a in before['assets'] if a['name'].endswith(('.jar', '.zip'))]
+          assert len(retained) == 3
+          notes = Path('docs/releases/3.12.1-port.6.md').read_text().split('\n### SHA256\n', 1)[0].rstrip()
+          notes += '\n\n### SHA256\n\n```text\n'
+          notes += ''.join(a['digest'][7:] + '  ' + a['name'] + '\n' for a in retained)
+          notes += '```\n'
+          for a in retained:
+              assert a['digest'].startswith('sha256:') and a['digest'][7:] + '  ' + a['name'] in notes
+          subprocess.run(['gh', 'api', '--method', 'PATCH', f'repos/{repo}/releases/{before["id"]}', '--input', '-'],
+                         input=json.dumps({'body': notes}), text=True, stdout=subprocess.DEVNULL, check=True)
+          assert fetch('releases/tags/v3.12.1-port.6')['body'] == notes
+          unwanted = {'release-notes.md', 'provenance.json', 'SHA256SUMS.txt'}
+          for a in before['assets']:
+              if a['name'] in unwanted:
+                  subprocess.run(['gh', 'api', '--method', 'DELETE', f'repos/{repo}/releases/assets/{a["id"]}'], check=True)
+                  print('Removed attachment: ' + a['name'])
+          after = fetch('releases/tags/v3.12.1-port.6')
+          def signature(assets):
+              return sorted((a['id'], a['name'], a['size'], a['digest']) for a in assets)
+          assert signature(after['assets']) == signature(retained)
+          for key in ['id', 'tag_name', 'target_commitish', 'name', 'draft', 'prerelease']:
+              assert after[key] == before[key], key
+          assert after['body'] == notes and fetch('releases/latest')['id'] == before['id']
+          print('Release checksum notes and attachment cleanup PASS; published jars and ZIP unchanged')
