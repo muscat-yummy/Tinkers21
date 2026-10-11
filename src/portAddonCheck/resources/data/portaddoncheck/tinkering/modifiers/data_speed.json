@@ -1,0 +1,10 @@
+{
+  "modules": [
+    {
+      "type": "tconstruct:stat_boost",
+      "each_level": 2.0,
+      "operation": "add",
+      "stat": "tconstruct:mining_speed"
+    }
+  ]
+}

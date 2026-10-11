@@ -49,7 +49,7 @@ public class ModifierDeferredRegister {
     if (expected.contains(id)) {
       throw new IllegalArgumentException("Already registered as an dynamic modifier " + id);
     }
-    Supplier<? extends Modifier> original = entries.put(id, supplier);
+    Supplier<? extends Modifier> original = entries.putIfAbsent(id, supplier);
     if (original != null) {
       throw new IllegalArgumentException("Duplicate static registration " + id);
     }

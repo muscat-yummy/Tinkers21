@@ -499,6 +499,12 @@ public final class ClientBootstrapCheck {
     }
     if (step == 17 && WorldEntityRenderingCheck.tick(minecraft)) {
       advance(18);
+      return;
+    }
+    if (step == 18 && AddonClientCheck.tick(minecraft)) {
+      geometry(minecraft, minecraft.player.getInventory().getItem(8));
+      TConstruct.LOG.info("TiC independent addon native inventory synchronization and material rendering PASS");
+      advance(19);
       minecraft.stop();
     }
   }

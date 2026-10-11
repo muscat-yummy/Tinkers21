@@ -57,17 +57,32 @@ if (portGameTests) {
 
 
 def portClientChecks = providers.gradleProperty('portClientCheck').map { it.toBoolean() }.orElse(false).get()
+// Independent addon fixture: never included in production jars or ordinary runs.
+if (portGameTests || portClientChecks) {
+    sourceSets.create('portAddonCheck') {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    configurations.portAddonCheckImplementation.extendsFrom(configurations.implementation)
+    if (portGameTests) {
+        sourceSets.portGameTest.compileClasspath += sourceSets.portAddonCheck.output
+        sourceSets.portGameTest.runtimeClasspath += sourceSets.portAddonCheck.output
+    }
+}
 if (portClientChecks) {
     sourceSets.create('portClientCheck') {
         java.srcDir('src/portClientCheck/java')
         compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
         runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        compileClasspath += sourceSets.portAddonCheck.output
+        runtimeClasspath += sourceSets.portAddonCheck.output
     }
     configurations.portClientCheckImplementation.extendsFrom(configurations.implementation)
 }
 
 neoForge {
     version = neo_version
+    if (portGameTests || portClientChecks) addModdingDependenciesTo(sourceSets.portAddonCheck)
     if (portGameTests) {
         addModdingDependenciesTo(sourceSets.portGameTest)
     }
@@ -102,6 +117,9 @@ neoForge {
         }
     }
     mods {
+        if (portGameTests || portClientChecks) {
+            portaddoncheck { sourceSet(sourceSets.portAddonCheck) }
+        }
         tconstruct {
             sourceSet(sourceSets.main)
             if (portGameTests) sourceSet(sourceSets.portGameTest)

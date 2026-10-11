@@ -14,6 +14,7 @@ on:
       - 'gradlew'
       - 'gradlew.bat'
       - 'src/portClientCheck/**'
+      - 'src/portAddonCheck/**'
   workflow_dispatch:
 permissions:
   contents: read
@@ -51,7 +52,8 @@ jobs:
           missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
           if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
               'TiC actual material armor equipment and native rendering PASS' not in text or
-              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or errors or missing):
+              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
+              'TiC independent addon native inventory synchronization and material rendering PASS' not in text or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
