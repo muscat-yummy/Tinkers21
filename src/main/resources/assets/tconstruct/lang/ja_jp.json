@@ -1492,7 +1492,7 @@
   "block.tconstruct.scorched_faucet": "焦熱石の蛇口",
   "block.tconstruct.scorched_faucet.tooltip": "鋳造炉やタンクから液体を排出する。",
   "block.tconstruct.scorched_basin": "焦熱石の鋳造鉢",
-  "block.tconstruct.scorched_basin.tooltip": "鋳造炉から溶けた金属を流し込んでアイテム化させる。",
+  "block.tconstruct.scorched_basin.tooltip": "鋳造炉から溶けた金属を流し込んでアイテム化させる。\n鋳造にはキャストまたは金の足場が必要",
   "block.tconstruct.scorched_table": "焦熱石の鋳造台",
   "block.tconstruct.scorched_table.tooltip": "鋳造炉から溶けた金属を流し込んでアイテム化させる。",
   "block.tconstruct.scorched_proxy_tank": "焦熱石のティンカータンク",

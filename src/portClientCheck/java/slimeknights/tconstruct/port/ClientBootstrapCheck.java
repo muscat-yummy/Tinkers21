@@ -188,7 +188,7 @@ public final class ClientBootstrapCheck {
 
   @SubscribeEvent
   public static void clientTick(ClientTickEvent.Post event) {
-    if (step == 21) return;
+    if (step == 22) return;
     if (serverFailure != null) throw serverFailure;
     Minecraft minecraft = Minecraft.getInstance();
     if (step > 0 && minecraft.screen instanceof DisconnectedScreen) {
@@ -537,6 +537,10 @@ public final class ClientBootstrapCheck {
     }
     if (step == 20 && ContainerScreenRenderingCheck.tick(minecraft)) {
       advance(21);
+      return;
+    }
+    if (step == 21 && BookScreenRenderingCheck.tick(minecraft)) {
+      advance(22);
       minecraft.stop();
     }
   }

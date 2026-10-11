@@ -4,7 +4,7 @@ plugins {
 }
 
 group = 'slimeknights.mantle'
-version = '1.11-port.1'
+version = '1.11-port.2'
 base.archivesName = 'Mantle'
 java.toolchain.languageVersion = JavaLanguageVersion.of(21)
 

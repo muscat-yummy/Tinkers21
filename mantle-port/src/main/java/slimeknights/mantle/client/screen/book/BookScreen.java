@@ -10,6 +10,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.client.gui.components.Button;
+import net.minecraft.client.gui.components.Renderable;
 import net.minecraft.client.gui.font.FontManager;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.multiplayer.ClientAdvancements;
@@ -164,6 +165,8 @@ public class BookScreen extends Screen {
       return;
     }
 
+    // Native Screen.render now blurs the background. Do that before drawing book pixels.
+    this.renderBackground(graphics, mouseX, mouseY, partialTicks);
     Font fontRenderer = getFontRenderer();
 
     if (debug) {
@@ -253,7 +256,10 @@ public class BookScreen extends Screen {
       }
     }
 
-    super.render(graphics, mouseX, mouseY, partialTicks);
+    // Preserve native widget order above the book, without another background/blur pass.
+    for (Renderable renderable : this.renderables) {
+      renderable.render(graphics, mouseX, mouseY, partialTicks);
+    }
   }
 
   private boolean shouldRenderPage(int pageNum, boolean rightSide) {

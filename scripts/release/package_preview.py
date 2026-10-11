@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
-LIBRARY_VERSION = "1.11-port.1" if VERSION == "3.12.1-port.3" else "1.11-port.0"
+LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2"}.get(VERSION, "1.11-port.0")
 
 
 def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, license_path: str) -> None:
@@ -71,6 +71,12 @@ def main() -> None:
             gate["scope"] = "unchanged server/data baseline; hotfix changes only client rendering"
         provenance["accepted_gates"].append({"run": int(os.environ["GITHUB_RUN_ID"]),
             "sha": os.environ["GITHUB_SHA"], "gate": "strict graphical core/addon/crystal/fluid/container screen hotfix client"})
+    if VERSION == "3.12.1-port.4":
+        provenance["accepted_gates"] = [
+            {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
+             "gate": "26 actual GameTests including native faucet iron/gold basins; strict graphical book/core/addon/crystal/fluid/container; both production assemblies; installed distribution server"},
+            {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
+             "gate": "native datagen", "scope": "unchanged generated data and datagen sources; current native recipe lookup covered by GameTests"}]
     (DIST / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     shutil.copyfile(ROOT / f"docs/releases/{VERSION}.md", DIST / "release-notes.md")
     bundle = DIST / f"Tinkers21-1.21.1-neoforge-{VERSION}.zip"

@@ -19,6 +19,12 @@ public interface ICastingContainer extends ISingleStackContainer {
    */
   Fluid getFluid();
 
+  /** Native recipe lookup must also consider fluid-only recipes (including empty casts). */
+  @Override
+  default boolean isEmpty() {
+    return getStack().isEmpty() && getFluidStack().isEmpty();
+  }
+
   /** Component-preserving fluid input for native casting recipes. */
   default FluidStack getFluidStack() {
     FluidStack result = new FluidStack(getFluid(), 1);

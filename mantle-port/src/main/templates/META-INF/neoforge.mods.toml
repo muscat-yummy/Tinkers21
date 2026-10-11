@@ -4,7 +4,7 @@ license="MIT"
 
 [[mods]]
 modId="mantle"
-version="1.11-port.1"
+version="1.11-port.2"
 displayName="Mantle (Unofficial Port)"
 description='''Shared library ported from SlimeKnights Mantle.'''
 
