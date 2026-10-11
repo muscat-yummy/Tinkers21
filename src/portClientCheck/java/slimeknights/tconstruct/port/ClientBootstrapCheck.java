@@ -254,7 +254,7 @@ public final class ClientBootstrapCheck {
       for (String id : new String[] {"tconstruct:ambidextrous", "tconstruct:haste"}) {
         ItemStack crystal = slimeknights.tconstruct.tools.item.ModifierCrystalItem.withModifier(new ModifierId(id));
         int expectedRgb = slimeknights.mantle.client.ResourceColorManager.getColor(
-          net.minecraft.Util.makeTranslationKey("modifier", new ModifierId(id))) & 0xFFFFFF;
+          slimeknights.mantle.util.Util.makeTranslationKey("modifier", new ModifierId(id))) & 0xFFFFFF;
         int actual = minecraft.getItemColors().getColor(crystal, 0);
         require((actual >>> 24) == 255 && (actual & 0xFFFFFF) == expectedRgb,
           "Actual modifier crystal tint is transparent or changed RGB: " + id + " color=" + Integer.toHexString(actual));
