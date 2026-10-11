@@ -9,6 +9,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.monster.Slime;
+import net.minecraft.world.level.block.Blocks;
 import slimeknights.tconstruct.TConstruct;
 import slimeknights.tconstruct.world.TinkerWorld;
 import slimeknights.tconstruct.world.client.TerracubeRenderer;
@@ -38,6 +39,16 @@ public final class WorldEntityRenderingCheck {
           server.setDifficulty(Difficulty.NORMAL, true);
           var player = server.getPlayerList().getPlayer(playerId);
           var level = player.serverLevel();
+          var origin = player.blockPosition();
+          // The randomly selected player spawn can border a mountain. Reserve
+          // actual air and a floor for the entire row instead of spawning the
+          // outer variants inside unmodified terrain, where they can suffocate.
+          for (int x = -6; x <= 6; x++) for (int z = 2; z <= 6; z++) {
+            level.setBlockAndUpdate(origin.offset(x, 0, z), Blocks.STONE.defaultBlockState());
+            for (int y = 1; y <= 5; y++) {
+              level.setBlockAndUpdate(origin.offset(x, y, z), Blocks.AIR.defaultBlockState());
+            }
+          }
           List<Expected> spawned = new ArrayList<>();
           List<EntityType<? extends Slime>> types = List.of(TinkerWorld.skySlimeEntity.get(),
             TinkerWorld.enderSlimeEntity.get(), TinkerWorld.terracubeEntity.get());
@@ -55,7 +66,11 @@ public final class WorldEntityRenderingCheck {
               }
               entity.setNoAi(true);
               entity.setNoGravity(true);
-              entity.moveTo(player.getX() + spawned.size() * 2 - 4, player.getY() + 1, player.getZ() + 4, 0, 0);
+              entity.moveTo(origin.getX() + 0.5 + spawned.size() * 2 - 4,
+                origin.getY() + 1, origin.getZ() + 4.5, 0, 0);
+              require(level.noCollision(entity), "Actual slime fixture intersects world terrain: " + type);
+              require(entity.isAlive() && entity.getSize() == 2,
+                "Actual server slime fixture lost life or size before spawning: " + type);
               require(level.addFreshEntity(entity), "Actual server rejected its registered slime entity");
               spawned.add(new Expected(entity.getUUID(), type, variant == 1));
             }
@@ -76,7 +91,10 @@ public final class WorldEntityRenderingCheck {
       }
       if (entity == null || entity.tickCount < 20) { frames = 0; return false; }
       require(entity.isAlive() && entity.getType() == value.type() && entity.getSize() == 2,
-        "Actual slime spawn packets lost type, life or tracked size");
+        "Actual slime spawn packets lost type, life or tracked size: expected " + value +
+          ", actual type=" + entity.getType() + ", size=" + entity.getSize() +
+          ", health=" + entity.getHealth() + ", removed=" + entity.isRemoved() +
+          ", ticks=" + entity.tickCount + ", position=" + entity.position());
       if (entity instanceof ArmoredSlimeEntity armored) {
         require(armored.isMetal() == value.metal(), "Actual slime tracked-data packets lost their metal variant");
       }
