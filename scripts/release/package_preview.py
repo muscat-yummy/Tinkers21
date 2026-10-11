@@ -108,10 +108,13 @@ def main() -> None:
              "gate": "native datagen", "scope": "unchanged generated data/datagen sources"}]
     if VERSION == "3.12.1-port.8":
         provenance["accepted_gates"] = [
+            {"run": 38165225689, "sha": "ff002799194b4a9288fa36d25c580fb4a8e86a40",
+             "gate": "28 actual GameTests including restored native water/lava tags and actual ammo/fishing-rod tip clearing",
+             "scope": "identical server sources; only optional client scroll-grid positioning changed"},
             {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
-             "gate": "28 actual GameTests including restored native water/lava tags and real ammo/fishing-rod tip clearing; existing strict native client without viewers; both assemblies; shipping jars installed on 249 and 251"},
+             "gate": "existing strict native client without viewers; both assemblies; shipping jars installed on 249 and 251"},
             {"run": int(os.environ["RECIPE_AUDIT_RUN"]), "sha": os.environ["RECIPE_AUDIT_SHA"],
-             "gate": "actual native JEI layouts and EMI widgets/tooltips for all TiC viewer categories plus actual scorched-basin EMI screen",
+             "gate": "actual native JEI layouts and EMI widgets/tooltips for all TiC viewer categories plus actual iron-block casting-basin EMI screen",
              "scope": "same production Java/resources apart from release versions; known non-TiC tag ID collisions explicitly recorded"}]
     evidence = ROOT / "build/release-evidence"
     evidence.mkdir(parents=True, exist_ok=True)

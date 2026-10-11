@@ -26,43 +26,20 @@ jobs:
           java-version: '21'
           cache: gradle
           cache-dependency-path: '**/*.gradle*'
-      - name: Install the native narrator library
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y flite1-dev
-      - name: Run the actual graphical Minecraft client
-        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true -Pneo_version=21.1.249 --no-daemon --console=plain
-      - name: Require graphical client verification
+      - name: Retain the successful strict native client without optional viewers
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: python
         run: |
-          import pathlib
-          log = pathlib.Path('run-port-client-check/logs/latest.log')
-          text = log.read_text() if log.is_file() else ''
-          errors = [line for line in text.splitlines() if '/ERROR]' in line]
-          missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
-          if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
-              'TiC actual material armor equipment and native rendering PASS' not in text or
-              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
-              'TiC independent addon native inventory synchronization and material rendering PASS' not in text or
-              'TiC actual modifier crystal opaque tint atlas geometry and native rendering PASS' not in text or
-              'TiC actual fluid GUI framebuffer bounds queued geometry lava iron partial empty and rectangular tanks PASS' not in text or
-              'TiC actual full Foundry legacy two-background duplicate-fluid reproduction PASS' not in text or
-              'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or
-              'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or
-              'TiC actual six loaded book section icons legacy material tool slot components Japanese encyclopedia index native rendering PASS' not in text or
-              'TiC actual Japanese Gadgetry four material titles descriptions and native index rendering PASS' not in text or
-              any('TiC actual loaded book resources scenario ' + str(i) + ' cover ' not in text for i in range(4)) or errors or missing):
-              raise SystemExit('Actual graphical client verification did not complete successfully')
-      - name: Show actual client diagnostics
-        if: always()
-        shell: python
-        run: |
-          import pathlib
-          log = pathlib.Path('run-port-client-check/logs/latest.log')
-          if log.is_file():
-              print(log.read_text()[-100000:])
-          for crash in sorted(pathlib.Path('run-port-client-check/crash-reports').glob('*.txt')):
-              print(crash.read_text()[-90000:])
+          import json, os, subprocess
+          source='ff002799194b4a9288fa36d25c580fb4a8e86a40'
+          jobs=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/38165225689/jobs'],text=True))['jobs']
+          job=next(j for j in jobs if j['id']==114546962547)
+          assert any(s['name']=='Require graphical client verification' and s['conclusion']=='success' for s in job['steps'])
+          subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
+          subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','gradle.properties','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portClientCheck','src/portAddonCheck',
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java'],check=True)
+          print('Strict native client without JEI/EMI retained from successful steps in job 114546962547; changed optional EMI target is absent in this profile')
       - name: Require the accepted actual viewer audit and identical production source
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -70,8 +47,8 @@ jobs:
         run: |
           import json, subprocess
           from pathlib import Path
-          base='769b1a6ed7d00f95b9f30b727cd0d07f6dd43b69'
-          run=json.loads(subprocess.check_output(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/actions/runs/38165161277'],text=True))
+          base='0a99fdb7825b7f037359fc04e58aff6c9799ecca'
+          run=json.loads(subprocess.check_output(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/actions/runs/38165655135'],text=True))
           assert run['conclusion']=='success' and run['head_sha']==base
           subprocess.run(['git','fetch','--no-tags','origin',base],check=True)
           subprocess.run(['git','diff','--exit-code',base,'HEAD','--','src/main','src/generated','mantle-port','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portAddonCheck',
@@ -93,8 +70,8 @@ jobs:
       - name: Inspect and package actual hotfix jars
         env:
           TINKERS21_RELEASE_VERSION: '3.12.1-port.8'
-          RECIPE_AUDIT_RUN: '38165161277'
-          RECIPE_AUDIT_SHA: '769b1a6ed7d00f95b9f30b727cd0d07f6dd43b69'
+          RECIPE_AUDIT_RUN: '38165655135'
+          RECIPE_AUDIT_SHA: '0a99fdb7825b7f037359fc04e58aff6c9799ecca'
         run: python3 scripts/release/package_preview.py
       - name: Verify identical 251-compiled distribution jars on installed NeoForge 249 and 251 servers
         run: |
@@ -128,87 +105,24 @@ jobs:
           retention-days: 30
   minecraft_load:
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
         with:
           ref: ${{ github.sha }}
           persist-credentials: false
-      - uses: actions/setup-java@v4
-        with:
-          distribution: temurin
-          java-version: '21'
-          cache: gradle
-          cache-dependency-path: '**/*.gradle*'
-      - name: Install mixed-format tank GameTest
-        run: cp scripts/port/qa/LegacySmelteryTankGameTest.java src/portGameTest/java/slimeknights/tconstruct/port/
-      - name: Install native fluid tag casting regression
-        run: cp scripts/port/recipe-qa/MantleFluidTagGameTest.java src/portGameTest/java/slimeknights/tconstruct/port/
-      - name: Create the isolated native world fixture
-        run: python3 scripts/port/create_game_load_template.py
-      - name: Build full production sources and run the actual Minecraft GameTest server
-        shell: bash
-        run: |
-          timeout 540s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true -Pneo_version=21.1.249 --no-daemon --console=plain &
-          build_pid=$!
-          (
-            sleep 180
-            if kill -0 "$build_pid" 2>/dev/null; then
-              jps -l
-              for java_pid in $(jps -l | awk '$2 ~ /devlaunch.Main/ {print $1}'); do
-                timeout 15s jcmd "$java_pid" Thread.print | python3 -c 'import sys; s=sys.stdin.read(); a=s.find("\"Server thread\""); print(s[a:a+9500] if a >= 0 else s[:2500])'
-              done
-            fi
-          ) &
-          monitor_pid=$!
-          if wait "$build_pid"; then result=0; else result=$?; fi
-          kill "$monitor_pid" 2>/dev/null || true
-          exit "$result"
-      - name: Require the actual game-world verification marker
+      - name: Retain the successful 28 native GameTests for identical server source
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: python
         run: |
-          import pathlib
-          log = pathlib.Path('run-port-game-test/logs/latest.log')
-          text = log.read_text() if log.is_file() else ''
-          marker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'
-          load_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]
-          if ('TiC actual native Mantle water lava tags and ammo fishing rod water tip clearing PASS' not in text or
-              marker not in text or
-              'TiC actual native melter fuel casting and machine persistence PASS' not in text or
-              'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
-              'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
-              'TiC actual registered world features PASS' not in text or
-              'TiC actual twenty slime island structure templates PASS' not in text or
-              'TiC actual earth slime island template world placement PASS' not in text or
-              'TiC actual sky slime island template world placement PASS' not in text or
-              'TiC actual blood slime island template world placement PASS' not in text or
-              'TiC actual ender slime island template world placement PASS' not in text or
-              'TiC actual island generation biome rejection and structure persistence PASS' not in text or
-              'TiC actual reloaded four island pieces native world placement PASS' not in text or
-              'TiC actual applied slime natural biome spawn entries PASS' not in text or
-              'TiC actual native slime natural spawn habitat predicates PASS' not in text or
-              'TiC actual overslime absorption exhaustion and persistence PASS' not in text or
-              'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or
-              'TiC actual sky slime entity world ticks PASS' not in text or
-              'TiC actual ender slime entity world ticks PASS' not in text or
-              'TiC actual ender slime damage canceled and approved native teleport PASS' not in text or
-              'TiC actual terracube entity world ticks PASS' not in text or
-              'TiC actual configured earth slime tree placement PASS' not in text or
-              'TiC actual configured sky slime tree placement PASS' not in text or
-              'TiC actual configured blood slime fungus placement PASS' not in text or
-              'TiC actual slime biome spawn modifiers PASS' not in text or
-              'TiC independent addon registration material dynamic modifier hook and persistence PASS' not in text or
-              'TiC actual faucet seared scorched iron gold block casting and reusable empty platform PASS' not in text or
-              'TiC actual smeltery foundry mixed legacy native fluids amounts components and native save reload PASS' not in text or
-              'Mod loading has failed' in text or load_errors):
-              raise SystemExit('Actual TiC world-load verification did not complete successfully')
-      - name: Show actual game diagnostics
-        if: always()
-        shell: python
-        run: |
-          import pathlib
-          log = pathlib.Path('run-port-game-test/logs/latest.log')
-          if log.is_file():
-              print(log.read_text()[-90000:])
-          for crash in sorted(pathlib.Path('run-port-game-test/crash-reports').glob('*.txt')):
-              print(crash.read_text()[-90000:])
+          import json, os, subprocess
+          source='ff002799194b4a9288fa36d25c580fb4a8e86a40'
+          jobs=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/38165225689/jobs'],text=True))['jobs']
+          assert any(j['id']==114546284188 and j['conclusion']=='success' for j in jobs)
+          subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
+          subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','gradle.properties','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portGameTest','src/portAddonCheck',
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java'],check=True)
+          config=json.loads(__import__('pathlib').Path('src/main/resources/tconstruct.mixins.json').read_text())
+          assert 'EmiScrollGridWidgetMixin' in config['client'] and 'EmiScrollGridWidgetMixin' not in config['mixins']
+          print('All 28 actual Minecraft GameTests retained at 38165225689 / ff002799; only optional client scroll-grid positioning changed')
