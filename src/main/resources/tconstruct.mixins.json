@@ -21,7 +21,9 @@
   ],
   "client": [
     "ToolTooltipMixin",
-    "EmiShapedRemainderMixin"
+    "EmiShapedRemainderMixin",
+    "EmiTextWidgetMixin",
+    "EmiRecipeIdentityMixin"
   ],
   "injectors": {
     "defaultRequire": 1

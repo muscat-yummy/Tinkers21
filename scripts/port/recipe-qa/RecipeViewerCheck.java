@@ -19,10 +19,26 @@ import slimeknights.tconstruct.TConstruct;
 public final class RecipeViewerCheck {
   private static boolean started, complete;
   private static RuntimeException failure;
-  private static int waiting;
+  private static int waiting, screenTicks;
+  private static boolean actualScreen;
   public static boolean tick(Minecraft mc) {
     if (failure != null) throw failure;
-    if (complete) { mc.setScreen(null); return true; }
+    if (complete) {
+      if (!actualScreen) {
+        EmiRecipe basin=EmiApi.getRecipeManager().getRecipes().stream().filter(r -> r.getCategory().getId().toString().equals("tconstruct:casting_basin") && r.getOutputs().stream().anyMatch(s -> s.getItemStack().is(slimeknights.tconstruct.smeltery.TinkerSmeltery.scorchedBasin.get().asItem()))).findFirst().orElseThrow();
+        EmiApi.displayRecipe(basin);
+        actualScreen=true;
+        return false;
+      }
+      if(++screenTicks<30) return false;
+      if(!mc.screen.getClass().getName().equals("dev.emi.emi.screen.RecipeScreen")) throw new IllegalStateException("Actual EMI recipe screen did not open");
+      try(var image=net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
+        image.writeToFile(Path.of("emi-casting-basin-gui.png"));
+      } catch(Exception e) { throw new IllegalStateException(e); }
+      TConstruct.LOG.info("TiC actual EMI scorched casting basin recipe screen rendering PASS");
+      mc.setScreen(null);
+      return true;
+    }
     if (!started) {
       var manager = EmiApi.getRecipeManager();
       if (manager == null || manager.getRecipes().isEmpty()) {
@@ -34,6 +50,14 @@ public final class RecipeViewerCheck {
         r.getId() != null && (r.getId().getNamespace().equals("tconstruct") ||
         r.getId().getNamespace().equals("jei") && r.getId().getPath().startsWith("/tconstruct/"))).toList();
       if (recipes.isEmpty()) throw new IllegalStateException("No TiC recipes registered in EMI");
+      var ids=new java.util.HashSet<String>();
+      var categories=new java.util.HashSet<String>();
+      for(var recipe:recipes) {
+        if(!recipe.getCategory().getId().getNamespace().equals("tconstruct")) continue;
+        if(recipe.getId()!=null && !ids.add(recipe.getId().toString())) throw new IllegalStateException("Duplicate TiC EMI display recipe ID: "+recipe.getId());
+        categories.add(recipe.getCategory().getId().getPath());
+      }
+      if(categories.size()!=15) throw new IllegalStateException("Missing TiC EMI category: "+categories);
       started = true;
       mc.setScreen(new CheckScreen(recipes));
     }

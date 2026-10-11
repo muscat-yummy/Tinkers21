@@ -4794,5 +4794,7 @@
   "tag.tconstruct.wood_variants.logs": "Logs Wood Variants",
   "tag.tconstruct.wood_variants.planks": "Planks Wood Variants",
   "tag.tconstruct.workstation_rock": "Workstation Rock",
-  "tag.twilightforest.banned_uncraftables": "Banned Uncraftables"
+  "tag.twilightforest.banned_uncraftables": "Banned Uncraftables",
+  "tag.mantle.water": "Water",
+  "tag.mantle.lava": "Lava"
 }

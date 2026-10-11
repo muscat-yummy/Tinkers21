@@ -43,10 +43,12 @@ public class SeveringCategory extends AbstractRecipeCategory<SeveringRecipe> {
     IIngredientAcceptor<?> entities = builder.addInputSlot(3, 3)
            .setCustomRenderer(MantleJEIConstants.ENTITY_TYPE, entityRenderer)
            .addIngredients(MantleJEIConstants.ENTITY_TYPE, input.getDisplay());
-    // currently JEI doesn't accept empty for a focus linked slot, so use null
-    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack.isEmpty() ? null : stack).toList();
-    IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
-    builder.createFocusLink(entities, eggs);
+    List<ItemStack> allEggs = input.getEggs();
+    List<ItemStack> eggStacks = allEggs.stream().filter(stack -> !stack.isEmpty()).toList();
+    if (!eggStacks.isEmpty()) {
+      IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
+      if (eggStacks.size() == allEggs.size()) builder.createFocusLink(entities, eggs);
+    }
 
     // output
     builder.addOutputSlot(76, 11).addItemStack(recipe.getOutput()).setOutputSlotBackground();
