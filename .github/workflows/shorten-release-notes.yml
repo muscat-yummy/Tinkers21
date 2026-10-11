@@ -1,0 +1,54 @@
+name: Shorten published release notes without rebuilding
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/shorten-release-notes.yml'
+      - 'docs/releases/concise/**'
+permissions:
+  contents: write
+jobs:
+  update_notes:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Apply concise notes and preserve published distribution
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+        shell: python
+        run: |
+          import json
+          import os
+          import subprocess
+          from pathlib import Path
+
+          repo = os.environ['GH_REPO']
+          ids = [409421343, 409435657, 409442358, 409450045, 409480506, 409746333]
+          def fetch(endpoint):
+              return json.loads(subprocess.check_output(['gh', 'api', f'repos/{repo}/{endpoint}']))
+          def assets(release):
+              return sorted((a['id'], a['name'], a['size'], a['digest']) for a in release['assets'])
+          latest = fetch('releases/latest')
+          before = []
+          for i, expected_id in enumerate(ids):
+              tag = f'v3.12.1-port.{i}'
+              release = fetch(f'releases/tags/{tag}')
+              assert release['id'] == expected_id and not release['draft'], tag
+              notes = Path(f'docs/releases/concise/3.12.1-port.{i}.md').read_text()
+              before.append((tag, release, notes))
+          for tag, release, notes in before:
+              subprocess.run(['gh', 'api', '--method', 'PATCH', f'repos/{repo}/releases/{release["id"]}',
+                              '--input', '-'], input=json.dumps({'body': notes}), text=True,
+                             stdout=subprocess.DEVNULL, check=True)
+              after = fetch(f'releases/tags/{tag}')
+              assert after['body'] == notes, tag
+              for key in ['id', 'tag_name', 'name', 'target_commitish', 'draft', 'prerelease']:
+                  assert after[key] == release[key], (tag, key)
+              assert assets(after) == assets(release), tag
+              print(f'{tag}: concise notes updated; published assets unchanged')
+          assert fetch('releases/latest')['id'] == latest['id'], 'Latest release changed'
