@@ -23,6 +23,7 @@
     "ToolTooltipMixin",
     "EmiShapedRemainderMixin",
     "EmiTextWidgetMixin",
+    "EmiScrollGridWidgetMixin",
     "EmiRecipeIdentityMixin"
   ],
   "injectors": {
