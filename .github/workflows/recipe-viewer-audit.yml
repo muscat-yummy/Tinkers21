@@ -46,10 +46,7 @@ jobs:
           assert 'findings=0' in report
           assert 'TiC actual EMI iron block casting basin recipe screen rendering PASS' in log
           errors=[line for line in log.splitlines() if '/ERROR]' in line or 'Unable to load model:' in line or 'Missing textures in model' in line]
-          upstream=[line for line in errors if '[EMI/]' in line and 'recipes loaded with the same id: jei:/' in line]
-          unexpected=[line for line in errors if line not in upstream]
-          print('Known EMI vanilla/common tag ID collision diagnostics:', len(upstream))
-          assert not unexpected, '\n'.join(unexpected)
+          assert not errors, errors[:20]
       - name: Keep full diagnostics
         if: always()
         shell: python

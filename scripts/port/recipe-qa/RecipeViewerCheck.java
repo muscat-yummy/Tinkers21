@@ -53,9 +53,8 @@ public final class RecipeViewerCheck {
       var ids=new java.util.HashSet<String>();
       var categories=new java.util.HashSet<String>();
       for(var recipe:recipes) {
-        if(!recipe.getCategory().getId().getNamespace().equals("tconstruct")) continue;
-        if(recipe.getId()!=null && !ids.add(recipe.getId().toString())) throw new IllegalStateException("Duplicate TiC EMI display recipe ID: "+recipe.getId());
-        categories.add(recipe.getCategory().getId().getPath());
+        if(recipe.getId()!=null && !ids.add(recipe.getId().toString())) throw new IllegalStateException("Duplicate audited EMI display recipe ID: "+recipe.getId());
+        if(recipe.getCategory().getId().getNamespace().equals("tconstruct")) categories.add(recipe.getCategory().getId().getPath());
       }
       if(categories.size()!=15) throw new IllegalStateException("Missing TiC EMI category: "+categories);
       started = true;

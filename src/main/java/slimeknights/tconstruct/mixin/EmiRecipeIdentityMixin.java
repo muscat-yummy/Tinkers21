@@ -12,7 +12,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
-/** Give TiC's category/variant display recipes distinct EMI IDs, retaining the real backing ID. */
+/** Give TiC and JEI tag category/variant displays distinct EMI IDs, retaining the real backing ID. */
 @Pseudo
 @Mixin(targets="dev.emi.emi.jemi.JemiRecipe",remap=false)
 public abstract class EmiRecipeIdentityMixin {
@@ -23,7 +23,10 @@ public abstract class EmiRecipeIdentityMixin {
   @Unique private static Object tconstruct$runtime;
   @Inject(method="<init>",at=@At("RETURN"),remap=false)
   private void tconstruct$distinctDisplayIdentity(CallbackInfo callback) {
-    if(originalId==null || !category.getRecipeType().getUid().getNamespace().equals("tconstruct")) return;
+    var uid=category.getRecipeType().getUid();
+    boolean tic=uid.getNamespace().equals("tconstruct");
+    boolean tags=uid.getNamespace().equals("minecraft") && uid.getPath().startsWith("tag_recipes/");
+    if(originalId==null || !tic && !tags) return;
     // Runtime instance changes on JEI reload. Constructor order is the actual registration order.
     try {
       Object runtime=Class.forName("dev.emi.emi.jemi.JemiPlugin").getField("runtime").get(null);
