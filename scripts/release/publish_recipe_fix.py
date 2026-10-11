@@ -64,17 +64,21 @@ with zipfile.ZipFile(bundle) as archive:
         if name.endswith('.jar'):
             assert hashlib.sha256(archive.read('mods/'+name)).hexdigest()==hashes[name]
 # An existing published version must be identical. Never upload with --clobber.
-existing=subprocess.run(['gh','release','view',TAG,'--repo',REPO,'--json','isDraft'],capture_output=True,text=True)
-if existing.returncode:
+matches=[release for release in api('releases?per_page=100') if release['tag_name']==TAG]
+assert len(matches)<=1
+if not matches:
     run('gh','release','create',TAG,*[str(dist/name) for name in sorted(expected)],'--repo',REPO,
         '--target',SOURCE,'--title','Tinkers21 '+VERSION,'--notes-file',str(notes),'--draft','--latest=false')
-release=api('releases/tags/'+TAG)
+# The tag endpoint is unavailable until a draft's tag is created at publication.
+# Authenticated release listing exposes the draft and lets us validate by release ID.
+release=next(release for release in api('releases?per_page=100') if release['tag_name']==TAG)
 assert {a['name'] for a in release['assets']}==expected
 for asset in release['assets']:
     assert asset['digest']=='sha256:'+hashes[asset['name']]
 assert release['body']==body and not release['prerelease']
 assert release['target_commitish']==SOURCE
 if release['draft']:
-    run('gh','release','edit',TAG,'--repo',REPO,'--draft=false','--latest')
+    subprocess.run(['gh','api','--method','PATCH','repos/'+REPO+'/releases/'+str(release['id']),'--input','-'],
+        input=json.dumps({'draft':False,'make_latest':'true'}),text=True,stdout=subprocess.DEVNULL,check=True)
 assert api('releases/latest')['id']==release['id']
 print('Accepted staging distribution published as Latest with exactly three assets: '+TAG)
