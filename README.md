@@ -67,6 +67,8 @@ The port attempts to retain the original Tinkers' Construct API structure wherev
 
 Compatibility is not guaranteed while development is ongoing.
 
+The source migration guide and independent addon acceptance fixture are documented in [Addon porting](docs/ADDON_PORTING.md). See [PORTING.md](PORTING.md) for exact validated commits, Actions results and remaining limitations.
+
 Once the core port becomes stable, additional work may be done to port or support existing Tinkers' Construct addons.
 
 ## Contributing

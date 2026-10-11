@@ -43,4 +43,4 @@ No test simulates an installed TiCEX binary. The fixture demonstrates the specif
 
 ## Verification status
 
-Actions run/source evidence and remaining limits are recorded in PORTING.md. Until the Phase 8 acceptance record says complete, the new fixture and fixes are pending CI. A successful import inventory or core compile alone does not establish addon interoperability.
+Phase 8 API-audit/independent-addon acceptance is complete. Datagen [38110981948](https://github.com/muscat-yummy/Tinkers21/actions/runs/38110981948) and assembly/all 25 real GameTests [38110981960](https://github.com/muscat-yummy/Tinkers21/actions/runs/38110981960) pass at `01fa71cbaeddb4abe63c245b73a37f96c65255e7`. Strict actual graphical/addon client [38111094698](https://github.com/muscat-yummy/Tinkers21/actions/runs/38111094698) passes at `304b302cf0e016371979bc35f58bb9aef1857c16`, which changes only the client test terminal-state guard. Full logs and strict markers/errors were checked; detailed evidence/limits are in PORTING.md. The independent fixture succeeds; full TiCEX and external integration compatibility remain unverified.
