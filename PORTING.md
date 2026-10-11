@@ -1,5 +1,12 @@
 # Tinkers' Construct 1.21.1 NeoForge Porting Notes
 
+### NeoForge 21.1.249 compatibility — pending final CI (2026-10-11 UTC)
+
+- User's actual server runs NeoForge 21.1.249. Existing TiC and Mantle metadata requires the compile target 21.1.251; both jars reject 249 before mod initialization. Candidate TiC 3.12.1-port.7 / Mantle 1.11-port.4 declares an independent runtime minimum of 21.1.249. Default compile target stays 21.1.251; Java21, runner, Gradle wrapper/plugin/dependencies, generated resources, production Java code and strict markers remain unchanged.
+- CI runs all 27 actual GameTests and the existing strict graphical core/addon/book/GUI checks on 249 through a test-only -Pneo_version override. It then assembles the shipping jars on pinned 251 and loads those exact inspected jars in separately installed ordinary 249 and 251 servers, requiring production recipe/material reload, world startup/save and clean shutdown without ERROR. Publishing is gated on the GameTest job and all client/distribution checks. No compatibility or release success is claimed before this completes.
+- Both TiC and Mantle must be updated on client and server. Lower versions than 249, all third-party mod combinations and general old-world migration are not added to verified scope. Existing accepted datagen remains scoped to unchanged source/generated resources.
+
+
 This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forge to Minecraft 1.21.1 / NeoForge / Java 21.
 
 ## Current acceptance (2026-10-11)

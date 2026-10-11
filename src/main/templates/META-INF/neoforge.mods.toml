@@ -13,7 +13,7 @@ description='''Unofficial port of Tinkers' Construct to Minecraft 1.21.1.'''
 [[dependencies.tconstruct]]
 modId="neoforge"
 type="required"
-versionRange="[${neo_version},)"
+versionRange="[21.1.249,)"
 ordering="NONE"
 side="BOTH"
 
@@ -27,7 +27,7 @@ side="BOTH"
 [[dependencies.tconstruct]]
 modId="mantle"
 type="required"
-versionRange="[1.11-port.3,)"
+versionRange="[1.11-port.4,)"
 ordering="AFTER"
 side="BOTH"
 

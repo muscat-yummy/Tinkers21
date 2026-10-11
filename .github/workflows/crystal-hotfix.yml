@@ -1,4 +1,4 @@
-name: Verify and release Japanese Gadgetry translation fix
+name: Verify and release NeoForge 21.1.249 compatibility
 on:
   push:
     branches: [main]
@@ -17,12 +17,13 @@ on:
       - 'src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/java/slimeknights/tconstruct/smeltery/client/screen/**'
       - 'src/portClientCheck/**'
-      - 'docs/releases/3.12.1-port.6.md'
+      - 'docs/releases/3.12.1-port.7.md'
   workflow_dispatch:
 permissions:
   contents: write
 jobs:
   minecraft_client:
+    needs: minecraft_load
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -44,7 +45,7 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y flite1-dev
       - name: Run the actual graphical Minecraft client
-        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true --no-daemon --console=plain
+        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true -Pneo_version=21.1.249 --no-daemon --console=plain
       - name: Require graphical client verification
         shell: python
         run: |
@@ -76,45 +77,60 @@ jobs:
               print(log.read_text()[-100000:])
           for crash in sorted(pathlib.Path('run-port-client-check/crash-reports').glob('*.txt')):
               print(crash.read_text()[-90000:])
-      - name: Verify bounded changes and pinned toolchain against published baseline
+      - name: Verify compatibility metadata only and preserve pinned production toolchain
+        shell: python
         run: |
-          git fetch --no-tags origin 71e495a06763602a600bc2d3a4f4ffe11f852275
-          git diff --exit-code 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- build.gradle settings.gradle gradle gradlew gradlew.bat src/generated src/portAddonCheck
-          git diff --exit-code 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- src/main mantle-port ':(exclude)src/main/resources/assets/tconstruct/book/tinkers_gadgetry/ja_jp/language.lang'
-          git diff 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- gradle.properties
-          python3 - <<'PYCODE'
           import subprocess
           from pathlib import Path
-          baseline = subprocess.check_output(['git', 'show', '71e495a06763602a600bc2d3a4f4ffe11f852275:gradle.properties'], text=True)
-          assert Path('gradle.properties').read_text() == baseline.replace('mod_version=3.12.1-port.5', 'mod_version=3.12.1-port.6')
-          PYCODE
+          base = '2ab682d41f5ce91891eca73dbdab394f46d969b4'
+          subprocess.run(['git', 'fetch', '--no-tags', 'origin', base], check=True)
+          subprocess.run(['git', 'diff', '--exit-code', base, 'HEAD', '--', 'src/main', 'src/generated', 'mantle-port', 'build.gradle', 'settings.gradle', 'gradle', 'gradlew', 'gradlew.bat', 'src/portAddonCheck',
+              ':(exclude)src/main/templates/META-INF/neoforge.mods.toml',
+              ':(exclude)mantle-port/src/main/templates/META-INF/neoforge.mods.toml',
+              ':(exclude)mantle-port/build.gradle'], check=True)
+          replacements = {
+              'gradle.properties': [('mod_version=3.12.1-port.6', 'mod_version=3.12.1-port.7')],
+              'mantle-port/build.gradle': [("version = '1.11-port.3'", "version = '1.11-port.4'")],
+              'src/main/templates/META-INF/neoforge.mods.toml': [('versionRange="[${neo_version},)"', 'versionRange="[21.1.249,)"'), ('[1.11-port.3,)', '[1.11-port.4,)')],
+              'mantle-port/src/main/templates/META-INF/neoforge.mods.toml': [('versionRange="[${neo_version},)"', 'versionRange="[21.1.249,)"'), ('version="1.11-port.3"', 'version="1.11-port.4"')],
+          }
+          for path, pairs in replacements.items():
+              expected = subprocess.check_output(['git', 'show', base + ':' + path], text=True)
+              for old, new in pairs:
+                  expected = expected.replace(old, new)
+              assert Path(path).read_text() == expected, path
       - name: Assemble production distribution jars
         run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
       - name: Inspect and package actual hotfix jars
         env:
-          TINKERS21_RELEASE_VERSION: '3.12.1-port.6'
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.7'
         run: python3 scripts/release/package_preview.py
-      - name: Install the pinned production NeoForge server
+      - name: Verify identical 251-compiled distribution jars on installed NeoForge 249 and 251 servers
         run: |
-          mkdir -p release-server
-          cd release-server
-          curl --fail --location --retry 2 https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.251/neoforge-21.1.251-installer.jar -o installer.jar
-          timeout 240s java -jar installer.jar --installServer
-      - name: Verify actual distribution jars in the installed server
-        run: python3 scripts/release/check_installed_server.py
+          set -euo pipefail
+          for version in 21.1.249 21.1.251; do
+            mkdir -p release-server
+            curl --fail --location --retry 2 "https://maven.neoforged.net/releases/net/neoforged/neoforge/$version/neoforge-$version-installer.jar" -o release-server/installer.jar
+            (cd release-server && timeout 240s java -jar installer.jar --installServer)
+            python3 scripts/release/check_installed_server.py
+            mv release-server "release-server-$version"
+          done
       - name: Keep installed-server diagnostics
         if: always()
         shell: python
         run: |
           from pathlib import Path
-          for path in [Path('release-server/console.log'), Path('release-server/logs/latest.log')]:
+          for path in sorted(Path('.').glob('release-server*/console.log')) + sorted(Path('.').glob('release-server*/logs/latest.log')):
               if path.is_file():
                   print(path.read_text(errors='replace')[-60000:])
       - uses: actions/upload-artifact@v4
         with:
-          name: Tinkers21-3.12.1-port.6-distribution
+          name: Tinkers21-3.12.1-port.7-distribution
           path: |
             dist/*
+            build/release-evidence/*
+            release-server*/logs/latest.log
+            run-port-client-check/logs/latest.log
             run-port-client-check/*gui*.png
           if-no-files-found: error
           retention-days: 30
@@ -123,13 +139,96 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag=v3.12.1-port.6
+          tag=v3.12.1-port.7
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
             git fetch --no-tags origin tag "$tag"
             git diff --exit-code "$tag" HEAD -- src/main src/generated mantle-port gradle.properties build.gradle settings.gradle gradle gradlew gradlew.bat
             echo 'Existing verified release production sources unchanged; preserving published assets.'
             exit 0
           fi
-          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.6" --notes-file docs/releases/3.12.1-port.6.md --draft --latest=false
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.7" --notes-file docs/releases/3.12.1-port.7.md --draft --latest=false
           gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets
+  minecraft_load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Install mixed-format tank GameTest
+        run: cp scripts/port/qa/LegacySmelteryTankGameTest.java src/portGameTest/java/slimeknights/tconstruct/port/
+      - name: Create the isolated native world fixture
+        run: python3 scripts/port/create_game_load_template.py
+      - name: Build full production sources and run the actual Minecraft GameTest server
+        shell: bash
+        run: |
+          timeout 540s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true -Pneo_version=21.1.249 --no-daemon --console=plain &
+          build_pid=$!
+          (
+            sleep 180
+            if kill -0 "$build_pid" 2>/dev/null; then
+              jps -l
+              for java_pid in $(jps -l | awk '$2 ~ /devlaunch.Main/ {print $1}'); do
+                timeout 15s jcmd "$java_pid" Thread.print | python3 -c 'import sys; s=sys.stdin.read(); a=s.find("\"Server thread\""); print(s[a:a+9500] if a >= 0 else s[:2500])'
+              done
+            fi
+          ) &
+          monitor_pid=$!
+          if wait "$build_pid"; then result=0; else result=$?; fi
+          kill "$monitor_pid" 2>/dev/null || true
+          exit "$result"
+      - name: Require the actual game-world verification marker
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-game-test/logs/latest.log')
+          text = log.read_text() if log.is_file() else ''
+          marker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'
+          load_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]
+          if (marker not in text or
+              'TiC actual native melter fuel casting and machine persistence PASS' not in text or
+              'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
+              'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
+              'TiC actual registered world features PASS' not in text or
+              'TiC actual twenty slime island structure templates PASS' not in text or
+              'TiC actual earth slime island template world placement PASS' not in text or
+              'TiC actual sky slime island template world placement PASS' not in text or
+              'TiC actual blood slime island template world placement PASS' not in text or
+              'TiC actual ender slime island template world placement PASS' not in text or
+              'TiC actual island generation biome rejection and structure persistence PASS' not in text or
+              'TiC actual reloaded four island pieces native world placement PASS' not in text or
+              'TiC actual applied slime natural biome spawn entries PASS' not in text or
+              'TiC actual native slime natural spawn habitat predicates PASS' not in text or
+              'TiC actual overslime absorption exhaustion and persistence PASS' not in text or
+              'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or
+              'TiC actual sky slime entity world ticks PASS' not in text or
+              'TiC actual ender slime entity world ticks PASS' not in text or
+              'TiC actual ender slime damage canceled and approved native teleport PASS' not in text or
+              'TiC actual terracube entity world ticks PASS' not in text or
+              'TiC actual configured earth slime tree placement PASS' not in text or
+              'TiC actual configured sky slime tree placement PASS' not in text or
+              'TiC actual configured blood slime fungus placement PASS' not in text or
+              'TiC actual slime biome spawn modifiers PASS' not in text or
+              'TiC independent addon registration material dynamic modifier hook and persistence PASS' not in text or
+              'TiC actual faucet seared scorched iron gold block casting and reusable empty platform PASS' not in text or
+              'TiC actual smeltery foundry mixed legacy native fluids amounts components and native save reload PASS' not in text or
+              'Mod loading has failed' in text or load_errors):
+              raise SystemExit('Actual TiC world-load verification did not complete successfully')
+      - name: Show actual game diagnostics
+        if: always()
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-game-test/logs/latest.log')
+          if log.is_file():
+              print(log.read_text()[-90000:])
+          for crash in sorted(pathlib.Path('run-port-game-test/crash-reports').glob('*.txt')):
+              print(crash.read_text()[-90000:])

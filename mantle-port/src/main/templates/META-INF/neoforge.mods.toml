@@ -4,14 +4,14 @@ license="MIT"
 
 [[mods]]
 modId="mantle"
-version="1.11-port.3"
+version="1.11-port.4"
 displayName="Mantle (Unofficial Port)"
 description='''Shared library ported from SlimeKnights Mantle.'''
 
 [[dependencies.mantle]]
 modId="neoforge"
 type="required"
-versionRange="[${neo_version},)"
+versionRange="[21.1.249,)"
 ordering="NONE"
 side="BOTH"
 
