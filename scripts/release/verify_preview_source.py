@@ -6,7 +6,8 @@ BASE = "01fa71cbaeddb4abe63c245b73a37f96c65255e7"
 CLIENT = "304b302cf0e016371979bc35f58bb9aef1857c16"
 subprocess.run(["git", "diff", "--exit-code", BASE, "HEAD", "--", "src/main", "src/generated",
                 "mantle-port/src", "src/portAddonCheck", "src/portGameTest", "settings.gradle",
-                "gradle", "gradlew", "gradlew.bat"], check=True)
+                "gradle", "gradlew", "gradlew.bat",
+                ":(exclude)mantle-port/src/main/templates/META-INF/neoforge.mods.toml"], check=True)
 subprocess.run(["git", "diff", "--exit-code", CLIENT, "HEAD", "--", "src/portClientCheck"], check=True)
 for filename, suffix in [
     ("build.gradle", "\n// Keep upstream and fork notices in the standalone distribution jar.\ntasks.named('jar', Jar).configure {\n    from('LICENSE') { into('META-INF/licenses/tinkers21') }\n}\n"),
@@ -18,3 +19,7 @@ original = subprocess.check_output(["git", "show", f"{BASE}:gradle.properties"],
 assert Path("gradle.properties").read_text() == original.replace(
     "mod_name=Tinkers' Construct (Unofficial Port)", "mod_name=Tinkers21 (Unofficial Fork)")
 print("Accepted runtime source, toolchain and distribution-only build changes PASS")
+
+metadata = "mantle-port/src/main/templates/META-INF/neoforge.mods.toml"
+original = subprocess.check_output(["git", "show", f"{BASE}:{metadata}"], text=True)
+assert Path(metadata).read_text() == original.replace("\\${neo_version}", "${neo_version}"), "Unexpected library metadata change"

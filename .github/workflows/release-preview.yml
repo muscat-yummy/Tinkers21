@@ -54,6 +54,23 @@ jobs:
         run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
       - name: Inspect jar contents and package distribution
         run: python3 scripts/release/package_preview.py
+      - name: Install the pinned production NeoForge server
+        shell: bash
+        run: |
+          mkdir -p release-server
+          cd release-server
+          curl --fail --location --retry 2 https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.251/neoforge-21.1.251-installer.jar -o installer.jar
+          timeout 240s java -jar installer.jar --installServer
+      - name: Verify actual distribution jars in the installed server
+        run: python3 scripts/release/check_installed_server.py
+      - name: Keep bounded installed-server diagnostics
+        if: always()
+        shell: python
+        run: |
+          from pathlib import Path
+          for path in [Path('release-server/console.log'), Path('release-server/logs/latest.log')]:
+              if path.is_file():
+                  print(path.read_text(errors='replace')[-60000:])
       - uses: actions/upload-artifact@v4
         with:
           name: Tinkers21-3.12.1-port.0-distribution
