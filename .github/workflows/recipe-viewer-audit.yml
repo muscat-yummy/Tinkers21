@@ -5,6 +5,8 @@ on:
     paths:
       - '.github/workflows/recipe-viewer-audit.yml'
       - 'scripts/port/recipe-qa/**'
+      - 'src/main/java/slimeknights/tconstruct/mixin/Emi*.java'
+      - 'src/main/java/slimeknights/tconstruct/plugin/jei/**'
   workflow_dispatch:
 permissions:
   contents: read
