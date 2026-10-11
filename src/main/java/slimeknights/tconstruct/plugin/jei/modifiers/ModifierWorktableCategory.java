@@ -40,8 +40,7 @@ public class ModifierWorktableCategory extends AbstractRecipeCategory<IModifierW
 
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IModifierWorktableRecipe recipe, IFocusGroup focuses) {
-    builder.addText(recipe.getTitle(), 115, 9)
-      .setPosition(3, 2)
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, recipe.getTitle(), 115, 9, 3, 2)
       .setColor(0x404040);
     DrawableTooltipWidget.area(builder, 0, 2, 121, 11).setTooltip(recipe.getDescription(null));
   }

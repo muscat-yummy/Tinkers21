@@ -31,9 +31,9 @@ public class ToolTinkeringCategory extends AbstractTinkerStationCategory<IDispla
     super.createRecipeExtras(builder, recipe, focuses);
 
     // add title and tooltip
-    builder.addText(recipe.getTitle(), 124, 10)
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, recipe.getTitle(), 124, 10, 3, 3)
       .setShadow(true).setColor(Color.WHITE.getRGB())
-      .setTextAlignment(HorizontalAlignment.CENTER).setPosition(3, 3);
+      .setTextAlignment(HorizontalAlignment.CENTER);
     DrawableTooltipWidget.area(builder, 3, 3, 124, 10).setTooltip(recipe.getTooltip());
   }
 }

@@ -73,7 +73,7 @@ public abstract class AbstractCastingCategory extends AbstractRecipeCategory<IDi
     arrowTooltip:
     {
       if (recipe.isCoolingTimeDynamic()) {
-        IRecipeSlotDrawable fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
+        IRecipeSlotDrawable fluid = CategoryUtil.findSlot(CategoryUtil.recipeSlots(builder), FLUID_SLOT);
         if (fluid != null) {
           arrowWidget.setTooltip(new CoolingArrowTooltip(recipe, fluid));
           break arrowTooltip;

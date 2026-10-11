@@ -29,6 +29,11 @@ public class FoundryCategory extends AbstractMeltingCategory {
   }
 
   @Override
+  public net.minecraft.resources.ResourceLocation getRegistryName(IDisplayableMeltingRecipe recipe) {
+    return recipe.getRecipeId().withPrefix("jei/foundry/");
+  }
+
+  @Override
   public void setRecipe(IRecipeLayoutBuilder builder, IDisplayableMeltingRecipe recipe, IFocusGroup focuses) {
     // input
     List<ItemStack> inputs = recipe.getInputs();

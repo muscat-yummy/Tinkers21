@@ -106,8 +106,7 @@ public class OverslimeRecipeExtension implements ICraftingCategoryExtension<Over
   @Override
   public void createRecipeExtras(RecipeHolder<OverslimeCraftingTableRecipe> holder, IRecipeExtrasBuilder builder, ICraftingGridHelper craftingGridHelper, IFocusGroup focuses) {
     int restoreAmount = recipe.getRestoreAmount();
-    builder.addText(Component.translatable(KEY_AMOUNT, restoreAmount), 57, 9)
-      .setPosition(60, 44).setColor(Color.GRAY.getRGB());
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_AMOUNT, restoreAmount), 57, 9, 60, 44).setColor(Color.GRAY.getRGB());
     DrawableTooltipWidget.area(builder, 60, 44, 57, 9).setTooltip(Component.translatable(KEY_TOOLTIP, restoreAmount));
   }
 }

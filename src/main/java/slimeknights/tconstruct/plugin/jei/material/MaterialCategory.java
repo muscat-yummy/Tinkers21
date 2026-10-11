@@ -175,11 +175,10 @@ public class MaterialCategory extends AbstractRecipeCategory<IDisplayMaterialRec
   public void createRecipeExtras(IRecipeExtrasBuilder builder, IDisplayMaterialRecipe recipe, IFocusGroup focuses) {
     int value = recipe.getValue();
     if (value > 0) {
-      builder.addText(Component.translatable(KEY_VALUE, value), 111, 9)
-        .setPosition(21, 11).setColor(Color.GRAY.getRGB());
+      slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_VALUE, value), 111, 9, 21, 11).setColor(Color.GRAY.getRGB());
       DrawableTooltipWidget.area(builder, 21, 11, 111, 9).setTooltip(VALUE_TOOLTIP);
     } else {
-      IRecipeSlotView fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
+      IRecipeSlotView fluid = CategoryUtil.findSlot(CategoryUtil.recipeSlots(builder), FLUID_SLOT);
       if (fluid != null) {
         builder.addWidget(new FluidAmountWidget(new ScreenRectangle(21, 11, 111, 9), font, fluid));
       }

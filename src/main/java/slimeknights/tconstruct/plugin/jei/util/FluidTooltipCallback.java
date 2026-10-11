@@ -49,7 +49,19 @@ public interface FluidTooltipCallback extends mezz.jei.api.gui.ingredient.IRecip
 
   @Override
   default void onRichTooltip(IRecipeSlotView recipeSlotView, ITooltipBuilder tooltip) {
-    ListIterator<Either<FormattedText,TooltipComponent>> listIterator = tooltip.getLines().listIterator();
+    List<Either<FormattedText,TooltipComponent>> lines;
+    try {
+      lines = tooltip.getLines();
+    } catch (AbstractMethodError bridgeWithoutRichLines) {
+      // EMI 1.1.24 implements JEI's older text-only tooltip builder ABI.
+      List<Component> original = new ArrayList<>(tooltip.toLegacyToComponents());
+      List<Component> replacement = new ArrayList<>(original);
+      onTooltip(recipeSlotView, replacement);
+      tooltip.removeAll(original);
+      tooltip.addAll(replacement);
+      return;
+    }
+    ListIterator<Either<FormattedText,TooltipComponent>> listIterator = lines.listIterator();
     while (listIterator.hasNext()) {
       FormattedText line = listIterator.next().left().orElse(null);
       if (line instanceof Component component && component.getContents() instanceof TranslatableContents translatable && AMOUNT_KEY.equals(translatable.getKey())) {

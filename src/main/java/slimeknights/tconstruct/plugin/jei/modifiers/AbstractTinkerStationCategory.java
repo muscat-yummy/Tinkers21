@@ -82,7 +82,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
   /** Creates the erroring arrow */
   static void createErrorArrow(IRecipeExtrasBuilder builder, IDisplayTinkerStationRecipe recipe, IDrawable errorArrow, int xPos, int yPos) {
     // if the result slot is empty, means we had an error so display that
-    List<IRecipeSlotDrawable> slots = builder.getRecipeSlots().getSlots();
+    List<IRecipeSlotDrawable> slots = CategoryUtil.recipeSlots(builder);
     IRecipeSlotDrawable resultSlot = CategoryUtil.findSlot(slots, RESULT_TOOL_SLOT);
     if (resultSlot != null && resultSlot.getDisplayedItemStack().isEmpty()) {
       DrawableTooltipWidget arrow = DrawableTooltipWidget.add(builder, errorArrow).setPosition(xPos, yPos);
@@ -107,8 +107,7 @@ public abstract class AbstractTinkerStationCategory<T extends IDisplayTinkerStat
 
     Component levelText = getVariantText(recipe);
     if (levelText != null) {
-      builder.addText(levelText, 85, 9)
-        .setPosition(43, 16)
+      slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, levelText, 85, 9, 43, 16)
         .setColor(Color.GRAY.getRGB())
         .setTextAlignment(HorizontalAlignment.CENTER);
     }

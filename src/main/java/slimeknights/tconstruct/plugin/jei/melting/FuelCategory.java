@@ -73,7 +73,7 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
   public void createRecipeExtras(IRecipeExtrasBuilder builder, MeltingFuel recipe, IFocusGroup focuses) {
     List<FluidStack> fluids = recipe.getInputs();
     Component title = SOLID;
-    IRecipeSlotView fuel = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FUEL_SLOT);
+    IRecipeSlotView fuel = CategoryUtil.findSlot(CategoryUtil.recipeSlots(builder), FUEL_SLOT);
     ScreenPosition fuelPosition = new ScreenPosition(21, 31);
     Font font = Minecraft.getInstance().font;
     if (!fluids.isEmpty()) {
@@ -85,12 +85,10 @@ public class FuelCategory extends AbstractRecipeCategory<MeltingFuel> {
     } else if (fuel != null) {
       builder.addWidget(new SolidFuelWidget(fuelPosition, 105, font, fuel));
     }
-    builder.addText(title, 111, 9).setPosition(21, 0).setColor(Color.WHITE.getRGB()).setShadow(true);
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, title, 111, 9, 21, 0).setColor(Color.WHITE.getRGB()).setShadow(true);
     // show temperature and multiplier on the same line
-    builder.addText(Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 111, 9)
-      .setPosition(21, 11).setColor(Color.GRAY.getRGB());
-    builder.addText(Component.translatable(KEY_MULTIPLIER, recipe.getRate() / 10f), 111, 9)
-      .setPosition(21, 21).setColor(Color.GRAY.getRGB());
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 111, 9, 21, 11).setColor(Color.GRAY.getRGB());
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_MULTIPLIER, recipe.getRate() / 10f), 111, 9, 21, 21).setColor(Color.GRAY.getRGB());
   }
 
 

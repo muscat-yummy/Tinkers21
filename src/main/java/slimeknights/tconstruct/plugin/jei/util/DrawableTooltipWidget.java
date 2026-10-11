@@ -14,6 +14,7 @@ import java.util.function.Consumer;
 /** Drawable and hover tooltip using the widget contract in the pinned JEI 19 API. */
 public final class DrawableTooltipWidget implements IRecipeWidget {
   private final IDrawable drawable;
+  private mezz.jei.api.gui.placement.IPlaceable<?> placement;
   private ScreenPosition position = new ScreenPosition(0, 0);
   private Consumer<ITooltipBuilder> tooltip = builder -> {};
 
@@ -23,6 +24,7 @@ public final class DrawableTooltipWidget implements IRecipeWidget {
 
   public static DrawableTooltipWidget add(IRecipeExtrasBuilder builder, IDrawable drawable) {
     DrawableTooltipWidget widget = new DrawableTooltipWidget(drawable);
+    widget.placement = builder.addDrawable(drawable);
     builder.addWidget(widget);
     return widget;
   }
@@ -44,6 +46,7 @@ public final class DrawableTooltipWidget implements IRecipeWidget {
 
   public DrawableTooltipWidget setPosition(int x, int y) {
     position = new ScreenPosition(x, y);
+    placement.setPosition(x, y);
     return this;
   }
 
@@ -63,7 +66,7 @@ public final class DrawableTooltipWidget implements IRecipeWidget {
 
   @Override
   public void drawWidget(GuiGraphics graphics, double mouseX, double mouseY) {
-    drawable.draw(graphics);
+    // Image is rendered once by addDrawable; this widget owns hover text only.
   }
 
   @Override

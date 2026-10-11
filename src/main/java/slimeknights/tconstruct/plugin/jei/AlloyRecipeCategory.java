@@ -69,8 +69,7 @@ public class AlloyRecipeCategory extends AbstractRecipeCategory<AlloyRecipe> {
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, AlloyRecipe recipe, IFocusGroup focuses) {
     DrawableTooltipWidget.add(builder, arrow).setPosition(90, 21);
-    builder.addText(Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 139, 9)
-      .setPosition(33, 5)
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 139, 9, 33, 5)
       .setColor(Color.GRAY.getRGB())
       .setTextAlignment(HorizontalAlignment.CENTER);
   }

@@ -56,8 +56,7 @@ public class PartBuilderCategory extends AbstractRecipeCategory<IDisplayPartBuil
     builder.addRecipeArrow().setPosition(66, 15);
     Component title = recipe.getDisplayTitle();
     if (title != null && recipe.getMaterials().isEmpty()) {
-      builder.addText(title, 118, 9)
-        .setPosition(3, 2)
+      slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, title, 118, 9, 3, 2)
         .setColor(-1)
         .setShadow(true);
       List<Component> tooltip = recipe.getTooltip();

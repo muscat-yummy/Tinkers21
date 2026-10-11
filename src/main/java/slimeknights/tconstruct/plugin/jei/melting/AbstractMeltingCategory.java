@@ -74,7 +74,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
     arrowTooltip:
     {
       if (recipe.isTimeDynamic()) {
-        IRecipeSlotDrawable fluid = CategoryUtil.findSlot(builder.getRecipeSlots().getSlots(), FLUID_SLOT);
+        IRecipeSlotDrawable fluid = CategoryUtil.findSlot(CategoryUtil.recipeSlots(builder), FLUID_SLOT);
         if (fluid != null) {
           arrow.setTooltip(new MeltingArrowTooltip(recipe, fluid));
           break arrowTooltip;
@@ -87,8 +87,7 @@ public abstract class AbstractMeltingCategory extends AbstractRecipeCategory<IDi
     if (recipe.getOreType() != null) {
       DrawableTooltipWidget.add(builder, plus).setPosition(83, 26).setTooltip(TOOLTIP_ORE);
     }
-    builder.addText(Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 113, 9)
-      .setPosition(0, 3)
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.translatable(KEY_TEMPERATURE, recipe.getTemperature()), 113, 9, 0, 3)
       .setColor(Color.GRAY.getRGB())
       .setTextAlignment(HorizontalAlignment.CENTER);
   }

@@ -77,6 +77,12 @@ public final class CategoryUtil {
     return maxAmount;
   }
 
+  /** Older EMI bridges expose no slot view while constructing standalone extras. */
+  public static List<IRecipeSlotDrawable> recipeSlots(mezz.jei.api.gui.widgets.IRecipeExtrasBuilder builder) {
+    var slots = builder.getRecipeSlots();
+    return slots == null ? List.of() : slots.getSlots();
+  }
+
   /** Finds the slot with the given name, or null if the slot is missing */
   @Nullable
   public static IRecipeSlotDrawable findSlot(List<IRecipeSlotDrawable> slots, String name) {

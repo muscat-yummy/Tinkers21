@@ -129,7 +129,7 @@ public class ToolTinkeringExtension implements ICraftingCategoryExtension<IDispl
     }
     Component variantText = recipe.getVariant();
     if (variantText != null) {
-      builder.addText(variantText, 57, 9).setPosition(60, 44).setColor(Color.GRAY.getRGB());
+      slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, variantText, 57, 9, 60, 44).setColor(Color.GRAY.getRGB());
     }
     if (errorArrow != null) {
       AbstractTinkerStationCategory.createErrorArrow(builder, recipe, errorArrow, 61, 19);

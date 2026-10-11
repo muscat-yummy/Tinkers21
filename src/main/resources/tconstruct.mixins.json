@@ -20,7 +20,8 @@
     "CommonTagImportsMixin"
   ],
   "client": [
-    "ToolTooltipMixin"
+    "ToolTooltipMixin",
+    "EmiShapedRemainderMixin"
   ],
   "injectors": {
     "defaultRequire": 1

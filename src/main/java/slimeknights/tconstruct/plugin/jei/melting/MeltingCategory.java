@@ -42,7 +42,14 @@ public class MeltingCategory extends AbstractMeltingCategory {
       return;
     }
     MeltingFuel solid = MeltingFuelLookup.getSolid();
-    var list = tooltip.getLines();
+    java.util.List<com.mojang.datafixers.util.Either<net.minecraft.network.chat.FormattedText, net.minecraft.world.inventory.tooltip.TooltipComponent>> list;
+    try {
+      list = tooltip.getLines();
+    } catch (AbstractMethodError bridgeWithoutRichLines) {
+      tooltip.add(Component.translatable(KEY_TEMPERATURE, solid.getTemperature()).withStyle(ChatFormatting.GRAY));
+      tooltip.add(Component.translatable(KEY_MULTIPLIER, solid.getRate() / 10f).withStyle(ChatFormatting.GRAY));
+      return;
+    }
     int insertAfterItemName = list.isEmpty() ? 0 : 1;
     list.addAll(insertAfterItemName, List.of(
       Either.left(Component.translatable(KEY_TEMPERATURE, solid.getTemperature()).withStyle(ChatFormatting.GRAY)),

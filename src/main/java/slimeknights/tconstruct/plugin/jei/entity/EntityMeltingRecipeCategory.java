@@ -61,8 +61,7 @@ public class EntityMeltingRecipeCategory extends AbstractRecipeCategory<EntityMe
   @Override
   public void createRecipeExtras(IRecipeExtrasBuilder builder, EntityMeltingRecipe recipe, IFocusGroup focuses) {
     DrawableTooltipWidget.add(builder, arrow).setPosition(71, 21);
-    builder.addText(Component.literal(Float.toString(recipe.getDamage() / 2f)), 84, 9)
-      .setPosition(0, 8)
+    slimeknights.tconstruct.plugin.jei.util.RecipeTextWidget.add(builder, Component.literal(Float.toString(recipe.getDamage() / 2f)), 84, 9, 0, 8)
       .setColor(Color.RED.getRGB())
       .setTextAlignment(HorizontalAlignment.RIGHT);
   }
@@ -80,10 +79,13 @@ public class EntityMeltingRecipeCategory extends AbstractRecipeCategory<EntityMe
                                              .setCustomRenderer(MantleJEIConstants.ENTITY_TYPE, entityRenderer)
                                              .addIngredients(MantleJEIConstants.ENTITY_TYPE, input.getDisplay());
     // add spawn eggs as hidden inputs
-    // currently JEI doesn't accept empty for a focus linked slot, so use null
-    List<ItemStack> eggStacks = input.getEggs().stream().map(stack -> stack.isEmpty() ? null : stack).toList();
-    IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
-    builder.createFocusLink(entities, eggs);
+    // Non-spawnable entities have no egg. EMI rejects null ingredients; only link complete egg lists.
+    List<ItemStack> allEggs = input.getEggs();
+    List<ItemStack> eggStacks = allEggs.stream().filter(stack -> !stack.isEmpty()).toList();
+    if (!eggStacks.isEmpty()) {
+      IIngredientAcceptor<?> eggs = builder.addInvisibleIngredients(RecipeIngredientRole.INPUT).addIngredients(VanillaTypes.ITEM_STACK, eggStacks);
+      if (eggStacks.size() == allEggs.size()) builder.createFocusLink(entities, eggs);
+    }
 
     // output
     builder.addOutputSlot(115, 11)
