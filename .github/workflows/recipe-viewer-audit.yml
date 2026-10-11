@@ -1,0 +1,65 @@
+name: Audit actual JEI EMI recipe rendering
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/recipe-viewer-audit.yml'
+      - 'scripts/port/recipe-qa/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  recipe_viewer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      ALSOFT_DRIVERS: 'null'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Install the native narrator library
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flite1-dev
+      - name: Install isolated JEI EMI recipe audit
+        run: python3 scripts/port/recipe-qa/install.py
+      - name: Run the actual graphical Minecraft client
+        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true -Pneo_version=21.1.249 --no-daemon --console=plain
+      - name: Require complete native recipe rendering audit
+        shell: python
+        run: |
+          from pathlib import Path
+          log=Path('run-port-client-check/logs/latest.log').read_text()
+          report=Path('run-port-client-check/recipe-viewer-report.txt').read_text()
+          assert 'TiC actual EMI JEI all registered recipe audit COMPLETE' in log
+          assert 'findings=0' in report
+          errors=[line for line in log.splitlines() if '/ERROR]' in line or 'Unable to load model:' in line or 'Missing textures in model' in line]
+          assert not errors, '\n'.join(errors)
+      - name: Keep full diagnostics
+        if: always()
+        shell: python
+        run: |
+          from pathlib import Path
+          for path in [Path('run-port-client-check/recipe-viewer-report.txt'),Path('run-port-client-check/logs/latest.log')]:
+              if path.is_file(): print(path.read_text(errors='replace')[-150000:])
+          for path in Path('run-port-client-check/crash-reports').glob('*.txt'):
+              print(path.read_text(errors='replace')[-60000:])
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: actual-jei-emi-recipe-audit
+          path: |
+            run-port-client-check/logs/latest.log
+            run-port-client-check/recipe-viewer-report.txt
+            run-port-client-check/*gui*.png
+          if-no-files-found: warn
+          retention-days: 30
