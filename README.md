@@ -1,3 +1,6 @@
+# This repo is currently being neglected.
+# このリポジトリは現在サボっています。
+
 **English** | [日本語](README_ja.md)
 
 # Tinkers' Construct for Minecraft 1.21.1
