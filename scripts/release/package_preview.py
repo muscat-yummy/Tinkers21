@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
-LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3", "3.12.1-port.6": "1.11-port.3", "3.12.1-port.7": "1.11-port.4"}.get(VERSION, "1.11-port.0")
+LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3", "3.12.1-port.6": "1.11-port.3", "3.12.1-port.7": "1.11-port.4", "3.12.1-port.8": "1.11-port.5"}.get(VERSION, "1.11-port.0")
 
 
 def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, license_path: str) -> None:
@@ -31,11 +31,11 @@ def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, lice
         assert [(mod["modId"], mod["version"]) for mod in metadata["mods"]] == [(mod_id, version)]
         assert all("${" not in str(dependency) for dependencies in metadata["dependencies"].values()
                    for dependency in dependencies), f"Unexpanded dependency metadata: {path}"
-        if VERSION == "3.12.1-port.7":
+        if VERSION in ("3.12.1-port.7", "3.12.1-port.8"):
             dependencies = {d["modId"]: d for d in metadata["dependencies"][mod_id]}
             assert dependencies["neoforge"]["versionRange"] == "[21.1.249,)"
             if mod_id == "tconstruct":
-                assert dependencies["mantle"]["versionRange"] == "[1.11-port.4,)"
+                assert dependencies["mantle"]["versionRange"] == f"[{LIBRARY_VERSION},)"
         if mod_id == "tconstruct":
             assert metadata["mods"][0]["displayName"] == "Tinkers21 (Unofficial Fork)"
             assert "data/tconstruct/recipe/tools/materials/iron/ingot.json" in names
@@ -99,13 +99,20 @@ def main() -> None:
              "scope": "unchanged server sources; includes accepted legacy smeltery fluid fix"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
-    if VERSION == "3.12.1-port.7":
+    if VERSION in ("3.12.1-port.7", "3.12.1-port.8"):
         provenance["minimum_neoforge"] = "21.1.249"
         provenance["accepted_gates"] = [
             {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
              "gate": "NeoForge 21.1.249: 27 actual GameTests and strict graphical core/addon/book checks; compile on pinned 21.1.251; exact distribution jars installed on both 249 and 251"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data/datagen sources"}]
+    if VERSION == "3.12.1-port.8":
+        provenance["accepted_gates"] = [
+            {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
+             "gate": "28 actual GameTests including restored native water/lava tags and real ammo/fishing-rod tip clearing; existing strict native client without viewers; both assemblies; shipping jars installed on 249 and 251"},
+            {"run": int(os.environ["RECIPE_AUDIT_RUN"]), "sha": os.environ["RECIPE_AUDIT_SHA"],
+             "gate": "actual native JEI layouts and EMI widgets/tooltips for all TiC viewer categories plus actual scorched-basin EMI screen",
+             "scope": "same production Java/resources apart from release versions; known non-TiC tag ID collisions explicitly recorded"}]
     evidence = ROOT / "build/release-evidence"
     evidence.mkdir(parents=True, exist_ok=True)
     (evidence / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
