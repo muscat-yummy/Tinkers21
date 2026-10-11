@@ -45,11 +45,11 @@ Where an API must change, compatibility with existing Tinkers' Construct concept
 
 ## Status and installation
 
-The current experimental preview is **3.12.1-port.5**, fixing barrier icons in book indexes and the Japanese slimesuit section title, while retaining the earlier basin/book blur/Foundry/fluid/crystal fixes. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.5) and install both the Tinkers21 and Mantle21 JARs in `mods/` on the client and server. For this fix, replace **both jars**: Tinkers21 **3.12.1-port.5** and Mantle21 **1.11-port.3**; retaining older Mantle leaves the book icon bug unfixed. Requires Minecraft **1.21.1**, NeoForge **21.1.251 or later in the 21.1 series**, and **Java 21**. Do not install another Tinkers' Construct or Mantle jar alongside these; the original `tconstruct` and `mantle` mod IDs are retained.
+The current experimental preview is **3.12.1-port.6**, fixing missing Japanese book translations and legacy smeltery fluid loading. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.6). Use Tinkers21 **3.12.1-port.6** and Mantle21 **1.11-port.3** on both client and server; if Mantle21 is already 1.11-port.3, update **Tinkers21 only**. Requires Minecraft **1.21.1**, NeoForge **21.1.251 or later in the 21.1 series**, and **Java 21**. Keep one jar per mod; do not combine these with official Tinkers' Construct or Mantle jars.
 
 Phases 1–8 meet their documented acceptance: native datagen, both production assemblies, 26 actual Minecraft GameTests (including real iron/gold faucet-to-basin casting) and strict graphical core/addon checks pass. This is a preview, with full TiCEX/external integration stacks and general old-world migration still unverified. Use a separate world or a backed-up copy when evaluating it.
 
-See the [release notes](docs/releases/3.12.1-port.5.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). The download includes SHA-256 checksums and source/CI provenance. The independent addon acceptance fixture is excluded from the distribution jars.
+See the [release notes](docs/releases/3.12.1-port.6.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). The download includes SHA-256 checksums and source/CI provenance. The independent addon acceptance fixture is excluded from the distribution jars.
 
 ## Addon Compatibility
 

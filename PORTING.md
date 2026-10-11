@@ -4,6 +4,15 @@ This document tracks the port of Tinkers' Construct from Minecraft 1.20.1 / Forg
 
 ## Current acceptance (2026-10-11)
 
+### Japanese Gadgetry index translation hotfix (2026-10-12 JST)
+
+- Latest [v3.12.1-port.6](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.6), source/tag `c3ed3214409c1ac30ad59bf0556d1ed685f3ff23`, adds the four missing Japanese Gadgetry material section titles and descriptions: melee/harvest, ranged, armor and advanced ammo. The user's screenshot showed literal internal keys because the Japanese book language file lacked all eight entries. The previous full-page exploration checked load/render faults, not translation coverage; it did not establish that all visible headings were translated.
+- Native fixture now asserts the four exact loaded Japanese titles and resolved descriptions, and renders the actual Gadgetry index in addition to the existing encyclopedia index (`book-icon-gui-gadgetry-ja-jp.png`). [Actions 38156866243](https://github.com/muscat-yummy/Tinkers21/actions/runs/38156866243) succeeds on the first attempt: new actual loaded translation/index marker, all existing strict client markers with no runtime ERROR/exception/missing model/texture, both assemblies, distribution inspection/packaging, and installed production-server startup/reload/shutdown.
+- This release also distributes the previously accepted legacy smeltery fluid fix from `71e495a06763602a600bc2d3a4f4ffe11f852275`. CI verifies all server sources against that source, retaining its successful 27 actual GameTests and Japanese/English 2,272-page exploration rather than repeating unchanged gates. Native datagen and pinned toolchain remain unchanged; the only Gradle property edit is the TiC release version.
+- Update **Tinkers21 only** to 3.12.1-port.6 when Mantle21 is already 1.11-port.3. Published Mantle SHA-256 `5c08521e51862e6be7f7e29f1649454e0700eea552836869a5c694d0ed00120b` is byte-identical to port.5; TiC SHA-256 is `6ca1f7a86bf7bae2c66ed5316025c8fdb53b2bbd297953ba840ceef1a1d0aa91`. Release notes are concise Japanese/English and title has no dash subtitle.
+- Scope: these reported missing headings/descriptions and the accepted fluid reader. Do not claim exhaustive localization, manual survival play, all tooltip/link interactions or a dedicated updater; the user's requested packwiz-inspired updater remains unimplemented.
+
+
 ### Exploratory native book playthrough — verified source fix (2026-10-11)
 
 - User requested a wider exploratory playthrough after several visual hotfixes. Added an isolated, non-publishing Actions workflow and repository-owned fixtures in `scripts/port/qa`; CI copies verification-only sources into the existing native test source sets. Production toolchain, runner, Java 21, Gradle wrapper/plugin/dependencies and native launch commands are unchanged.

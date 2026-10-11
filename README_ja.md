@@ -48,11 +48,11 @@ APIの変更が必要になった場合でも、不必要な独自実装を追�
 
 ## 状態と導入方法
 
-現在の実験的プレビューは **3.12.1-port.5** です。本の目次がバリア表示になる問題と日本語のスライムスーツ素材見出しを修正し、以前の鉢・本のぼけ・Foundry・液体・Modifierクリスタル修正も含みます。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.5) からTinkers21とMantle21の両方のJARを取得し、クライアント・サーバーの `mods/` に配置してください。今回の修正には **両方のJARの交換** が必要です。Tinkers21 **3.12.1-port.5** とMantle21 **1.11-port.3** を使用してください。古いMantleを残すと本のアイコンは直りません。Minecraft **1.21.1**、NeoForge **21.1.251以上の21.1系列**、**Java 21** が必要です。元の `tconstruct`・`mantle` mod IDを維持しているため、別のTinkers' ConstructやMantleのJARと同時に導入しないでください。
+現在の実験的プレビューは **3.12.1-port.6** です。本の日本語訳と、溶融炉の旧形式の流体読み込みを修正しました。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.6) から取得し、クライアント・サーバーの `mods/` に配置してください。Tinkers21 **3.12.1-port.6** とMantle21 **1.11-port.3** を使用します。Mantle21がすでに1.11-port.3なら、今回は **Tinkers21だけ更新** してください。Minecraft **1.21.1**、NeoForge **21.1.251以上の21.1系列**、**Java 21** が必要です。同じMODのJARは1個だけ置き、公式Tinkers' ConstructやMantleのJARと同時に導入しないでください。
 
 Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全26件（蛇口から鉢への鉄・金ブロック鋳造を含む）、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
 
-[リリースノート](docs/releases/3.12.1-port.5.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。配布にはSHA-256とソース・CIの来歴を含め、独立した検証用アドオンは配布JARから除外しています。
+[リリースノート](docs/releases/3.12.1-port.6.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。配布にはSHA-256とソース・CIの来歴を含め、独立した検証用アドオンは配布JARから除外しています。
 
 ## アドオン互換性
 
