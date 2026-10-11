@@ -116,3 +116,7 @@ Minecraft 1.21.1またはNeoForgeの仕様上困難な場合を除き、既存�
 このプロジェクトは独立した非公式移植プロジェクトです。
 
 Mojang Studios、Microsoft、SlimeKnights、およびオリジナルのTinkers' Construct開発者によって公式に提供、承認、または運営されているものではありません。
+
+## バックストーリー
+
+友達とTinkers' Constructをしたかったけど、1.21.1にはないことに気づいたから、規約とかそこら辺全部AIに任せることにして出来上がった変な作品だ。
