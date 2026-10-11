@@ -1076,3 +1076,10 @@ All required final core-port gates have now executed successfully in GitHub Acti
 | Tinkers21-1.21.1-neoforge-3.12.1-port.0.zip | `256106913ff1a468caf298a6e0d74c8e7dc70c28299a297d713c8bed03d14c30` |
 
 - Installation requires both jars, Minecraft 1.21.1 and Java 21; the actual verified loader is NeoForge 21.1.251. Extract the combined ZIP before placing jars in mods. This remains an independent experimental MIT fork with upstream credits, not upstream endorsement. Full TiCEX/Diet/optional stacks, arbitrary old-world conversion and exhaustive modifier/world combinations remain unverified. Phase 8 stays complete within its defined scope; no additional phase or ChatGPT scheduled task is started.
+
+
+### Reported invisible modifier crystal hotfix (2026-10-11 UTC)
+
+- User screenshot identifies an invisible Ambidextrous modifier crystal in hotbar/hand. The original PNG and item/generated model both exist; registered item tint returns ResourceColorManager's TextColor RGB with alpha zero. Native item rendering requires opaque ARGB. Add only 0xFF000000 to this item's tint, preserving resource colors and -1 fallback.
+- Add actual joined-world checks for Ambidextrous/haste crystal opaque alpha/exact RGB, real atlas sprite, nonempty model geometry, native GUI renderer/buffer execution and unassigned white fallback. All existing graphical regression markers and ERROR/model/texture gates remain required.
+- Increment TiC to 3.12.1-port.1; Mantle stays 1.11-port.0. The bounded hotfix release workflow verifies only the approved client tint differs in production sources, retains the unchanged server/datagen acceptance, runs strict graphical validation once, assembles/inspects and loads exact production jars in a normal installed server, then publishes a new Latest tag without replacing v3.12.1-port.0. Final CI/publication remains pending at this checkpoint.

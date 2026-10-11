@@ -250,6 +250,30 @@ public final class ClientBootstrapCheck {
       require(!geometry(minecraft, woodTool).equals(geometry(minecraft, ironTool)),
         "Material tool rendering lost its wood/iron distinction");
       TConstruct.LOG.info("TiC actual joined-world material tool composition PASS");
+      // Exercise the actual registered tint/model and native renderer after world resource reload.
+      for (String id : new String[] {"tconstruct:ambidextrous", "tconstruct:haste"}) {
+        ItemStack crystal = slimeknights.tconstruct.tools.item.ModifierCrystalItem.withModifier(new ModifierId(id));
+        int expectedRgb = slimeknights.mantle.client.ResourceColorManager.getColor(
+          net.minecraft.Util.makeTranslationKey("modifier", new ModifierId(id))) & 0xFFFFFF;
+        int actual = minecraft.getItemColors().getColor(crystal, 0);
+        require((actual >>> 24) == 255 && (actual & 0xFFFFFF) == expectedRgb,
+          "Actual modifier crystal tint is transparent or changed RGB: " + id + " color=" + Integer.toHexString(actual));
+        require(minecraft.getResourceManager().getResource(TConstruct.getResource(
+          "textures/item/materials/modifier_crystal.png")).isPresent(), "Modifier crystal PNG is absent");
+        var model = minecraft.getItemRenderer().getModel(crystal, minecraft.level, minecraft.player, 17);
+        require(model.getParticleIcon().contents().name().equals(TConstruct.getResource(
+          "item/materials/modifier_crystal")), "Modifier crystal atlas sprite is missing or unrelated");
+        geometry(minecraft, crystal);
+        var buffers = minecraft.renderBuffers().bufferSource();
+        minecraft.getItemRenderer().renderStatic(crystal, ItemDisplayContext.GUI, 0xF000F0, 0,
+          new PoseStack(), buffers, minecraft.level, 17);
+        buffers.endBatch();
+      }
+      ItemStack blankCrystal = new ItemStack(slimeknights.tconstruct.tools.TinkerModifiers.modifierCrystal.get());
+      require(minecraft.getItemColors().getColor(blankCrystal, 0) == -1,
+        "Unassigned modifier crystal lost its opaque white fallback");
+      TConstruct.LOG.info("TiC actual modifier crystal opaque tint atlas geometry and native rendering PASS");
+
       var server = minecraft.getSingleplayerServer();
       var uuid = minecraft.player.getUUID();
       advance(2);

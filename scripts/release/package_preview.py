@@ -11,7 +11,7 @@ import zipfile
 
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
-VERSION = "3.12.1-port.0"
+VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
 LIBRARY_VERSION = "1.11-port.0"
 
 
@@ -53,7 +53,7 @@ def main() -> None:
         shutil.copyfile(source, destination)
         jars.append(destination)
     provenance = {
-        "project": "Tinkers21", "version": VERSION, "prerelease": True,
+        "project": "Tinkers21", "version": VERSION, "prerelease": VERSION == "3.12.1-port.0",
         "source_commit": os.environ["GITHUB_SHA"], "packaging_run": os.environ["GITHUB_RUN_ID"],
         "minecraft": "1.21.1", "neoforge": "21.1.251", "java": 21,
         "accepted_gates": [
@@ -64,6 +64,13 @@ def main() -> None:
         "jars": {path.name: hashlib.sha256(path.read_bytes()).hexdigest() for path in jars},
         "fixtures_in_distribution": False,
     }
+    if VERSION == "3.12.1-port.1":
+        # Server/datagen evidence is retained only for identical server/data sources.
+        provenance["accepted_gates"] = provenance["accepted_gates"][:2]
+        for gate in provenance["accepted_gates"]:
+            gate["scope"] = "unchanged server/data baseline; hotfix changes only client tint"
+        provenance["accepted_gates"].append({"run": int(os.environ["GITHUB_RUN_ID"]),
+            "sha": os.environ["GITHUB_SHA"], "gate": "strict graphical core/addon/crystal hotfix client"})
     (DIST / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     shutil.copyfile(ROOT / f"docs/releases/{VERSION}.md", DIST / "release-notes.md")
     bundle = DIST / f"Tinkers21-1.21.1-neoforge-{VERSION}.zip"

@@ -1,0 +1,118 @@
+name: Verify and release modifier crystal hotfix
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/crystal-hotfix.yml'
+      - 'src/main/java/slimeknights/tconstruct/tools/ToolClientEvents.java'
+      - 'src/portClientCheck/**'
+      - 'docs/releases/3.12.1-port.1.md'
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  minecraft_client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      ALSOFT_DRIVERS: 'null'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Install the native narrator library
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flite1-dev
+      - name: Run the actual graphical Minecraft client
+        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true --no-daemon --console=plain
+      - name: Require graphical client verification
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-client-check/logs/latest.log')
+          text = log.read_text() if log.is_file() else ''
+          errors = [line for line in text.splitlines() if '/ERROR]' in line]
+          missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
+          if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
+              'TiC actual material armor equipment and native rendering PASS' not in text or
+              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
+              'TiC independent addon native inventory synchronization and material rendering PASS' not in text or
+              'TiC actual modifier crystal opaque tint atlas geometry and native rendering PASS' not in text or errors or missing):
+              raise SystemExit('Actual graphical client verification did not complete successfully')
+      - name: Show actual client diagnostics
+        if: always()
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-client-check/logs/latest.log')
+          if log.is_file():
+              print(log.read_text()[-100000:])
+          for crash in sorted(pathlib.Path('run-port-client-check/crash-reports').glob('*.txt')):
+              print(crash.read_text()[-90000:])
+      - name: Verify bounded hotfix against published baseline
+        run: |
+          git fetch --no-tags origin tag v3.12.1-port.0
+          python3 - <<'PY'
+          import subprocess
+          from pathlib import Path
+          base = 'v3.12.1-port.0'
+          def old(path):
+              return subprocess.check_output(['git', 'show', base + ':' + path], text=True)
+          path = 'src/main/java/slimeknights/tconstruct/tools/ToolClientEvents.java'
+          expected = old(path).replace('return ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier));',
+              '// Native item rendering consumes ARGB; resource text colors contain RGB only.\n        return 0xFF000000 | ResourceColorManager.getColor(Util.makeTranslationKey("modifier", modifier));')
+          assert Path(path).read_text() == expected
+          assert Path('gradle.properties').read_text() == old('gradle.properties').replace('mod_version=3.12.1-port.0', 'mod_version=3.12.1-port.1')
+          subprocess.run(['git', 'diff', '--exit-code', base, 'HEAD', '--', 'src/main', 'src/generated', 'mantle-port', 'src/portGameTest', 'src/portAddonCheck', 'build.gradle', 'settings.gradle', 'gradle', 'gradlew', 'gradlew.bat', ':(exclude)' + path], check=True)
+          print('Identical server/datagen sources and pinned toolchain; bounded client tint fix PASS')
+          PY
+      - name: Assemble production distribution jars
+        run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
+      - name: Inspect and package actual hotfix jars
+        env:
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.1'
+        run: python3 scripts/release/package_preview.py
+      - name: Install the pinned production NeoForge server
+        run: |
+          mkdir -p release-server
+          cd release-server
+          curl --fail --location --retry 2 https://maven.neoforged.net/releases/net/neoforged/neoforge/21.1.251/neoforge-21.1.251-installer.jar -o installer.jar
+          timeout 240s java -jar installer.jar --installServer
+      - name: Verify actual distribution jars in the installed server
+        run: python3 scripts/release/check_installed_server.py
+      - name: Keep installed-server diagnostics
+        if: always()
+        shell: python
+        run: |
+          from pathlib import Path
+          for path in [Path('release-server/console.log'), Path('release-server/logs/latest.log')]:
+              if path.is_file():
+                  print(path.read_text(errors='replace')[-60000:])
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tinkers21-3.12.1-port.1-distribution
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish verified hotfix as Latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          tag=v3.12.1-port.1
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
+            echo 'Hotfix exists; refusing to replace release assets.' >&2
+            exit 1
+          fi
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.1 — crystal rendering fix" --notes-file docs/releases/3.12.1-port.1.md --draft --latest=false
+          gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets
