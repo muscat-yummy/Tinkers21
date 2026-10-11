@@ -1143,3 +1143,9 @@ All required final core-port gates have now executed successfully in GitHub Acti
 
 - Actions 38118790159 succeeded at source `10c7ef2e0cb2763fb0abb59cf2b2b61558dacb58`: all 26 GameTests (including actual iron/gold faucets/basins), both assemblies, strict previous graphical gates and installed distribution server. Workflow published v3.12.1-port.4. The book ordering fix is production code, but inspection found the new graphical fixture constructed BookScreen without BookData.load(), unlike normal BookData.openGui. Its identical cover/page edge metrics were insufficient proof of real loaded books; do not accept that first book-content claim.
 - Correct the fixture to perform normal lazy loading and require nonempty title/sections plus four loaded-resource markers before checking cover/page framebuffer edges. Repeat final CI with the same production source; preserve published assets if production files are byte-identical to the tag. No published JAR is replaced. Await actual loaded-book results before final acceptance/report.
+
+
+### Loaded book cover identity correction — pending final verification (2026-10-11)
+
+- Supplemental Actions 38119271869 (`ac08780206eca204febb08e0b6aa64677e9f172f`) passed all 26 GameTests, then failed the new fixture assertion that appearance.title must be nonempty. Actual production book appearances intentionally omit title: the title is baked into the distinct cover PNG. Book loading itself completed without content/resource errors; this was an invalid fixture requirement.
+- Require each exact production cover texture, its existence in the real resource manager, nonempty sections and multiple actual pages instead. Keep normal BookData.load(), real native blur/framebuffer comparisons and all strict error/model/texture/marker checks. No production/JAR/version change; no claim of final loaded-book acceptance until the corrected CI succeeds.

@@ -28,10 +28,15 @@ public final class BookScreenRenderingCheck {
     BookData book = scenario < 2 ? TinkerBook.MATERIALS_AND_YOU : TinkerBook.PUNY_SMELTING;
     // BookData.openGui loads lazily; direct regression screen construction must do the same.
     book.load();
-    if (book.appearance.title.isEmpty() || book.sections.isEmpty()) {
+    String expectedCover = "tconstruct:book/images/covers/" +
+      (scenario < 2 ? "materials_and_you" : "puny_smelting") + "_cover.png";
+    // These books bake their titles into cover PNGs, so appearance.title is legitimately empty.
+    if (!book.appearance.getCoverTexture().toString().equals(expectedCover) ||
+        minecraft.getResourceManager().getResource(book.appearance.getCoverTexture()).isEmpty() ||
+        book.sections.isEmpty() || book.getPageCount(null) < 2) {
       throw new IllegalStateException("Actual book resources were not loaded");
     }
-    TConstruct.LOG.info("TiC actual loaded book resources scenario {} title {} sections {} PASS", scenario, book.appearance.title, book.sections.size());
+    TConstruct.LOG.info("TiC actual loaded book resources scenario {} cover {} sections {} PASS", scenario, book.appearance.getCoverTexture(), book.sections.size());
     current = new CheckBook(book, scenario++);
     minecraft.setScreen(current);
     return false;

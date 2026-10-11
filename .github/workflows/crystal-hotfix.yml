@@ -80,7 +80,7 @@ jobs:
               'TiC actual full Foundry legacy two-background duplicate-fluid reproduction PASS' not in text or
               'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or
               'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or
-              any('TiC actual loaded book resources scenario ' + str(i) + ' title ' not in text for i in range(4)) or errors or missing):
+              any('TiC actual loaded book resources scenario ' + str(i) + ' cover ' not in text for i in range(4)) or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
