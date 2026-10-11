@@ -48,11 +48,11 @@ APIの変更が必要になった場合でも、不必要な独自実装を追�
 
 ## 状態と導入方法
 
-現在の実験的プレビューは **3.12.1-port.3** です。Foundryなどの背景の二重描画を修正し、以前の液体・Modifierクリスタル修正も含みます。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.3) からTinkers21とMantle21の両方のJARを取得し、クライアント・サーバーの `mods/` に配置してください。今回の修正には **両方のJARの交換** が必要です。Tinkers21 **3.12.1-port.3** とMantle21 **1.11-port.1** を使用してください。古いMantle port.0を残すと二重描画は直りません。Minecraft **1.21.1**、NeoForge **21.1.251以上の21.1系列**、**Java 21** が必要です。元の `tconstruct`・`mantle` mod IDを維持しているため、別のTinkers' ConstructやMantleのJARと同時に導入しないでください。
+現在の実験的プレビューは **3.12.1-port.4** です。鉢へ溶融金属を流せない問題と本の表紙・本文のぼけを修正し、以前のFoundry・液体・Modifierクリスタル修正も含みます。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.4) からTinkers21とMantle21の両方のJARを取得し、クライアント・サーバーの `mods/` に配置してください。今回の修正には **両方のJARの交換** が必要です。Tinkers21 **3.12.1-port.4** とMantle21 **1.11-port.2** を使用してください。古いMantleを残すと本のぼけは直りません。Minecraft **1.21.1**、NeoForge **21.1.251以上の21.1系列**、**Java 21** が必要です。元の `tconstruct`・`mantle` mod IDを維持しているため、別のTinkers' ConstructやMantleのJARと同時に導入しないでください。
 
-Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全25件、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
+Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全26件（蛇口から鉢への鉄・金ブロック鋳造を含む）、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
 
-[リリースノート](docs/releases/3.12.1-port.3.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。配布にはSHA-256とソース・CIの来歴を含め、独立した検証用アドオンは配布JARから除外しています。
+[リリースノート](docs/releases/3.12.1-port.4.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。配布にはSHA-256とソース・CIの来歴を含め、独立した検証用アドオンは配布JARから除外しています。
 
 ## アドオン互換性
 

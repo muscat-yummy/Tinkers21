@@ -45,11 +45,11 @@ Where an API must change, compatibility with existing Tinkers' Construct concept
 
 ## Status and installation
 
-The current experimental preview is **3.12.1-port.3**, fixing duplicate Foundry/container background rendering and retaining the earlier fluid/crystal fixes. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.3) and install both the Tinkers21 and Mantle21 JARs in `mods/` on the client and server. For this fix, replace **both jars**: Tinkers21 **3.12.1-port.3** and Mantle21 **1.11-port.1**; retaining Mantle port.0 retains the duplicate-rendering defect. Requires Minecraft **1.21.1**, NeoForge **21.1.251 or later in the 21.1 series**, and **Java 21**. Do not install another Tinkers' Construct or Mantle jar alongside these; the original `tconstruct` and `mantle` mod IDs are retained.
+The current experimental preview is **3.12.1-port.4**, fixing fluid-only basin casting and blurry book covers/pages, while retaining earlier Foundry/fluid/crystal fixes. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.4) and install both the Tinkers21 and Mantle21 JARs in `mods/` on the client and server. For this fix, replace **both jars**: Tinkers21 **3.12.1-port.4** and Mantle21 **1.11-port.2**; retaining older Mantle leaves book blur unfixed. Requires Minecraft **1.21.1**, NeoForge **21.1.251 or later in the 21.1 series**, and **Java 21**. Do not install another Tinkers' Construct or Mantle jar alongside these; the original `tconstruct` and `mantle` mod IDs are retained.
 
-Phases 1–8 meet their documented acceptance: native datagen, both production assemblies, 25 actual Minecraft GameTests and strict graphical core/addon checks pass. This is a preview, with full TiCEX/external integration stacks and general old-world migration still unverified. Use a separate world or a backed-up copy when evaluating it.
+Phases 1–8 meet their documented acceptance: native datagen, both production assemblies, 26 actual Minecraft GameTests (including real iron/gold faucet-to-basin casting) and strict graphical core/addon checks pass. This is a preview, with full TiCEX/external integration stacks and general old-world migration still unverified. Use a separate world or a backed-up copy when evaluating it.
 
-See the [release notes](docs/releases/3.12.1-port.3.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). The download includes SHA-256 checksums and source/CI provenance. The independent addon acceptance fixture is excluded from the distribution jars.
+See the [release notes](docs/releases/3.12.1-port.4.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). The download includes SHA-256 checksums and source/CI provenance. The independent addon acceptance fixture is excluded from the distribution jars.
 
 ## Addon Compatibility
 
