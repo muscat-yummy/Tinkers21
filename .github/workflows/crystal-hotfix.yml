@@ -1,4 +1,4 @@
-name: Verify and release book icon compatibility hotfix
+name: Verify and release Japanese Gadgetry translation fix
 on:
   push:
     branches: [main]
@@ -11,12 +11,13 @@ on:
       - 'src/portGameTest/**'
       - 'mantle-port/src/main/java/slimeknights/mantle/client/book/data/element/IngredientData.java'
       - 'src/main/resources/assets/tconstruct/book/encyclopedia/ja_jp/language.lang'
+      - 'src/main/resources/assets/tconstruct/book/tinkers_gadgetry/ja_jp/language.lang'
       - 'mantle-port/build.gradle'
       - 'mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/java/slimeknights/tconstruct/smeltery/client/screen/**'
       - 'src/portClientCheck/**'
-      - 'docs/releases/3.12.1-port.5.md'
+      - 'docs/releases/3.12.1-port.6.md'
   workflow_dispatch:
 permissions:
   contents: write
@@ -62,6 +63,7 @@ jobs:
               'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or
               'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or
               'TiC actual six loaded book section icons legacy material tool slot components Japanese encyclopedia index native rendering PASS' not in text or
+              'TiC actual Japanese Gadgetry four material titles descriptions and native index rendering PASS' not in text or
               any('TiC actual loaded book resources scenario ' + str(i) + ' cover ' not in text for i in range(4)) or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
@@ -76,14 +78,21 @@ jobs:
               print(crash.read_text()[-90000:])
       - name: Verify bounded changes and pinned toolchain against published baseline
         run: |
-          git fetch --no-tags origin tag v3.12.1-port.4
-          git diff --exit-code v3.12.1-port.4 HEAD -- build.gradle settings.gradle gradle gradlew gradlew.bat src/generated src/portAddonCheck
-          git diff --exit-code v3.12.1-port.4 HEAD -- src/main mantle-port ':(exclude)src/main/resources/assets/tconstruct/book/encyclopedia/ja_jp/language.lang' ':(exclude)src/main/templates/META-INF/neoforge.mods.toml' ':(exclude)mantle-port/src/main/java/slimeknights/mantle/client/book/data/element/IngredientData.java' ':(exclude)mantle-port/build.gradle' ':(exclude)mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
+          git fetch --no-tags origin 71e495a06763602a600bc2d3a4f4ffe11f852275
+          git diff --exit-code 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- build.gradle settings.gradle gradle gradlew gradlew.bat src/generated src/portAddonCheck
+          git diff --exit-code 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- src/main mantle-port ':(exclude)src/main/resources/assets/tconstruct/book/tinkers_gadgetry/ja_jp/language.lang'
+          git diff 71e495a06763602a600bc2d3a4f4ffe11f852275 HEAD -- gradle.properties
+          python3 - <<'PYCODE'
+          import subprocess
+          from pathlib import Path
+          baseline = subprocess.check_output(['git', 'show', '71e495a06763602a600bc2d3a4f4ffe11f852275:gradle.properties'], text=True)
+          assert Path('gradle.properties').read_text() == baseline.replace('mod_version=3.12.1-port.5', 'mod_version=3.12.1-port.6')
+          PYCODE
       - name: Assemble production distribution jars
         run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
       - name: Inspect and package actual hotfix jars
         env:
-          TINKERS21_RELEASE_VERSION: '3.12.1-port.5'
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.6'
         run: python3 scripts/release/package_preview.py
       - name: Install the pinned production NeoForge server
         run: |
@@ -103,7 +112,7 @@ jobs:
                   print(path.read_text(errors='replace')[-60000:])
       - uses: actions/upload-artifact@v4
         with:
-          name: Tinkers21-3.12.1-port.5-distribution
+          name: Tinkers21-3.12.1-port.6-distribution
           path: |
             dist/*
             run-port-client-check/*gui*.png
@@ -114,13 +123,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag=v3.12.1-port.5
+          tag=v3.12.1-port.6
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
             git fetch --no-tags origin tag "$tag"
             git diff --exit-code "$tag" HEAD -- src/main src/generated mantle-port gradle.properties build.gradle settings.gradle gradle gradlew gradlew.bat
             echo 'Existing verified release production sources unchanged; preserving published assets.'
             exit 0
           fi
-          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.5 — legacy book icon compatibility fix" --notes-file docs/releases/3.12.1-port.5.md --draft --latest=false
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.6" --notes-file docs/releases/3.12.1-port.6.md --draft --latest=false
           gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets

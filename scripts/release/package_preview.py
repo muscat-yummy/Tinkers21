@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
-LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3"}.get(VERSION, "1.11-port.0")
+LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3", "3.12.1-port.6": "1.11-port.3"}.get(VERSION, "1.11-port.0")
 
 
 def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, license_path: str) -> None:
@@ -83,6 +83,15 @@ def main() -> None:
              "gate": "strict actual client six loaded books Japanese encyclopedia icons preserved material/tool/slot data; previous graphical checks; both assemblies; installed distribution server"},
             {"run": 38119549799, "sha": "89e9b8139bf48640b350bbbcea0ace90ca4e5612",
              "gate": "26 actual GameTests", "scope": "identical server/recipe sources; hotfix only client book display reader and Japanese book text"},
+            {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
+             "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
+    if VERSION == "3.12.1-port.6":
+        provenance["accepted_gates"] = [
+            {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
+             "gate": "actual Japanese Gadgetry translated index; previous strict graphical gates; production assemblies and installed distribution server"},
+            {"run": 38152426339, "sha": "71e495a06763602a600bc2d3a4f4ffe11f852275",
+             "gate": "27 actual GameTests and complete Japanese/English six-book graphical exploration",
+             "scope": "unchanged server sources; includes accepted legacy smeltery fluid fix"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
     (DIST / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")

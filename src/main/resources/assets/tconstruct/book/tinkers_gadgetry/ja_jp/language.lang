@@ -29,3 +29,12 @@ ancient_tools.subtext=古代の道具は、世界中から稀に見つかる道�
 
 materials=頭の素材
 materials.subtext=これらの頭のいずれかを鋳造鉢に入れてエンダースライムを足すと、ヘルメットとしての能力を高めることができます。
+
+melee_harvest_materials=一般素材
+melee_harvest_materials.subtext=遠くの地域を探検すると見つかる素材です。近接武器や採掘道具の部品を作ることができます。
+ranged_materials=遠距離武器用素材
+ranged_materials.subtext=遠くの地域を探検すると見つかる素材です。弓などの遠距離武器の部品を作ることができます。
+armor_materials=防具用素材
+armor_materials.subtext=遠くの地域を探検すると見つかる素材です。防具や盾を作ることができます。
+ammo_materials=上級弾薬用素材
+ammo_materials.subtext=希少な素材を使って、より高性能な弾薬を作ることができます。

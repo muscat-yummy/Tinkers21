@@ -18,10 +18,17 @@ import slimeknights.tconstruct.library.client.book.TinkerBook;
 public final class BookIconRenderingCheck {
   private static boolean started, complete;
   private static String language;
+  private static int indexStage;
   private static RuntimeException failure;
   public static boolean tick(Minecraft minecraft) {
     if (failure != null) throw failure;
     if (complete) {
+      if (indexStage == 0) {
+        indexStage = 1;
+        complete = false;
+        minecraft.setScreen(new IndexScreen(TinkerBook.TINKERS_GADGETRY));
+        return false;
+      }
       minecraft.setScreen(null);
       minecraft.getLanguageManager().setSelected(language);
       return true;
@@ -44,6 +51,13 @@ public final class BookIconRenderingCheck {
         }
       }
       var book = TinkerBook.ENCYCLOPEDIA;
+      var gadgetry = TinkerBook.TINKERS_GADGETRY;
+      String[] keys = {"melee_harvest_materials", "ranged_materials", "armor_materials", "ammo_materials"};
+      String[] titles = {"一般素材", "遠距離武器用素材", "防具用素材", "上級弾薬用素材"};
+      for (int i = 0; i < keys.length; i++) {
+        require(gadgetry.findSection(keys[i]).getTitle().equals(titles[i]), "Missing Japanese Gadgetry title: " + keys[i]);
+        require(!gadgetry.translate(keys[i] + ".subtext").equals(keys[i] + ".subtext"), "Missing Japanese Gadgetry description: " + keys[i]);
+      }
       require(book.findSection("materials_slime").getTitle().equals("スライムスーツ用素材"), "Missing Japanese slimesuit index translation");
       for (String name : new String[]{"tools", "materials_harvest", "upgrades", "defense", "slotless", "abilities"}) {
         var stack = book.findSection(name).icon.item.getItems().get(0);
@@ -72,9 +86,10 @@ public final class BookIconRenderingCheck {
         super.render(graphics, -100, -100, partialTick);
         graphics.flush();
         try (NativeImage image = Screenshot.takeScreenshot(minecraft.getMainRenderTarget())) {
-          image.writeToFile(Path.of("book-icon-gui-ja-jp.png"));
+          image.writeToFile(Path.of(indexStage == 0 ? "book-icon-gui-ja-jp.png" : "book-icon-gui-gadgetry-ja-jp.png"));
         }
         TConstruct.LOG.info("TiC actual six loaded book section icons legacy material tool slot components Japanese encyclopedia index native rendering PASS");
+        if (indexStage == 1) TConstruct.LOG.info("TiC actual Japanese Gadgetry four material titles descriptions and native index rendering PASS");
         complete = true;
       } catch (Exception problem) {
         failure = new IllegalStateException("Actual loaded book icon rendering failed", problem);
