@@ -1,0 +1,9 @@
+{
+  "values": [
+    "tconstruct:javelin",
+    {
+      "id": "#c:tools/spear",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "tconstruct:soul_glass",
+    {
+      "id": "#c:glass_blocks",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,34 @@
+modLoader="javafml"
+loaderVersion="[1,)"
+license="MIT"
+
+[[mods]]
+modId="mantle"
+version="1.11-port.0"
+displayName="Mantle (Unofficial Port)"
+description='''Shared library ported from SlimeKnights Mantle.'''
+
+[[dependencies.mantle]]
+modId="neoforge"
+type="required"
+versionRange="[\${neo_version},)"
+ordering="NONE"
+side="BOTH"
+
+[[dependencies.mantle]]
+modId="minecraft"
+type="required"
+versionRange="[1.21.1,1.21.2)"
+ordering="NONE"
+side="BOTH"
+
+[[accessTransformers]]
+file="META-INF/accesstransformer.cfg"
+
+# Scoped ingredient visibility is required when optional JEI integration is enabled.
+[[dependencies.mantle]]
+modId="jei"
+type="optional"
+versionRange="[19.51.0,20)"
+ordering="AFTER"
+side="CLIENT"

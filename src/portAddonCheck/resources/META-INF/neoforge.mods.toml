@@ -1,0 +1,13 @@
+modLoader="javafml"
+loaderVersion="[4,)"
+license="MIT"
+[[mods]]
+modId="portaddoncheck"
+version="1.0"
+displayName="Independent TiC addon API acceptance fixture"
+[[dependencies.portaddoncheck]]
+modId="tconstruct"
+type="required"
+versionRange="*"
+ordering="AFTER"
+side="BOTH"

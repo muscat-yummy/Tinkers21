@@ -1,0 +1,67 @@
+name: Verify acknowledged menu close and actual material armor rendering
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths:
+      - '.github/workflows/port-client-load.yml'
+      - 'src/main/**'
+      - 'src/generated/**'
+      - 'mantle-port/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+      - 'src/portClientCheck/**'
+      - 'src/portAddonCheck/**'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  minecraft_client:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      ALSOFT_DRIVERS: 'null'
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Install the native narrator library
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y flite1-dev
+      - name: Run the actual graphical Minecraft client
+        run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true --no-daemon --console=plain
+      - name: Require graphical client verification
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-client-check/logs/latest.log')
+          text = log.read_text() if log.is_file() else ''
+          errors = [line for line in text.splitlines() if '/ERROR]' in line]
+          missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
+          if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
+              'TiC actual material armor equipment and native rendering PASS' not in text or
+              'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
+              'TiC independent addon native inventory synchronization and material rendering PASS' not in text or errors or missing):
+              raise SystemExit('Actual graphical client verification did not complete successfully')
+      - name: Show actual client diagnostics
+        if: always()
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-client-check/logs/latest.log')
+          if log.is_file():
+              print(log.read_text()[-100000:])
+          for crash in sorted(pathlib.Path('run-port-client-check/crash-reports').glob('*.txt')):
+              print(crash.read_text()[-90000:])

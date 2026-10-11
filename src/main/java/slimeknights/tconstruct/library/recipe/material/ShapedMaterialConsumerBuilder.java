@@ -1,0 +1,66 @@
+package slimeknights.tconstruct.library.recipe.material;
+
+import com.google.gson.JsonObject;
+import lombok.NoArgsConstructor;
+import slimeknights.mantle.recipe.data.FinishedRecipe;
+import slimeknights.mantle.recipe.data.RecipeConsumer;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import slimeknights.mantle.recipe.data.ConsumerWrapperBuilder;
+import slimeknights.tconstruct.library.materials.definition.MaterialVariantId;
+import slimeknights.tconstruct.tables.TinkerTables;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
+import net.minecraft.core.HolderLookup;
+
+/** Special variant of {@link ConsumerWrapperBuilder} for {@link ShapedMaterialRecipe} */
+@Deprecated
+@NoArgsConstructor(staticName = "wrap")
+public class ShapedMaterialConsumerBuilder {
+  private final List<MaterialVariantId> materials = new ArrayList<>();
+
+  /** Adds a material to the builder */
+  public ShapedMaterialConsumerBuilder material(MaterialVariantId material) {
+    materials.add(material);
+    return this;
+  }
+
+  /** Builds the wrapped consumer */
+  public RecipeConsumer build(RecipeConsumer consumer) {
+    return RecipeConsumer.wrap(consumer, recipe -> consumer.accept(new Wrapped(recipe, List.copyOf(materials))));
+  }
+
+  private record Wrapped(FinishedRecipe original, List<MaterialVariantId> materials) implements FinishedRecipe {
+    @Override
+    public ResourceLocation getId() {
+      return original.getId();
+    }
+
+    @Override
+    public RecipeSerializer<?> getType() {
+      return TinkerTables.shapedMaterialRecipeSerializer.get();
+    }
+
+    @Override
+    public void serializeRecipeData(JsonObject json) {
+      original.serializeRecipeData(json);
+      if (!materials.isEmpty()) {
+        json.add(ShapedMaterialRecipe.Serializer.MATERIAL_FIELD.key(), ShapedMaterialRecipe.Serializer.EXTRA_MATERIALS.serialize(materials));
+      }
+    }
+
+    @Nullable
+    @Override
+    public JsonObject serializeAdvancement(HolderLookup.Provider lookup) {
+      return original.serializeAdvancement(lookup);
+    }
+
+    @Nullable
+    @Override
+    public ResourceLocation getAdvancementId() {
+      return original.getAdvancementId();
+    }
+  }
+}

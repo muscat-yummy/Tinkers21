@@ -1,0 +1,518 @@
+name: Preserve native tool inventory and cooking state
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths: [.github/workflows/migrate-tic-namespace-oneshot.yml]
+permissions:
+  contents: read
+jobs:
+  inspect_native_next:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Resolve exact native API classpath
+        run: |
+          cat > /tmp/native-api.init.gradle <<'GRADLE'
+          gradle.projectsEvaluated {
+              rootProject.tasks.register('nativeApiClasspath') {
+                  doLast {
+                      new File('/tmp/native-api-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :createMinecraftArtifacts :nativeApiClasspath --no-daemon --console=plain -I /tmp/native-api.init.gradle
+      - name: Inspect public tooltip and loot implementation APIs
+        shell: python
+        run: |
+          import pathlib, subprocess, zipfile
+          targets = {
+              'net.minecraft.world.item.ItemStack': ['hashItemAndComponents(', 'matches('],
+              'net.minecraft.world.item.Item': ['components('],
+              'net.neoforged.neoforge.fluids.FluidStack': ['hashFluidAndComponents(', 'matches('],
+              'net.minecraft.core.component.DataComponentType$Builder': ['public '],
+              'net.minecraft.world.item.component.ItemContainerContents': ['public ']
+          }
+          for entry in pathlib.Path('/tmp/native-api-classpath.txt').read_text().splitlines():
+              jar = pathlib.Path(entry)
+              if not jar.is_file() or jar.suffix != '.jar':
+                  continue
+              with zipfile.ZipFile(jar) as archive:
+                  names = set(archive.namelist())
+              for cls, wanted in list(targets.items()):
+                  if cls.replace('.', '/') + '.class' not in names:
+                      continue
+                  command = ['javap', '-classpath', str(jar), '-p']
+                  if wanted is None or isinstance(wanted, dict):
+                      command.append('-c')
+                  command.append(cls)
+                  result = subprocess.run(command, capture_output=True, text=True, check=True)
+                  if cls == 'net.minecraft.server.level.ServerPlayerGameMode':
+                      method = result.stdout.split('public boolean destroyBlock(')[1].split('private boolean removeBlock(')[0]
+                      tokens = ['CommonHooks.fireBlockBreak:', 'BreakEvent.isCanceled:', 'Block.playerWillDestroy:', 'ItemStack.mineBlock:']
+                      indexes = [method.index(token) for token in tokens]
+                      if indexes != sorted(indexes) or method.count('Block.playerWillDestroy:') != 1:
+                          raise RuntimeError('Native permission/harvest injection boundary changed')
+                      print('Native harvest permission/cancellation/pre-destruction order verified')
+                  print('Native tooltip/loot API:', cls)
+                  if isinstance(wanted, dict):
+                      printing = False
+                      for line in result.stdout.splitlines():
+                          if line.startswith(('  public ', '  protected ', '  private ', '  static ')):
+                              printing = any(token in line for token in wanted['methods'])
+                          if printing:
+                              print(line)
+                  else:
+                      for line in result.stdout.splitlines():
+                          if wanted is None or any(token in line for token in wanted):
+                              print(line)
+                  del targets[cls]
+          if targets:
+              raise RuntimeError('API classes not found: ' + ', '.join(targets))
+      - name: Inspect published JEI 1.21.1 API versions
+        shell: python
+        run: |
+          import urllib.request, xml.etree.ElementTree as ET
+          url = 'https://maven.blamejared.com/mezz/jei/jei-1.21.1-common-api/maven-metadata.xml'
+          with urllib.request.urlopen(url, timeout=30) as response:
+              metadata = ET.fromstring(response.read())
+          versions = [element.text for element in metadata.findall('./versioning/versions/version')]
+          print('Published JEI versions with scoped visibility and widget APIs:', [version for version in versions if version.startswith('19.51.') or version.startswith('19.52.')])
+      - name: Audit enchantment hook signatures and registry boundaries
+        shell: python
+        run: |
+          import pathlib, re
+          pattern = re.compile(r'updateEnchantmentLevel|updateEnchantments|updateHarvestEnchantments|Single(?:Harvest)?Enchantment|EnchantmentModule.builder|EnchantmentModifierHook.addEnchantment')
+          for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
+              lines = path.read_text().splitlines()
+              for number, line in enumerate(lines, 1):
+                  if pattern.search(line):
+                      print(f'{path}:{number}: {line.strip()}')
+      - name: Audit melting and tank persistence callers
+        shell: python
+        run: |
+          import pathlib, re
+          pattern = re.compile(r'meltingInventory\.(?:writeToTag|readFromTag)|tank\.(?:write|read)\(|modules\[.*\]\.writeToTag|\.readFromTag\(item')
+          for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
+              for number, line in enumerate(path.read_text().splitlines(), 1):
+                  if pattern.search(line):
+                      print(f'{path}:{number}: {line.strip()}')
+      - name: Audit authoritative recipe identity and launcher callers
+        shell: python
+        run: |
+          import pathlib, re, shutil, subprocess
+          expression = r'LoadableFinishedRecipe\.save|new LoadableFinishedRecipe|new UpdateTinkerStationRecipePacket|\.updateRecipe\(|KEY_CROSSBOW_AMMO|KEY_DRAWBACK_AMMO|getDamageForEvent|setKnockback\(|getKnockback\(|getFilteredRecipes|SimpleRecipeSerializer|getEquivalentEnchantments|ModifierManager.INSTANCE.get\(|setLeftClickEventResult|JsonRedirect|implements IToolStackView|implements IModifiable|ToolTankHelper.PARSE_FLUID|InventoryModule.writeStack|new DummyToolStack|CraftingNBTWrapper|getProjectile\(\)'
+          if shutil.which('rg'):
+              result = subprocess.run(['rg', '-n', expression, 'src/main/java'])
+              if result.returncode not in (0, 1):
+                  raise RuntimeError('Caller audit failed: ' + str(result.returncode))
+          else:
+              pattern = re.compile(expression)
+              for path in sorted(pathlib.Path('src/main/java').rglob('*.java')):
+                  for number, line in enumerate(path.read_text().splitlines(), 1):
+                      if pattern.search(line):
+                          print(f'{path}:{number}: {line.strip()}')
+      - name: Audit mutable tool data view boundaries
+        run: python3 scripts/port/audit_tic_tool_data_views.py
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+          fetch-depth: 2
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Resolve the exact compile classpath
+        run: |
+          cat > /tmp/tinkers-compiler.init.gradle <<'GRADLE'
+          allprojects {
+              tasks.withType(JavaCompile).configureEach {
+                  options.compilerArgs.addAll(['-Xmaxerrs', '12000'])
+              }
+          }
+          gradle.projectsEvaluated {
+              rootProject.tasks.register('compileResourceIdSmoke', JavaCompile) {
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/utils/ResourceId.java', 'src/portTest/java/slimeknights/tconstruct/port/ResourceIdSmoke.java')
+                  classpath = rootProject.configurations.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/resource-id'))
+              }
+              rootProject.tasks.register('runResourceIdSmoke', JavaExec) {
+                  dependsOn 'compileResourceIdSmoke'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/resource-id')) + rootProject.configurations.compileClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ResourceIdSmoke')
+              }
+              rootProject.tasks.register('compileToolStorageChecks', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorageLegacy.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java')
+                  classpath = rootProject.configurations.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/storage'))
+              }
+              rootProject.tasks.register('runToolStorageChecks', JavaExec) {
+                  dependsOn 'compileToolStorageChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/storage')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ToolStorageSmoke')
+              }
+              rootProject.tasks.register('compileLeafPortChecks', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/plugin/jei/util/CraftingExtensionFactory.java', 'src/portTest/java/slimeknights/tconstruct/port/CraftingExtensionSmoke.java', 'src/main/java/slimeknights/tconstruct/common/data/CountRequirementsStrategy.java', 'src/portTest/java/slimeknights/tconstruct/port/CountRequirementsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/BannerPatternData.java', 'src/main/java/slimeknights/tconstruct/library/utils/BannerTextureData.java', 'src/portTest/java/slimeknights/tconstruct/port/BannerPatternDataSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/BlockInteractionUtil.java', 'src/portTest/java/slimeknights/tconstruct/port/BlockInteractionSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/BlockPositionDataSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/ItemAttributeData.java', 'src/portTest/java/slimeknights/tconstruct/port/ItemAttributeDataSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/EnchantmentData.java', 'src/portTest/java/slimeknights/tconstruct/port/EnchantmentDataSmoke.java', 'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java', 'src/main/java/slimeknights/tconstruct/fluids/util/BottleBrewingRecipe.java', 'src/portTest/java/slimeknights/tconstruct/port/BottleBrewingSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/material/MaterialRecipePattern.java', 'src/portTest/java/slimeknights/tconstruct/port/MaterialRecipePatternSmoke.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/CraftingContainerWrapper.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/CraftingGridMapping.java', 'src/portTest/java/slimeknights/tconstruct/port/CraftingGridMappingSmoke.java', 'src/main/java/slimeknights/tconstruct/library/tools/part/MaterialItemData.java', 'src/portTest/java/slimeknights/tconstruct/port/MaterialItemDataSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/AttributeIdUtil.java', 'src/main/java/slimeknights/tconstruct/library/utils/NBTTags.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/library/fluid/TankContentsPredicate.java', 'src/main/java/slimeknights/tconstruct/smeltery/client/util/TintedVertexBuilder.java', 'src/portTest/java/slimeknights/tconstruct/port/TintedVertexSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/EffectCureUtil.java', 'src/main/java/slimeknights/tconstruct/library/json/AttributeOperationLoadable.java', 'src/portTest/java/slimeknights/tconstruct/port/AttributeOperationSmoke.java', 'src/main/java/slimeknights/tconstruct/common/TinkerEffect.java', 'src/main/java/slimeknights/tconstruct/tools/modifiers/effect/NoMilkEffect.java', 'src/portTest/java/slimeknights/tconstruct/port/EffectFoundationSmoke.java', 'src/main/java/slimeknights/tconstruct/library/tools/helper/ToolTooltipPolicy.java', 'src/portTest/java/slimeknights/tconstruct/port/ToolTooltipPolicySmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/FirstMatchingRecipeSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeIdentityScopeSmoke.java', 'src/main/java/slimeknights/tconstruct/tools/logic/DamageStageLogic.java', 'src/portTest/java/slimeknights/tconstruct/port/DamageStageSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/HarvestTierRegistry.java', 'src/portTest/java/slimeknights/tconstruct/port/HarvestTierSmoke.java', 'src/main/java/slimeknights/tconstruct/plugin/jei/util/DrawableTooltipWidget.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeWidgetSmoke.java', 'src/main/java/slimeknights/tconstruct/tools/logic/CriticalHitLogic.java', 'src/portTest/java/slimeknights/tconstruct/port/CriticalHitSmoke.java', 'src/main/java/slimeknights/tconstruct/fluids/item/ContainerFoodItem.java', 'src/main/java/slimeknights/tconstruct/plugin/jei/util/PotionSubtypeInterpreter.java', 'src/main/java/slimeknights/tconstruct/fluids/item/PotionBucketItem.java', 'src/main/java/slimeknights/tconstruct/fluids/util/FillBottle.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoWater.java', 'src/main/java/slimeknights/tconstruct/fluids/util/EmptyBottleIntoEmpty.java', 'src/main/java/slimeknights/tconstruct/library/fluid/PotionData.java', 'src/main/java/slimeknights/tconstruct/fluids/item/BottleItem.java', 'src/portTest/java/slimeknights/tconstruct/port/PotionContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java', 'src/portTest/java/slimeknights/tconstruct/port/RecipeInputSmoke.java', 'src/main/java/slimeknights/tconstruct/library/utils/RegistryBuffer.java', 'src/main/java/slimeknights/tconstruct/common/network/InventorySlotSyncPacket.java', 'src/main/java/slimeknights/tconstruct/smeltery/network/FluidUpdatePacket.java', 'src/main/java/slimeknights/tconstruct/tools/network/FluidDataSerializer.java', 'src/portTest/java/slimeknights/tconstruct/port/InventoryPacketSmoke.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IChestItemHandler.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/IScalingContainer.java', 'src/main/java/slimeknights/tconstruct/tables/block/entity/inventory/ScalingChestItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ScalingChestSmoke.java', 'src/main/java/slimeknights/tconstruct/library/fluid/ForwardingFluidHandler.java', 'src/main/java/slimeknights/tconstruct/library/utils/ForwardingItemHandler.java', 'src/portTest/java/slimeknights/tconstruct/port/ForwardingCapabilitySmoke.java', 'src/main/java/slimeknights/tconstruct/tables/menu/module/SideInventoryContainer.java', 'src/main/java/slimeknights/tconstruct/library/utils/BlockCapabilitySource.java', 'src/main/java/slimeknights/tconstruct/shared/particle/FluidParticleData.java', 'src/main/java/slimeknights/tconstruct/shared/inventory/BlockContainerOpenedTrigger.java', 'src/main/java/slimeknights/tconstruct/common/json/BlockOrEntityCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/HasLootContextSetCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/LootConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagIntersectionPresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagDifferencePresentCondition.java', 'src/main/java/slimeknights/tconstruct/library/json/condition/TagNotEmptyCondition.java', 'src/portTest/java/slimeknights/tconstruct/port/TagConditionSmoke.java', 'src/main/java/slimeknights/tconstruct/library/json/loot/TagPreferenceLootEntry.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/BlockTagIngredient.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/NoContainerIngredient.java', 'src/main/java/slimeknights/tconstruct/library/fluid/StoredFluid.java', 'src/main/java/slimeknights/tconstruct/library/fluid/FluidItemData.java', 'src/main/java/slimeknights/tconstruct/smeltery/item/ScaledFluidTank.java', 'src/main/java/slimeknights/tconstruct/library/utils/TagUtil.java', 'src/main/java/slimeknights/tconstruct/fluids/util/ConstantFluidContainerWrapper.java', 'src/portTest/java/slimeknights/tconstruct/port/FluidContentsSmoke.java', 'src/main/java/slimeknights/tconstruct/library/recipe/ingredient/InstrumentIngredient.java', 'src/portTest/java/slimeknights/tconstruct/port/InstrumentIngredientSmoke.java', 'src/portTest/java/slimeknights/tconstruct/port/LoadableIngredientScopeSmoke.java', 'src/portTest/java/net/neoforged/neoforge/registries/VanillaRegistryPortTestBootstrap.java', 'src/main/java/slimeknights/tconstruct/tools/modifiers/loot/BonusFormulaCodec.java', 'src/portTest/java/slimeknights/tconstruct/port/BonusFormulaSmoke.java')
+                  options.annotationProcessorPath = rootProject.configurations.annotationProcessor
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/leaf'))
+              }
+              rootProject.tasks.register('runLootConditionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.LootConditionSmoke')
+              }
+              rootProject.tasks.register('runTagConditionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.TagConditionSmoke')
+              }
+              rootProject.tasks.register('runFluidContentsSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.FluidContentsSmoke')
+              }
+              rootProject.tasks.register('runInstrumentIngredientSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.InstrumentIngredientSmoke')
+              }
+              rootProject.tasks.register('runLoadableIngredientScopeSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.LoadableIngredientScopeSmoke')
+              }
+              rootProject.tasks.register('runBonusFormulaSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.BonusFormulaSmoke')
+              }
+              rootProject.tasks.register('runForwardingCapabilitySmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ForwardingCapabilitySmoke')
+              }
+              rootProject.tasks.register('runScalingChestSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ScalingChestSmoke')
+              }
+              rootProject.tasks.register('runToolStackDataSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ToolStackDataSmoke')
+              }
+              rootProject.tasks.register('runEnchantmentDataSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.EnchantmentDataSmoke')
+              }
+              rootProject.tasks.register('runCountRequirementsSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.CountRequirementsSmoke')
+              }
+              rootProject.tasks.register('runBannerPatternDataSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.BannerPatternDataSmoke')
+              }
+              rootProject.tasks.register('runBlockInteractionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.BlockInteractionSmoke')
+              }
+              rootProject.tasks.register('runBlockPositionDataSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.BlockPositionDataSmoke')
+              }
+              rootProject.tasks.register('runItemAttributeDataSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ItemAttributeDataSmoke')
+              }
+              rootProject.tasks.register('runBottleBrewingSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.BottleBrewingSmoke')
+              }
+              rootProject.tasks.register('runMaterialRecipePatternSmoke', JavaExec) {
+                  dependsOn(rootProject.tasks.named('compileLeafPortChecks'))
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.MaterialRecipePatternSmoke')
+              }
+              rootProject.tasks.register('runCraftingGridMappingSmoke', JavaExec) {
+                  dependsOn(rootProject.tasks.named('compileLeafPortChecks'))
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.CraftingGridMappingSmoke')
+              }
+              rootProject.tasks.register('runMaterialItemDataSmoke', JavaExec) {
+                  dependsOn(rootProject.tasks.named('compileLeafPortChecks'))
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.MaterialItemDataSmoke')
+              }
+              rootProject.tasks.register('runInventoryPacketSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.InventoryPacketSmoke')
+              }
+              rootProject.tasks.register('runRecipeInputSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.RecipeInputSmoke')
+              }
+              rootProject.tasks.register('runPotionContentsSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.PotionContentsSmoke')
+              }
+              rootProject.tasks.register('runAttributeOperationSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.AttributeOperationSmoke')
+              }
+              rootProject.tasks.register('runTintedVertexSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.TintedVertexSmoke')
+              }
+              rootProject.tasks.register('runEffectFoundationSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.EffectFoundationSmoke')
+              }
+              rootProject.tasks.register('runToolTooltipPolicySmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.ToolTooltipPolicySmoke')
+              }
+              rootProject.tasks.register('runFirstMatchingRecipeSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.FirstMatchingRecipeSmoke')
+              }
+
+              rootProject.tasks.register('runRecipeIdentityScopeSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.RecipeIdentityScopeSmoke')
+              }
+              rootProject.tasks.register('runDamageStageSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.DamageStageSmoke')
+              }
+              rootProject.tasks.register('runHarvestTierSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.HarvestTierSmoke')
+              }
+              rootProject.tasks.register('runCraftingExtensionSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.CraftingExtensionSmoke')
+              }
+              rootProject.tasks.register('runRecipeWidgetSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.RecipeWidgetSmoke')
+              }
+              rootProject.tasks.register('runCriticalHitSmoke', JavaExec) {
+                  dependsOn 'compileLeafPortChecks'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/leaf')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('slimeknights.tconstruct.port.CriticalHitSmoke')
+              }
+              rootProject.tasks.register('compileArmorRegistryCheck', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.files('src/main/java/slimeknights/tconstruct/library/tools/item/armor/DummyArmorMaterial.java', 'src/portTest/java/net/neoforged/neoforge/registries/ArmorMaterialRegistrationSmoke.java')
+                  options.annotationProcessorPath = rootProject.configurations.annotationProcessor
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/armor-registry'))
+              }
+              rootProject.tasks.register('runArmorRegistryCheck', JavaExec) {
+                  dependsOn 'compileArmorRegistryCheck'
+                  classpath = rootProject.files(rootProject.layout.buildDirectory.dir('port-test/armor-registry')) + rootProject.sourceSets.main.compileClasspath + rootProject.configurations.runtimeClasspath
+                  mainClass.set('net.neoforged.neoforge.registries.ArmorMaterialRegistrationSmoke')
+              }
+              rootProject.tasks.register('compileTiCDeclarations', JavaCompile) {
+                  dependsOn ':mantle-port:compileJava'
+                  source = rootProject.sourceSets.main.allJava
+                  classpath = rootProject.sourceSets.main.compileClasspath
+                  options.annotationProcessorPath = rootProject.configurations.annotationProcessor
+                  options.compilerArgs.add('-proc:only')
+                  destinationDirectory.set(rootProject.layout.buildDirectory.dir('port-test/declarations'))
+              }
+              rootProject.tasks.register('portClasspath') {
+                  doLast {
+                      new File('/tmp/tinkers-port-classpath.txt').text = rootProject.configurations.compileClasspath.files.collect { it.absolutePath }.join('\n')
+                  }
+              }
+          }
+          GRADLE
+          ./gradlew :createMinecraftArtifacts :portClasspath --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Inspect public APIs needed by the next port step
+        shell: python
+        run: |
+          import pathlib, subprocess, zipfile
+          targets = {
+              'net.minecraft.world.level.storage.loot.functions.EnchantedCountIncreaseFunction': ('public ',),
+              'net.minecraft.data.loot.EntityLootSubProvider': ('protected ', 'public ',),
+              'net.neoforged.neoforge.common.data.GlobalLootModifierProvider': ('protected ', 'public ',),
+              'net.minecraft.world.level.storage.loot.functions.CopyCustomDataFunction': ('public ',),
+              'net.minecraft.world.level.storage.loot.functions.CopyComponentsFunction': ('public ',),
+              'net.neoforged.neoforge.client.extensions.common.IClientItemExtensions': ('DyeColor(', 'LayerTintColor(', 'setupModelAnimations(',),
+              'net.minecraft.client.renderer.blockentity.SkullBlockRenderer': ('getRenderType(',),
+              'net.minecraft.world.item.ArmorMaterial$Layer': ('public ',),
+
+              'mezz.jei.api.gui.widgets.IRecipeWidget': ('public ', 'abstract ', 'default ',),
+              'mezz.jei.api.helpers.IGuiHelper': ('Arrow(',),
+              'net.minecraft.core.dispenser.ProjectileDispenseBehavior': ('public ', 'protected ',),
+              'net.minecraft.world.item.ProjectileItem': ('public ', 'abstract ', 'default ',),
+              'net.minecraft.world.item.ProjectileItem$DispenseConfig': ('public ',),
+              'net.minecraft.world.item.ArrowItem': ('public ', 'protected ',),
+              'net.minecraft.client.DeltaTracker': ('public ', 'abstract ',),
+              'net.minecraft.network.codec.ByteBufCodecs': ('registry(', 'holderRegistry(',),
+              'net.minecraft.world.item.Tier': ('public ', 'abstract ',),
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount': ('class ', 'CODEC', 'FORMULA',),
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$Formula': ('interface ', 'CODEC', 'getType(',),
+              'net.minecraft.world.level.storage.loot.functions.ApplyBonusCount$FormulaType': ('class ', 'record ', 'Codec',),
+              'net.minecraft.world.level.storage.loot.functions.LootItemConditionalFunction': ('class ', 'commonFields(', 'LootItemConditionalFunction(',),
+              'net.minecraft.world.level.storage.loot.entries.LootPoolSingletonContainer': ('class ', 'singletonFields(', 'LootPoolSingletonContainer(',),
+          
+              'net.minecraft.world.item.alchemy.PotionBrewing$Builder': ('addMix(', 'addRecipe('),
+              'net.minecraft.resources.ResourceLocation': ('class ', 'ResourceLocation(java.lang.String, java.lang.String)',),
+              'net.minecraft.core.particles.ParticleType': ('ParticleType(', 'codec(', 'streamCodec(',),
+              'net.minecraft.world.level.block.TransparentBlock': ('class ', 'TransparentBlock(',),
+              'net.minecraft.world.item.component.DyedItemColor': ('DyedItemColor(', 'rgb(', 'getColor(',),
+              'net.minecraft.world.item.BlockItem': ('updateCustomBlockEntityTag(',),
+              'net.minecraft.world.entity.Entity': ('getAddEntityPacket(',),
+              'net.minecraft.world.entity.projectile.ThrowableItemProjectile': ('getItem(', 'defineSynchedData(',),
+              'net.neoforged.neoforge.entity.IEntityWithComplexSpawn': ('SpawnData(',),
+              'net.blay09.mods.craftingtweaks.api.CraftingGridProvider': ('interface ', 'buildCraftingGrids(',),
+              'blusunrize.immersiveengineering.api.tool.ChemthrowerHandler$ChemthrowerEffect': ('applyToEntity(', 'applyToBlock(',),
+              'net.mehvahdjukaar.dummmmmmy.common.TargetDummyEntity': ('class ', 'disableShield(',),
+              'dev.gigaherz.jsonthings.things.serializers.FlexItemType': ('class ', 'register(',),
+              'dev.gigaherz.jsonthings.things.serializers.IItemSerializer': ('interface ',),
+              'dev.gigaherz.jsonthings.things.serializers.FlexBlockType': ('class ', 'register(',),
+              'net.minecraft.locale.Language': ('getInstance(', 'getOrDefault(',),
+              'net.minecraft.world.item.crafting.ShapedRecipe': ('getWidth(', 'getHeight(', 'canCraftInDimensions(',),
+              'mezz.jei.api.constants.RecipeTypes': ('CRAFTING;',),
+              'net.minecraft.world.item.crafting.RecipeInput': ('interface ', 'size(', 'getItem(', 'isEmpty(',),
+              'net.minecraft.world.item.ArmorMaterial': ('ArmorMaterial(',),
+              'net.minecraft.world.level.block.Block': ('codec(', 'useWithoutItem(', 'useItemOn(', 'getCloneItemStack(',),
+              'net.neoforged.neoforge.fluids.FluidStack': ('save(', 'parseOptional(', 'isSameFluidSameComponents(',),
+              'net.minecraft.world.item.ArmorMaterial$Layer': ('Layer(',),
+              'net.minecraft.world.item.ArmorItem': ('ArmorItem(', 'getMaterial(',),
+              'net.neoforged.neoforge.registries.DeferredRegister': ('create(', 'register(',),
+              'net.minecraft.world.item.enchantment.Enchantment$EnchantmentDefinition': ('EnchantmentDefinition(', 'slots(',),
+              'net.minecraft.core.registries.BuiltInRegistries': ('Registry<',),
+              'net.neoforged.neoforge.registries.NeoForgeRegistries': ('Registry<',),
+          }
+          for entry in pathlib.Path('/tmp/tinkers-port-classpath.txt').read_text().splitlines():
+              jar = pathlib.Path(entry)
+              if not jar.is_file() or jar.suffix != '.jar':
+                  continue
+              with zipfile.ZipFile(jar) as archive:
+                  names = set(archive.namelist())
+              for cls, wanted in list(targets.items()):
+                  if cls.replace('.', '/') + '.class' not in names:
+                      continue
+                  result = subprocess.run(['javap', '-classpath', str(jar), '-p', cls], capture_output=True, text=True, check=True)
+                  print('Public API:', cls)
+                  for line in result.stdout.splitlines():
+                      if any(token in line for token in wanted):
+                          print(line)
+                  del targets[cls]
+          if targets:
+              raise RuntimeError('API classes not found: ' + ', '.join(targets))
+      - name: Migrate references to classes present in NeoForge
+        run: |
+          python3 scripts/port/migrate_tic_namespace.py
+          python3 scripts/port/migrate_tic_resource_locations.py
+          python3 scripts/port/migrate_tic_fluid_copies.py
+          python3 scripts/port/migrate_tic_wrapped_ingredients.py
+          python3 scripts/port/migrate_tic_access_transformer.py
+          python3 scripts/port/migrate_tic_attribute_operations.py
+          python3 scripts/port/migrate_tic_finished_recipe_ids.py
+          python3 scripts/port/migrate_tic_recipe_result_lookup.py
+          python3 scripts/port/migrate_tic_common_tags.py
+          python3 scripts/port/migrate_tic_item_copies.py
+      - name: Verify migration idempotence before persisting source
+        shell: python
+        run: |
+          import hashlib, pathlib, subprocess
+          paths = sorted(pathlib.Path('src/main/java').rglob('*.java'))
+          paths.append(pathlib.Path('src/main/resources/META-INF/accesstransformer.cfg'))
+          before = {str(p): hashlib.sha256(p.read_bytes()).hexdigest() for p in paths}
+          for script in ('migrate_tic_namespace.py', 'migrate_tic_resource_locations.py', 'migrate_tic_fluid_copies.py', 'migrate_tic_wrapped_ingredients.py', 'migrate_tic_access_transformer.py', 'migrate_tic_attribute_operations.py', 'migrate_tic_finished_recipe_ids.py', 'migrate_tic_recipe_result_lookup.py', 'migrate_tic_common_tags.py', 'migrate_tic_item_copies.py'):
+              subprocess.run(['python3', 'scripts/port/' + script], check=True)
+          changed = [str(p) for p in paths if before[str(p)] != hashlib.sha256(p.read_bytes()).hexdigest()]
+          if changed:
+              raise RuntimeError('Migration changed files on second pass: ' + ', '.join(changed))
+          print('Namespace/resource/access migration idempotence: PASS')
+      - name: Apply verified mapped access changes to Minecraft artifacts
+        run: ./gradlew :createMinecraftArtifacts --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile Mantle
+        run: ./gradlew :mantle-port:compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Select independent production checks affected by this source batch
+        id: port_checks
+        shell: python
+        run: |
+          import os, pathlib, re, subprocess
+          workflow = pathlib.Path('.github/workflows/migrate-tic-namespace-oneshot.yml').read_text()
+          checked_sources = set(re.findall(r"'([^']+\.java)'", workflow))
+          changed = set(subprocess.check_output(['git', 'diff', '--name-only', os.environ['GITHUB_SHA'] + '^', 'HEAD'], text=True).splitlines())
+          storage_sources = {
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStackData.java',
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorage.java',
+              'src/main/java/slimeknights/tconstruct/library/tools/nbt/ToolStorageLegacy.java',
+              'src/portTest/java/slimeknights/tconstruct/port/ToolStackDataSmoke.java',
+              'src/portTest/java/slimeknights/tconstruct/port/ToolStorageSmoke.java',
+          }
+          shared = any(path.startswith(('mantle-port/', 'scripts/port/', 'gradle/')) or path in ('build.gradle', 'settings.gradle', 'gradle.properties') for path in changed)
+          storage_changed = shared or bool(changed & storage_sources)
+          affected = shared or any(path in checked_sources - storage_sources or (path.startswith('src/portTest/') and path not in storage_sources) for path in changed)
+          with open(os.environ['GITHUB_OUTPUT'], 'a') as output:
+              output.write('changed=' + str(affected).lower() + '\n')
+              output.write('storage_changed=' + str(storage_changed).lower() + '\n')
+          print('Independent checks affected:', affected)
+      - name: Verify typed resource ID behavior independently of the remaining TiC port
+        if: steps.port_checks.outputs.changed == 'true'
+        run: ./gradlew :runResourceIdSmoke --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile and verify production port checks with independent task failures
+        if: steps.port_checks.outputs.changed == 'true'
+        continue-on-error: true
+        run: >-
+          ./gradlew :compileLeafPortChecks :runLootConditionSmoke :runTagConditionSmoke
+          :runFluidContentsSmoke :runInstrumentIngredientSmoke :runLoadableIngredientScopeSmoke
+          :runBonusFormulaSmoke :runForwardingCapabilitySmoke :runScalingChestSmoke
+          :runInventoryPacketSmoke :runMaterialItemDataSmoke :runEnchantmentDataSmoke :runItemAttributeDataSmoke :runBlockInteractionSmoke :runBlockPositionDataSmoke :runBannerPatternDataSmoke :runCountRequirementsSmoke :runBottleBrewingSmoke :runMaterialRecipePatternSmoke :runCraftingGridMappingSmoke :runRecipeInputSmoke :runPotionContentsSmoke
+          :runCriticalHitSmoke :runCraftingExtensionSmoke :runRecipeWidgetSmoke :runAttributeOperationSmoke :runTintedVertexSmoke :runEffectFoundationSmoke :runToolTooltipPolicySmoke :runFirstMatchingRecipeSmoke :runRecipeIdentityScopeSmoke :runHarvestTierSmoke :runDamageStageSmoke :runArmorRegistryCheck --continue
+          --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Verify changed native tool storage and component cache once
+        if: steps.port_checks.outputs.storage_changed == 'true'
+        continue-on-error: true
+        run: ./gradlew :runToolStorageChecks --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Diagnose TiC declarations independently of method bodies
+        continue-on-error: true
+        run: ./gradlew :compileTiCDeclarations --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle
+      - name: Compile Tinkers
+        run: ./gradlew :compileJava --no-daemon --console=plain -I /tmp/tinkers-compiler.init.gradle

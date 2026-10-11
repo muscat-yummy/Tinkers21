@@ -1,0 +1,49 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+group = 'slimeknights.mantle'
+version = '1.11-port.0'
+base.archivesName = 'Mantle'
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+
+repositories {
+    mavenCentral()
+    maven { url = uri('https://maven.blamejared.com/') }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
+    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.51.0.420'
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.51.0.420'
+}
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude('**/.cache/**')
+    exclude('META-INF/mods.toml')
+}
+
+neoForge {
+    version = neo_version
+    mods {
+        mantle { sourceSet(sourceSets.main) }
+    }
+}
+
+tasks.register('generateModMetadata', ProcessResources) {
+    inputs.property('neo_version', neo_version)
+    from('src/main/templates')
+    into(layout.buildDirectory.dir('generated/sources/modMetadata'))
+    expand(neo_version: neo_version)
+}
+sourceSets.main.resources.srcDir(tasks.named('generateModMetadata'))
+neoForge.ideSyncTask(tasks.named('generateModMetadata'))
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+// The independently distributed library must retain its upstream MIT notice.
+tasks.named('jar', Jar).configure {
+    from('LICENSE') { into('META-INF/licenses/mantle') }
+}

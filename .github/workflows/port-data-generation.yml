@@ -1,0 +1,55 @@
+name: Verify native registry-owned full data generation
+on:
+  push:
+    branches: [port/1.21.1-neoforge]
+    paths:
+      - '.github/workflows/port-data-generation.yml'
+      - 'src/main/**'
+      - 'src/generated/**'
+      - 'mantle-port/**'
+      - 'build.gradle'
+      - 'settings.gradle'
+      - 'gradle.properties'
+      - 'gradle/**'
+      - 'gradlew'
+      - 'gradlew.bat'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  native_datagen:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Run the actual complete native data generator
+        run: timeout 600s ./gradlew :runData --no-daemon --console=plain
+      - name: Require native datagen without errors
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-data-check/logs/latest.log')
+          text = log.read_text() if log.is_file() else ''
+          errors = [line for line in text.splitlines() if '/ERROR]' in line]
+          if not text or errors:
+              raise SystemExit('Actual native data generation did not finish without errors')
+          print('TiC complete native data generator PASS')
+      - name: Show bounded native data generation diagnostics
+        if: always()
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-data-check/logs/latest.log')
+          if log.is_file():
+              print(log.read_text()[-50000:])
+          for crash in sorted(pathlib.Path('run-port-data-check/crash-reports').glob('*.txt')):
+              print(crash.read_text()[-50000:])

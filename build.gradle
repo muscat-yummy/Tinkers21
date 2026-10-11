@@ -1,0 +1,167 @@
+plugins {
+    id 'java-library'
+    id 'net.neoforged.moddev' version '2.0.147'
+}
+
+group = mod_group_id
+version = mod_version
+base.archivesName = 'TinkersConstruct'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(21)
+evaluationDependsOn(':mantle-port')
+
+repositories {
+    mavenCentral()
+    maven {
+        url = uri('https://api.modrinth.com/maven')
+        content { includeGroup 'maven.modrinth' }
+    }
+    maven { url = uri('https://maven.blamejared.com/') }
+    maven {
+        url = uri('https://cursemaven.com')
+        content { includeGroup 'curse.maven' }
+    }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.48'
+    annotationProcessor 'org.projectlombok:lombok:1.18.48'
+    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.51.0.420'
+    compileOnly 'mezz.jei:jei-1.21.1-neoforge-api:19.51.0.420'
+    // Published native jars provide optional API types without requiring these mods at runtime.
+    compileOnly('maven.modrinth:DMu0oBKf:IhkQpEve') { transitive = false } // Crafting Tweaks 21.1.11
+    compileOnly('maven.modrinth:tIm2nV03:uNRARSH2') { transitive = false } // IE 12.4.2-194
+    compileOnly('maven.modrinth:Adega8YN:DldwQTMc') { transitive = false } // Dummy 1.21-2.1.2
+    compileOnly('curse.maven:json-things-541617:7949745') { transitive = false } // Json Things 0.13.7
+    implementation project(':mantle-port')
+}
+
+sourceSets.main.resources {
+    srcDir('src/generated/resources')
+    exclude('**/.cache/**')
+    // The imported Forge metadata is superseded by generated NeoForge metadata.
+    exclude('META-INF/mods.toml')
+}
+
+def portGameTests = providers.gradleProperty('portGameTests').map { it.toBoolean() }.orElse(false).get()
+if (portGameTests) {
+    sourceSets.create('portGameTest') {
+        java.srcDir('src/portGameTest/java')
+        resources.srcDir(layout.buildDirectory.dir('generated/portGameTestResources'))
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    configurations.portGameTestImplementation.extendsFrom(configurations.implementation)
+    dependencies.add('portGameTestImplementation', "net.neoforged:testframework:${neo_version}")
+}
+
+
+def portClientChecks = providers.gradleProperty('portClientCheck').map { it.toBoolean() }.orElse(false).get()
+// Independent addon fixture: never included in production jars or ordinary runs.
+if (portGameTests || portClientChecks) {
+    sourceSets.create('portAddonCheck') {
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+    }
+    configurations.portAddonCheckImplementation.extendsFrom(configurations.implementation)
+    if (portGameTests) {
+        sourceSets.portGameTest.compileClasspath += sourceSets.portAddonCheck.output
+        sourceSets.portGameTest.runtimeClasspath += sourceSets.portAddonCheck.output
+    }
+}
+if (portClientChecks) {
+    sourceSets.create('portClientCheck') {
+        java.srcDir('src/portClientCheck/java')
+        compileClasspath += sourceSets.main.output + sourceSets.main.compileClasspath
+        runtimeClasspath += sourceSets.main.output + sourceSets.main.runtimeClasspath
+        compileClasspath += sourceSets.portAddonCheck.output
+        runtimeClasspath += sourceSets.portAddonCheck.output
+    }
+    configurations.portClientCheckImplementation.extendsFrom(configurations.implementation)
+}
+
+neoForge {
+    version = neo_version
+    if (portGameTests || portClientChecks) addModdingDependenciesTo(sourceSets.portAddonCheck)
+    if (portGameTests) {
+        addModdingDependenciesTo(sourceSets.portGameTest)
+    }
+    if (portClientChecks) addModdingDependenciesTo(sourceSets.portClientCheck)
+    runs {
+        if (portClientChecks) {
+            portClientCheck {
+                type = 'client'
+                sourceSet = sourceSets.portClientCheck
+                gameDirectory = project.file('run-port-client-check')
+            }
+        }
+        if (portGameTests) {
+            portGameTestServer {
+                type = 'gameTestServer'
+                sourceSet = sourceSets.portGameTest
+                gameDirectory = project.file('run-port-game-test')
+                systemProperty 'neoforge.enabledGameTestNamespaces', 'tconstruct'
+            }
+        }
+        client { client() }
+        server {
+            server()
+            programArgument '--nogui'
+        }
+        data {
+            gameDirectory = project.file('run-port-data-check')
+            data()
+            programArguments.addAll '--mod', mod_id, '--all',
+                    '--output', file('src/generated/resources').absolutePath,
+                    '--existing', file('src/main/resources').absolutePath
+        }
+    }
+    mods {
+        if (portGameTests || portClientChecks) {
+            portaddoncheck { sourceSet(sourceSets.portAddonCheck) }
+        }
+        tconstruct {
+            sourceSet(sourceSets.main)
+            if (portGameTests) sourceSet(sourceSets.portGameTest)
+            if (portClientChecks) sourceSet(sourceSets.portClientCheck)
+        }
+        mantle {
+            sourceSet(project(':mantle-port').sourceSets.main)
+        }
+    }
+}
+
+tasks.register('generateModMetadata', ProcessResources) {
+    def properties = [
+            mod_id: mod_id,
+            mod_name: mod_name,
+            mod_version: mod_version,
+            mod_license: mod_license,
+            neo_version: neo_version,
+            minecraft_version_range: minecraft_version_range,
+            loader_version_range: loader_version_range
+    ]
+    inputs.properties(properties)
+    expand(properties)
+    from('src/main/templates')
+    into(layout.buildDirectory.dir('generated/sources/modMetadata'))
+}
+sourceSets.main.resources.srcDir(tasks.named('generateModMetadata'))
+neoForge.ideSyncTask(tasks.named('generateModMetadata'))
+
+// The upstream implementation must be imported and ported before a distributable jar exists.
+// A build containing only metadata would incorrectly look like a working TiC port.
+tasks.register('verifyUpstreamSource') {
+    doLast {
+        if (!file('src/main/java/slimeknights/tconstruct/TConstruct.java').isFile()) {
+            throw new GradleException('Upstream Tinkers Construct source is missing. See PORTING.md; do not publish an empty mod jar.')
+        }
+    }
+}
+tasks.named('compileJava').configure { dependsOn(tasks.named('verifyUpstreamSource')) }
+tasks.withType(JavaCompile).configureEach { options.encoding = 'UTF-8' }
+
+// Keep upstream and fork notices in the standalone distribution jar.
+tasks.named('jar', Jar).configure {
+    from('LICENSE') { into('META-INF/licenses/tinkers21') }
+}

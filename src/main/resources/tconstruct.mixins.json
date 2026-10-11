@@ -1,0 +1,28 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "slimeknights.tconstruct.mixin",
+  "compatibilityLevel": "JAVA_21",
+  "mixins": [
+    "LootCountMixin",
+    "LootChanceMixin",
+    "EffectRemovalMixin",
+    "ToolHarvestGameModeMixin",
+    "CrossbowArrowMixin",
+    "ArrowKnockbackMixin",
+    "RecipeManagerIdentityMixin",
+    "RecipeHolderIdentityMixin",
+    "BrushItemInvoker",
+    "ProtectionEquipmentSlotMixin",
+    "ProtectionEnchantmentSlotMixin",
+    "MaterialItemRarityMixin",
+    "ItemStackStorageCodecMixin",
+    "CommonTagImportsMixin"
+  ],
+  "client": [
+    "ToolTooltipMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}

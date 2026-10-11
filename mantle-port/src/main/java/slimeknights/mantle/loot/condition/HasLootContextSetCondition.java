@@ -1,0 +1,94 @@
+package slimeknights.mantle.loot.condition;
+
+import com.mojang.serialization.MapCodec;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSyntaxException;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParam;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSet;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParamSets;
+import net.minecraft.world.level.storage.loot.predicates.LootItemCondition;
+import net.minecraft.world.level.storage.loot.predicates.LootItemConditionType;
+import slimeknights.mantle.loot.MantleLoot;
+import slimeknights.mantle.util.JsonHelper;
+
+import java.util.Objects;
+import java.util.Map;
+import java.util.HashMap;
+import java.util.Locale;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
+/** Loot condition that only runs if all required values in the given loot context set are present. Good heuristic for using that set. */
+public record HasLootContextSetCondition(LootContextParamSet set) implements LootItemCondition {
+  private static final Map<ResourceLocation, LootContextParamSet> SETS = discoverSets();
+  private static Map<ResourceLocation, LootContextParamSet> discoverSets() {
+    Map<ResourceLocation, LootContextParamSet> result = new HashMap<>();
+    for (Field field : LootContextParamSets.class.getFields()) {
+      if (Modifier.isStatic(field.getModifiers()) && field.getType() == LootContextParamSet.class) {
+        try {
+          result.put(ResourceLocation.withDefaultNamespace(field.getName().toLowerCase(Locale.ROOT)), (LootContextParamSet) field.get(null));
+        } catch (IllegalAccessException exception) {
+          throw new IllegalStateException("Cannot read loot context set " + field.getName(), exception);
+        }
+      }
+    }
+    return Map.copyOf(result);
+  }
+
+  private static ResourceLocation key(LootContextParamSet set) {
+    return SETS.entrySet().stream().filter(entry -> entry.getValue() == set)
+      .map(Map.Entry::getKey).findFirst().orElseThrow(() -> new IllegalArgumentException("Unregistered loot context set"));
+  }
+
+  public static final MapCodec<HasLootContextSetCondition> CODEC = ResourceLocation.CODEC.fieldOf("set")
+    .xmap(key -> new HasLootContextSetCondition(Objects.requireNonNull(SETS.get(key), "Unknown loot context set " + key)),
+          value -> Objects.requireNonNull(key(value.set), "Unregistered loot context set"));
+
+  /** Creates a new builder instance */
+  public static Builder builder(LootContextParamSet set) {
+    return new Builder(set);
+  }
+
+  @Override
+  public LootItemConditionType getType() {
+    return MantleLoot.HAS_CONTEXT_SET;
+  }
+
+  @Override
+  public boolean test(LootContext context) {
+    for (LootContextParam<?> param : set.getRequired()) {
+      if (!context.hasParam(param)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  /** Builder logic for this condition */
+  public record Builder(LootContextParamSet set) implements LootItemCondition.Builder {
+    @Override
+    public LootItemCondition build() {
+      return new HasLootContextSetCondition(set);
+    }
+  }
+
+  /** Serializer logic */
+  public static class Serializer {
+    public void serialize(JsonObject json, HasLootContextSetCondition value, JsonSerializationContext context) {
+      json.addProperty("set", Objects.requireNonNull(key(value.set), "Unregistered loot LootContextParamSets").toString());
+    }
+
+    public HasLootContextSetCondition deserialize(JsonObject json, JsonDeserializationContext context) {
+      ResourceLocation key = JsonHelper.getResourceLocation(json, "set");
+      LootContextParamSet set = SETS.get(key);
+      if (set == null) {
+        throw new JsonSyntaxException("Unknown LootContextParamSet " + key);
+      }
+      return new HasLootContextSetCondition(set);
+    }
+  }
+}

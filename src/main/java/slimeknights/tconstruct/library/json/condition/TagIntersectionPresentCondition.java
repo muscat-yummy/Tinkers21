@@ -1,0 +1,98 @@
+package slimeknights.tconstruct.library.json.condition;
+
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import net.minecraft.core.Holder;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.TagKey;
+import net.neoforged.neoforge.common.conditions.ICondition;
+
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.List;
+
+/** @deprecated use {@link slimeknights.mantle.recipe.condition.TagCombinationCondition#intersection(TagKey[])} */
+@Deprecated(forRemoval = true)
+public class TagIntersectionPresentCondition<T> implements ICondition {
+  public static final ResourceLocation ID = ResourceLocation.fromNamespaceAndPath("tconstruct", "tag_intersection_present");
+  private static final Codec<List<ResourceLocation>> NONEMPTY_NAMES = ResourceLocation.CODEC.listOf().validate(
+    names -> names.isEmpty() ? DataResult.error(() -> "At least one tag is required") : DataResult.success(names));
+
+  private final List<TagKey<T>> names;
+
+  public TagIntersectionPresentCondition(List<TagKey<T>> names) {
+    if (names.isEmpty()) {
+      throw new IllegalArgumentException("Cannot create a condition with no names");
+    }
+    ResourceKey<? extends Registry<T>> registry = names.getFirst().registry();
+    if (names.stream().anyMatch(tag -> !tag.registry().equals(registry))) {
+      throw new IllegalArgumentException("Intersection tags must use the same registry");
+    }
+    this.names = List.copyOf(names);
+  }
+
+  /** Creates a condition from a set of keys */
+  @SafeVarargs
+  public static <T> TagIntersectionPresentCondition<T> ofKeys(TagKey<T>... names) {
+    return new TagIntersectionPresentCondition<>(Arrays.asList(names));
+  }
+
+  /** Creates a condition from a registry and a set of names */
+  public static <T> TagIntersectionPresentCondition<T> ofNames(ResourceKey<? extends Registry<T>> registry, ResourceLocation... names) {
+    return new TagIntersectionPresentCondition<>(Arrays.stream(names).map(name -> TagKey.create(registry, name)).toList());
+  }
+
+  public ResourceLocation getID() {
+    return ID;
+  }
+
+  @Override
+  public MapCodec<? extends ICondition> codec() {
+    return CODEC;
+  }
+
+  @Override
+  public boolean test(IContext context) {
+    // if there is just one tag, just needs to be filled
+    List<Collection<Holder<T>>> tags = names.stream().map(context::getTag).toList();
+    if (tags.size() == 1) {
+      return !tags.get(0).isEmpty();
+    }
+    // if any remaining tag is empty, give up
+    int count = tags.size();
+    for (int i = 1; i < count; i++) {
+      if (tags.get(i).isEmpty()) {
+        return false;
+      }
+    }
+
+    // all tags have something, so find the first item that is in all tags
+    itemLoop:
+    for (Holder<T> entry : tags.get(0)) {
+      // find the first item contained in all other intersection tags
+      for (int i = 1; i < count; i++) {
+        if (!tags.get(i).contains(entry)) {
+          continue itemLoop;
+        }
+      }
+      // all tags contain the item? success
+      return true;
+    }
+    // no item in all tags
+    return false;
+  }
+
+  public static final MapCodec<TagIntersectionPresentCondition<?>> CODEC = RecordCodecBuilder.<TagIntersectionPresentCondition<?>>mapCodec(instance -> instance.group(
+    ResourceLocation.CODEC.fieldOf("registry").forGetter(value -> value.names.getFirst().registry().location()),
+    NONEMPTY_NAMES.fieldOf("tags").forGetter(value -> value.names.stream().map(TagKey::location).toList())
+  ).apply(instance, TagIntersectionPresentCondition::fromNames));
+
+  private static TagIntersectionPresentCondition<?> fromNames(ResourceLocation registry, List<ResourceLocation> names) {
+    ResourceKey<Registry<Object>> key = ResourceKey.createRegistryKey(registry);
+    return new TagIntersectionPresentCondition<>(names.stream().map(name -> TagKey.create(key, name)).toList());
+  }
+}

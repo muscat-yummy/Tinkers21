@@ -1,0 +1,84 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/silver"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/raw_electrum"
+    }
+  ],
+  "type": "mantle:conditional",
+  "recipes": [
+    {
+      "neoforge:conditions": [
+        {
+          "type": "mantle:tag_filled",
+          "tag": "forge:ingots/silver"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 810,
+          "rate": "metal",
+          "tag": "forge:molten_silver"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:storage_blocks/raw_electrum"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 810,
+        "tag": "forge:molten_electrum"
+      },
+      "temperature": 760,
+      "time": 353
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 810,
+          "rate": "metal",
+          "tag": "forge:molten_gold"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:storage_blocks/raw_electrum"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 810,
+        "tag": "forge:molten_electrum"
+      },
+      "temperature": 760,
+      "time": 353
+    }
+  ]
+}

@@ -1,0 +1,9 @@
+{
+  "values": [
+    "#forge:ores/cobalt",
+    {
+      "id": "#c:ores",
+      "required": false
+    }
+  ]
+}

@@ -1,0 +1,84 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/nickel"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mantle:tag_filled",
+      "tag": "forge:storage_blocks/raw_tin"
+    }
+  ],
+  "type": "mantle:conditional",
+  "recipes": [
+    {
+      "neoforge:conditions": [
+        {
+          "type": "mantle:tag_filled",
+          "tag": "forge:ingots/nickel"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 810,
+          "rate": "metal",
+          "tag": "forge:molten_nickel"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:storage_blocks/raw_tin"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 810,
+        "tag": "forge:molten_tin"
+      },
+      "temperature": 225,
+      "time": 234
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 810,
+          "rate": "metal",
+          "tag": "forge:molten_copper"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:storage_blocks/raw_tin"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 810,
+        "tag": "forge:molten_tin"
+      },
+      "temperature": 225,
+      "time": 234
+    }
+  ]
+}

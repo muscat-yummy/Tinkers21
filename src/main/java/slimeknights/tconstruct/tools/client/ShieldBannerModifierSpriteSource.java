@@ -1,0 +1,126 @@
+package slimeknights.tconstruct.tools.client;
+
+import com.mojang.blaze3d.platform.NativeImage;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
+import net.minecraft.client.renderer.texture.atlas.SpriteResourceLoader;
+import net.minecraft.server.packs.resources.ResourceMetadata;
+import slimeknights.tconstruct.library.utils.BannerTextureData;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import lombok.RequiredArgsConstructor;
+import net.minecraft.client.renderer.Sheets;
+import net.minecraft.client.renderer.texture.SpriteContents;
+import net.minecraft.client.renderer.texture.atlas.SpriteSource;
+import net.minecraft.client.renderer.texture.atlas.SpriteSourceType;
+import net.neoforged.neoforge.client.event.RegisterSpriteSourceTypesEvent;
+import net.minecraft.client.renderer.texture.atlas.sources.LazyLoadedImage;
+import net.minecraft.client.resources.metadata.animation.AnimationMetadataSection;
+import net.minecraft.client.resources.metadata.animation.FrameSize;
+import net.minecraft.client.resources.model.Material;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.resources.Resource;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.util.ExtraCodecs;
+import net.minecraft.world.level.block.entity.BannerPattern;
+import org.jetbrains.annotations.ApiStatus.Internal;
+import slimeknights.tconstruct.TConstruct;
+import slimeknights.tconstruct.library.client.materials.MaterialRenderInfo;
+
+import javax.annotation.Nullable;
+import java.io.IOException;
+import java.util.Map.Entry;
+import java.util.Optional;
+
+/** Sprite source creating modifier textures for banners using shield banner textures */
+public record ShieldBannerModifierSpriteSource(int cropX, int cropY, int cropWidth, int cropHeight, ResourceLocation destinationPrefix, int offsetX, int offsetY, int outSize) implements SpriteSource {
+  private static final Codec<Integer> NON_NEGATIVE = ExtraCodecs.intRange(0, Integer.MAX_VALUE);
+  private static final Codec<Integer> SHIELD_SIZE = ExtraCodecs.intRange(0, 64);
+  public static final MapCodec<ShieldBannerModifierSpriteSource> CODEC = RecordCodecBuilder.<ShieldBannerModifierSpriteSource>mapCodec(inst -> inst.group(
+    SHIELD_SIZE.fieldOf("crop_x").forGetter(ShieldBannerModifierSpriteSource::cropX),
+    SHIELD_SIZE.fieldOf("crop_y").forGetter(ShieldBannerModifierSpriteSource::cropY),
+    SHIELD_SIZE.fieldOf("crop_width").forGetter(ShieldBannerModifierSpriteSource::cropWidth),
+    SHIELD_SIZE.fieldOf("crop_height").forGetter(ShieldBannerModifierSpriteSource::cropHeight),
+    ResourceLocation.CODEC.fieldOf("destination_prefix").forGetter(ShieldBannerModifierSpriteSource::destinationPrefix),
+    NON_NEGATIVE.fieldOf("offset_x").forGetter(ShieldBannerModifierSpriteSource::offsetX),
+    NON_NEGATIVE.fieldOf("offset_y").forGetter(ShieldBannerModifierSpriteSource::offsetY),
+    NON_NEGATIVE.fieldOf("output_size").forGetter(ShieldBannerModifierSpriteSource::outSize)
+  ).apply(inst, ShieldBannerModifierSpriteSource::new)).validate(source -> {
+    if (source.cropX + source.cropWidth >= 64 || source.cropY + source.cropHeight >= 64) {
+      return DataResult.error(() -> "Invalid banner shield modifier sprite source: crop region must be within 64 by 64");
+    } else if (source.offsetX + source.cropWidth >= source.outSize || source.offsetY + source.cropHeight >= source.outSize) {
+      return DataResult.error(() -> "Invalid banner shield modifier sprite source: crop result must be placed within output size " + source.outSize);
+    }
+    return DataResult.success(source);
+  });
+  /** Stable type identity; its namespaced registration belongs to the native mod event. */
+  private static final SpriteSourceType TYPE = new SpriteSourceType(CODEC);
+
+  @Internal
+  public static void register(RegisterSpriteSourceTypesEvent event) {
+    event.register(TConstruct.getResource("shield_banner_to_modifier"), TYPE);
+  }
+
+  /** Returns the same type used by registration and datagen. */
+  @Internal
+  public static SpriteSourceType register() {
+    return TYPE;
+  }
+
+  @Override
+  public void run(ResourceManager manager, Output output) {
+    // Pattern assets are resource-pack files; dynamic patterns need not be present in Sheets' lazy cache.
+    for (Entry<ResourceLocation, Resource> entry : manager.listResources(
+        BannerTextureData.DIRECTORY, id -> id.getPath().endsWith(".png")).entrySet()) {
+      ResourceLocation asset = BannerTextureData.asset(entry.getKey());
+      if (asset != null) {
+        LazyLoadedImage image = new LazyLoadedImage(entry.getKey(), entry.getValue(), 1);
+        ResourceLocation destination = destinationPrefix.withSuffix(MaterialRenderInfo.getSuffix(asset));
+        output.add(destination, new BannerModifierSpriteSupplier(image, entry.getKey(), destination));
+      }
+    }
+  }
+
+  @Override
+  public SpriteSourceType type() {
+    return register();
+  }
+
+  /** Generates a cropped sprite lazily */
+  @RequiredArgsConstructor
+  private class BannerModifierSpriteSupplier implements SpriteSupplier {
+    private final LazyLoadedImage original;
+    private final ResourceLocation input, output;
+
+    @Nullable
+    @Override
+    public SpriteContents apply(SpriteResourceLoader loader) {
+      try {
+        // its possible the original is bigger than we expect due to HD pack, if so scale it accordingly
+        // we only support scaling if it is a multiple of width
+        NativeImage original = this.original.get();
+        int scale = original.getWidth() / 64;
+        if (scale == 0) {
+          TConstruct.LOG.warn("Unable to crop {} to produce {} as texture size is less than 64", input, output);
+        } else {
+          NativeImage generated = new NativeImage(outSize * scale, outSize * scale, true);
+          boolean transferred = false;
+          try {
+            original.copyRect(generated, cropX * scale, cropY * scale, offsetX * scale, offsetY * scale, cropWidth * scale, cropHeight * scale, false, false);
+            SpriteContents contents = new SpriteContents(this.output, new FrameSize(generated.getWidth(), generated.getHeight()), generated, ResourceMetadata.EMPTY);
+            transferred = true;
+            return contents;
+          } finally {
+            if (!transferred) generated.close();
+          }
+        }
+      } catch (IllegalArgumentException | IOException ex) {
+        TConstruct.LOG.warn("Unable to crop {} to produce {}", this.input, this.output, ex);
+      } finally {
+        this.original.release();
+      }
+      return null;
+    }
+  }
+}

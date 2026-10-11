@@ -1,9 +1,6 @@
-# This repo is currently being neglected.
-# このリポジトリは現在サボっています。
-
 **English** | [日本語](README_ja.md)
 
-# Tinkers' Construct for Minecraft 1.21.1
+# Tinkers21 — Minecraft 1.21.1 / NeoForge
 
 An unofficial port of **Tinkers' Construct** to **Minecraft 1.21.1** using **NeoForge**.
 
@@ -43,24 +40,13 @@ Where an API must change, compatibility with existing Tinkers' Construct concept
 | Java | 21 |
 | Original Tinkers' Construct | 1.20.1 |
 
-## Status
+## Status and installation
 
-🚧 **Work in progress**
+The first experimental preview is **3.12.1-port.0**. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.0) and install both the Tinkers21 and Mantle21 JARs in `mods/` on the client and server. Requires Minecraft **1.21.1**, NeoForge **21.1.251 or later in the 21.1 series**, and **Java 21**. Do not install another Tinkers' Construct or Mantle jar alongside these; the original `tconstruct` and `mantle` mod IDs are retained.
 
-This port is currently under active development.
+Phases 1–8 meet their documented acceptance: native datagen, both production assemblies, 25 actual Minecraft GameTests and strict graphical core/addon checks pass. This is a preview, with full TiCEX/external integration stacks and general old-world migration still unverified. Use a separate world or a backed-up copy when evaluating it.
 
-Do not expect all features to work correctly yet. Builds produced during development may contain missing functionality, crashes, broken rendering, incompatible data, or other issues.
-
-The rough development order is:
-
-1. Build system and NeoForge initialization
-2. Registries and core infrastructure
-3. Materials, tools and modifiers
-4. Tool construction and Tinkers' Station
-5. Tool and armor rendering
-6. Smeltery, melting, casting and fluids
-7. World content and remaining features
-8. Addon compatibility
+See the [release notes](docs/releases/3.12.1-port.0.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). The download includes SHA-256 checksums and source/CI provenance. The independent addon acceptance fixture is excluded from the distribution jars.
 
 ## Addon Compatibility
 
@@ -69,6 +55,8 @@ Addon compatibility is an important goal of this project.
 The port attempts to retain the original Tinkers' Construct API structure wherever practical so that existing addons can also be ported to Minecraft 1.21.1 without being completely rewritten.
 
 Compatibility is not guaranteed while development is ongoing.
+
+The source migration guide and independent addon acceptance fixture are documented in [Addon porting](docs/ADDON_PORTING.md). See [PORTING.md](PORTING.md) for exact validated commits, Actions results and remaining limitations.
 
 Once the core port becomes stable, additional work may be done to port or support existing Tinkers' Construct addons.
 

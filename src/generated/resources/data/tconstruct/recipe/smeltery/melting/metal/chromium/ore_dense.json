@@ -1,0 +1,103 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/aluminum"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mantle:tag_combination_filled",
+      "match": [
+        "forge:ores/chromium",
+        "c:ore_rates/dense"
+      ]
+    }
+  ],
+  "type": "mantle:conditional",
+  "recipes": [
+    {
+      "neoforge:conditions": [
+        {
+          "type": "mantle:tag_filled",
+          "tag": "forge:ingots/aluminum"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 540,
+          "rate": "metal",
+          "tag": "forge:molten_aluminum"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:intersection",
+        "children": [
+          {
+            "tag": "forge:ores/chromium"
+          },
+          {
+            "tag": "c:ore_rates/dense"
+          }
+        ]
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 540,
+        "tag": "forge:molten_chromium"
+      },
+      "temperature": 900,
+      "time": 285
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 540,
+          "rate": "metal",
+          "tag": "forge:molten_iron"
+        }
+      ],
+      "ingredient": {
+        "type": "neoforge:intersection",
+        "children": [
+          {
+            "tag": "forge:ores/chromium"
+          },
+          {
+            "tag": "c:ore_rates/dense"
+          }
+        ]
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 540,
+        "tag": "forge:molten_chromium"
+      },
+      "temperature": 900,
+      "time": 285
+    }
+  ]
+}

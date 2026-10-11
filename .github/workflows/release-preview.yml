@@ -1,0 +1,76 @@
+name: Package and publish Tinkers21 preview
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/release-preview.yml'
+      - 'docs/releases/3.12.1-port.0.md'
+  workflow_dispatch:
+permissions:
+  contents: write
+  actions: read
+concurrency:
+  group: release-v3.12.1-port.0
+  cancel-in-progress: false
+jobs:
+  preview:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Require accepted runtime source and successful CI provenance
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          python3 scripts/release/verify_preview_source.py
+          for run_id in 38110981948 38110981960 38111094698; do
+            gh api "repos/$GITHUB_REPOSITORY/actions/runs/$run_id" > "/tmp/tinkers21-gate-$run_id.json"
+          done
+          python3 - <<'PY'
+          import json
+          from pathlib import Path
+          for run, sha in [(38110981948, '01fa71cbaeddb4abe63c245b73a37f96c65255e7'),
+                           (38110981960, '01fa71cbaeddb4abe63c245b73a37f96c65255e7'),
+                           (38111094698, '304b302cf0e016371979bc35f58bb9aef1857c16')]:
+              result = json.loads(Path(f'/tmp/tinkers21-gate-{run}.json').read_text())
+              assert result['status'] == 'completed' and result['conclusion'] == 'success'
+              assert result['head_sha'] == sha
+          print('Accepted source and native CI provenance PASS')
+          PY
+      - name: Assemble production distribution jars
+        run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
+      - name: Inspect jar contents and package distribution
+        run: python3 scripts/release/package_preview.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tinkers21-3.12.1-port.0-distribution
+          path: dist/*
+          if-no-files-found: error
+          retention-days: 30
+      - name: Publish initial GitHub prerelease with verified assets
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          tag=v3.12.1-port.0
+          if gh release view "$tag" --json isDraft >/tmp/tinkers21-existing-release.json 2>/dev/null; then
+            echo 'The preview release already exists; refusing to overwrite published assets.' >&2
+            exit 1
+          fi
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.0 — NeoForge 1.21.1 preview" --notes-file docs/releases/3.12.1-port.0.md --draft --prerelease --latest=false
+          gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --prerelease --latest=false
+          gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets

@@ -1,0 +1,84 @@
+{
+  "neoforge:conditions": [
+    {
+      "type": "neoforge:or",
+      "values": [
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "mantle:tag_filled",
+              "tag": "forge:ingots/lead"
+            }
+          ]
+        },
+        {
+          "type": "neoforge:and",
+          "values": [
+            {
+              "type": "neoforge:true"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "type": "mantle:tag_filled",
+      "tag": "forge:raw_materials/cadmium"
+    }
+  ],
+  "type": "mantle:conditional",
+  "recipes": [
+    {
+      "neoforge:conditions": [
+        {
+          "type": "mantle:tag_filled",
+          "tag": "forge:ingots/lead"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_lead"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:raw_materials/cadmium"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_cadmium"
+      },
+      "temperature": 294,
+      "time": 63
+    },
+    {
+      "neoforge:conditions": [
+        {
+          "type": "neoforge:true"
+        }
+      ],
+      "type": "tconstruct:ore_melting",
+      "byproducts": [
+        {
+          "amount": 90,
+          "rate": "metal",
+          "tag": "forge:molten_copper"
+        }
+      ],
+      "ingredient": {
+        "tag": "forge:raw_materials/cadmium"
+      },
+      "rate": "metal",
+      "result": {
+        "amount": 90,
+        "tag": "forge:molten_cadmium"
+      },
+      "temperature": 294,
+      "time": 63
+    }
+  ]
+}

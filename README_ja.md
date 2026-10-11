@@ -1,6 +1,6 @@
 [English](README.md) | **日本語**
 
-# Tinkers' Construct for Minecraft 1.21.1
+# Tinkers21 — Minecraft 1.21.1 / NeoForge
 
 **Tinkers' Construct** を **Minecraft 1.21.1 / NeoForge** に対応させる非公式移植プロジェクトです。
 
@@ -43,26 +43,13 @@ APIの変更が必要になった場合でも、不必要な独自実装を追�
 | Java | 21 |
 | 移植元 Tinkers' Construct | 1.20.1 |
 
-## 開発状況
+## 状態と導入方法
 
-🚧 **開発中**
+初回の実験的プレリリースは **3.12.1-port.0** です。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.0) からTinkers21とMantle21の両方のJARを取得し、クライアント・サーバーの `mods/` に配置してください。Minecraft **1.21.1**、NeoForge **21.1.251以上の21.1系列**、**Java 21** が必要です。元の `tconstruct`・`mantle` mod IDを維持しているため、別のTinkers' ConstructやMantleのJARと同時に導入しないでください。
 
-現在、この移植版は開発途中です。
+Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全25件、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
 
-すべての機能が正常に動作するとは限りません。
-
-開発途中のビルドには、未実装の機能、クラッシュ、描画の問題、データの非互換性、その他の不具合が含まれている可能性があります。
-
-大まかに以下の順序で開発を進めます。
-
-1. ビルド環境とNeoForgeへの移行
-2. Registryおよび基本システム
-3. Material・Tool・Modifier
-4. ツール作成とTinkers' Station
-5. ツール・防具のレンダリング
-6. Smeltery・Melting・Casting・Fluid
-7. ワールド関連コンテンツと残りの機能
-8. アドオン互換性
+[リリースノート](docs/releases/3.12.1-port.0.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。配布にはSHA-256とソース・CIの来歴を含め、独立した検証用アドオンは配布JARから除外しています。
 
 ## アドオン互換性
 
@@ -71,6 +58,8 @@ APIの変更が必要になった場合でも、不必要な独自実装を追�
 可能な限りオリジナルのTinkers' Construct API構造を維持し、既存のアドオンをMinecraft 1.21.1へ移植する際に、完全な作り直しを必要としない環境を目指します。
 
 ただし、開発中の段階ではAPIの変更が発生する可能性があり、互換性は保証されません。
+
+アドオン移植のAPI差分と独立した検証用アドオンは [移植ガイド](docs/ADDON_PORTING.md) に記録しています。検証したコミット・Actions結果・残る制限は [PORTING.md](PORTING.md) を確認してください。
 
 本体の移植が安定した後、既存のTinkers' Constructアドオンについても移植・対応を進める場合があります。
 

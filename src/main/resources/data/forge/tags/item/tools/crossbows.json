@@ -1,0 +1,10 @@
+{
+  "values": [
+    "tconstruct:crossbow",
+    "tconstruct:war_pick",
+    {
+      "id": "#c:tools/crossbow",
+      "required": false
+    }
+  ]
+}

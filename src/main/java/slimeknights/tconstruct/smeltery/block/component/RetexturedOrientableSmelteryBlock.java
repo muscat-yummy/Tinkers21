@@ -1,0 +1,44 @@
+package slimeknights.tconstruct.smeltery.block.component;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Item.TooltipContext;
+import net.minecraft.world.level.LevelReader;
+import net.minecraft.core.component.DataComponents;
+import net.minecraft.world.item.TooltipFlag;
+import net.minecraft.world.level.BlockGetter;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntityType.BlockEntitySupplier;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.HitResult;
+import slimeknights.mantle.block.RetexturedBlock;
+import slimeknights.mantle.util.RetexturedHelper;
+import slimeknights.tconstruct.smeltery.block.entity.component.SmelteryComponentBlockEntity;
+
+import javax.annotation.Nullable;
+import java.util.List;
+
+public class RetexturedOrientableSmelteryBlock extends OrientableSmelteryBlock {
+  public RetexturedOrientableSmelteryBlock(Properties properties, BlockEntitySupplier<? extends SmelteryComponentBlockEntity> blockEntity) {
+    super(properties, true, blockEntity);
+  }
+
+  @Override
+  public void appendHoverText(ItemStack stack, TooltipContext context, List<Component> tooltip, TooltipFlag flag) {
+    RetexturedHelper.addTooltip(stack, tooltip, flag);
+  }
+
+  @Override
+  public void setPlacedBy(Level world, BlockPos pos, BlockState state, @Nullable LivingEntity placer, ItemStack stack) {
+    super.setPlacedBy(world, pos, state, placer, stack);
+    RetexturedBlock.updateTextureBlock(world, pos, stack);
+  }
+
+  @Override
+  public ItemStack getCloneItemStack(BlockState state, HitResult target, LevelReader world, BlockPos pos, Player player) {
+    return RetexturedBlock.getPickBlock(world, pos, state);
+  }
+}
