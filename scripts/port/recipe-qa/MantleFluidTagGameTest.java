@@ -34,7 +34,7 @@ public final class MantleFluidTagGameTest {
       var displays=recipes[i].getRecipes(level.registryAccess());
       helper.assertTrue(!displays.isEmpty(),"Tip-clearing recipe has no native fluid display");
       ItemStack cast=displays.get(0).getCastItems(ItemStack.EMPTY,false).get(0).copy();
-      helper.assertTrue(!ModifierUtil.getPersistentString(cast,recipes[i].getModifier()).isEmpty(),"Test tool has no potion");
+      helper.assertTrue(!ModifierUtil.getPersistentString(cast,new slimeknights.tconstruct.library.modifiers.ModifierId("tconstruct", "tipped")).isEmpty(),"Test tool has no potion");
       BlockPos pos=new BlockPos(i*2,1,1);
       helper.setBlock(pos,TinkerSmeltery.searedTable.get());
       var inventory=level.getCapability(Capabilities.ItemHandler.BLOCK,helper.absolutePos(pos),Direction.UP);
@@ -49,7 +49,7 @@ public final class MantleFluidTagGameTest {
       for(int i=0;i<2;i++) {
         var table=(CastingBlockEntity)level.getBlockEntity(helper.absolutePos(new BlockPos(i*2,1,1)));
         ItemStack result=table.getItem(CastingBlockEntity.OUTPUT);
-        helper.assertTrue(!result.isEmpty() && ModifierUtil.getPersistentString(result,recipes[i].getModifier()).isEmpty(),"Water casting did not remove the actual potion effect");
+        helper.assertTrue(!result.isEmpty() && ModifierUtil.getPersistentString(result,new slimeknights.tconstruct.library.modifiers.ModifierId("tconstruct", "tipped")).isEmpty(),"Water casting did not remove the actual potion effect");
         helper.assertTrue(table.getTank().getFluidInTank(0).isEmpty(),"Water was not consumed");
       }
       TConstruct.LOG.info("TiC actual native Mantle water lava tags and ammo fishing rod water tip clearing PASS");
