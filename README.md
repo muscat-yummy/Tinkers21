@@ -8,6 +8,9 @@ This project aims to bring the original Tinkers' Construct experience to modern 
 
 > [!IMPORTANT]
 > This is an **unofficial community port** and is not affiliated with or maintained by the original Tinkers' Construct developers or SlimeKnights.
+>
+> This port was developed through **vibe coding (AI-assisted development)**. Passing the documented checks does not guarantee safety or freedom from bugs.
+> When an official Tinkers' Construct release for Minecraft 1.21.1 / NeoForge becomes available, **switch to the official version for safety, reliability and ongoing maintenance**. Back up your world first and check migration compatibility; this fork does not guarantee that existing worlds or addon data can be transferred unchanged.
 
 ## Goals
 
