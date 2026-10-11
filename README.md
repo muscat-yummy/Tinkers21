@@ -112,4 +112,5 @@ It is not an official Minecraft product, and it is not approved by or associated
 
 ## Backstory
 
-I wanted to play Tinkers' Construct with my friends, but realized there was no version for Minecraft 1.21.1. So I decided to leave the terms, rules and all that stuff to AI—and this weird project is what came out of it.
+I wanted to play Tinkers' Construct with my friends, but realized there was no version for Minecraft 1.21.1. So I decided to leave the terms, rules and all that stuff to AI
+and this weird project is what came out of it.
