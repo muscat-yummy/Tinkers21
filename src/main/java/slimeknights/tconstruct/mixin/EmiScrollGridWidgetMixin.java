@@ -1,7 +1,6 @@
 package slimeknights.tconstruct.mixin;
 
 import mezz.jei.api.gui.placement.HorizontalAlignment;
-import mezz.jei.api.gui.placement.IPlaceable;
 import mezz.jei.api.gui.placement.VerticalAlignment;
 import mezz.jei.api.gui.widgets.IScrollGridWidget;
 import org.spongepowered.asm.mixin.Mixin;
@@ -15,7 +14,9 @@ public abstract class EmiScrollGridWidgetMixin {
   @Unique
   public IScrollGridWidget setPosition(int x,int y,int width,int height,
                                        HorizontalAlignment horizontal,VerticalAlignment vertical) {
-    ((IPlaceable<?>)(Object)this).setPosition(x,y,width,height,horizontal,vertical);
+    IScrollGridWidget widget=(IScrollGridWidget)(Object)this;
+    widget.setPosition(x+horizontal.getXPos(width,widget.getWidth()),
+                       y+vertical.getYPos(height,widget.getHeight()));
     return (IScrollGridWidget)(Object)this;
   }
 }

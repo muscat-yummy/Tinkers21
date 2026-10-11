@@ -107,8 +107,11 @@ public final class RecipeViewerCheck {
           recipe.addWidgets(group);
           if (group.widgets.size()<2) throw new IllegalStateException("No recipe widgets");
           for (var widget : group.widgets) {
-            widget.render(g,4,4,delta);
-            widget.getTooltip(4,4);
+            var bounds=widget.getBounds();
+            int hoverX=bounds.x()+bounds.width()/2;
+            int hoverY=bounds.y()+bounds.height()/2;
+            widget.render(g,hoverX,hoverY,delta);
+            widget.getTooltip(hoverX,hoverY);
           }
           g.flush();
           counts.merge(category,1,Integer::sum);
