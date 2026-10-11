@@ -1,13 +1,17 @@
-name: Verify and release fluid GUI hotfix
+name: Verify and release container background hotfix
 on:
   push:
     branches: [main]
     paths:
       - '.github/workflows/crystal-hotfix.yml'
-      - 'src/main/java/slimeknights/tconstruct/library/client/GuiUtil.java'
+      - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/MultiModuleScreen.java'
+      - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/BackgroundContainerScreen.java'
+      - 'mantle-port/build.gradle'
+      - 'mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
+      - 'src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/java/slimeknights/tconstruct/smeltery/client/screen/**'
       - 'src/portClientCheck/**'
-      - 'docs/releases/3.12.1-port.2.md'
+      - 'docs/releases/3.12.1-port.3.md'
   workflow_dispatch:
 permissions:
   contents: write
@@ -48,7 +52,9 @@ jobs:
               'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
               'TiC independent addon native inventory synchronization and material rendering PASS' not in text or
               'TiC actual modifier crystal opaque tint atlas geometry and native rendering PASS' not in text or
-              'TiC actual fluid GUI framebuffer bounds queued geometry lava iron partial empty and rectangular tanks PASS' not in text or errors or missing):
+              'TiC actual fluid GUI framebuffer bounds queued geometry lava iron partial empty and rectangular tanks PASS' not in text or
+              'TiC actual full Foundry legacy two-background duplicate-fluid reproduction PASS' not in text or
+              'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
@@ -62,28 +68,34 @@ jobs:
               print(crash.read_text()[-90000:])
       - name: Verify bounded hotfix against published baseline
         run: |
-          git fetch --no-tags origin tag v3.12.1-port.1
+          git fetch --no-tags origin tag v3.12.1-port.2
           python3 - <<'PY'
           import subprocess
           from pathlib import Path
-          base = 'v3.12.1-port.1'
-          old = subprocess.check_output(['git', 'show', base + ':gradle.properties'], text=True)
-          assert Path('gradle.properties').read_text() == old.replace('mod_version=3.12.1-port.1', 'mod_version=3.12.1-port.2')
-          allowed = ['src/main/java/slimeknights/tconstruct/library/client/GuiUtil.java',
-            'src/main/java/slimeknights/tconstruct/smeltery/client/screen/HeatingStructureScreen.java',
-            'src/main/java/slimeknights/tconstruct/smeltery/client/screen/module/GuiSmelteryTank.java',
-            'src/main/java/slimeknights/tconstruct/smeltery/client/screen/module/GuiFuelModule.java',
-            'src/main/java/slimeknights/tconstruct/smeltery/client/screen/module/GuiTankModule.java']
+          base = 'v3.12.1-port.2'
+          def old(path):
+              return subprocess.check_output(['git', 'show', base + ':' + path], text=True)
+          assert Path('gradle.properties').read_text() == old('gradle.properties').replace('mod_version=3.12.1-port.2', 'mod_version=3.12.1-port.3')
+          replacements = {
+            'mantle-port/build.gradle': ("version = '1.11-port.0'", "version = '1.11-port.1'"),
+            'mantle-port/src/main/templates/META-INF/neoforge.mods.toml': ('version="1.11-port.0"', 'version="1.11-port.1"'),
+            'src/main/templates/META-INF/neoforge.mods.toml': ('versionRange="[1.11-port.0,)"', 'versionRange="[1.11-port.1,)"')}
+          for path, (before, after) in replacements.items():
+              assert Path(path).read_text() == old(path).replace(before, after)
+          screens = ['mantle-port/src/main/java/slimeknights/mantle/client/screen/MultiModuleScreen.java',
+            'mantle-port/src/main/java/slimeknights/mantle/client/screen/BackgroundContainerScreen.java']
+          for path in screens:
+              assert Path(path).read_text() == old(path).replace('    this.renderBackground(graphics, mouseX, mouseY, partialTicks);\n', '').replace('\t\tthis.renderBackground(graphics, mouseX, mouseY, partialTicks);\n', '')
           subprocess.run(['git', 'diff', '--exit-code', base, 'HEAD', '--', 'src/main', 'src/generated',
             'mantle-port', 'src/portGameTest', 'src/portAddonCheck', 'build.gradle', 'settings.gradle',
-            'gradle', 'gradlew', 'gradlew.bat'] + [':(exclude)' + path for path in allowed], check=True)
-          print('Identical server/datagen sources and pinned toolchain; bounded fluid GUI fix PASS')
+            'gradle', 'gradlew', 'gradlew.bat'] + [':(exclude)' + path for path in [*replacements, *screens]], check=True)
+          print('Unchanged server/data and pinned toolchain; exact two client background-call removals and version metadata PASS')
           PY
       - name: Assemble production distribution jars
         run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
       - name: Inspect and package actual hotfix jars
         env:
-          TINKERS21_RELEASE_VERSION: '3.12.1-port.2'
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.3'
         run: python3 scripts/release/package_preview.py
       - name: Install the pinned production NeoForge server
         run: |
@@ -103,10 +115,10 @@ jobs:
                   print(path.read_text(errors='replace')[-60000:])
       - uses: actions/upload-artifact@v4
         with:
-          name: Tinkers21-3.12.1-port.2-distribution
+          name: Tinkers21-3.12.1-port.3-distribution
           path: |
             dist/*
-            run-port-client-check/fluid-gui-check.png
+            run-port-client-check/*gui*.png
           if-no-files-found: error
           retention-days: 30
       - name: Publish verified hotfix as Latest
@@ -114,11 +126,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag=v3.12.1-port.2
+          tag=v3.12.1-port.3
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
             echo 'Hotfix exists; refusing to replace release assets.' >&2
             exit 1
           fi
-          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.2 — fluid GUI rendering fix" --notes-file docs/releases/3.12.1-port.2.md --draft --latest=false
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.3 — duplicate container rendering fix" --notes-file docs/releases/3.12.1-port.3.md --draft --latest=false
           gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets

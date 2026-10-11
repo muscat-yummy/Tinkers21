@@ -141,7 +141,6 @@ public class MultiModuleScreen<CONTAINER extends MultiModuleContainerMenu<?>> ex
 
   @Override
   public void render(GuiGraphics graphics, int mouseX, int mouseY, float partialTicks) {
-    this.renderBackground(graphics, mouseX, mouseY, partialTicks);
     int oldX = this.leftPos;
     int oldY = this.topPos;
     int oldW = this.imageWidth;

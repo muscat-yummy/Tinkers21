@@ -27,7 +27,7 @@ side="BOTH"
 [[dependencies.tconstruct]]
 modId="mantle"
 type="required"
-versionRange="[1.11-port.0,)"
+versionRange="[1.11-port.1,)"
 ordering="AFTER"
 side="BOTH"
 
