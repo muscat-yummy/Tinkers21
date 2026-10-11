@@ -38,18 +38,25 @@ jobs:
           assert any(s['name']=='Require graphical client verification' and s['conclusion']=='success' for s in job['steps'])
           subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
           subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','gradle.properties','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portClientCheck','src/portAddonCheck',
-              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java'],check=True)
-          print('Strict native client without JEI/EMI retained from successful steps in job 114546962547; changed optional EMI target is absent in this profile')
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java',
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiRecipeIdentityMixin.java'],check=True)
+          print('Strict native client without JEI/EMI retained from successful steps in job 114546962547; changed optional EMI targets are absent in this profile')
       - name: Require the accepted actual viewer audit and identical production source
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         shell: python
         run: |
-          import json, subprocess
+          import json, subprocess, time
           from pathlib import Path
-          base='0a99fdb7825b7f037359fc04e58aff6c9799ecca'
-          run=json.loads(subprocess.check_output(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/actions/runs/38165655135'],text=True))
-          assert run['conclusion']=='success' and run['head_sha']==base
+          base='644bf6b8d517d1a411a4316ec18e9ccf93867afb'
+          deadline=time.monotonic()+600
+          while True:
+              run=json.loads(subprocess.check_output(['gh','api','repos/'+__import__('os').environ['GITHUB_REPOSITORY']+'/actions/runs/38166095246'],text=True))
+              assert run['head_sha']==base
+              if run['status']=='completed': break
+              assert time.monotonic()<deadline, 'Viewer audit did not finish'
+              time.sleep(10)
+          assert run['conclusion']=='success'
           subprocess.run(['git','fetch','--no-tags','origin',base],check=True)
           subprocess.run(['git','diff','--exit-code',base,'HEAD','--','src/main','src/generated','mantle-port','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portAddonCheck',
               ':(exclude)src/main/templates/META-INF/neoforge.mods.toml',
@@ -70,8 +77,8 @@ jobs:
       - name: Inspect and package actual hotfix jars
         env:
           TINKERS21_RELEASE_VERSION: '3.12.1-port.8'
-          RECIPE_AUDIT_RUN: '38165655135'
-          RECIPE_AUDIT_SHA: '0a99fdb7825b7f037359fc04e58aff6c9799ecca'
+          RECIPE_AUDIT_RUN: '38166095246'
+          RECIPE_AUDIT_SHA: '644bf6b8d517d1a411a4316ec18e9ccf93867afb'
         run: python3 scripts/release/package_preview.py
       - name: Verify identical 251-compiled distribution jars on installed NeoForge 249 and 251 servers
         run: |
@@ -122,7 +129,8 @@ jobs:
           assert any(j['id']==114546284188 and j['conclusion']=='success' for j in jobs)
           subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
           subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','gradle.properties','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portGameTest','src/portAddonCheck',
-              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java'],check=True)
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiScrollGridWidgetMixin.java',
+              ':(exclude)src/main/java/slimeknights/tconstruct/mixin/EmiRecipeIdentityMixin.java'],check=True)
           config=json.loads(__import__('pathlib').Path('src/main/resources/tconstruct.mixins.json').read_text())
-          assert 'EmiScrollGridWidgetMixin' in config['client'] and 'EmiScrollGridWidgetMixin' not in config['mixins']
-          print('All 28 actual Minecraft GameTests retained at 38165225689 / ff002799; only optional client scroll-grid positioning changed')
+          assert all(m in config['client'] and m not in config['mixins'] for m in ['EmiScrollGridWidgetMixin','EmiRecipeIdentityMixin'])
+          print('All 28 actual Minecraft GameTests retained at 38165225689 / ff002799; only optional client scroll-grid positioning and display identities changed')
