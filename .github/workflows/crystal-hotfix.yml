@@ -1,4 +1,4 @@
-name: Verify and release basin casting and book rendering hotfix
+name: Verify and release book icon compatibility hotfix
 on:
   push:
     branches: [main]
@@ -9,12 +9,14 @@ on:
       - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/book/BookScreen.java'
       - 'src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java'
       - 'src/portGameTest/**'
+      - 'mantle-port/src/main/java/slimeknights/mantle/client/book/data/element/IngredientData.java'
+      - 'src/main/resources/assets/tconstruct/book/encyclopedia/ja_jp/language.lang'
       - 'mantle-port/build.gradle'
       - 'mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/templates/META-INF/neoforge.mods.toml'
       - 'src/main/java/slimeknights/tconstruct/smeltery/client/screen/**'
       - 'src/portClientCheck/**'
-      - 'docs/releases/3.12.1-port.4.md'
+      - 'docs/releases/3.12.1-port.5.md'
   workflow_dispatch:
 permissions:
   contents: write
@@ -40,27 +42,6 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y flite1-dev
-      - name: Create the isolated native world fixture
-        run: python3 scripts/port/create_game_load_template.py
-      - name: Run actual Minecraft GameTests including faucet basin regression
-        run: timeout 540s ./gradlew :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain
-      - name: Require native casting regression and strict server log
-        shell: python
-        run: |
-          from pathlib import Path
-          text = Path('run-port-game-test/logs/latest.log').read_text()
-          assert 'TiC actual faucet seared scorched iron gold block casting and reusable empty platform PASS' in text
-          assert 'TiC actual native melter fuel casting and machine persistence PASS' in text
-          assert 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS' in text
-          assert not any('/ERROR]' in line and 'server.properties' not in line for line in text.splitlines())
-      - name: Keep actual GameTest diagnostics
-        if: always()
-        shell: python
-        run: |
-          from pathlib import Path
-          log = Path('run-port-game-test/logs/latest.log')
-          if log.is_file(): print(log.read_text()[-100000:])
-          for crash in Path('run-port-game-test/crash-reports').glob('*.txt'): print(crash.read_text()[-90000:])
       - name: Run the actual graphical Minecraft client
         run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true --no-daemon --console=plain
       - name: Require graphical client verification
@@ -80,6 +61,7 @@ jobs:
               'TiC actual full Foundry legacy two-background duplicate-fluid reproduction PASS' not in text or
               'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or
               'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or
+              'TiC actual six loaded book section icons legacy material tool slot components Japanese encyclopedia index native rendering PASS' not in text or
               any('TiC actual loaded book resources scenario ' + str(i) + ' cover ' not in text for i in range(4)) or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
@@ -94,14 +76,14 @@ jobs:
               print(crash.read_text()[-90000:])
       - name: Verify bounded changes and pinned toolchain against published baseline
         run: |
-          git fetch --no-tags origin tag v3.12.1-port.3
-          git diff --exit-code v3.12.1-port.3 HEAD -- build.gradle settings.gradle gradle gradlew gradlew.bat src/generated src/portAddonCheck
-          git diff --exit-code v3.12.1-port.3 HEAD -- src/main mantle-port ':(exclude)src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java' ':(exclude)src/main/resources/assets/tconstruct/lang/ja_jp.json' ':(exclude)src/main/templates/META-INF/neoforge.mods.toml' ':(exclude)mantle-port/src/main/java/slimeknights/mantle/client/screen/book/BookScreen.java' ':(exclude)mantle-port/build.gradle' ':(exclude)mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
+          git fetch --no-tags origin tag v3.12.1-port.4
+          git diff --exit-code v3.12.1-port.4 HEAD -- build.gradle settings.gradle gradle gradlew gradlew.bat src/generated src/portAddonCheck
+          git diff --exit-code v3.12.1-port.4 HEAD -- src/main mantle-port ':(exclude)src/main/resources/assets/tconstruct/book/encyclopedia/ja_jp/language.lang' ':(exclude)src/main/templates/META-INF/neoforge.mods.toml' ':(exclude)mantle-port/src/main/java/slimeknights/mantle/client/book/data/element/IngredientData.java' ':(exclude)mantle-port/build.gradle' ':(exclude)mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
       - name: Assemble production distribution jars
         run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
       - name: Inspect and package actual hotfix jars
         env:
-          TINKERS21_RELEASE_VERSION: '3.12.1-port.4'
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.5'
         run: python3 scripts/release/package_preview.py
       - name: Install the pinned production NeoForge server
         run: |
@@ -121,7 +103,7 @@ jobs:
                   print(path.read_text(errors='replace')[-60000:])
       - uses: actions/upload-artifact@v4
         with:
-          name: Tinkers21-3.12.1-port.4-distribution
+          name: Tinkers21-3.12.1-port.5-distribution
           path: |
             dist/*
             run-port-client-check/*gui*.png
@@ -132,13 +114,13 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
-          tag=v3.12.1-port.4
+          tag=v3.12.1-port.5
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
             git fetch --no-tags origin tag "$tag"
             git diff --exit-code "$tag" HEAD -- src/main src/generated mantle-port gradle.properties build.gradle settings.gradle gradle gradlew gradlew.bat
             echo 'Existing verified release production sources unchanged; preserving published assets.'
             exit 0
           fi
-          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.4 — basin casting and sharp books fix" --notes-file docs/releases/3.12.1-port.4.md --draft --latest=false
+          gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.5 — legacy book icon compatibility fix" --notes-file docs/releases/3.12.1-port.5.md --draft --latest=false
           gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest
           gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json url,tagName,isDraft,isPrerelease,assets

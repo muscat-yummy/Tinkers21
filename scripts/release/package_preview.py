@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
-LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2"}.get(VERSION, "1.11-port.0")
+LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3"}.get(VERSION, "1.11-port.0")
 
 
 def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, license_path: str) -> None:
@@ -77,6 +77,14 @@ def main() -> None:
              "gate": "26 actual GameTests including native faucet iron/gold basins; strict graphical book/core/addon/crystal/fluid/container; both production assemblies; installed distribution server"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data and datagen sources; current native recipe lookup covered by GameTests"}]
+    if VERSION == "3.12.1-port.5":
+        provenance["accepted_gates"] = [
+            {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
+             "gate": "strict actual client six loaded books Japanese encyclopedia icons preserved material/tool/slot data; previous graphical checks; both assemblies; installed distribution server"},
+            {"run": 38119549799, "sha": "89e9b8139bf48640b350bbbcea0ace90ca4e5612",
+             "gate": "26 actual GameTests", "scope": "identical server/recipe sources; hotfix only client book display reader and Japanese book text"},
+            {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
+             "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
     (DIST / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")
     shutil.copyfile(ROOT / f"docs/releases/{VERSION}.md", DIST / "release-notes.md")
     bundle = DIST / f"Tinkers21-1.21.1-neoforge-{VERSION}.zip"

@@ -20,6 +20,9 @@ materials_ammo=発射物用素材
 materials_ammo.subtext=矢や手裏剣のような武器を作成するために使用する素材です。
 materials_armor=防具用素材
 materials_armor.subtext=防具を作成するために使用する素材です。
+materials_slime=スライムスーツ用素材
+materials_slime.subtext=スライムスーツを構成する素材の効果を解説します。
+
 materials_skull=スライムスカル
 materials_skull.subtext=このセクションではスライムスカルを作る際の頭全種類の効果を解説します。
 

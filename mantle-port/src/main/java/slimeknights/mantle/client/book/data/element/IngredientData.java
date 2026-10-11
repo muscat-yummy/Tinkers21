@@ -7,6 +7,11 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonPrimitive;
+import net.minecraft.client.Minecraft;
+import com.mojang.serialization.JsonOps;
+import slimeknights.mantle.data.loadable.LoadableOps;
+import slimeknights.mantle.data.loadable.common.ItemStackLoadable;
+import slimeknights.mantle.data.loadable.primitive.IntLoadable;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
@@ -153,6 +158,16 @@ public class IngredientData implements IDataElement {
       }
 
       JsonObject object = json.getAsJsonObject();
+      // Old book display entries are stacks, not registered native recipe predicates.
+      // Decode them with the established component-preserving legacy stack converter.
+      if (object.has("type") && "forge:nbt".equals(object.get("type").getAsString())) {
+        var level = Minecraft.getInstance().level;
+        ItemStack stack = level == null
+          ? ItemStackLoadable.REQUIRED_ITEM_NBT.deserialize(object)
+          : LoadableOps.with(level.registryAccess().createSerializationContext(JsonOps.INSTANCE),
+              () -> ItemStackLoadable.REQUIRED_ITEM_NBT.deserialize(object));
+        return SizedIngredient.of(Ingredient.of(stack), IntLoadable.FROM_ONE.getOrDefault(object, "amount_needed", 1));
+      }
       return SizedIngredient.deserialize(object);
     }
   }
