@@ -1,7 +1,7 @@
 name: Audit actual JEI EMI recipe rendering
 on:
   push:
-    branches: [main, fix/recipe-viewer]
+    branches: [fix/recipe-viewer]
     paths:
       - '.github/workflows/recipe-viewer-audit.yml'
       - 'scripts/port/recipe-qa/**'

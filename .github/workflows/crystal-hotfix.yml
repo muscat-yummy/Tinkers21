@@ -1,23 +1,5 @@
-name: Verify and release NeoForge 21.1.249 compatibility
+name: Archived port.7 compatibility verification
 on:
-  push:
-    branches: [main]
-    paths:
-      - '.github/workflows/crystal-hotfix.yml'
-      - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/MultiModuleScreen.java'
-      - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/BackgroundContainerScreen.java'
-      - 'mantle-port/src/main/java/slimeknights/mantle/client/screen/book/BookScreen.java'
-      - 'src/main/java/slimeknights/tconstruct/library/recipe/casting/ICastingContainer.java'
-      - 'src/portGameTest/**'
-      - 'mantle-port/src/main/java/slimeknights/mantle/client/book/data/element/IngredientData.java'
-      - 'src/main/resources/assets/tconstruct/book/encyclopedia/ja_jp/language.lang'
-      - 'src/main/resources/assets/tconstruct/book/tinkers_gadgetry/ja_jp/language.lang'
-      - 'mantle-port/build.gradle'
-      - 'mantle-port/src/main/templates/META-INF/neoforge.mods.toml'
-      - 'src/main/templates/META-INF/neoforge.mods.toml'
-      - 'src/main/java/slimeknights/tconstruct/smeltery/client/screen/**'
-      - 'src/portClientCheck/**'
-      - 'docs/releases/3.12.1-port.7.md'
   workflow_dispatch:
 permissions:
   contents: write

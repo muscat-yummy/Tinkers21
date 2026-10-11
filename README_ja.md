@@ -48,11 +48,11 @@ APIの変更が必要になった場合でも、不必要な独自実装を追�
 
 ## 状態と導入方法
 
-現在の実験的プレビューは **3.12.1-port.7** です。NeoForge **21.1.249** に対応しました。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.7) から取得し、クライアント・サーバーの `mods/` に配置してください。**両方のJARを更新**し、Tinkers21 **3.12.1-port.7** とMantle21 **1.11-port.4** を使用します。Minecraft **1.21.1**、NeoForge **21.1.249以上の21.1系列**、**Java 21** が必要です。249で実クライアント描画とGameTest全27件、249・251の通常サーバーで同一の配布JARを検証しています。同じMODのJARは1個だけ置き、公式Tinkers' ConstructやMantleのJARと同時に導入しないでください。
+現在の実験的プレビューは **3.12.1-port.8** です。レシピ表示と一部のレシピ条件を修正しました。[GitHub Releases](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.8) から取得し、クライアント・サーバーの `mods/` に配置してください。**両方のJARを更新**し、Tinkers21 **3.12.1-port.8** とMantle21 **1.11-port.5** を使用します。Minecraft **1.21.1**、NeoForge **21.1.249以上の21.1系列**、**Java 21** が必要です。249で実クライアント描画とGameTest全28件、249・251の通常サーバーで同一の配布JARを検証しています。同じMODのJARは1個だけ置き、公式Tinkers' ConstructやMantleのJARと同時に導入しないでください。
 
-Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全27件（蛇口から鉢への鉄・金ブロック鋳造を含む）、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
+Phase 1〜8の定義された範囲の検証が完了し、フルdatagen、両JARビルド、実Minecraft GameTest全28件（蛇口から鉢への鉄・金ブロック鋳造を含む）、実クライアントの厳格な描画・アドオン検証が成功しています。TiCEX本体・外部連携modの組み合わせ・一般的な旧ワールド移行は未検証のため、検証時には別ワールドかバックアップしたコピーを使用してください。
 
-[リリースノート](docs/releases/3.12.1-port.7.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。SHA-256はリリース本文に、ソースとCIの検証記録はPORTING.mdに記載しています。独立した検証用アドオンは配布JARから除外しています。
+[リリースノート](docs/releases/3.12.1-port.8.md)、[CIの検証記録](PORTING.md)、[アドオン移植ガイド](docs/ADDON_PORTING.md) を参照してください。SHA-256はリリース本文に、ソースとCIの検証記録はPORTING.mdに記載しています。独立した検証用アドオンは配布JARから除外しています。
 
 ## アドオン互換性
 
