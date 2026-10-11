@@ -43,11 +43,12 @@ jobs:
               before.append((tag, release, notes))
           for tag, release, notes in before:
               subprocess.run(['gh', 'api', '--method', 'PATCH', f'repos/{repo}/releases/{release["id"]}',
-                              '--input', '-'], input=json.dumps({'body': notes}), text=True,
+                              '--input', '-'], input=json.dumps({'body': notes, 'name': 'Tinkers21 ' + tag.removeprefix('v')}), text=True,
                              stdout=subprocess.DEVNULL, check=True)
               after = fetch(f'releases/tags/{tag}')
               assert after['body'] == notes, tag
-              for key in ['id', 'tag_name', 'name', 'target_commitish', 'draft', 'prerelease']:
+              assert after['name'] == 'Tinkers21 ' + tag.removeprefix('v'), tag
+              for key in ['id', 'tag_name', 'target_commitish', 'draft', 'prerelease']:
                   assert after[key] == release[key], (tag, key)
               assert assets(after) == assets(release), tag
               print(f'{tag}: concise notes updated; published assets unchanged')
