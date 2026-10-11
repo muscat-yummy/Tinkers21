@@ -12,6 +12,7 @@ import net.neoforged.neoforge.fluids.FluidStack;
 import net.neoforged.neoforge.fluids.capability.IFluidHandler;
 import slimeknights.mantle.block.entity.MantleBlockEntity;
 import slimeknights.tconstruct.common.network.TinkerNetwork;
+import slimeknights.tconstruct.library.fluid.StoredFluid;
 import slimeknights.tconstruct.library.fluid.IMultitankListChange;
 import slimeknights.tconstruct.library.utils.WeakListenerList;
 import slimeknights.tconstruct.smeltery.block.entity.tank.ISmelteryTankHandler.FluidChange;
@@ -309,7 +310,7 @@ public class SmelteryTank<T extends MantleBlockEntity & ISmelteryTankHandler> im
     contained = 0;
     for (int i = 0; i < list.size(); i++) {
       CompoundTag fluidTag = list.getCompound(i);
-      FluidStack fluid = FluidStack.parseOptional(registries, fluidTag);
+      FluidStack fluid = StoredFluid.readTank(fluidTag, registries);
       if (!fluid.isEmpty()) {
         fluids.add(fluid);
         contained += fluid.getAmount();

@@ -87,7 +87,7 @@ public final class BookExplorationCheck {
     if (value == null || depth > 5 || !visited.add(value)) return;
     if (value instanceof IngredientData ingredient) {
       var stacks = ingredient.getItems();
-      if (stacks == null || stacks.isEmpty()) findings.add(id + " EMPTY_INGREDIENT");
+      if (stacks == null) findings.add(id + " UNLOADED_INGREDIENT");
       else for (var stack : stacks) if (stack.is(Items.BARRIER)) findings.add(id + " BARRIER_INGREDIENT " + describe(ingredient));
       return;
     }

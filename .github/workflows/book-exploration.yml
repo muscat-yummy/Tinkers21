@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/book-exploration.yml'
       - 'scripts/port/qa/**'
+      - 'src/main/java/slimeknights/tconstruct/smeltery/block/entity/tank/SmelteryTank.java'
   workflow_dispatch:
 permissions:
   contents: read
@@ -42,6 +43,9 @@ jobs:
           text = log.read_text() if log.is_file() else ''
           errors = [line for line in text.splitlines() if '/ERROR]' in line]
           missing = [line for line in text.splitlines() if 'Unable to load model:' in line or 'Missing textures in model' in line]
+          report = pathlib.Path('run-port-client-check/book-exploration-report.txt').read_text()
+          if 'findings=0' not in report:
+              raise SystemExit('Exploration report contains unresolved page findings')
           if ('TiC actual client construction repair and persisted modifier packets PASS' not in text or
               'TiC actual material armor equipment and native rendering PASS' not in text or
               'TiC actual slime spawn packets tracked variants and native rendering PASS' not in text or
@@ -75,3 +79,86 @@ jobs:
             run-port-client-check/*gui*.png
           if-no-files-found: warn
           retention-days: 30
+  minecraft_load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Install mixed-format tank GameTest
+        run: cp scripts/port/qa/LegacySmelteryTankGameTest.java src/portGameTest/java/slimeknights/tconstruct/port/
+      - name: Create the isolated native world fixture
+        run: python3 scripts/port/create_game_load_template.py
+      - name: Build full production sources and run the actual Minecraft GameTest server
+        shell: bash
+        run: |
+          timeout 540s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true --no-daemon --console=plain &
+          build_pid=$!
+          (
+            sleep 180
+            if kill -0 "$build_pid" 2>/dev/null; then
+              jps -l
+              for java_pid in $(jps -l | awk '$2 ~ /devlaunch.Main/ {print $1}'); do
+                timeout 15s jcmd "$java_pid" Thread.print | python3 -c 'import sys; s=sys.stdin.read(); a=s.find("\"Server thread\""); print(s[a:a+9500] if a >= 0 else s[:2500])'
+              done
+            fi
+          ) &
+          monitor_pid=$!
+          if wait "$build_pid"; then result=0; else result=$?; fi
+          kill "$monitor_pid" 2>/dev/null || true
+          exit "$result"
+      - name: Require the actual game-world verification marker
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-game-test/logs/latest.log')
+          text = log.read_text() if log.is_file() else ''
+          marker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'
+          load_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]
+          if (marker not in text or
+              'TiC actual native melter fuel casting and machine persistence PASS' not in text or
+              'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or
+              'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or
+              'TiC actual registered world features PASS' not in text or
+              'TiC actual twenty slime island structure templates PASS' not in text or
+              'TiC actual earth slime island template world placement PASS' not in text or
+              'TiC actual sky slime island template world placement PASS' not in text or
+              'TiC actual blood slime island template world placement PASS' not in text or
+              'TiC actual ender slime island template world placement PASS' not in text or
+              'TiC actual island generation biome rejection and structure persistence PASS' not in text or
+              'TiC actual reloaded four island pieces native world placement PASS' not in text or
+              'TiC actual applied slime natural biome spawn entries PASS' not in text or
+              'TiC actual native slime natural spawn habitat predicates PASS' not in text or
+              'TiC actual overslime absorption exhaustion and persistence PASS' not in text or
+              'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or
+              'TiC actual sky slime entity world ticks PASS' not in text or
+              'TiC actual ender slime entity world ticks PASS' not in text or
+              'TiC actual ender slime damage canceled and approved native teleport PASS' not in text or
+              'TiC actual terracube entity world ticks PASS' not in text or
+              'TiC actual configured earth slime tree placement PASS' not in text or
+              'TiC actual configured sky slime tree placement PASS' not in text or
+              'TiC actual configured blood slime fungus placement PASS' not in text or
+              'TiC actual slime biome spawn modifiers PASS' not in text or
+              'TiC independent addon registration material dynamic modifier hook and persistence PASS' not in text or
+              'TiC actual faucet seared scorched iron gold block casting and reusable empty platform PASS' not in text or
+              'TiC actual smeltery foundry mixed legacy native fluids amounts components and native save reload PASS' not in text or
+              'Mod loading has failed' in text or load_errors):
+              raise SystemExit('Actual TiC world-load verification did not complete successfully')
+      - name: Show actual game diagnostics
+        if: always()
+        shell: python
+        run: |
+          import pathlib
+          log = pathlib.Path('run-port-game-test/logs/latest.log')
+          if log.is_file():
+              print(log.read_text()[-90000:])
+          for crash in sorted(pathlib.Path('run-port-game-test/crash-reports').glob('*.txt')):
+              print(crash.read_text()[-90000:])
