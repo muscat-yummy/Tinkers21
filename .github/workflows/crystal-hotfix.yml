@@ -79,7 +79,8 @@ jobs:
               'TiC actual fluid GUI framebuffer bounds queued geometry lava iron partial empty and rectangular tanks PASS' not in text or
               'TiC actual full Foundry legacy two-background duplicate-fluid reproduction PASS' not in text or
               'TiC actual full Foundry and generic container single background dispatch no shifted lava or input-panel iron PASS' not in text or
-              'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or errors or missing):
+              'TiC actual Materials and You Puny Smelting cover pages native blur ordering sharp framebuffer and arrows PASS' not in text or
+              any('TiC actual loaded book resources scenario ' + str(i) + ' title ' not in text for i in range(4)) or errors or missing):
               raise SystemExit('Actual graphical client verification did not complete successfully')
       - name: Show actual client diagnostics
         if: always()
@@ -133,8 +134,10 @@ jobs:
           set -euo pipefail
           tag=v3.12.1-port.4
           if gh release view "$tag" --repo "$GITHUB_REPOSITORY" --json isDraft >/tmp/tinkers21-existing-hotfix.json 2>/dev/null; then
-            echo 'Hotfix exists; refusing to replace release assets.' >&2
-            exit 1
+            git fetch --no-tags origin tag "$tag"
+            git diff --exit-code "$tag" HEAD -- src/main src/generated mantle-port gradle.properties build.gradle settings.gradle gradle gradlew gradlew.bat
+            echo 'Existing verified release production sources unchanged; preserving published assets.'
+            exit 0
           fi
           gh release create "$tag" dist/* --repo "$GITHUB_REPOSITORY" --target "$GITHUB_SHA" --title "Tinkers21 3.12.1-port.4 — basin casting and sharp books fix" --notes-file docs/releases/3.12.1-port.4.md --draft --latest=false
           gh release edit "$tag" --repo "$GITHUB_REPOSITORY" --draft=false --latest

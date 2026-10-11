@@ -26,6 +26,12 @@ public final class BookScreenRenderingCheck {
       return true;
     }
     BookData book = scenario < 2 ? TinkerBook.MATERIALS_AND_YOU : TinkerBook.PUNY_SMELTING;
+    // BookData.openGui loads lazily; direct regression screen construction must do the same.
+    book.load();
+    if (book.appearance.title.isEmpty() || book.sections.isEmpty()) {
+      throw new IllegalStateException("Actual book resources were not loaded");
+    }
+    TConstruct.LOG.info("TiC actual loaded book resources scenario {} title {} sections {} PASS", scenario, book.appearance.title, book.sections.size());
     current = new CheckBook(book, scenario++);
     minecraft.setScreen(current);
     return false;
