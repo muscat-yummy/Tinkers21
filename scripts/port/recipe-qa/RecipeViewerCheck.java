@@ -25,17 +25,17 @@ public final class RecipeViewerCheck {
     if (failure != null) throw failure;
     if (complete) {
       if (!actualScreen) {
-        EmiRecipe basin=EmiApi.getRecipeManager().getRecipes().stream().filter(r -> r.getCategory().getId().toString().equals("tconstruct:casting_basin") && r.getOutputs().stream().anyMatch(s -> s.getItemStack().is(slimeknights.tconstruct.smeltery.TinkerSmeltery.scorchedBasin.get().asItem()))).findFirst().orElseThrow();
+        EmiRecipe basin=EmiApi.getRecipeManager().getRecipes().stream().filter(r -> r.getCategory().getId().toString().equals("tconstruct:casting_basin") && r.getOutputs().stream().anyMatch(s -> s.getItemStack().is(net.minecraft.world.item.Items.IRON_BLOCK))).findFirst().orElseThrow();
         EmiApi.displayRecipe(basin);
         actualScreen=true;
         return false;
       }
       if(++screenTicks<30) return false;
-      if(!mc.screen.getClass().getName().equals("dev.emi.emi.screen.RecipeScreen")) throw new IllegalStateException("Actual EMI recipe screen did not open");
+      if(!mc.screen.getClass().getName().equals("dev.emi.emi.screen.RecipeScreen")) throw new IllegalStateException("Actual EMI casting basin recipe screen did not open");
       try(var image=net.minecraft.client.Screenshot.takeScreenshot(mc.getMainRenderTarget())) {
         image.writeToFile(Path.of("emi-casting-basin-gui.png"));
       } catch(Exception e) { throw new IllegalStateException(e); }
-      TConstruct.LOG.info("TiC actual EMI scorched casting basin recipe screen rendering PASS");
+      TConstruct.LOG.info("TiC actual EMI iron block casting basin recipe screen rendering PASS");
       mc.setScreen(null);
       return true;
     }

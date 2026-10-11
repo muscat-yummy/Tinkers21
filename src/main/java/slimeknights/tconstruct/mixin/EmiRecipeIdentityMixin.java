@@ -35,4 +35,18 @@ public abstract class EmiRecipeIdentityMixin {
       }
     } catch(ReflectiveOperationException error) { throw new IllegalStateException("EMI runtime identity unavailable",error); }
   }
+  /** EMI passed null to its extras builder; expose the already-created actual JEI slot drawables. */
+  @org.spongepowered.asm.mixin.injection.ModifyArg(method="addWidgets", index=0, remap=false,
+      at=@At(value="INVOKE", target="Ldev/emi/emi/jemi/impl/extras/JemiRecipeExtrasBuilder;<init>(Lmezz/jei/api/gui/ingredient/IRecipeSlotDrawablesView;)V", remap=false))
+  private mezz.jei.api.gui.ingredient.IRecipeSlotDrawablesView tconstruct$extrasSlots(
+      mezz.jei.api.gui.ingredient.IRecipeSlotDrawablesView existing,
+      @com.llamalad7.mixinextras.sugar.Local java.util.Optional<mezz.jei.api.gui.IRecipeLayoutDrawable<?>> layout) {
+    if(existing!=null) return existing;
+    java.util.List<mezz.jei.api.gui.ingredient.IRecipeSlotDrawable> slots=layout.map(value ->
+      value.getRecipeSlotsView().getSlotViews().stream()
+        .filter(mezz.jei.api.gui.ingredient.IRecipeSlotDrawable.class::isInstance)
+        .map(mezz.jei.api.gui.ingredient.IRecipeSlotDrawable.class::cast).toList()).orElse(java.util.List.of());
+    return () -> slots;
+  }
+
 }
