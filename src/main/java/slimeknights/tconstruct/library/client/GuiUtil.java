@@ -69,6 +69,23 @@ public final class GuiUtil {
     return mouseY > y + topHeight;
   }
 
+  /** Draws fluid after queued GUI geometry, before changing the shared atlas/shader state. */
+  public static void renderFluidTank(GuiGraphics graphics, AbstractContainerScreen<?> screen, FluidStack stack, int capacity, int x, int y, int width, int height, int depth) {
+    renderFluidTank(graphics, screen, stack, stack.getAmount(), capacity, x, y, width, height, depth);
+  }
+
+  /** Draws fluid using an explicit amount (including fuel stored across multiple tanks). */
+  public static void renderFluidTank(GuiGraphics graphics, AbstractContainerScreen<?> screen, FluidStack stack, int amount, int capacity, int x, int y, int width, int height, int depth) {
+    graphics.flush();
+    renderFluidTank(graphics.pose(), screen, stack, amount, capacity, x, y, width, height, depth);
+  }
+
+  /** Keeps buffered GUI draws ordered around the immediate fluid atlas draw. */
+  public static void renderTiledFluid(GuiGraphics graphics, AbstractContainerScreen<?> screen, FluidStack stack, int x, int y, int width, int height, int depth) {
+    graphics.flush();
+    renderTiledFluid(graphics.pose(), screen, stack, x, y, width, height, depth);
+  }
+
   /**
    * Renders a fluid tank with a partial fluid level
    * @param screen    Parent screen
@@ -98,7 +115,7 @@ public final class GuiUtil {
   public static void renderFluidTank(PoseStack matrices, AbstractContainerScreen<?> screen, FluidStack stack, int amount, int capacity, int x, int y, int width, int height, int depth) {
     if(!stack.isEmpty() && capacity > 0) {
       int maxY = y + height;
-      int fluidHeight = Math.min(height * amount / capacity, height);
+      int fluidHeight = (int) Math.min((long) height * Math.max(amount, 0) / capacity, height);
       renderTiledFluid(matrices, screen, stack, x, maxY - fluidHeight, width, fluidHeight, depth);
     }
   }
@@ -115,7 +132,7 @@ public final class GuiUtil {
    * @param depth   Fluid depth
    */
   public static void renderTiledFluid(PoseStack matrices, AbstractContainerScreen<?> screen, FluidStack stack, int x, int y, int width, int height, int depth) {
-    if (!stack.isEmpty()) {
+    if (!stack.isEmpty() && width > 0 && height > 0) {
       IClientFluidTypeExtensions clientFluid = IClientFluidTypeExtensions.of(stack.getFluid());
       TextureAtlasSprite fluidSprite = screen.getMinecraft().getTextureAtlas(InventoryMenu.BLOCK_ATLAS).apply(clientFluid.getStillTexture(stack));
       RenderUtils.setColorRGBA(clientFluid.getTintColor(stack));
@@ -137,6 +154,7 @@ public final class GuiUtil {
    * @param upsideDown  If true, flips the sprite
    */
   public static void renderTiledTextureAtlas(PoseStack matrices, AbstractContainerScreen<?> screen, TextureAtlasSprite sprite, int x, int y, int width, int height, int depth, boolean upsideDown) {
+    if (width <= 0 || height <= 0) return;
     // start drawing sprites
     RenderUtils.bindTexture(sprite.atlasLocation());
     BufferBuilder builder = Tesselator.getInstance().begin(Mode.QUADS, DefaultVertexFormat.POSITION_TEX);
@@ -232,9 +250,11 @@ public final class GuiUtil {
    * @param height    Element height
    */
   public static void renderHighlight(GuiGraphics graphics, int x, int y, int width, int height) {
+      graphics.flush();
       RenderSystem.disableDepthTest();
       RenderSystem.colorMask(true, true, true, false);
       graphics.fill(x, y, x + width, y + height, 100, 0x80FFFFFF);
+      graphics.flush();
       RenderSystem.colorMask(true, true, true, true);
       RenderSystem.enableDepthTest();
   }

@@ -188,7 +188,7 @@ public final class ClientBootstrapCheck {
 
   @SubscribeEvent
   public static void clientTick(ClientTickEvent.Post event) {
-    if (step == 19) return;
+    if (step == 20) return;
     if (serverFailure != null) throw serverFailure;
     Minecraft minecraft = Minecraft.getInstance();
     if (step > 0 && minecraft.screen instanceof DisconnectedScreen) {
@@ -529,6 +529,10 @@ public final class ClientBootstrapCheck {
       geometry(minecraft, minecraft.player.getInventory().getItem(8));
       TConstruct.LOG.info("TiC independent addon native inventory synchronization and material rendering PASS");
       advance(19);
+      return;
+    }
+    if (step == 19 && FluidGuiRenderingCheck.tick(minecraft)) {
+      advance(20);
       minecraft.stop();
     }
   }
