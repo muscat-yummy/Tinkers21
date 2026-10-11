@@ -48,7 +48,12 @@ text = (SERVER / "logs/latest.log").read_text(errors="replace")
 assert process.returncode == 0, f"Installed release server exit code {process.returncode}"
 errors = [line for line in text.splitlines() if "/ERROR]" in line]
 assert not errors, "Actual distribution server ERROR: " + "\n".join(errors)
-assert "Loaded 3336 recipes" in text, "Actual distribution recipe reload did not match accepted core pack"
+# The accepted graphical run also loads 3335 recipes without the server test framework.
+assert "Loaded 3335 recipes" in text, "Actual distribution recipe reload did not match accepted production/client pack"
+for marker in ["Loaded 83 materials", "562 stats loaded for 99 materials",
+               "623 traits loaded for 99 materials", "Loaded 297 dynamic modifiers and 6 modifier redirects",
+               "Loaded 45 tool definitions", "Loaded 23 station slot layouts"]:
+    assert marker in text, f"Actual production data reload missing: {marker}"
 assert "Stopping server" in text and "Saving" in text, "Distribution world did not shut down/save cleanly"
 assert not any("Mod loading has failed" in line or "Missing or unsupported mandatory dependencies" in line
                for line in text.splitlines()), "Native release dependency check failed"
