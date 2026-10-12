@@ -1,0 +1,23 @@
+name: Publish accepted small gameplay fixes
+on:
+  push:
+    branches: [main]
+    paths:
+      - '.github/workflows/publish-small-bugs.yml'
+      - 'scripts/release/publish_small_bugs.py'
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - name: Publish the exact accepted distribution as Latest
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: python3 scripts/release/publish_small_bugs.py

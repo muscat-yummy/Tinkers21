@@ -234,9 +234,10 @@ public class FancyItemFrameEntity extends ItemFrame implements IEntityWithComple
 
   @Override
   public void readAdditionalSaveData(CompoundTag compound) {
-    super.readAdditionalSaveData(compound);
+    // ItemFrame loads rotation through our override, so its rotation range must be known first.
     int frameId = compound.getInt(TAG_VARIANT);
     this.entityData.set(VARIANT, frameId);
+    super.readAdditionalSaveData(compound);
     if (doesRotate(frameId)) {
       rotationTimer = compound.getInt(TAG_ROTATION_TIMER);
     }

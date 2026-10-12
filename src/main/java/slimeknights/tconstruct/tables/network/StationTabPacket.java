@@ -31,16 +31,16 @@ public class StationTabPacket implements IThreadsafePacket {
   public void handleThreadsafe(Context context) {
     ServerPlayer sender = context.getSender();
     if (sender != null) {
+      Level world = sender.getCommandSenderWorld();
+      if (!world.hasChunkAt(pos)) {
+        return;
+      }
       ItemStack heldStack = sender.containerMenu.getCarried();
       if (!heldStack.isEmpty()) {
         // set it to empty, so it's doesn't get dropped
         sender.containerMenu.setCarried(ItemStack.EMPTY);
       }
 
-      Level world = sender.getCommandSenderWorld();
-      if (!world.hasChunkAt(pos)) {
-        return;
-      }
       BlockState state = world.getBlockState(pos);
       if (state.getBlock() instanceof ITabbedBlock) {
         ((ITabbedBlock) state.getBlock()).openGui(sender, sender.getCommandSenderWorld(), pos);

@@ -12,7 +12,7 @@ import zipfile
 ROOT = Path(__file__).resolve().parents[2]
 DIST = ROOT / "dist"
 VERSION = os.environ.get("TINKERS21_RELEASE_VERSION", "3.12.1-port.0")
-LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3", "3.12.1-port.6": "1.11-port.3", "3.12.1-port.7": "1.11-port.4", "3.12.1-port.8": "1.11-port.5", "3.12.1-port.9": "1.11-port.5"}.get(VERSION, "1.11-port.0")
+LIBRARY_VERSION = {"3.12.1-port.3": "1.11-port.1", "3.12.1-port.4": "1.11-port.2", "3.12.1-port.5": "1.11-port.3", "3.12.1-port.6": "1.11-port.3", "3.12.1-port.7": "1.11-port.4", "3.12.1-port.8": "1.11-port.5", "3.12.1-port.9": "1.11-port.5", "3.12.1-port.10": "1.11-port.5"}.get(VERSION, "1.11-port.0")
 
 
 def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, license_path: str) -> None:
@@ -31,7 +31,7 @@ def inspect_jar(path: Path, mod_id: str, version: str, required_class: str, lice
         assert [(mod["modId"], mod["version"]) for mod in metadata["mods"]] == [(mod_id, version)]
         assert all("${" not in str(dependency) for dependencies in metadata["dependencies"].values()
                    for dependency in dependencies), f"Unexpanded dependency metadata: {path}"
-        if VERSION in ("3.12.1-port.7", "3.12.1-port.8", "3.12.1-port.9"):
+        if VERSION in ("3.12.1-port.7", "3.12.1-port.8", "3.12.1-port.9", "3.12.1-port.10"):
             dependencies = {d["modId"]: d for d in metadata["dependencies"][mod_id]}
             assert dependencies["neoforge"]["versionRange"] == "[21.1.249,)"
             if mod_id == "tconstruct":
@@ -99,7 +99,7 @@ def main() -> None:
              "scope": "unchanged server sources; includes accepted legacy smeltery fluid fix"},
             {"run": 38110981948, "sha": "01fa71cbaeddb4abe63c245b73a37f96c65255e7",
              "gate": "native datagen", "scope": "unchanged generated data/datagen"}]
-    if VERSION in ("3.12.1-port.7", "3.12.1-port.8", "3.12.1-port.9"):
+    if VERSION in ("3.12.1-port.7", "3.12.1-port.8", "3.12.1-port.9", "3.12.1-port.10"):
         provenance["minimum_neoforge"] = "21.1.249"
         provenance["accepted_gates"] = [
             {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
@@ -124,6 +124,14 @@ def main() -> None:
              "gate": "production assembly on pinned NeoForge251; identical shipping TiC jar plus reused published Mantle5 loaded on installed NeoForge249 and251 servers"},
             {"run": 38165225689, "sha": "ff002799194b4a9288fa36d25c580fb4a8e86a40",
              "gate": "28 native GameTests", "scope": "unchanged server and recipe sources; new optional native EMI client integration only"}]
+    if VERSION == "3.12.1-port.10":
+        provenance["accepted_gates"] = [
+            {"run": int(os.environ["SMALL_BUGS_SERVER_RUN"]), "sha": os.environ["SMALL_BUGS_SERVER_SHA"],
+             "gate": "31 native GameTests: cursor conservation, full/partial crafting destinations and six frame reload variants plus retained regressions"},
+            {"run": int(os.environ["SMALL_BUGS_CLIENT_RUN"]), "sha": os.environ["SMALL_BUGS_CLIENT_SHA"],
+             "gate": "strict actual graphical native EMI alone, all categories and core/addon/books/armor/slimes/fluid rendering"},
+            {"run": int(os.environ["GITHUB_RUN_ID"]), "sha": os.environ["GITHUB_SHA"],
+             "gate": "production assembly on pinned251; exact shipping TiC and reused Mantle5 installed on NeoForge249 and251"}]
     evidence = ROOT / "build/release-evidence"
     evidence.mkdir(parents=True, exist_ok=True)
     (evidence / "provenance.json").write_text(json.dumps(provenance, indent=2) + "\n")

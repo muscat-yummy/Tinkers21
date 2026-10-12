@@ -1,0 +1,58 @@
+name: Verify small gameplay fixes and existing native regressions
+permissions:
+  contents: read
+jobs:
+  minecraft_load:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
+        cache: gradle
+        cache-dependency-path: '**/*.gradle*'
+    - name: Install isolated small bug and retained regression fixtures
+      run: 'mkdir -p src/portGameTest/java/slimeknights/tconstruct/port
+
+        cp scripts/port/small-bugs/SmallBugsGameTest.java scripts/port/qa/LegacySmelteryTankGameTest.java scripts/port/recipe-qa/MantleFluidTagGameTest.java src/portGameTest/java/slimeknights/tconstruct/port/
+
+        '
+    - name: Create the isolated native world fixture
+      run: python3 scripts/port/create_game_load_template.py
+    - name: Build full production sources and run the actual Minecraft GameTest server
+      shell: bash
+      run: "timeout 540s ./gradlew :assemble :mantle-port:assemble :runPortGameTestServer -PportGameTests=true -Pneo_version=21.1.249 --no-daemon --console=plain &\nbuild_pid=$!\n(\n  sleep 180\n  if kill -0 \"$build_pid\" 2>/dev/null; then\n    jps -l\n    for java_pid in $(jps -l | awk '$2 ~ /devlaunch.Main/ {print $1}'); do\n      timeout 15s jcmd \"$java_pid\" Thread.print | python3 -c 'import sys; s=sys.stdin.read(); a=s.find(\"\\\"Server thread\\\"\"); print(s[a:a+9500] if a >= 0 else s[:2500])'\n    done\n  fi\n) &\nmonitor_pid=$!\nif wait \"$build_pid\"; then result=0; else result=$?; fi\nkill \"$monitor_pid\" 2>/dev/null || true\nexit \"$result\"\n"
+    - name: Require the actual game-world verification marker
+      shell: python
+      run: "import pathlib\nlog = pathlib.Path('run-port-game-test/logs/latest.log')\ntext = log.read_text() if log.is_file() else ''\nmarker = 'TiC actual world load, recipe registration, native codec Mixin, inventory and cooking PASS'\nload_errors = [line for line in text.splitlines() if '/ERROR]' in line and 'server.properties' not in line]\nif (marker not in text or\n    'TiC actual native melter fuel casting and machine persistence PASS' not in text or\n    'TiC actual smeltery alloy structure heating reload forwarding and reformation PASS' not in text or\n    'TiC actual foundry structure heating reload forwarding and reformation PASS' not in text or\n    'TiC actual registered world features PASS' not in text or\n    'TiC actual twenty slime island structure templates PASS' not in text or\n    'TiC actual earth slime island template world placement PASS' not in text or\n    'TiC actual sky slime island template world placement PASS' not in text or\n    'TiC actual blood slime island template world placement PASS' not in text or\n    'TiC actual ender slime island template world\
+        \ placement PASS' not in text or\n    'TiC actual island generation biome rejection and structure persistence PASS' not in text or\n    'TiC actual reloaded four island pieces native world placement PASS' not in text or\n    'TiC actual applied slime natural biome spawn entries PASS' not in text or\n    'TiC actual native slime natural spawn habitat predicates PASS' not in text or\n    'TiC actual overslime absorption exhaustion and persistence PASS' not in text or\n    'TiC actual spilling fluid capability simulation persistence and removal PASS' not in text or\n    'TiC actual sky slime entity world ticks PASS' not in text or\n    'TiC actual ender slime entity world ticks PASS' not in text or\n    'TiC actual ender slime damage canceled and approved native teleport PASS' not in text or\n    'TiC actual terracube entity world ticks PASS' not in text or\n    'TiC actual configured earth slime tree placement PASS' not in text or\n    'TiC actual configured sky slime tree placement PASS' not in text or\n    'TiC actual configured blood slime fungus placement PASS' not in text or\n\
+        \    'TiC actual slime biome spawn modifiers PASS' not in text or\n    'TiC independent addon registration material dynamic modifier hook and persistence PASS' not in text or\n    'Mod loading has failed' in text or load_errors):\n    raise SystemExit('Actual TiC world-load verification did not complete successfully')\n"
+    - name: Require all new and retained regression markers
+      shell: python
+      run: "from pathlib import Path\ntext=Path('run-port-game-test/logs/latest.log').read_text()\nfor marker in [\n  'TiC actual unloaded and valid station tab cursor conservation PASS',\n  'TiC actual full partial empty and attached crafting destinations conservation PASS',\n  'TiC actual six fancy frame variants rotation timer item save reload PASS',\n  'TiC actual smeltery foundry mixed legacy native fluids amounts components and native save reload PASS',\n  'TiC actual native Mantle water lava tags and ammo fishing rod water tip clearing PASS',\n]:\n    assert marker in text, marker\n"
+    - name: Show actual game diagnostics
+      if: always()
+      shell: python
+      run: "import pathlib\nlog = pathlib.Path('run-port-game-test/logs/latest.log')\nif log.is_file():\n    print(log.read_text()[-90000:])\nfor crash in sorted(pathlib.Path('run-port-game-test/crash-reports').glob('*.txt')):\n    print(crash.read_text()[-90000:])\n"
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: small-bugs-native-server
+        path: 'run-port-game-test/logs/latest.log
+
+          run-port-game-test/crash-reports/*.txt'
+        retention-days: 30
+'on':
+  push:
+    branches:
+    - fix/small-bugs
+    paths:
+    - .github/workflows/small-bugs.yml
+    - scripts/port/small-bugs/**
+    - src/main/**
+  workflow_dispatch: null

@@ -1,0 +1,89 @@
+name: Verify small gameplay fixes shipping distribution
+permissions:
+  contents: read
+  actions: read
+jobs:
+  distribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
+        cache: gradle
+        cache-dependency-path: '**/*.gradle*'
+    - name: Assemble production on pinned NeoForge 251
+      run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
+    - name: Require successful server/client gates and exact production source
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      shell: python
+      run: |
+        import json,os,subprocess
+        from pathlib import Path
+        accepted=[(38224093400,'cf60e1206c200c335bb7517ed240aba983ce44d6'),(38224274046,'2e6a304a73149b2bf5065fada7640d6e953d597e')]
+        for number,source in accepted:
+            run=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/'+str(number)],text=True))
+            assert run['conclusion']=='success' and run['head_sha']==source
+            subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
+            subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portAddonCheck','src/portGameTest','src/portClientCheck','scripts/port/small-bugs'],check=True)
+            expected=subprocess.check_output(['git','show',source+':gradle.properties'],text=True).replace('mod_version=3.12.1-port.9','mod_version=3.12.1-port.10')
+            assert Path('gradle.properties').read_text()==expected
+    - name: Reuse the unchanged published Mantle5 jar without replacing a version
+      env:
+        GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      run: |
+        gh release download v3.12.1-port.9 --repo "$GITHUB_REPOSITORY" --pattern 'Mantle21-1.21.1-neoforge-1.11-port.5.jar' --dir accepted-mantle
+        python3 - <<'PY_VERIFY'
+        from pathlib import Path
+        import hashlib,shutil
+        jar=Path('accepted-mantle/Mantle21-1.21.1-neoforge-1.11-port.5.jar')
+        assert hashlib.sha256(jar.read_bytes()).hexdigest()=='ff13e368113fe11c15c6e6656c3f130e95614d71f87cadb0ddeb3bd095a3049d'
+        shutil.copyfile(jar,'mantle-port/build/libs/Mantle-1.11-port.5.jar')
+        PY_VERIFY
+    - name: Inspect and package the accepted small fixes
+      env:
+        TINKERS21_RELEASE_VERSION: 3.12.1-port.10
+        SMALL_BUGS_SERVER_RUN: '38224093400'
+        SMALL_BUGS_SERVER_SHA: cf60e1206c200c335bb7517ed240aba983ce44d6
+        SMALL_BUGS_CLIENT_RUN: '38224274046'
+        SMALL_BUGS_CLIENT_SHA: 2e6a304a73149b2bf5065fada7640d6e953d597e
+      run: python3 scripts/release/package_preview.py
+    - name: Load exact shipping jars on installed NeoForge249 and251 servers without EMI or JEI
+      run: |
+        set -euo pipefail
+        for version in 21.1.249 21.1.251; do
+          mkdir -p release-server
+          curl --fail --location --retry 2 "https://maven.neoforged.net/releases/net/neoforged/neoforge/$version/neoforge-$version-installer.jar" -o release-server/installer.jar
+          (cd release-server && timeout 240s java -jar installer.jar --installServer)
+          python3 scripts/release/check_installed_server.py
+          mv release-server "release-server-$version"
+        done
+    - name: Keep complete shipping diagnostics
+      if: always()
+      shell: python
+      run: |
+        from pathlib import Path
+        for path in sorted(Path('.').glob('release-server*/logs/latest.log')):
+            print(path.read_text(errors='replace')[-100000:])
+    - uses: actions/upload-artifact@v4
+      with:
+        name: Tinkers21-3.12.1-port.10-distribution
+        path: |
+          dist/*
+          build/release-evidence/*
+          docs/releases/3.12.1-port.10.md
+          release-server*/logs/latest.log
+        if-no-files-found: error
+        retention-days: 30
+'on':
+  push:
+    branches:
+    - fix/small-bugs
+    paths:
+    - .github/workflows/small-bugs-distribution.yml

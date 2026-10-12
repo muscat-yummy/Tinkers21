@@ -68,24 +68,27 @@ public class CraftingStationContainerMenu extends TabbedContainerMenu<CraftingSt
         // but add the true result into the inventory
         ItemStack result = tile.getResultForPlayer(player);
         if (!result.isEmpty()) {
+          // Do not consume ingredients when shift-click has nowhere to put the result.
+          if (!canAcceptCraftedResult(result)) {
+            return ItemStack.EMPTY;
+          }
           // take the result before we put it in containers; lets events modify the stack
           tile.takeResult(player, result, result.getCount());
-          boolean nothingDone = true;
+
           if (!subContainers.isEmpty()) { // the sub container check does not do well with 0 sub containers
-            nothingDone = this.refillAnyContainer(result, this.subContainers);
+            this.refillAnyContainer(result, this.subContainers);
           }
-          nothingDone &= this.moveToPlayerInventory(result);
+          this.moveToPlayerInventory(result);
           if (!subContainers.isEmpty()) {
-            nothingDone &= this.moveToAnyContainer(result, this.subContainers);
+            this.moveToAnyContainer(result, this.subContainers);
           }
-          // if successfully added to an inventory, update
-          if (!nothingDone) {
-            if (!result.isEmpty()) {
-              player.drop(result, false);
-            }
-            tile.getCraftingResult().clearContent();
-            return original;
+          // Crafting hooks may change the result after the capacity check. Preserve any
+          // remainder even when the changed stack no longer fits in a destination.
+          if (!result.isEmpty()) {
+            player.drop(result, false);
           }
+          tile.getCraftingResult().clearContent();
+          return original;
         } else {
           tile.notifyUncraftable(player);
         }
@@ -94,6 +97,26 @@ public class CraftingStationContainerMenu extends TabbedContainerMenu<CraftingSt
     } else {
       return super.quickMoveStack(player, index);
     }
+  }
+
+  /** Checks the same destination slots and limits as the normal shift-click transfer. */
+  private boolean canAcceptCraftedResult(ItemStack result) {
+    for (int i = resultSlot.index + 1; i < slots.size(); i++) {
+      Slot destination = slots.get(i);
+      if (!canTakeItemForPickAll(result, destination)) {
+        continue;
+      }
+      ItemStack existing = destination.getItem();
+      if (existing.isEmpty()) {
+        if (destination.mayPlace(result) && destination.getMaxStackSize(result) > 0) {
+          return true;
+        }
+      } else if (result.isStackable() && ItemStack.isSameItemSameComponents(result, existing)
+                 && existing.getCount() < Math.min(result.getMaxStackSize(), destination.getMaxStackSize(result))) {
+        return true;
+      }
+    }
+    return false;
   }
 
   @Override
