@@ -48,6 +48,7 @@ public final class TiCEmiRecipe extends BasicEmiRecipe {
       final Component text=note;
       widgets.addDrawable(4,y,166,10,(g,mx,my,d)->g.drawString(net.minecraft.client.Minecraft.getInstance().font,
         net.minecraft.client.Minecraft.getInstance().font.plainSubstrByWidth(text.getString(),164),0,0,0xff606060,false));
+      widgets.addTooltipText(List.of(text),4,y,166,10);
       y+=10;
     }
   }

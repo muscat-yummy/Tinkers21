@@ -108,7 +108,10 @@ public final class TConstructEmiPlugin implements EmiPlugin {
     for(var r:RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.SEVERING.get(),SeveringRecipe.class))publish(registry,recipe(severing,r.getId()).input(entityIngredients(r.getIngredient().getTypes())).output(EmiStack.of(r.getOutput())));
     for(var r:RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.TINKER_STATION.get(),IDisplayModifierRecipe.class)) {
       var a=station(modifiers,r).output(new TiCEmiStack("modifier",r.getDisplayResult().getId().toString())).note(r.getDisplayResult().getDisplayName());
-      if(r.getSlots()!=null)a.note(Component.literal(r.getSlots().toString()));publish(registry,a);
+      if(r.getSlots()!=null)a.note(Component.translatable("jei.tconstruct.modifiers.slots",r.getSlots().count(),r.getSlots().type().getDisplayName()));
+      if(r.getLevel().min()>0)a.note(Component.translatable("jei.tconstruct.modifiers.level.min",r.getLevel().min()));
+      if(r.getLevel().max()<Integer.MAX_VALUE)a.note(Component.translatable("jei.tconstruct.modifiers.level.max",r.getLevel().max()));
+      if(r.isIncremental())a.note(Component.translatable("jei.tconstruct.modifiers.incremental"));publish(registry,a);
     }
     for(var r:RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.TINKER_STATION.get(),IDisplayToolTinkering.class)) {
       var a=station(tinkering,r).note(r.getTitle());publish(registry,a);
@@ -137,7 +140,9 @@ public final class TConstructEmiPlugin implements EmiPlugin {
       if(r.getModifierOptions(null).isEmpty())continue;
       var a=recipe(worktable,r.getId()).note(r.getTitle());if(r.isToolInput())a.input(items(r.getInputTools()));else a.catalyst(items(r.getInputTools()));
       for(int i=0;i<r.getInputCount();i++)a.input(items(r.getDisplayItems(i)));
-      for(var m:r.getModifierOptions(null)){var s=new TiCEmiStack("modifier",m.getId().toString());if(r.isModifierOutput())a.output(s);else a.catalyst(s);}publish(registry,a);
+      var choices=r.getModifierOptions(null).stream().map(m->(EmiStack)new TiCEmiStack("modifier",m.getId().toString())).toList();
+      if(r.isModifierOutput())a.outputChoice(choices);else a.catalyst(EmiIngredient.of(choices));
+      a.note(r.getDescription(null));publish(registry,a);
     }
     TConstruct.LOG.info("TiC native EMI registration without JEI PASS categories=15 displays={}",variants.values().stream().mapToInt(Integer::intValue).sum());
   }
