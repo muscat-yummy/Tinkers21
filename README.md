@@ -45,11 +45,11 @@ Where an API must change, compatibility with existing Tinkers' Construct concept
 
 ## Status and installation
 
-The current experimental preview is **3.12.1-port.8**, fixing recipe displays and native fluid tags. [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.8). Update **both** Tinkers21 to **3.12.1-port.8** and Mantle21 to **1.11-port.5** on client and server. Requires Minecraft **1.21.1**, NeoForge **21.1.249 or later in the 21.1 series**, and **Java 21**. Native graphical client and 28 GameTests are verified on 249; the identical distribution jars also load on ordinary installed 249 and 251 servers. Keep one jar per mod; do not combine these with official Tinkers' Construct or Mantle jars.
+The current experimental preview is **3.12.1-port.9**, adding native EMI support without JEI (verified with EMI 1.1.24). [Download the GitHub release](https://github.com/muscat-yummy/Tinkers21/releases/tag/v3.12.1-port.9). Use Tinkers21 **3.12.1-port.9** and Mantle21 **1.11-port.5** on client and server. Existing Mantle21 1.11-port.5 does not need an update. Requires Minecraft **1.21.1**, NeoForge **21.1.249 or later in the 21.1 series**, and **Java 21**. Native graphical client and 28 GameTests are verified on 249; the identical distribution jars also load on ordinary installed 249 and 251 servers. Keep one jar per mod; do not combine these with official Tinkers' Construct or Mantle jars.
 
 Phases 1–8 meet their documented acceptance: native datagen, both production assemblies, 27 actual Minecraft GameTests (including real iron/gold faucet-to-basin casting) and strict graphical core/addon checks pass. This is a preview, with full TiCEX/external integration stacks and general old-world migration still unverified. Use a separate world or a backed-up copy when evaluating it.
 
-See the [release notes](docs/releases/3.12.1-port.8.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). SHA-256 checksums are listed in the release description; source and CI evidence are recorded in PORTING.md. The independent addon acceptance fixture is excluded from the distribution jars.
+See the [release notes](docs/releases/3.12.1-port.9.md), [exact CI evidence](PORTING.md) and [addon migration guide](docs/ADDON_PORTING.md). SHA-256 checksums are listed in the release description; source and CI evidence are recorded in PORTING.md. The independent addon acceptance fixture is excluded from the distribution jars.
 
 ## Addon Compatibility
 
