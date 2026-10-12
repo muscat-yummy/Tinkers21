@@ -56,6 +56,14 @@ public final class NativeEmiCheck {
       for(var recipe:recipes) for(var output:recipe.getOutputs()) {
         if(manager.getRecipesByOutput(output).stream().noneMatch(r->r==recipe)) throw new IllegalStateException("Native EMI R lookup lost output "+recipe.getId()+" "+output);
       }
+      for(var recipe:recipes) for(var ingredient:java.util.stream.Stream.concat(recipe.getInputs().stream(),recipe.getOutputs().stream()).toList()) {
+        for(var stack:ingredient.getEmiStacks()) if(stack instanceof slimeknights.tconstruct.plugin.emi.TiCEmiStack) {
+          var serialized=dev.emi.emi.api.stack.serializer.EmiIngredientSerializer.getSerialized(stack);
+          if(serialized==null) throw new IllegalStateException("Native ingredient cannot be bookmarked: "+stack);
+          var restored=dev.emi.emi.api.stack.serializer.EmiIngredientSerializer.getDeserialized(serialized);
+          if(restored.getEmiStacks().size()!=1 || !restored.getEmiStacks().get(0).isEqual(stack) || restored.getAmount()!=stack.getAmount()) throw new IllegalStateException("Native ingredient bookmark roundtrip lost data: "+stack);
+        }
+      }
       TConstruct.LOG.info("TiC native EMI all output recipe lookup and iron ingot usage PASS JEI={}",jei);
       if (recipes.isEmpty()) throw new IllegalStateException("No TiC recipes registered in EMI");
       var ids=new java.util.HashSet<String>();
@@ -74,7 +82,8 @@ public final class NativeEmiCheck {
     private final List<EmiRecipe> recipes;
     private final List<String> findings = new ArrayList<>();
     private final Map<String,Integer> counts = new TreeMap<>();
-    private int index, jeiIndex;
+    private int index;
+    private final java.util.Set<String> logged=new java.util.HashSet<>();
     CheckScreen(List<EmiRecipe> recipes) { super(Component.literal("Native EMI audit"));this.recipes=recipes; }
     @Override public void render(GuiGraphics g, int mouseX, int mouseY, float delta) {
       super.render(g,mouseX,mouseY,delta);

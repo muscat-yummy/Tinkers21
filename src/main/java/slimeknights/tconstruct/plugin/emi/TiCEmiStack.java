@@ -61,11 +61,11 @@ public final class TiCEmiStack extends EmiStack {
   @Override public Object getKey() { return key; }
   @Override public ResourceLocation getId() { return TConstruct.getResource("emi/"+key.kind()+"/"+UUID.nameUUIDFromBytes(key.value().getBytes(StandardCharsets.UTF_8))); }
   @Override public Component getName() { return name; }
-  @Override public List<Component> getTooltipText() { return List.of(name,Component.literal(key.value())); }
+  @Override public List<Component> getTooltipText() { return List.of(name,Component.literal(key.value()),Component.literal("× "+amount)); }
   @Override public List<net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent> getTooltip() {
     return getTooltipText().stream().map(c->net.minecraft.client.gui.screens.inventory.tooltip.ClientTooltipComponent.create(c.getVisualOrderText())).toList();
   }
-  @Override public void render(GuiGraphics g,int x,int y,float delta,int flags) { g.renderFakeItem(icon,x,y); }
+  @Override public void render(GuiGraphics g,int x,int y,float delta,int flags) { g.renderFakeItem(icon,x,y);if((flags&RENDER_AMOUNT)!=0 && amount!=1)g.drawString(net.minecraft.client.Minecraft.getInstance().font,Long.toString(amount),x+8,y+9,-1,true); }
   public static final EmiIngredientSerializer<TiCEmiStack> SERIALIZER=new EmiIngredientSerializer<>() {
     @Override public String getType(){ return "tconstruct:native"; }
     @Override public JsonElement serialize(TiCEmiStack stack){ var json=new JsonObject();json.addProperty("type",getType());json.addProperty("kind",stack.key.kind());json.addProperty("value",stack.key.value());json.addProperty("amount",stack.getAmount());return json; }
