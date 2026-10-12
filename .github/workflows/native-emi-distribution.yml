@@ -1,0 +1,107 @@
+name: Verify native EMI shipping distribution
+on:
+  push:
+    branches: [fix/emi-native]
+    paths: ['.github/workflows/native-emi-distribution.yml']
+permissions:
+  contents: read
+  actions: read
+jobs:
+  distribution:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: gradle
+          cache-dependency-path: '**/*.gradle*'
+      - name: Assemble production on pinned NeoForge 251
+        run: ./gradlew :assemble :mantle-port:assemble --no-daemon --console=plain
+      - name: Require accepted native EMI profiles and exact client source
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: python
+        run: |
+          import json,os,subprocess,time
+          from pathlib import Path
+          source='4cdb7e1edff476a84decae21afee0374a7af1fc2'
+          deadline=time.monotonic()+600
+          while True:
+              run=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/38215503627'],text=True))
+              assert run['head_sha']==source
+              if run['status']=='completed': break
+              assert time.monotonic()<deadline
+              time.sleep(10)
+          assert run['conclusion']=='success'
+          subprocess.run(['git','fetch','--no-tags','origin',source],check=True)
+          subprocess.run(['git','diff','--exit-code',source,'HEAD','--','src/main','src/generated','mantle-port','build.gradle','settings.gradle','gradle','gradlew','gradlew.bat','src/portAddonCheck','src/portClientCheck'],check=True)
+          expected=subprocess.check_output(['git','show',source+':gradle.properties'],text=True).replace('mod_version=3.12.1-port.8','mod_version=3.12.1-port.9')
+          assert Path('gradle.properties').read_text()==expected
+      - name: Retain the successful 28 GameTests for unchanged native gameplay sources
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: python
+        run: |
+          import json,os,subprocess
+          from pathlib import Path
+          base='f32c95ea52a371252f439eacf36189fe1efc2e6e'
+          accepted=json.loads(subprocess.check_output(['gh','api','repos/'+os.environ['GITHUB_REPOSITORY']+'/actions/runs/38166181835'],text=True))
+          assert accepted['conclusion']=='success'
+          subprocess.run(['git','fetch','--no-tags','origin',base],check=True)
+          subprocess.run(['git','diff','--exit-code',base,'HEAD','--','src/main','src/generated','mantle-port','src/portGameTest','src/portAddonCheck','settings.gradle','gradle','gradlew','gradlew.bat',
+              ':(exclude)src/main/java/slimeknights/tconstruct/plugin/emi'],check=True)
+          original=subprocess.check_output(['git','show',base+':build.gradle'],text=True)
+          expected=original.replace("    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.51.0.420'", "    // Optional native EMI API; never install or bundle JEI to enable EMI recipes.\n    compileOnly('maven.modrinth:emi:5sIPA1To') { transitive = false }\n    compileOnly 'mezz.jei:jei-1.21.1-common-api:19.51.0.420'")
+          assert Path('build.gradle').read_text()==expected
+          print('Unchanged native gameplay/data retain accepted 28 GameTests; new client-only @EmiEntrypoint integration has one optional compileOnly API')
+      - name: Reuse the unchanged published Mantle5 jar without replacing a version
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          gh release download v3.12.1-port.8 --repo "$GITHUB_REPOSITORY" --pattern 'Mantle21-1.21.1-neoforge-1.11-port.5.jar' --dir accepted-mantle
+          python3 - <<'PY_VERIFY'
+          from pathlib import Path
+          import hashlib,shutil
+          jar=Path('accepted-mantle/Mantle21-1.21.1-neoforge-1.11-port.5.jar')
+          assert hashlib.sha256(jar.read_bytes()).hexdigest()=='ff13e368113fe11c15c6e6656c3f130e95614d71f87cadb0ddeb3bd095a3049d'
+          shutil.copyfile(jar,'mantle-port/build/libs/Mantle-1.11-port.5.jar')
+          PY_VERIFY
+      - name: Inspect and package native EMI release
+        env:
+          TINKERS21_RELEASE_VERSION: '3.12.1-port.9'
+          NATIVE_EMI_RUN: '38215503627'
+          NATIVE_EMI_SHA: '4cdb7e1edff476a84decae21afee0374a7af1fc2'
+        run: python3 scripts/release/package_preview.py
+      - name: Load exact shipping jars on installed NeoForge249 and251 servers without EMI or JEI
+        run: |
+          set -euo pipefail
+          for version in 21.1.249 21.1.251; do
+            mkdir -p release-server
+            curl --fail --location --retry 2 "https://maven.neoforged.net/releases/net/neoforged/neoforge/$version/neoforge-$version-installer.jar" -o release-server/installer.jar
+            (cd release-server && timeout 240s java -jar installer.jar --installServer)
+            python3 scripts/release/check_installed_server.py
+            mv release-server "release-server-$version"
+          done
+      - name: Keep complete shipping diagnostics
+        if: always()
+        shell: python
+        run: |
+          from pathlib import Path
+          for path in sorted(Path('.').glob('release-server*/logs/latest.log')):
+              print(path.read_text(errors='replace')[-100000:])
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Tinkers21-3.12.1-port.9-distribution
+          path: |
+            dist/*
+            build/release-evidence/*
+            docs/releases/3.12.1-port.9.md
+            release-server*/logs/latest.log
+          if-no-files-found: error
+          retention-days: 30
