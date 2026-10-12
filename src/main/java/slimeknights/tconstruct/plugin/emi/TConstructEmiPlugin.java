@@ -66,8 +66,8 @@ public final class TConstructEmiPlugin implements EmiPlugin {
     var molding=category(registry,"molding","jei.tconstruct.molding.title",TinkerSmeltery.searedTable.get());
     var modifiers=category(registry,"modifiers","jei.tconstruct.modifiers.title",TinkerTables.tinkerStation.get());
     var severing=category(registry,"severing","jei.tconstruct.severing.title",Items.IRON_SWORD);
-    var building=category(registry,"tool_recipes","jei.tconstruct.tool_building.title",TinkerTables.tinkerStation.get());
-    var tinkering=category(registry,"tool_modification","jei.tconstruct.tool_modification.title",TinkerTables.tinkerStation.get());
+    var building=category(registry,"tool_recipes","jei.tconstruct.tinkering.tool_building",TinkerTables.tinkerStation.get());
+    var tinkering=category(registry,"tool_modification","jei.tconstruct.tool_tinkering.title",TinkerTables.tinkerStation.get());
     var materials=category(registry,"materials","jei.tconstruct.materials.title",TinkerTables.partBuilder.get());
     var parts=category(registry,"part_builder","jei.tconstruct.part_builder.title",TinkerTables.partBuilder.get());
     var worktable=category(registry,"worktable","jei.tconstruct.modifier_worktable.title",TinkerTables.modifierWorktable.get());
@@ -87,9 +87,17 @@ public final class TConstructEmiPlugin implements EmiPlugin {
     }
     for(var r:RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.ALLOYING.get(),AlloyRecipe.class)) {
       var a=recipe(alloy,r.getId()).output(fluid(r.getOutput())).note(temperature(r.getTemperature()));
-      r.getInputs().forEach(i->a.input(fluids(i.getFluids())));publish(registry,a);
+      r.getInputs().forEach(i->{if(i.catalyst())a.catalyst(fluids(i.fluid().getFluids()));else a.input(fluids(i.fluid().getFluids()));});publish(registry,a);
     }
-    for(var r:RecipeHelper.getRecipes(manager,TinkerRecipeTypes.FUEL.get(),MeltingFuel.class))publish(registry,recipe(fuel,r.getId()).input(fluids(r.getInputs())).note(temperature(r.getTemperature())).note(Component.translatable("jei.tconstruct.melting.multiplier",r.getRate()/10f)));
+    for(var r:RecipeHelper.getRecipes(manager,TinkerRecipeTypes.FUEL.get(),MeltingFuel.class)) {
+      var a=recipe(fuel,r.getId()).note(temperature(r.getTemperature())).note(Component.translatable("jei.tconstruct.melting.multiplier",r.getRate()/10f));
+      if(!r.getInputs().isEmpty())a.input(fluids(r.getInputs())).note(Component.translatable("jei.tconstruct.fuel.duration.liquid",r.getDuration()/5,r.getInputs().get(0).getAmount()));
+      else {
+        var solid=net.minecraft.core.registries.BuiltInRegistries.ITEM.stream().map(ItemStack::new).filter(i->i.getBurnTime(TinkerRecipeTypes.FUEL.get())>0).toList();
+        a.input(items(solid)).note(Component.translatable("jei.tconstruct.fuel.solid"));
+      }
+      publish(registry,a);
+    }
     var entities=new ArrayList<>(RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.ENTITY_MELTING.get(),EntityMeltingRecipe.class));
     entities.add(new slimeknights.tconstruct.plugin.jei.entity.DefaultEntityMeltingRecipe(entities));
     for(var r:entities)publish(registry,recipe(entity,r.getId()).input(entityIngredients(r.getIngredient().getTypes())).output(fluid(r.getOutput())).note(Component.literal(r.getDamage()/2f+" ♥")));
@@ -116,7 +124,8 @@ public final class TConstructEmiPlugin implements EmiPlugin {
       if(r.hasLeftover())a.output(EmiStack.of(r.getLeftover()));publish(registry,a);
     });
     for(var r:RecipeHelper.getJEIRecipes(access,manager,TinkerRecipeTypes.PART_BUILDER.get(),IDisplayPartBuilderRecipe.class)) {
-      var a=recipe(parts,r.getId());a.catalyst(items(r.getPatternItems()));
+      var a=recipe(parts,r.getId());
+      if(r.getPatternItems().stream().allMatch(i->i.is(slimeknights.tconstruct.common.TinkerTags.Items.REUSABLE_PATTERNS)))a.catalyst(items(r.getPatternItems()));else a.input(items(r.getPatternItems()));
       r.getPatterns().forEach(p->a.catalyst(new TiCEmiStack("pattern",p.toString())));
       var materialList=r.getMaterials().stream().map(m->(EmiIngredient)new TiCEmiStack("material",m.getVariant().toString()).setAmount(Math.max(1,r.getCost()))).toList();
       if(!materialList.isEmpty())a.input(EmiIngredient.of(materialList));else a.input(items(r.getMaterialItems()));
