@@ -1,0 +1,67 @@
+name: Verify small fixes with native EMI standalone graphical client
+permissions:
+  contents: read
+jobs:
+  recipe_viewer:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      LIBGL_ALWAYS_SOFTWARE: 'true'
+      ALSOFT_DRIVERS: 'null'
+      EMI_CHECK_JEI: 'false'
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        ref: ${{ github.sha }}
+        persist-credentials: false
+    - uses: actions/setup-java@v4
+      with:
+        distribution: temurin
+        java-version: '21'
+        cache: gradle
+        cache-dependency-path: '**/*.gradle*'
+    - name: Install the native narrator library
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y flite1-dev
+    - name: Install isolated native EMI audit
+      run: python3 scripts/port/emi-native/install.py
+    - name: Run the actual graphical Minecraft client
+      run: xvfb-run -a -s '-screen 0 1280x720x24' timeout 600s ./gradlew :runPortClientCheck -PportClientCheck=true -Pneo_version=21.1.249 --no-daemon --console=plain
+    - name: Require complete native recipe rendering audit
+      shell: python
+      run: |
+        from pathlib import Path
+        log=Path('run-port-client-check/logs/latest.log').read_text()
+        report=Path('run-port-client-check/native-emi-report.txt').read_text()
+        assert 'TiC native EMI all registered recipe audit COMPLETE' in log
+        assert 'findings=0' in report
+        assert 'TiC native EMI all output recipe lookup and iron ingot usage PASS' in log
+        assert 'TiC actual EMI iron block casting basin recipe screen rendering PASS' in log
+        errors=[line for line in log.splitlines() if '/ERROR]' in line or 'Unable to load model:' in line or 'Missing textures in model' in line]
+        assert not errors, errors[:20]
+    - name: Keep full diagnostics
+      if: always()
+      shell: python
+      run: |
+        from pathlib import Path
+        for path in [Path('run-port-client-check/native-emi-report.txt'),Path('run-port-client-check/logs/latest.log')]:
+            if path.is_file(): print(path.read_text(errors='replace')[-150000:])
+        for path in Path('run-port-client-check/crash-reports').glob('*.txt'):
+            print(path.read_text(errors='replace')[-60000:])
+    - uses: actions/upload-artifact@v4
+      if: always()
+      with:
+        name: small-bugs-native-client
+        path: |
+          run-port-client-check/logs/latest.log
+          run-port-client-check/native-emi-report.txt
+          run-port-client-check/*gui*.png
+        if-no-files-found: warn
+        retention-days: 30
+'on':
+  push:
+    branches:
+    - fix/small-bugs
+    paths:
+    - .github/workflows/small-bugs-client.yml
